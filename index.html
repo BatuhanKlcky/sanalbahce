@@ -577,22 +577,24 @@ function renderShop() {
   var coinBar = document.getElementById('coinBarAmt');
   if(coinBar) coinBar.textContent = stats.coin;
   if(!grid) return;
+  
   var items = SHOP_ITEMS[currentShopTab] || [];
   grid.innerHTML = items.map(function(item) {
-    var owned = purchasedItems[item.id];
+    var owned = (window.purchasedItems && window.purchasedItems[item.id]);
     var canAfford = stats.coin >= item.price;
-    var cls = 'shop-item' + (owned?' owned':'') + (!canAfford&&!owned?' cant-afford':'');
-    return '<div class="'+cls+'" onclick="window.buyItem(''+item.id+'')">'
+    var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
+    
+    // Düzenlenen Kısım: Kaçış karakteri (\') kullanarak tırnak hatası giderildi
+    return '<div class="' + cls + '" onclick="window.buyItem(\'' + item.id + '\')">'
       + (owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : '')
-      + '<div class="shop-emoji">'+item.emoji+'</div>'
-      + '<div class="shop-name">'+item.name+'</div>'
-      + '<div class="shop-desc">'+item.desc+'</div>'
+      + '<div class="shop-emoji">' + item.emoji + '</div>'
+      + '<div class="shop-name">' + item.name + '</div>'
+      + '<div class="shop-desc">' + item.desc + '</div>'
       + (owned ? '<div class="shop-price">✓ Sahipsin</div>'
-               : '<div class="shop-price">💰 '+item.price+'</div>')
+               : '<div class="shop-price">💰 ' + item.price + '</div>')
       + '</div>';
   }).join('');
 }
-
 window.buyItem = function(id) {
   if(purchasedItems[id]) { showToast('Zaten sahipsin! ✓'); return; }
   var item = null;
