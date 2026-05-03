@@ -6,6 +6,7 @@
 <title>Sanal Bahce</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <style>
 *{padding:0;margin:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
 body{margin:0;overflow:hidden;background:#010103;touch-action:none}
@@ -56,6 +57,24 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 #saveInd{position:fixed;top:14px;right:76px;font-size:11px;color:rgba(0,255,150,.8);font-weight:700;opacity:0;transition:opacity .4s;z-index:999}
 #saveInd.show{opacity:1}
 
+/* ── MAĞAZA PANELİ ── */
+#shopPanel .shop-tabs{display:flex;gap:6px;margin-bottom:12px}
+.shop-tab{flex:1;padding:6px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-size:10px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;text-align:center;transition:all .2s}
+.shop-tab.active{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.3);color:#f0c96a}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shop-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.shop-item:active{transform:scale(.94);background:rgba(255,255,255,.1)}
+.shop-item.owned{border-color:rgba(76,175,101,.3);background:rgba(76,175,101,.08)}
+.shop-item.cant-afford{opacity:.5;cursor:not-allowed}
+.shop-emoji{font-size:24px;margin-bottom:4px}
+.shop-name{font-size:10px;font-weight:700;color:#fff;margin-bottom:2px}
+.shop-desc{font-size:9px;color:rgba(255,255,255,.4);margin-bottom:6px;line-height:1.4}
+.shop-price{display:inline-flex;align-items:center;gap:3px;background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:800;color:#f0c96a}
+.shop-owned-badge{position:absolute;top:6px;right:6px;font-size:9px;background:rgba(76,175,101,.3);border-radius:6px;padding:1px 5px;color:#4caf65;font-weight:700}
+#coinBar{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:12px;margin-bottom:12px}
+#coinBarAmt{font-size:14px;font-weight:800;color:#f0c96a}
+
+
 /* ── İSTATİSTİKLER PANELİ ── */
 #statsPanel .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px}
 #statsPanel .stat-row:last-child{border-bottom:none}
@@ -90,7 +109,9 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
   <div class="sbb" id="btnDel" onclick="window.toggleDeleteMode()">🗑️</div>
   <div class="sbb" onclick="window.addPet('cat')">🐱</div>
   <div class="sbb" onclick="window.addPet('dog')">🐶</div>
+  <div class="sbb" id="btnShop" onclick="window.togglePanel('shop')">🏪</div>
   <div class="sbb" id="btnStats" onclick="window.togglePanel('stats')">📊</div>
+  <div class="sbb" onclick="window.shareBahce()" title="Paylaş">📤</div>
   <div class="sbb" onclick="window.resetCamera()">🏠</div>
 </div>
 <div class="spanel" id="decoPanel">
@@ -147,6 +168,21 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
   <div id="xpLabel"><span>Seviye <span id="lvN">1</span></span><span><span id="xpC">0</span>/<span id="xpM">100</span> XP</span></div>
   <div id="xpTrack"><div id="xpFill"></div></div>
   <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:8px;text-align:center">Her gün sıfırlanır</div>
+</div>
+
+
+<!-- MAĞAZA PANELİ -->
+<div class="spanel" id="shopPanel">
+  <div id="coinBar">
+    <span style="font-size:11px;color:rgba(255,255,255,.5)">💰 Coin</span>
+    <span id="coinBarAmt">0</span>
+  </div>
+  <div class="shop-tabs">
+    <div class="shop-tab active" onclick="window.shopTab('seeds')">🌱 Tohum</div>
+    <div class="shop-tab" onclick="window.shopTab('items')">🏡 Eşya</div>
+    <div class="shop-tab" onclick="window.shopTab('special')">✨ Nadir</div>
+  </div>
+  <div id="shopGrid" class="shop-grid"></div>
 </div>
 
 <!-- İSTATİSTİKLER PANELİ -->
@@ -511,6 +547,7 @@ var SHOP_ITEMS = {
     {id:'treehouse',    emoji:'🏚️', name:'Ağaç Evi',     desc:'Mini ağaç üstü ev',           price:250, deco:'treehouse'},
   ],
   special: [
+    {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı',    desc:'Beyaz altın melek kanadı heykeli',  price:400, special:true, fn:'angel_wing'},
     {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:300, special:true},
     {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:200, special:true},
     {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:350, special:true},
@@ -584,7 +621,9 @@ window.buyItem = function(id) {
     else if(item.deco==='treehouse')    mkTreehouse(x,z);
     showToast(item.emoji+' '+item.name+' yerleştirildi!');
   } else if(item.special) {
-    placeSpecial(item, Math.random()*6-3, Math.random()*6-3);
+    var sx=Math.random()*10-5, sz=Math.random()*10-5;
+    if(item.id==='angel_wing') mkAngelWing(sx, sz);
+    else placeSpecial(item, sx, sz);
     showToast('✨ '+item.name+' bahçene eklendi!');
   }
   tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
@@ -684,6 +723,171 @@ function mkTreehouse(x,z){
   roof.rotation.y=Math.PI/4;roof.position.y=3.6;g.add(roof);
   var lt=new THREE.PointLight(0xffeeaa,.6,3);lt.position.y=2.8;g.add(lt);
   g.position.set(x,0,z);scene.add(g);decos.push({group:g,type:'treehouse',light:lt});markDirty();
+}
+
+
+function mkAngelWing(x, z) {
+  var g = new THREE.Group();
+
+  // ── MATERYAL ──────────────────────────────────────────────────────────────
+  var baseMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: .3, metalness: .15,
+    emissive: 0xffe8aa, emissiveIntensity: .25,
+    side: THREE.DoubleSide, transparent: true, opacity: .96
+  });
+  var goldMat = new THREE.MeshStandardMaterial({
+    color: 0xd4a843, roughness: .2, metalness: .8,
+    emissive: 0x8b6000, emissiveIntensity: .4
+  });
+  var glowMat = new THREE.MeshStandardMaterial({
+    color: 0xfffaee, emissive: 0xffe8aa, emissiveIntensity: 1.8,
+    transparent: true, opacity: .35, side: THREE.DoubleSide
+  });
+
+  // ── KANAT OLUŞTURUCU ──────────────────────────────────────────────────────
+  function makeWing(side) {
+    var wg = new THREE.Group();
+    var s = side; // 1 = sağ, -1 = sol
+
+    // Ana kanat gövdesi (büyük kavisli şekil)
+    var wingShape = new THREE.Shape();
+    wingShape.moveTo(0, 0);
+    wingShape.bezierCurveTo(s*.3, .4, s*.8, .8, s*.6, 1.6);
+    wingShape.bezierCurveTo(s*.5, 2.1, s*.2, 2.4, 0, 2.6);
+    wingShape.bezierCurveTo(s*-.1, 2.2, s*-.05, 1.8, 0, 1.4);
+    wingShape.bezierCurveTo(s*.1, 1.0, s*.05, .5, 0, 0);
+
+    var wingGeo = new THREE.ShapeGeometry(wingShape, 24);
+    var wingMesh = new THREE.Mesh(wingGeo, baseMat.clone());
+    wingMesh.rotation.x = -.15;
+    wg.add(wingMesh);
+
+    // Glow layer (biraz büyük, arkada)
+    var glowShape = new THREE.Shape();
+    glowShape.moveTo(0, -.05);
+    glowShape.bezierCurveTo(s*.35, .38, s*.88, .82, s*.65, 1.65);
+    glowShape.bezierCurveTo(s*.55, 2.15, s*.22, 2.45, 0, 2.68);
+    glowShape.bezierCurveTo(s*-.15, 2.25, s*-.08, 1.82, 0, 1.38);
+    glowShape.bezierCurveTo(s*.12, .98, s*.06, .48, 0, -.05);
+    var glowGeo = new THREE.ShapeGeometry(glowShape, 24);
+    var glowMesh = new THREE.Mesh(glowGeo, glowMat);
+    glowMesh.rotation.x = -.15;
+    glowMesh.position.z = -.02;
+    wg.add(glowMesh);
+
+    // Tüy detayları — uzun ince şeritler
+    var featherCount = 10;
+    for (var i = 0; i < featherCount; i++) {
+      var t = i / (featherCount - 1);
+      var fy = t * 2.4;
+      var fx = s * (.5 * Math.sin(t * Math.PI) + .05);
+      var flen = .55 + .3 * Math.sin(t * Math.PI);
+      var fwidth = .06 + .025 * Math.sin(t * Math.PI);
+
+      var fShape = new THREE.Shape();
+      fShape.moveTo(0, 0);
+      fShape.bezierCurveTo(fwidth, flen*.3, fwidth*.8, flen*.7, 0, flen);
+      fShape.bezierCurveTo(-fwidth*.8, flen*.7, -fwidth, flen*.3, 0, 0);
+      var fGeo = new THREE.ShapeGeometry(fShape, 8);
+      var fMat = baseMat.clone();
+      fMat.emissiveIntensity = .15 + .2 * (1 - t);
+      var fMesh = new THREE.Mesh(fGeo, fMat);
+      fMesh.position.set(fx, fy, .01 + i*.002);
+      fMesh.rotation.z = s * (.2 - t * .35);
+      fMesh.rotation.x = -.1;
+      wg.add(fMesh);
+    }
+
+    // Alt tüyler (kısa, aşağıda)
+    for (var j = 0; j < 6; j++) {
+      var jt = j / 5;
+      var jShape = new THREE.Shape();
+      jShape.moveTo(0,0);
+      jShape.bezierCurveTo(.04,.12,.03,.28,0,.35);
+      jShape.bezierCurveTo(-.03,.28,-.04,.12,0,0);
+      var jGeo = new THREE.ShapeGeometry(jShape, 6);
+      var jMesh = new THREE.Mesh(jGeo, baseMat.clone());
+      jMesh.position.set(s*(jt*.4+.02), jt*.5-.05, .015);
+      jMesh.rotation.z = s * (-.3 + jt*.5);
+      wg.add(jMesh);
+    }
+
+    return wg;
+  }
+
+  // Sağ kanat
+  var rightWing = makeWing(1);
+  rightWing.position.set(.12, .15, 0);
+  g.add(rightWing);
+
+  // Sol kanat (aynalı)
+  var leftWing = makeWing(-1);
+  leftWing.position.set(-.12, .15, 0);
+  leftWing.rotation.y = Math.PI;
+  leftWing.position.z = .04;
+  g.add(leftWing);
+
+  // ── ALTIN SÜSLER ──────────────────────────────────────────────────────────
+  // Ortadaki altın taban
+  var baseGeo = new THREE.CylinderGeometry(.18, .24, .12, 12);
+  var baseMesh = new THREE.Mesh(baseGeo, goldMat);
+  baseMesh.position.y = .06;
+  g.add(baseMesh);
+
+  // Altın çerçeve - kanat birleşim noktası
+  var centerGeo = new THREE.TorusGeometry(.1, .025, 8, 16);
+  var center = new THREE.Mesh(centerGeo, goldMat);
+  center.rotation.x = Math.PI/2;
+  center.position.y = .22;
+  g.add(center);
+
+  // Altın yıldız süsleri
+  function mkStar(px, py, pz, size) {
+    var sg = new THREE.Group();
+    for (var k = 0; k < 6; k++) {
+      var a = (k/6)*Math.PI*2;
+      var bar = new THREE.Mesh(
+        new THREE.CylinderGeometry(size*.06, size*.06, size, 4),
+        goldMat
+      );
+      bar.rotation.z = a;
+      sg.add(bar);
+    }
+    var core = new THREE.Mesh(new THREE.SphereGeometry(size*.2, 6, 6), goldMat);
+    sg.add(core);
+    sg.position.set(px, py, pz);
+    return sg;
+  }
+  g.add(mkStar(0, 2.5, .02, .18));   // tepe yıldız
+  g.add(mkStar(.5, 1.8, .02, .1));   // sağ küçük
+  g.add(mkStar(-.5, 1.8, .02, .1));  // sol küçük
+
+  // ── IŞIKLAR ───────────────────────────────────────────────────────────────
+  // Ana yumuşak beyaz ışık
+  var lt = new THREE.PointLight(0xfff8e1, 1.4, 4.5);
+  lt.position.set(0, 1.2, .3);
+  g.add(lt);
+
+  // Altın parıltı
+  var lt2 = new THREE.PointLight(0xffcc44, .6, 2);
+  lt2.position.set(0, 2.4, .1);
+  g.add(lt2);
+
+  // ── HALO (IŞIK HALKASI) ───────────────────────────────────────────────────
+  var haloGeo = new THREE.TorusGeometry(.32, .018, 8, 32);
+  var haloMat = new THREE.MeshStandardMaterial({
+    color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 2.5,
+    transparent: true, opacity: .85, metalness: .6
+  });
+  var halo = new THREE.Mesh(haloGeo, haloMat);
+  halo.rotation.x = Math.PI/2 - .3;
+  halo.position.set(0, 2.85, -.08);
+  g.add(halo);
+
+  g.position.set(x, 0, z);
+  scene.add(g);
+  decos.push({group: g, type: 'angel_wing', light: lt, light2: lt2, halo: halo});
+  markDirty();
 }
 
 function placeSpecial(item, x, z){
@@ -1221,6 +1425,7 @@ function load(){
       else if(d.type==='rainbow_arch')mkRainbowArch(x,z,a);
       else if(d.type==='fountain')mkFountain(x,z);
       else if(d.type==='treehouse')mkTreehouse(x,z);
+      else if(d.type==='angel_wing')mkAngelWing(x,z);
       else if(d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar'){
         // Special items - find original item and re-place
         var sItem=null;
@@ -1286,6 +1491,11 @@ function animate(){
   for(var bi2=0;bi2<bugs.length;bi2++){var bug=bugs[bi2];bug.time+=.15;if(_fc%2!==0)continue;var fl2=Math.sin(bug.time*5)*.95;bug.wR1.rotation.y=fl2;bug.wL1.rotation.y=-fl2;bug.wR2.rotation.y=fl2*.6;bug.wL2.rotation.y=-fl2*.6;if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.4||Math.random()<.004){if(flowers.length>0&&Math.random()>.25){var rf=flowers[Math.floor(Math.random()*flowers.length)];bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.5,rf.h*rf.mesh.scale.y+1,rf.mesh.position.z+(Math.random()-.5)*.5);}else{bug.target=new THREE.Vector3((Math.random()-.5)*22,1+Math.random()*4,(Math.random()-.5)*22);}}bug.mesh.position.lerp(bug.target,bug.speed);bug.mesh.position.y+=Math.sin(bug.time*1.5)*.015;bug.mesh.lookAt(bug.target);}
   // Decos
   decos.forEach(function(d){if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=.01;
+    if(d.type==='angel_wing'&&_fc%2===0){
+      if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
+      if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;
+      if(d.halo) d.halo.rotation.z=_fc*.008;
+    }
     if((d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar')&&d.light&&_fc%2===0){
       d.light.intensity=.6+Math.sin(_fc*.2+d.group.position.x*2)*.4;
     }
@@ -1353,7 +1563,6 @@ function animate(){
 }
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
 loadProg();loadStats();loadShop();load();animate();
-
 </script>
 </body>
 </html>
