@@ -344,9 +344,9 @@ function addCoin(n){stats.coin+=n;updStats();saveStats();showToast('+'+n+' 💰 
 var harvestItems = []; // {group, type, stage, growTimer, x, z}
 
 var HARVEST_TYPES = {
-  tomato:    {emoji:'🍅', color:0xcc2200, stages:['🌱','🌿','🍅'], growTime:120, coin:15, statKey:'tom'},
-  strawberry:{emoji:'🍓', color:0xff2244, stages:['🌱','🌿','🍓'], growTime:90,  coin:10, statKey:'str'},
-  cucumber:  {emoji:'🥒', color:0x228822, stages:['🌱','🌿','🥒'], growTime:150, coin:20, statKey:'cuc'}
+  tomato:    {emoji:'🍅', color:0xcc2200, stages:['🌱','🌿','🍅'], growTime:90,  coin:15, statKey:'tom'},
+  strawberry:{emoji:'🍓', color:0xff2244, stages:['🌱','🌿','🍓'], growTime:60,  coin:10, statKey:'str'},
+  cucumber:  {emoji:'🥒', color:0x228822, stages:['🌱','🌿','🥒'], growTime:120, coin:20, statKey:'cuc'}
 };
 
 function mkHarvestPlant(x, z, type, stage) {
@@ -546,7 +546,7 @@ var SHOP_ITEMS = {
     {id:'treehouse',    emoji:'🏚️', name:'Ağaç Evi',     desc:'Mini ağaç üstü ev',           price:250, deco:'treehouse'},
   ],
   special: [
-    {id:'angel_wing', emoji:'❓', name:'???',    desc:'?????',  price:400, special:true, fn:'angel_wing'},
+    {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı',    desc:'Beyaz altın melek kanadı heykeli',  price:400, special:true, fn:'angel_wing'},
     {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:300, special:true},
     {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:200, special:true},
     {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:350, special:true},
@@ -577,24 +577,22 @@ function renderShop() {
   var coinBar = document.getElementById('coinBarAmt');
   if(coinBar) coinBar.textContent = stats.coin;
   if(!grid) return;
-  
   var items = SHOP_ITEMS[currentShopTab] || [];
   grid.innerHTML = items.map(function(item) {
-    var owned = (window.purchasedItems && window.purchasedItems[item.id]);
+    var owned = purchasedItems[item.id];
     var canAfford = stats.coin >= item.price;
-    var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
-    
-    // Düzenlenen Kısım: Kaçış karakteri (\') kullanarak tırnak hatası giderildi
-    return '<div class="' + cls + '" onclick="window.buyItem(\'' + item.id + '\')">'
+    var cls = 'shop-item' + (owned?' owned':'') + (!canAfford&&!owned?' cant-afford':'');
+    return '<div class="'+cls+'" onclick="window.buyItem(''+item.id+'')">'
       + (owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : '')
-      + '<div class="shop-emoji">' + item.emoji + '</div>'
-      + '<div class="shop-name">' + item.name + '</div>'
-      + '<div class="shop-desc">' + item.desc + '</div>'
+      + '<div class="shop-emoji">'+item.emoji+'</div>'
+      + '<div class="shop-name">'+item.name+'</div>'
+      + '<div class="shop-desc">'+item.desc+'</div>'
       + (owned ? '<div class="shop-price">✓ Sahipsin</div>'
-               : '<div class="shop-price">💰 ' + item.price + '</div>')
+               : '<div class="shop-price">💰 '+item.price+'</div>')
       + '</div>';
   }).join('');
 }
+
 window.buyItem = function(id) {
   if(purchasedItems[id]) { showToast('Zaten sahipsin! ✓'); return; }
   var item = null;
@@ -1115,7 +1113,7 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       bugCount:bugs.length,
       decos:decos.map(function(d){return{type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y};}),
       weather:curWeather,
-      harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z};}),
+      harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
       petCount:pets.map(function(p){return{type:p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
     }));lastSave=now;isDirty=false;showSave();updateWidgetData();}catch(e){}}
 window.addEventListener('pagehide',function(){save(true);},{capture:true});
@@ -1441,7 +1439,11 @@ function load(){
     renderShop();
     // Restore harvest plants
     var sH=data.harvest||[];
-    sH.forEach(function(h){mkHarvestPlant(h.x,h.z,h.type,h.stage);});
+    sH.forEach(function(h){
+      mkHarvestPlant(h.x,h.z,h.type,h.stage);
+      // growTimer geri yükle
+      if(harvestItems.length>0) harvestItems[harvestItems.length-1].growTimer=h.growTimer||0;
+    });
     // Restore pets
     var sP=data.petCount||[];
     sP.forEach(function(p){if(p.type==='cat')mkCat(p.x,p.z);else mkDog(p.x,p.z);});
@@ -1505,23 +1507,24 @@ function animate(){
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
-  // Harvest büyüme
-  if(_fc%300===0){
-    harvestItems.forEach(function(h,idx){
+  // Harvest büyüme - saniye bazlı (60fps = 60 frame = 1 saniye)
+  if(_fc%60===0){
+    for(var hi=harvestItems.length-1;hi>=0;hi--){
+      var h=harvestItems[hi];
       if(h.stage<2){
-        h.growTimer++;
-        if(h.growTimer>=h.cfg.growTime/5){
+        h.growTimer=(h.growTimer||0)+1;
+        if(h.growTimer>=h.cfg.growTime){
           h.growTimer=0;
           var nextStage=h.stage+1;
-          var x=h.x,z=h.z,tp=h.type;
-          h.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});
+          var hx=h.x,hz=h.z,htp=h.type;
+          h.group.traverse(function(ch){if(ch.geometry)ch.geometry.dispose();if(ch.material)ch.material.dispose();});
           scene.remove(h.group);
-          harvestItems.splice(idx,1);
-          mkHarvestPlant(x,z,tp,nextStage);
-          if(nextStage===2)showToast(HARVEST_TYPES[tp].emoji+' Hasat zamanı! Dokun!');
+          harvestItems.splice(hi,1);
+          mkHarvestPlant(hx,hz,htp,nextStage);
+          if(nextStage===2)showToast(HARVEST_TYPES[htp].emoji+' Hasat zamanı! Dokun! 🎉');
         }
       }
-    });
+    }
   }
 
   // Evcil hayvan hareketi
