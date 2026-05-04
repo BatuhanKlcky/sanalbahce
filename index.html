@@ -585,8 +585,8 @@ function renderShop() {
     var canAfford = stats.coin >= item.price;
     var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
     
-    // Değişiklik burada: String oluştururken ` (backtick) kullanıyoruz
-    return `<div class="${cls}" onclick="window.buyItem('${item.id}')">`
+    // ÇÖZÜM: "return" ve "`" (backtick) aynı satırda olmalı!
+    return `<div class="${cls}" onclick="window.buyItem('${item.id}')">
         ${owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : ''}
         <div class="shop-emoji">${item.emoji}</div>
         <div class="shop-name">${item.name}</div>
