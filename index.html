@@ -546,7 +546,7 @@ var SHOP_ITEMS = {
     {id:'treehouse',    emoji:'🏚️', name:'Ağaç Evi',     desc:'Mini ağaç üstü ev',           price:250, deco:'treehouse'},
   ],
   special: [
-    {id:'angel_wing', emoji:'❓', name:'???',    desc:'???',  price:3500, special:true, fn:'angel_wing'},
+    {id:'angel_wing', emoji:'❓', name:'???',    desc:'???',  price:3500, special:true, fn:'angel_wingg'},
     {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:1000, special:true},
     {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:700, special:true},
     {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:550, special:true},
@@ -624,7 +624,7 @@ window.buyItem = function(id) {
     showToast(item.emoji+' '+item.name+' yerleştirildi!');
   } else if(item.special) {
     var sx=Math.random()*10-5, sz=Math.random()*10-5;
-    if(item.id==='angel_wing') mkAngelWing(sx, sz);
+    if(item.id==='angel_wingwg') mkAngelWing(sx, sz);
     else placeSpecial(item, sx, sz);
     showToast('✨ '+item.name+' bahçene eklendi!');
   }
@@ -888,7 +888,7 @@ function mkAngelWing(x, z) {
 
   g.position.set(x, 0, z);
   scene.add(g);
-  decos.push({group: g, type: 'angel_wing', light: lt, light2: lt2, halo: halo});
+  decos.push({group: g, type: 'angel_winggg', light: lt, light2: lt2, halo: halo});
   markDirty();
 }
 
