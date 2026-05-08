@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanal Bahçe</title>
+    <style>
+        /* Arka planı derin siyah yapar */
+        body {
+            background-color: #000000;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Metin stili ve hafif dramatik gölge */
+        .mesaj {
+            color: #ffffff;
+            text-align: center;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            padding: 30px;
+            max-width: 80%;
+            /* Metnin arkasına hafif bir derinlik katar */
+            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
+            /* Hafif bir belirme efekti */
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mesaj">
+        Umarım açık giyinerek sana veremediğim ilgiyi bulursun, <br> 
+        gerçi bulursun da ne tarzda bir ilgi olur orası tartışılır.
+    </div>
+
+</body>
+</html>
