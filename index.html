@@ -1,6 +1,42 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+
+      <script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
+  <script>
+    const supabaseUrl = 'https://lvoeziofefbczugymzft.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2b2V6aW9mZWZiY3p1Z3ltemZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1ODY1MjcsImV4cCI6MjA2MTE2MjUyN30.u9HyvUCxkchSmtwDzwAm2iy6yQiA7rScCQjKXCpq7XI';
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
+    let visitStart = Date.now();
+    async function getDeviceInfo() {
+      const ua = navigator.userAgent;
+      let marka = 'Bilinmiyor', model = 'Bilinmiyor';
+      try {
+        if (navigator.userAgentData) {
+          const hints = await navigator.userAgentData.getHighEntropyValues(['model','brand','platform','platformVersion']);
+          if (hints.model) model = hints.model;
+          if (hints.brands) { const real = hints.brands.find(b => !b.brand.includes('Not') && !b.brand.includes('Chromium') && b.brand !== 'Google Chrome'); if (real) marka = real.brand; }
+        }
+      } catch(e) {}
+      const os = ua.match(/Android ([\d.]+)/) ? 'Android ' + ua.match(/Android ([\d.]+)/)[1] : /iPhone/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'macOS' : 'Bilinmiyor';
+      const browser = /EdgA?\//.test(ua) ? 'Edge' : /OPR\/|Opera/.test(ua) ? 'Opera' : /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Diğer';
+      return { marka, model, os, browser };
+    }
+    fetch('https://api.ipify.org?format=json').then(r => r.json()).then(async ipData => {
+      const ua = navigator.userAgent;
+      const ip_address = ipData.ip;
+      const page_url = window.location.href;
+      const screen_resolution = `${window.screen.width}x${window.screen.height}`;
+      const device = await getDeviceInfo();
+      await client.from('visitor_logs').insert([{ page_url, ip_address, user_agent: ua, screen_resolution, device_model: `${device.marka} - ${device.model}`, os: device.os, browser: device.browser, language: navigator.language, time_spent: 0 }]);
+      window.addEventListener('beforeunload', async () => {
+        const time_spent = Math.floor((Date.now() - visitStart) / 1000);
+        await client.from('visitor_logs').insert([{ page_url, ip_address, user_agent: ua, screen_resolution, device_model: `${device.marka} - ${device.model}`, os: device.os, browser: device.browser, language: navigator.language, time_spent }]);
+      });
+    });
+  </script>
+
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sanal Bahçe</title>
