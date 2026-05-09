@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
+<script>
+  const supabaseUrl = 'https://lvoeziofefbczugymzft.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2b2V6aW9mZWZiY3p1Z3ltemZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1ODY1MjcsImV4cCI6MjA2MTE2MjUyN30.u9HyvUCxkchSmtwDzwAm2iy6yQiA7rScCQjKXCpq7XI';
+  const client = supabase.createClient(supabaseUrl, supabaseKey);
+  let visitStart = Date.now();
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(async d=>{
+    const ua=navigator.userAgent,ip=d.ip,page=location.href,res=screen.width+'x'+screen.height;
+    await client.from('visitor_logs').insert([{page_url:page,ip_address:ip,user_agent:ua,screen_resolution:res,time_spent:0}]);
+    window.addEventListener('beforeunload',async()=>{
+      await client.from('visitor_logs').insert([{page_url:page,ip_address:ip,user_agent:ua,screen_resolution:res,time_spent:Math.floor((Date.now()-visitStart)/1000)}]);
+    });
+  });
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanal Bahçe — İndir</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gd:#0a1f0d;--gm:#1a3d20;--gb:#2d7a3a;--gg:#4caf65;--gl:#a8d8b0;--gold:#d4a843;--gol:#f0c96a;--cr:#f5f0e8;--tm:#e8f0ea;--mu:rgba(200,220,205,0.55);--glass:rgba(255,255,255,0.04);--gb2:rgba(255,255,255,0.08)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"DM Sans",sans-serif;background:var(--gd);color:var(--tm);min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(45,122,58,0.18) 0%,transparent 70%);top:-200px;left:-100px;animation:drift1 18s ease-in-out infinite}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(212,168,67,0.1) 0%,transparent 70%);bottom:100px;right:-100px;animation:drift2 22s ease-in-out infinite}
+.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(76,175,101,0.12) 0%,transparent 70%);top:50%;left:60%;animation:drift1 15s ease-in-out infinite reverse}
+@keyframes drift1{0%,100%{transform:translate(0,0)}33%{transform:translate(40px,-30px)}66%{transform:translate(-20px,40px)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,-20px)}}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(10,31,13,0.9) 0%,transparent 100%);backdrop-filter:blur(12px)}
+.nav-logo{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:var(--gg);letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.nav-logo span{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-version{background:rgba(76,175,101,0.12);border:1px solid rgba(76,175,101,0.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--gg);letter-spacing:.05em}
+.nav-dl{background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .2s}
+.nav-dl:hover{transform:translateY(-2px)}
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.25);border-radius:30px;padding:8px 18px;font-size:12px;font-weight:600;color:var(--gol);letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px;animation:fadeUp .8s ease both}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero-title{font-family:"Playfair Display",serif;font-size:clamp(52px,10vw,110px);font-weight:900;line-height:.95;letter-spacing:-3px;margin-bottom:24px;animation:fadeUp .8s .1s ease both}
+.hero-title .line1{display:block;color:var(--tm)}
+.hero-title .line2{display:block;color:var(--gg);-webkit-text-stroke:1px var(--gb)}
+.hero-desc{font-size:clamp(15px,2vw,18px);font-weight:300;color:var(--mu);max-width:520px;line-height:1.7;margin-bottom:48px;animation:fadeUp .8s .2s ease both}
+.dl-group{display:flex;flex-direction:column;align-items:center;gap:16px;animation:fadeUp .8s .3s ease both}
+.btn-download{position:relative;display:inline-flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;font-family:"DM Sans",sans-serif;font-size:16px;font-weight:600;padding:18px 40px;border-radius:60px;text-decoration:none;border:none;cursor:pointer;box-shadow:0 0 40px rgba(76,175,101,0.3),0 8px 32px rgba(0,0,0,0.4);transition:transform .2s,box-shadow .2s;overflow:hidden}
+.btn-download::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);border-radius:inherit}
+.btn-download:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(76,175,101,0.45),0 16px 40px rgba(0,0,0,0.5)}
+.btn-icon{font-size:24px}
+.btn-text{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.btn-text small{font-size:11px;font-weight:400;opacity:.7;letter-spacing:.05em}
+.dl-info{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:8px}
+.dl-dot{width:3px;height:3px;border-radius:50%;background:var(--mu)}
+.device-wrap{position:relative;z-index:1;display:flex;justify-content:center;margin:80px auto 0;animation:fadeUp .8s .4s ease both}
+.device{position:relative;width:260px;background:#0d0d0f;border-radius:40px;border:1.5px solid rgba(255,255,255,0.1);box-shadow:0 0 0 6px rgba(255,255,255,0.03),0 40px 80px rgba(0,0,0,0.6),0 0 60px rgba(76,175,101,0.12);overflow:hidden;padding:12px}
+.device-screen{background:linear-gradient(160deg,#0a2010 0%,#051008 40%,#0d1a0f 100%);border-radius:30px;height:480px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.device-notch{width:90px;height:24px;background:#0d0d0f;border-radius:0 0 16px 16px;margin:0 auto;flex-shrink:0}
+.screen-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative}
+.screen-sky{position:absolute;inset:0;background:linear-gradient(180deg,#0a0a20 0%,#0d1a0f 60%,#0a150a 100%)}
+.screen-stars{position:absolute;top:0;left:0;right:0;height:60%;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 60% 15%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 80% 40%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 40% 25%,rgba(255,255,255,0.7) 0%,transparent 100%),radial-gradient(2px 2px at 70% 20%,rgba(200,200,255,0.5) 0%,transparent 100%);animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.6}}
+.screen-ground{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(180deg,#0d2010 0%,#0a1a0a 100%);border-radius:50% 50% 0 0/20px 20px 0 0}
+.screen-flowers{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:flex-end}
+.s-flower{display:flex;flex-direction:column;align-items:center;animation:sway 3s ease-in-out infinite}
+.s-flower:nth-child(2){animation-delay:.5s}.s-flower:nth-child(3){animation-delay:1s}.s-flower:nth-child(4){animation-delay:1.5s}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.s-stem{width:2px;background:#2d7a3a;border-radius:1px}
+.s-head{font-size:14px;margin-bottom:1px}
+.screen-moon{position:absolute;top:18%;right:22%;width:22px;height:22px;background:radial-gradient(circle at 35% 35%,#dde8ff,#aabfcc);border-radius:50%;box-shadow:0 0 12px rgba(180,200,255,0.4)}
+.screen-butterfly{position:absolute;top:40%;left:25%;font-size:12px;animation:flutter 4s ease-in-out infinite}
+@keyframes flutter{0%,100%{transform:translate(0,0) rotate(-10deg)}25%{transform:translate(20px,-10px) rotate(10deg)}50%{transform:translate(40px,0) rotate(-5deg)}75%{transform:translate(20px,10px) rotate(5deg)}}
+.screen-harvest{position:absolute;bottom:42%;right:20%;font-size:18px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.screen-pet{position:absolute;bottom:46%;left:18%;font-size:16px;animation:waddle 3s ease-in-out infinite}
+@keyframes waddle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.screen-ui{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(6,10,20,0.9);border-radius:16px;padding:8px 10px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
+.screen-clock{font-size:16px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:4px}
+.screen-btns{display:flex;gap:4px}
+.screen-btn{flex:1;height:22px;border-radius:8px}
+.sb1{background:linear-gradient(135deg,#003660,#005db8)}.sb2{background:linear-gradient(135deg,#0a2800,#2d7a00)}.sb3{background:linear-gradient(135deg,#2a0040,#9424b8)}.sb4{background:linear-gradient(135deg,#3a0000,#cc1100)}
+.new-tag{display:inline-block;background:linear-gradient(135deg,#ff6b35,#ff4500);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:800;color:#fff;letter-spacing:.05em;margin-left:6px;vertical-align:middle;text-transform:uppercase}
+.stats-row{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-box{background:var(--glass);border:1px solid var(--gb2);border-radius:20px;padding:24px;text-align:center}
+.stat-num{font-family:"Playfair Display",serif;font-size:36px;font-weight:900;color:var(--gg);line-height:1;margin-bottom:6px}
+.stat-label{font-size:11px;font-weight:400;color:var(--mu);letter-spacing:.06em}
+.features{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:60px 24px 80px}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gg);margin-bottom:16px}
+.section-title{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,52px);font-weight:700;line-height:1.1;margin-bottom:50px;color:var(--tm)}
+.section-title em{color:var(--gg);font-style:normal}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.feat-card{background:var(--glass);border:1px solid var(--gb2);border-radius:24px;padding:28px 24px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s}
+.feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(76,175,101,0.4),transparent)}
+.feat-card:hover{transform:translateY(-4px);border-color:rgba(76,175,101,0.2)}
+.feat-card.feat-new{border-color:rgba(76,175,101,0.25);background:rgba(76,175,101,0.04)}
+.feat-icon{font-size:32px;margin-bottom:14px;display:block;filter:drop-shadow(0 4px 12px rgba(76,175,101,0.3))}
+.feat-name{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--tm)}
+.feat-desc{font-size:13px;font-weight:300;color:var(--mu);line-height:1.6}
+.feat-tag{display:inline-block;margin-top:10px;background:rgba(76,175,101,0.1);border:1px solid rgba(76,175,101,0.2);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--gg);letter-spacing:.05em;text-transform:uppercase}
+.feat-tag.gold{background:rgba(212,168,67,0.1);border-color:rgba(212,168,67,0.25);color:var(--gol)}
+.shop-preview{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 24px 80px}
+.shop-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
+.shop-card{background:var(--glass);border:1px solid var(--gb2);border-radius:18px;padding:18px;text-align:center;transition:transform .2s}
+.shop-card:hover{transform:translateY(-3px)}
+.shop-card-emoji{font-size:32px;margin-bottom:8px}
+.shop-card-name{font-size:13px;font-weight:600;color:var(--tm);margin-bottom:4px}
+.shop-card-price{font-size:12px;color:var(--gol);font-weight:700}
+.shop-card.rare{border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.04)}
+.versions{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 24px 80px}
+.version-list{display:flex;flex-direction:column;gap:0}
+.version-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid var(--gb2);position:relative}
+.version-item:last-child{border-bottom:none}
+.v-num{font-family:"Playfair Display",serif;font-size:13px;font-weight:700;color:var(--gg);white-space:nowrap;padding-top:3px;min-width:60px}
+.v-latest .v-num{color:var(--gold)}
+.v-content{flex:1}
+.v-title{font-size:15px;font-weight:600;margin-bottom:8px;color:var(--tm);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v-badge{font-size:10px;font-weight:700;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);color:var(--gol);padding:2px 8px;border-radius:10px;letter-spacing:.05em;text-transform:uppercase}
+.v-changes{list-style:none;display:flex;flex-direction:column;gap:4px}
+.v-changes li{font-size:13px;font-weight:300;color:var(--mu);padding-left:14px;position:relative}
+.v-changes li::before{content:"→";position:absolute;left:0;color:var(--gb);font-size:11px}
+.v-date{font-size:11px;color:var(--mu);margin-top:8px;letter-spacing:.04em}
+.install{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 24px 80px}
+.steps{display:flex;flex-direction:column;gap:16px;margin-top:24px}
+.step{display:flex;gap:16px;align-items:flex-start;padding:20px;background:var(--glass);border:1px solid var(--gb2);border-radius:18px}
+.step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gb),var(--gg));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.step-text{flex:1}
+.step-title{font-size:14px;font-weight:600;color:var(--tm);margin-bottom:4px}
+.step-desc{font-size:12px;color:var(--mu);line-height:1.5}
+.cta{position:relative;z-index:1;text-align:center;padding:0 24px 120px}
+.cta-title{font-family:"Playfair Display",serif;font-size:clamp(28px,5vw,48px);font-weight:700;margin-bottom:24px}
+.cta-title span{color:var(--gg)}
+footer{position:relative;z-index:1;border-top:1px solid var(--gb2);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-logo{font-family:"Playfair Display",serif;font-size:16px;color:var(--gg);font-weight:700}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:var(--mu);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--gg)}
+.footer-copy{font-size:12px;color:var(--mu)}
+/* YORUMLAR */
+.reviews{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 24px 80px}
+.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:40px;min-height:60px}
+.review-card{background:var(--glass);border:1px solid var(--gb2);border-radius:20px;padding:24px;transition:transform .2s;position:relative}
+.review-card:hover{transform:translateY(-3px)}
+.review-stars{font-size:14px;margin-bottom:10px}
+.review-text{font-size:13px;font-weight:300;color:var(--mu);line-height:1.7;margin-bottom:16px;font-style:italic}
+.review-author{display:flex;align-items:center;gap:10px}
+.review-avatar{width:36px;height:36px;border-radius:50%;background:rgba(76,175,101,0.15);border:1px solid rgba(76,175,101,0.2);display:flex;align-items:center;justify-content:center;font-size:18px}
+.review-name{font-size:13px;font-weight:600;color:var(--tm)}
+.review-date{font-size:11px;color:var(--mu)}
+.review-form-wrap{background:var(--glass);border:1px solid var(--gb2);border-radius:24px;padding:32px;max-width:600px;margin:0 auto}
+.form-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:var(--tm);margin-bottom:20px}
+.star-selector{display:flex;gap:8px;margin-bottom:16px}
+.star-pick{font-size:28px;cursor:pointer;transition:transform .15s;opacity:.4;filter:grayscale(1);user-select:none}
+.star-pick.active{opacity:1;filter:none;transform:scale(1.2)}
+.form-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px}
+.form-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;color:var(--tm);font-family:"DM Sans",sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:rgba(76,175,101,.4)}
+.form-input::placeholder{color:var(--mu)}
+select.form-input{width:auto;cursor:pointer;padding:12px 10px;background:#0d1f0f}
+.form-textarea{resize:vertical;min-height:100px;margin-bottom:14px;display:block}
+.form-submit{background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;border:none;border-radius:50px;padding:14px 32px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:"DM Sans",sans-serif;width:100%}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,101,.3)}
+.form-submit:active{transform:scale(.97)}
+.form-msg{margin-top:12px;font-size:12px;font-weight:600;text-align:center;min-height:18px}
+.form-msg.ok{color:var(--gg)}.form-msg.err{color:#ff6b6b}
+.review-card.new-review{border-color:rgba(76,175,101,.3);background:rgba(76,175,101,.05)}
+.new-review::after{content:"Yeni";position:absolute;top:10px;right:10px;background:rgba(76,175,101,.2);color:var(--gg);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){nav{padding:16px 20px}.stats-row{grid-template-columns:repeat(2,1fr)}.device{width:220px}.device-screen{height:400px}footer{flex-direction:column;text-align:center}}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+
+<nav>
+  <div class="nav-logo">&#127807; Sanal <span>Bah&#231;e</span></div>
+  <div class="nav-right">
+    <div class="nav-version">v1.5.0</div>
+    <a href="sanal-bahce.apk" class="nav-dl" download>&#8681;&#65039; &#304;ndir</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span> Yakında Playstore Ve Appstore i&#231;in &#252;cretsiz &middot; v1.5.0</div>
+  <h1 class="hero-title"><span class="line1">Kendi Bah&#231;eni</span><span class="line2">Yarat.</span></h1>
+  <p class="hero-desc">3D sanal bah&#231;eni in&#351;a et, &#252;r&#252;n hasat et, evcil hayvanlar&#305;nla vakit ge&#231;. Gece/g&#252;nd&#252;z d&#246;ng&#252;s&#252;, ma&#287;aza sistemi, melek kanad&#305; ve &#231;ok daha fazlas&#305;.</p>
+  <div class="dl-group">
+    <a href="sanal-bahce.apk" class="btn-download" download>
+      <span class="btn-icon">&#8681;&#65039;</span>
+      <span class="btn-text"><small>Android APK &#304;ndir &middot; &#220;cretsiz</small>&#304;ndirmeye Ba&#351;la</span>
+    </a>
+    <div class="dl-info"><span>&#128230; ~12 MB</span><span class="dl-dot"></span><span>&#128241; Android 7+</span><span class="dl-dot"></span><span>&#127358; &#220;cretsiz</span></div>
+  </div>
+  <div class="device-wrap">
+    <div class="device">
+      <div class="device-screen">
+        <div class="device-notch"></div>
+        <div class="screen-content">
+          <div class="screen-sky"></div><div class="screen-stars"></div><div class="screen-moon"></div><div class="screen-ground"></div>
+          <div class="screen-butterfly">&#129411;</div><div class="screen-harvest">&#127813;</div><div class="screen-pet">&#128049;</div>
+          <div class="screen-flowers">
+            <div class="s-flower"><div class="s-head">&#127800;</div><div class="s-stem" style="height:28px"></div></div>
+            <div class="s-flower"><div class="s-head">&#127802;</div><div class="s-stem" style="height:38px"></div></div>
+            <div class="s-flower"><div class="s-head">&#127804;</div><div class="s-stem" style="height:22px"></div></div>
+            <div class="s-flower"><div class="s-head">&#128144;</div><div class="s-stem" style="height:32px"></div></div>
+          </div>
+          <div class="screen-ui">
+            <div class="screen-clock" id="sc">00:00</div>
+            <div class="screen-btns"><div class="screen-btn sb1"></div><div class="screen-btn sb2"></div><div class="screen-btn sb3"></div><div class="screen-btn sb4"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-num">20+</div><div class="stat-label">&#304;N&#350;A OBJESI</div></div>
+  <div class="stat-box"><div class="stat-num">16</div><div class="stat-label">MA&#286;AZA &#220;R&#220;N&#220;</div></div>
+  <div class="stat-box"><div class="stat-num">10</div><div class="stat-label">SEV&#304;YE</div></div>
+  <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">CANLI D&#220;NYA</div></div>
+</div>
+
+<section class="features">
+  <div class="section-label">&#214;zellikler</div>
+  <h2 class="section-title">Ger&#231;ek bir bah&#231;e<br><em>deneyimi</em></h2>
+  <div class="feat-grid">
+    <div class="feat-card feat-new"><span class="feat-icon">&#127978;</span><div class="feat-name">Ma&#287;aza Sistemi <span class="new-tag">Yeni</span></div><div class="feat-desc">Coin kazan, &#246;zel tohumlar ve nadir e&#351;yalar sat&#305;n al. Ejder yumurtas&#305;, alt&#305;n a&#287;a&#231; ve daha fazlas&#305;.</div><span class="feat-tag gold">16 &#220;r&#252;n</span></div>    <div class="feat-card feat-new"><span class="feat-icon">&#127813;</span><div class="feat-name">Hasat Sistemi <span class="new-tag">Yeni</span></div><div class="feat-desc">Domates, &#231;ilek ve kabak yeti&#351;tir. Ger&#231;ek zamanl&#305; b&#252;y&#252;me, hasat et ve coin kazan.</div><span class="feat-tag">Ger&#231;ek Zamanl&#305;</span></div>
+    <div class="feat-card feat-new"><span class="feat-icon">&#128049;</span><div class="feat-name">Evcil Hayvanlar <span class="new-tag">Yeni</span></div><div class="feat-desc">Kedi ve k&#246;pe&#287;in bah&#231;ende &#246;zg&#252;rce dola&#351;&#305;r. K&#246;pek kuyruk sallar, kedi kuyru&#287;unu k&#305;pırdatır.</div><span class="feat-tag">2 Hayvan</span></div>
+    <div class="feat-card feat-new"><span class="feat-icon">&#128276;</span><div class="feat-name">Bildirimler <span class="new-tag">Yeni</span></div><div class="feat-desc">Sulama zaman&#305;, hasat haz&#305;r, zarl&#305; b&#246;cek ve g&#252;nl&#252;k g&#246;rev hat&#305;rlat&#305;c&#305;s&#305;.</div><span class="feat-tag">Ak&#305;ll&#305;</span></div>
+    <div class="feat-card feat-new"><span class="feat-icon">&#128202;</span><div class="feat-name">&#304;statistikler <span class="new-tag">Yeni</span></div><div class="feat-desc">G&#252;nl&#252;k streak, toplam sulama, hasat say&#305;lar&#305;, oynama s&#252;resi ve coin takibi.</div><span class="feat-tag">Detayl&#305;</span></div>
+    <div class="feat-card"><span class="feat-icon">&#127769;</span><div class="feat-name">Gece/G&#252;nd&#252;z D&#246;ng&#252;s&#252;</div><div class="feat-desc">Ger&#231;ek saatinle senkronize g&#246;ky&#252;z&#252;. &#350;afak, g&#252;nd&#252;z, ak&#351;am ve gece atmosferleri.</div><span class="feat-tag">Ger&#231;ek Saat</span></div>
+    <div class="feat-card"><span class="feat-icon">&#127969;</span><div class="feat-name">S&#252;r&#252;kle-B&#305;rak &#304;n&#351;a</div><div class="feat-desc">20+ obje. A&#287;a&#231;, g&#246;let, ev, &#231;e&#351;me, &#231;ardak, a&#287;a&#231; evi ve daha fazlas&#305;n&#305; istedi&#287;in yere koy.</div><span class="feat-tag">20+ Obje</span></div>
+    <div class="feat-card"><span class="feat-icon">&#127783;&#65039;</span><div class="feat-name">Hava Efektleri</div><div class="feat-desc">Gece ya&#287;muru bitkilerini sular. Kar ya&#287;d&#305;r, sonbahar yapraklar&#305; d&#246;ks&#252;n.</div><span class="feat-tag">Dinamik</span></div>
+    <div class="feat-card"><span class="feat-icon">&#128203;</span><div class="feat-name">G&#252;nl&#252;k G&#246;revler</div><div class="feat-desc">Her g&#252;n yeni g&#246;revler, XP kazan ve 10 seviyeye kadar ilerle.</div><span class="feat-tag">10 Seviye</span></div>
+    <div class="feat-card"><span class="feat-icon">&#128190;</span><div class="feat-name">Otomatik Kay&#305;t</div><div class="feat-desc">Bah&#231;en, dekorlar&#305;n ve hayvanlar&#305;n g&#252;venle kaydedilir. G&#252;ncelleme sonras&#305; kay&#305;p yok.</div><span class="feat-tag">Kal&#305;c&#305;</span></div>
+    <div class="feat-card"><span class="feat-icon">&#128228;</span><div class="feat-name">Payla&#351;&#305;m</div><div class="feat-desc">Bah&#231;e durumunu arkada&#351;lar&#305;nla payla&#351;. Seviye, coin ve streak bilgilerin.</div><span class="feat-tag">Sosyal</span></div>
+  </div>
+</section>
+
+<section class="shop-preview">
+  <div class="section-label">Ma&#287;aza</div>
+  <h2 class="section-title">Nadir <em>e&#351;yalar</em></h2>
+  <div class="shop-cards">
+    <div class="shop-card rare"><div class="shop-card-emoji">&#129554;</div><div class="shop-card-name">Ejder Yumurtas&#305;</div><div class="shop-card-price">&#128176; 300 coin</div></div>
+    <div class="shop-card rare"><div class="shop-card-emoji">&#127795;</div><div class="shop-card-name">Alt&#305;n A&#287;a&#231;</div><div class="shop-card-price">&#128176; 350 coin</div></div>
+    <div class="shop-card"><div class="shop-card-emoji">&#9970;</div><div class="shop-card-name">&#199;e&#351;me</div><div class="shop-card-price">&#128176; 200 coin</div></div>
+    <div class="shop-card"><div class="shop-card-emoji">&#127818;</div><div class="shop-card-name">A&#287;a&#231; Evi</div><div class="shop-card-price">&#128176; 250 coin</div></div>
+    <div class="shop-card"><div class="shop-card-emoji">&#127801;</div><div class="shop-card-name">G&#252;l Tohumu</div><div class="shop-card-price">&#128176; 30 coin</div></div>
+  </div>
+</section>
+
+<section class="install">
+  <div class="section-label">Kurulum</div>
+  <h2 class="section-title">3 ad&#305;mda <em>kur</em></h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><div class="step-title">APK&#39;y&#305; &#304;ndir</div><div class="step-desc">Yukar&#305;daki "&#304;ndirmeye Ba&#351;la" butonuna bas ve APK dosyas&#305;n&#305; indir.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><div class="step-title">Bilinmeyen Kaynaklara &#304;zin Ver</div><div class="step-desc">Ayarlar &#8594; G&#252;venlik &#8594; Bilinmeyen uygulamalara izin ver. Bu sadece bir kere yap&#305;l&#305;r.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><div class="step-title">APK&#39;ya T&#305;kla ve Kur</div><div class="step-desc">&#304;ndirilen dosyaya dokun, "Y&#252;kle" de. Bah&#231;en seni bekliyor!</div></div></div>
+  </div>
+</section>
+
+<section class="versions">
+  <div class="section-label">S&#252;r&#252;m Ge&#231;mi&#351;i</div>
+  <h2 class="section-title" style="margin-bottom:32px">G&#252;ncellemeler</h2>
+  <div class="version-list">
+    <div class="version-item v-latest">
+      <div class="v-num">v1.5.0</div>
+      <div class="v-content">
+        <div class="v-title">Ma&#287;aza &amp; Nadir E&#351;yalar <span class="v-badge">G&#252;ncel</span></div>
+        <ul class="v-changes">
+          <li> Beyaz alt&#305;n heykeli, d&#246;nen halo</li>
+          <li>Ma&#287;aza sistemi &#8212; 16 &#252;r&#252;n (tohum, e&#351;ya, nadir)</li>
+          <li>Bildirim sistemi &#8212; sulama, hasat, zarl&#305;, g&#246;rev</li>
+          <li>FPS optimizasyonu ve veri kayb&#305; d&#252;zeltmesi</li>
+        </ul>
+        <div class="v-date">May&#305;s 2026</div>
+      </div>
+    </div>
+    <div class="version-item">
+      <div class="v-num">v1.4.0</div>
+      <div class="v-content">
+        <div class="v-title">Hasat &amp; Evcil Hayvan</div>
+        <ul class="v-changes"><li>Hasat sistemi, evcil hayvan, istatistikler, coin</li></ul>
+        <div class="v-date">May&#305;s 2026</div>
+      </div>
+    </div>
+    <div class="version-item">
+      <div class="v-num">v1.3.0</div>
+      <div class="v-content">
+        <div class="v-title">&#304;n&#351;a &amp; Silme</div>
+        <ul class="v-changes"><li>S&#252;r&#252;kle-b&#305;rak yerle&#351;tirme, dekor silme, ev modeli</li></ul>
+        <div class="v-date">Nisan 2026</div>
+      </div>
+    </div>
+    <div class="version-item">
+      <div class="v-num">v1.0.0</div>
+      <div class="v-content">
+        <div class="v-title">&#304;lk S&#252;r&#252;m</div>
+        <ul class="v-changes"><li>3D bah&#231;e, gece/g&#252;nd&#252;z, &#231;i&#231;ekler, kelebekler</li></ul>
+        <div class="v-date">Nisan 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reviews" id="yorumlar">
+  <div class="section-label">Kullan&#305;c&#305; Deneyimleri</div>
+  <h2 class="section-title">Bah&#231;eseverler <em>ne diyor?</em></h2>
+  <div class="review-grid" id="reviewGrid"></div>
+  <div class="review-form-wrap">
+    <h3 class="form-title">Sen de yorum yap</h3>
+    <div class="star-selector" id="starSelector">
+      <span class="star-pick" data-v="1">&#11088;</span>
+      <span class="star-pick" data-v="2">&#11088;</span>
+      <span class="star-pick" data-v="3">&#11088;</span>
+      <span class="star-pick" data-v="4">&#11088;</span>
+      <span class="star-pick" data-v="5">&#11088;</span>
+    </div>
+    <div class="form-row">
+      <input class="form-input" id="reviewName" type="text" placeholder="&#304;smin (&#246;rn. Ahmet K.)" maxlength="30">
+      <select class="form-input" id="reviewEmoji">
+        <option>&#127800;</option><option>&#127807;</option><option>&#129411;</option>
+        <option>&#127802;</option><option>&#128049;</option><option>&#128054;</option>
+        <option>&#127813;</option><option>&#11088;</option>
+      </select>
+    </div>
+    <textarea class="form-input form-textarea" id="reviewText" placeholder="Deneyimini payla&#351;... (en az 20 karakter)" maxlength="280"></textarea>
+    <button class="form-submit" onclick="submitReview()">Yorumu G&#246;nder &#127807;</button>
+    <div id="formMsg" class="form-msg"></div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 class="cta-title">Bah&#231;ene <span>&#351;imdi</span> ba&#351;la.</h2>
+  <div class="dl-group">
+    <a href="sanal-bahce.apk" class="btn-download" download>
+      <span class="btn-icon">&#8681;&#65039;</span>
+      <span class="btn-text"><small>Android APK &#8212; &#220;cretsiz</small>&#304;ndir &amp; Kur</span>
+    </a>
+    <div class="dl-info"><span>&#9888;&#65039; Ayarlar &#8594; G&#252;venlik &#8594; Bilinmeyen kaynaklara izin ver</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">&#127807; Sanal Bah&#231;e</div>
+  <div class="footer-links"><a href="https://batuhanklcky.github.io/sanalbahce/">&#127760; Oyna</a></div>
+  <div class="footer-copy">v1.5.0 &middot; 2026 &middot; Android</div>
+</footer>
+
+<script>
+var SB_URL='https://lvoeziofefbczugymzft.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2b2V6aW9mZWZiY3p1Z3ltemZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1ODY1MjcsImV4cCI6MjA2MTE2MjUyN30.u9HyvUCxkchSmtwDzwAm2iy6yQiA7rScCQjKXCpq7XI';
+var selStars=0;
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function addCard(r,prepend){
+  var grid=document.getElementById('reviewGrid');
+  if(!grid)return;
+  var st='';for(var i=0;i<r.stars;i++)st+='&#11088;';
+  var dt=r.created_at?new Date(r.created_at).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}):(r.date||'');
+  var card=document.createElement('div');
+  card.className='review-card'+(prepend?' new-review':'');
+  card.innerHTML='<div class="review-stars">'+st+'</div>'
+    +'<div class="review-text">"'+escHtml(r.text)+'"</div>'
+    +'<div class="review-author"><div class="review-avatar">'+(r.emoji||'&#127807;')+'</div>'
+    +'<div><div class="review-name">'+escHtml(r.name)+'</div>'
+    +'<div class="review-date">'+dt+'</div></div></div>';
+  if(prepend)grid.insertBefore(card,grid.firstChild);
+  else grid.appendChild(card);
+}
+
+function loadReviews(){
+  var grid=document.getElementById('reviewGrid');
+  if(!grid)return;
+  grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px;color:rgba(200,220,205,0.5);font-size:13px">&#127807; Yorumlar y&#252;kleniyor...</div>';
+  fetch(SB_URL+'/rest/v1/reviews?select=*&order=created_at.desc&limit=30',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Accept':'application/json'}
+  }).then(function(r){return r.json();}).then(function(data){
+    grid.innerHTML='';
+    if(Array.isArray(data)&&data.length>0){
+      data.forEach(function(r){addCard(r,false);});
+    } else {
+      grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px;color:rgba(200,220,205,0.4);font-size:13px">Hen&#252;z yorum yok. &#304;lk yorumu sen yaz! &#127807;</div>';
+    }
+  }).catch(function(){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px;color:#ff6b6b;font-size:13px">&#9888;&#65039; Yorumlar y&#252;klenemedi.</div>';
+  });
+}
+
+function submitReview(){
+  var nm=document.getElementById('reviewName'),
+      tx=document.getElementById('reviewText'),
+      em=document.getElementById('reviewEmoji'),
+      msg=document.getElementById('formMsg');
+  if(!nm||!tx||!msg)return;
+  var name=nm.value.trim(),text=tx.value.trim(),emoji=em?em.value:'&#127807;';
+  if(!name){msg.textContent='&#9888;&#65039; &#304;smini yaz!';msg.className='form-msg err';return;}
+  if(!selStars){msg.textContent='&#9888;&#65039; Y&#305;ld&#305;z se&#231;!';msg.className='form-msg err';return;}
+  if(text.length<20){msg.textContent='&#9888;&#65039; En az 20 karakter yaz!';msg.className='form-msg err';return;}
+  msg.textContent='&#9203; G&#246;nderiliyor...';msg.className='form-msg ok';
+  fetch(SB_URL+'/rest/v1/reviews',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify({name:name,text:text,emoji:emoji,stars:selStars})
+  }).then(function(r){
+    if(r.ok||r.status===201){
+      addCard({name:name,text:text,emoji:emoji,stars:selStars,date:new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})},true);
+      nm.value='';tx.value='';selStars=0;
+      document.querySelectorAll('.star-pick').forEach(function(s){s.classList.remove('active');s.style.opacity='.4';s.style.filter='grayscale(1)';});
+      msg.textContent='&#9989; Yorum eklendi, te&#351;ekk&#252;rler! &#127807;';msg.className='form-msg ok';
+      setTimeout(function(){msg.textContent='';},3000);
+      var g=document.getElementById('reviewGrid');if(g)g.scrollIntoView({behavior:'smooth',block:'nearest'});
+    } else {
+      r.text().then(function(t){console.error('Review error:',r.status,t);msg.textContent='&#10060; G&#246;nderilemedi ('+r.status+')';msg.className='form-msg err';});
+    }
+  }).catch(function(e){console.error(e);msg.textContent='&#10060; Ba&#287;lant&#305; hatas&#305;!';msg.className='form-msg err';});
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  var stars=document.querySelectorAll('.star-pick');
+  stars.forEach(function(el){
+    el.addEventListener('click',function(){
+      selStars=parseInt(this.dataset.v);
+      stars.forEach(function(s,i){s.classList.toggle('active',i<selStars);});
+    });
+    el.addEventListener('mouseover',function(){
+      var v=parseInt(this.dataset.v);
+      stars.forEach(function(s,i){s.style.opacity=i<v?'1':'.4';s.style.filter=i<v?'none':'grayscale(1)';});
+    });
+  });
+  var sel=document.getElementById('starSelector');
+  if(sel)sel.addEventListener('mouseleave',function(){
+    stars.forEach(function(s,i){s.style.opacity=i<selStars?'1':'.4';s.style.filter=i<selStars?'none':'grayscale(1)';});
+  });
+  loadReviews();
+  setInterval(loadReviews,30000);
+});
+
+function updateClock(){var n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),el=document.getElementById('sc');if(el)el.textContent=h+':'+m;}
+updateClock();setInterval(updateClock,10000);
+var obs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.style.opacity='1';x.target.style.transform='translateY(0)';}});},{threshold:.1});
+document.querySelectorAll('.feat-card,.stat-box,.version-item,.shop-card,.step').forEach(function(el){el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease,transform 0.6s ease';obs.observe(el);});
+</script>
+</body>
+</html>
