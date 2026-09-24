@@ -20,15 +20,16 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 
 ---
 
-🎮 Özellikler
-🔔 Bildirimler — Sulama zamanı, hasat hazır, zararlı böcek ve günlük görev hatırlatıcıları
-📊 İstatistikler — Günlük streak, toplam sulama, hasat sayıları, oynama süresi ve coin takibi
-🌙 Gece/Gündüz Döngüsü — Gerçek saatle senkronize gökyüzü; şafak, gündüz, akşam ve gece atmosferleri
-🏡 Sürükle-Bırak İnşa — 20+ obje (ağaç, gölet, ev, çeşme, çardak, ağaç evi ve daha fazlası)
-🌧️ Hava Efektleri — Gece yağmuru bitkileri sular, kar yağabilir, sonbahar yaprakları dökülür
-📝 Günlük Görevler — Her gün yeni görevler, XP kazanma ve 10 seviyeye kadar ilerleme
-💾 Otomatik Kayıt — Bahçen, dekorların ve hayvanların tarayıcında (local) güvenle kaydedilir, güncelleme sonrası kayıp yok. (Not: kayıt cihaza/tarayıcıya bağlıdır — farklı bir cihaz veya tarayıcıda açtığında bahçen sıfırdan başlar.)
-🔗 Paylaşım — Bahçe durumunu arkadaşlarınla paylaş: seviye, coin ve streak bilgilerin
+## 🎮 Özellikler
+
+- 🔔 **Bildirimler** — Sulama zamanı, hasat hazır, zararlı böcek ve günlük görev hatırlatıcıları
+- 📊 **İstatistikler** — Günlük streak, toplam sulama, hasat sayıları, oynama süresi ve coin takibi
+- 🌙 **Gece/Gündüz Döngüsü** — Gerçek saatle senkronize gökyüzü; şafak, gündüz, akşam ve gece atmosferleri
+- 🏡 **Sürükle-Bırak İnşa** — 20+ obje (ağaç, gölet, ev, çeşme, çardak, ağaç evi ve daha fazlası)
+- 🌧️ **Hava Efektleri** — Gece yağmuru bitkileri sular, kar yağabilir, sonbahar yaprakları dökülür
+- 📝 **Günlük Görevler** — Her gün yeni görevler, XP kazanma ve 10 seviyeye kadar ilerleme
+- 💾 **Otomatik Kayıt** — Bahçen, dekorların ve hayvanların tarayıcında (local) güvenle kaydedilir, güncelleme sonrası kayıp yok. *(Not: kayıt cihaza/tarayıcıya bağlıdır — farklı bir cihaz veya tarayıcıda açtığında bahçen sıfırdan başlar.)*
+- 🔗 **Paylaşım** — Bahçe durumunu arkadaşlarınla paylaş: seviye, coin ve streak bilgilerin
 
 ## 🚀 Nasıl Çalıştırılır
 
@@ -75,4 +76,4 @@ Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
 ---
 
-Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky) https://www.linkedin.com/in/batuhanklcky/
+Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky)  https://www.linkedin.com/in/batuhanklcky/
