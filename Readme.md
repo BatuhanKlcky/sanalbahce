@@ -28,7 +28,7 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 - 🏡 **Sürükle-Bırak İnşa** — 20+ obje (ağaç, gölet, ev, çeşme, çardak, ağaç evi ve daha fazlası)
 - 🌧️ **Hava Efektleri** — Gece yağmuru bitkileri sular, kar yağabilir, sonbahar yaprakları dökülür
 - 📝 **Günlük Görevler** — Her gün yeni görevler, XP kazanma ve 10 seviyeye kadar ilerleme
-- 💾 **Otomatik Kayıt** — Bahçen, dekorların ve hayvanların güvenle kaydedilir, güncelleme sonrası kayıp yok
+💾 Otomatik Kayıt — Bahçen, dekorların ve hayvanların tarayıcında (local) güvenle kaydedilir, güncelleme sonrası kayıp yok. (Not: kayıt cihaza/tarayıcıya bağlıdır — farklı bir cihaz veya tarayıcıda açtığında bahçen sıfırdan başlar.)
 - 🔗 **Paylaşım** — Bahçe durumunu arkadaşlarınla paylaş: seviye, coin ve streak bilgilerin
 
 ## 🚀 Nasıl Çalıştırılır
