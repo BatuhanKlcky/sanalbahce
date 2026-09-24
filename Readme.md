@@ -13,7 +13,6 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 - ⏳ Zamanla büyüme sistemi
 - 🎨 Sade ve keyifli arayüz
 
-> Not: Bu listeyi kendi uygulamandaki gerçek özelliklerle güncelle.
 
 ## 🚀 Nasıl Çalıştırılır
 
@@ -34,9 +33,7 @@ Sonrasında `index.html` dosyasına çift tıklaman yeterli — herhangi bir kur
 
 ## 📸 Ekran Görüntüsü
 
-<!-- Buraya bir ekran görüntüsü ekle, örnek:
-![Sanal Bahçe Ekran Görüntüsü](screenshot.png)
--->
+
 
 ## 🗺️ Yol Haritası
 
@@ -55,4 +52,4 @@ Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
 ---
 
-Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky)
+Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky) https://www.linkedin.com/in/batuhanklcky/
