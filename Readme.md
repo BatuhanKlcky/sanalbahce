@@ -1,6 +1,5 @@
 # 🌱 Sanal Bahçe
 
-![Version](https://img.shields.io/badge/version-1.5.0-brightgreen)
 
 Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümelerini izle! Sürükle-bırak inşa, gece/gündüz döngüsü ve hava efektleriyle keyifli ve rahatlatıcı bir bitki büyütme simülasyonu.
 
@@ -30,6 +29,9 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 - 📝 **Günlük Görevler** — Her gün yeni görevler, XP kazanma ve 10 seviyeye kadar ilerleme
 - 💾 **Otomatik Kayıt** — Bahçen, dekorların ve hayvanların tarayıcında (local) güvenle kaydedilir, güncelleme sonrası kayıp yok. *(Not: kayıt cihaza/tarayıcıya bağlıdır — farklı bir cihaz veya tarayıcıda açtığında bahçen sıfırdan başlar.)*
 - 🔗 **Paylaşım** — Bahçe durumunu arkadaşlarınla paylaş: seviye, coin ve streak bilgilerin
+- 🏪 **Mağaza** — Coin biriktirip özel tohum, dekor ve nadir eşyalar satın al
+- 🥕 **Hasat Sistemi** — Domates, çilek ve kabak ek, büyüt, hasat et ve coin kazan
+- 🐾 **Evcil Hayvanlar** — Bahçende dolaşan sevimli kedi ve köpekler edin
 
 ## 🚀 Nasıl Çalıştırılır
 
@@ -44,16 +46,17 @@ Sonrasında `anasayfa.html` dosyasına çift tıklaman yeterli — herhangi bir 
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- HTML
-- CSS
-- JavaScript
-
+- HTML / CSS / JavaScript
+- [Three.js](https://threejs.org/) — 3D bahçe sahnesi ve nesneler
+- [Supabase](https://supabase.com/) — ziyaret istatistikleri
+- Web Audio API — oyun içi ses efektleri
+- Web Notifications API — sulama/hasat hatırlatıcıları
 
 ## 🗺️ Yol Haritası
 
 - [ ] Yeni bitki türleri eklemek
 - [ ] Ses efektleri
-- [ ] Mobil uyumlu tasarım (web)
+- [x] Mobil uyumlu tasarım (web) — çentik güvenlik alanı, esnek panel genişliği, performans modu
 - [ ] Kayıt/skor sistemi
 - [ ] APK'yı Google Play'e taşımak
 
@@ -71,4 +74,4 @@ Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
 ---
 
-Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky)  https://www.linkedin.com/in/batuhanklcky/
+Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky) https://www.linkedin.com/in/batuhanklcky/
