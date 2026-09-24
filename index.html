@@ -14,8 +14,8 @@ body{margin:0;overflow:hidden;background:#010103;touch-action:none}
 #sidebar{position:fixed;top:50%;left:10px;transform:translateY(-50%);z-index:1100;display:flex;flex-direction:column;gap:8px}
 .sbb{background:rgba(6,10,20,.88);border:1px solid rgba(255,255,255,.12);border-radius:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;backdrop-filter:blur(16px);transition:transform .2s,background .2s;-webkit-tap-highlight-color:transparent}
 .sbb:active{transform:scale(.88)}.sbb.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)}
-.spanel{position:fixed;top:50%;left:66px;transform:translateY(-50%) translateX(-8px);z-index:1100;background:rgba(6,10,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;width:236px;backdrop-filter:blur(24px);color:#fff;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-height:80vh;overflow-y:auto}
-.spanel.open{opacity:1;pointer-events:all;transform:translateY(-50%) translateX(0)}
+.spanel{position:fixed;top:50%;left:66px;transform:translateY(-50%) translateX(-8px);z-index:1100;background:rgba(6,10,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;width:min(236px, calc(100vw - 80px));;backdrop-filter:blur(24px);color:#fff;opacity:0;pointer-eves:none;transition:opacity .25s,transform .25s;max-height:80vh;overflow-y:auto}
+.spanel.open{opacity:1;pointer-events:all;transform:translateY(-50%) translateX(0)}nt
 .spanel h3{font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.4);margin:10px 0 7px;text-transform:uppercase}
 .spanel h3:first-child{margin-top:0}
 .dg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
@@ -34,8 +34,8 @@ body{margin:0;overflow:hidden;background:#010103;touch-action:none}
 #pBar{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(6,10,20,.95);border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:10px 20px;color:#fbbf24;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:16px}
 #pBar.show{display:flex}
 #pBar button{background:rgba(255,80,80,.2);border:1px solid rgba(255,80,80,.4);color:#ff6666;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer}
-#wIcon{position:fixed;top:14px;right:14px;z-index:1100;font-size:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
-#lvBadge{position:fixed;top:50px;right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)}
+#wIcon{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:1100;font-size:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+#lvBadge{position:fixed;top:calc(50px + env(safe-area-inset-top,0px));right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)}
 .ui-container{position:fixed;bottom:0;left:0;right:0;padding:0 12px 12px;z-index:1000}
 @supports (padding:env(safe-area-inset-bottom)){.ui-container{padding-bottom:calc(env(safe-area-inset-bottom) + 12px)}}
 .ui-panel{max-width:440px;margin:0 auto;background:rgba(6,10,20,.92);padding:14px;border-radius:24px;color:#fff;text-align:center;border:1px solid rgba(0,180,255,.12);backdrop-filter:blur(24px);box-shadow:0 -4px 40px rgba(0,0,0,.8)}
@@ -111,6 +111,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
   <div class="sbb" id="btnShop" onclick="window.togglePanel('shop')">🏪</div>
   <div class="sbb" id="btnStats" onclick="window.togglePanel('stats')">📊</div>
   <div class="sbb" onclick="window.shareBahce()" title="Paylaş">📤</div>
+  <div class="sbb" id="btnPerf" onclick="window.togglePerf()">⚡</div>
   <div class="sbb" onclick="window.resetCamera()">🏠</div>
 </div>
 <div class="spanel" id="decoPanel">
@@ -201,7 +202,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 </div>
 <div id="wIcon">☀️</div>
 <div id="lvBadge">⭐ Lv.1</div>
-<div id="coinBadge" style="position:fixed;top:86px;right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)">💰 0</div>
+<div id="coinBadge" style="position:fixed;top:calc(86px + env(safe-area-inset-top,0px));right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)">💰 0</div>
 <div id="saveInd">OK</div>
 <div id="toast"></div>
 <div class="ui-container">
@@ -1457,7 +1458,16 @@ var _tc=new THREE.Color(),_cd=new THREE.Color(0x2a1a0a),_cg=new THREE.Color(0x0f
 var _fc=0,_lc='',_eClock=document.getElementById('clock'),_eHp=document.getElementById('hp');
 var growNames=['🌱 Tohum','🌿 Fide','🌸 Filiz','🌺 Tam Çiçek'];
 var growSteps=[.20,.45,.80,1.3];
-var _lastFrame=0, _targetFPS=60, _fpsInterval=1000/_targetFPS;
+var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
+var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
+window.togglePerf = function(){
+  _perfMode = _perfMode==='low' ? 'high' : 'low';
+  localStorage.setItem('gdn_perf', _perfMode);
+  _targetFPS = _perfMode==='low' ? 30 : 60;
+  _fpsInterval = 1000/_targetFPS;
+  document.getElementById('btnPerf').classList.toggle('on', _perfMode==='high');
+  showToast(_perfMode==='low' ? '🔋 Pil Tasarrufu (30fps)' : '⚡ Yüksek Performans (60fps)');
+};
 function animate(){
   requestAnimationFrame(animate);
   // Uygulama arka plandaysa render etme
