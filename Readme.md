@@ -63,6 +63,12 @@ Sonrasında `index.html` dosyasına çift tıklaman yeterli — herhangi bir kur
 
 Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
 
+
+🔒 Gizlilik
+
+Uygulamayı daha iyi hale getirebilmek için ziyaret istatistiklerini (örn. IP adresi, tarayıcı bilgisi) anonim şekilde kaydediyoruz. Bu bilgiler yalnızca kullanım analizi için tutulur, üçüncü kişilerle paylaşılmaz ve kimseyle ticari amaçla kullanılmaz.
+
+
 ---
 
 Geliştiren: [Batuhan Kılıçkaya](https://github.com/BatuhanKlcky) https://www.linkedin.com/in/batuhanklcky/
