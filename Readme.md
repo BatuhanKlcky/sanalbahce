@@ -2,7 +2,19 @@
 
 Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümelerini izle! Tarayıcı üzerinde çalışan, eğlenceli ve rahatlatıcı bir bitki büyütme simülasyonu.
 
-🔗 **Canlı Demo:** [sanalbahce'yi dene](https://batuhanklcky.github.io/sanalbahce/)
+🔗 **Canlı Demo (Web):** [sanalbahce'yi dene](https://batuhanklcky.github.io/sanalbahce/)
+
+📱 **Android APK:** [⬇️ APK'yı indir](../../releases/latest) *(en son sürümü Releases sekmesinden indirebilirsin)*
+
+---
+
+## 🌐 Hangi versiyonu kullanmalıyım?
+
+| | Web (GitHub Pages) | Android (APK) |
+|---|---|---|
+| Kurulum gerekir mi? | Hayır, direkt tarayıcıda açılır | Evet, APK dosyasını indirip kurman gerekir |
+| Güncellik | Her zaman en güncel | Yeni release yayınlandığında güncellenir |
+| Önerilen kullanım | Hızlı deneme, masaüstü | Telefonda kalıcı kullanım |
 
 ---
 
@@ -39,8 +51,9 @@ Sonrasında `index.html` dosyasına çift tıklaman yeterli — herhangi bir kur
 
 - [ ] Yeni bitki türleri eklemek
 - [ ] Ses efektleri
-- [ ] Mobil uyumlu tasarım
+- [ ] Mobil uyumlu tasarım (web)
 - [ ] Kayıt/skor sistemi
+- [ ] APK'yı Google Play'e taşımak
 
 ## 🤝 Katkıda Bulunma
 
