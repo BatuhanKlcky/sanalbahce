@@ -48,11 +48,6 @@ Sonrasında `anasayfa.html` dosyasına çift tıklaman yeterli — herhangi bir 
 - CSS
 - JavaScript
 
-## 📸 Ekran Görüntüsü
-
-<!-- Buraya bir ekran görüntüsü ekle, örnek:
-![Sanal Bahçe Ekran Görüntüsü](screenshot.png)
--->
 
 ## 🗺️ Yol Haritası
 
