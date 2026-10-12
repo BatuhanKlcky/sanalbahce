@@ -11,22 +11,29 @@ window.addEventListener('pagehide',_sl);
 // ── XP / TASKS ───────────────────────────────────────────────────────────────
 var XPL=[0,100,250,450,700,1000,1400,1900,2500,3200,4000];
 var tasks={w:{done:false,n:0,need:5},p:{done:false,n:0,need:3},k:{done:false,n:0,need:1},b:{done:false,n:0,need:2}};
+var _taskLabels={w:'bitki sula',p:'yeni bitki ek',k:'Zararlıları temizle',b:'dost böcek ekle'};
+var _taskFull={w:'5 bitki sula',p:'3 yeni bitki ek',k:'Zararlıları temizle',b:'2 dost böcek ekle'};
 var xp=0,level=1;
-function addXP(a){xp+=a;var mx=XPL[Math.min(level,10)];while(level<10&&xp>=mx){xp-=mx;level++;mx=XPL[Math.min(level,10)];sndLvl();showToast('🎉 Seviye '+level+'!');}updXP();}
+function addXP(a){xp+=a;var mx=XPL[Math.min(level,10)];while(level<10&&xp>=mx){xp-=mx;level++;mx=XPL[Math.min(level,10)];sndLvl();showToast('🎉 Seviye '+level+'!');}updXP();saveProg();}
 function updXP(){var mx=XPL[Math.min(level,10)];document.getElementById('lvN').textContent=level;document.getElementById('xpC').textContent=Math.floor(xp);document.getElementById('xpM').textContent=mx;document.getElementById('xpFill').style.width=Math.min(100,xp/mx*100)+'%';document.getElementById('lvBadge').textContent='⭐ Lv.'+level;}
-function chkTask(k,r){if(tasks[k].done)return;tasks[k].n++;var lb=document.getElementById('lb-'+k);var lbs={w:'bitki sula',p:'yeni bitki ek',k:'Zararlıları temizle',b:'dost böcek ekle'};if(lb&&!tasks[k].done)lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+lbs[k];if(tasks[k].n>=tasks[k].need){tasks[k].done=true;var ck=document.getElementById('ck-'+k);if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb)lb.classList.add('done');sndTask();addXP(r);showToast('✅ Görev! +'+r+' XP');}}
-function rstTasks(){var td=new Date().toDateString();if(localStorage.getItem('gdn_td')!==td){['w','p','k','b'].forEach(function(k){tasks[k].done=false;tasks[k].n=0;});localStorage.setItem('gdn_td',td);updTUI();}}
-function updTUI(){var lbs={w:'5 bitki sula',p:'3 yeni bitki ek',k:'Zararlıları temizle',b:'2 dost böcek ekle'};['w','p','k','b'].forEach(function(k){var ck=document.getElementById('ck-'+k),lb=document.getElementById('lb-'+k);if(tasks[k].done){if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb)lb.classList.add('done');}else{if(ck){ck.classList.remove('done');ck.textContent='';}if(lb){lb.classList.remove('done');lb.textContent=lbs[k];}}});}
+function chkTask(k,r){if(!tasks[k]||tasks[k].done)return;tasks[k].n++;var lb=document.getElementById('lb-'+k);if(lb)lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k];if(tasks[k].n>=tasks[k].need){tasks[k].done=true;var ck=document.getElementById('ck-'+k);if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb)lb.classList.add('done');sndTask();addXP(r);showToast('✅ Görev! +'+r+' XP');}saveTasks();}
+function rstTasks(){var td=new Date().toDateString();if(localStorage.getItem('gdn_td')!==td){['w','p','k','b'].forEach(function(k){tasks[k].done=false;tasks[k].n=0;});localStorage.setItem('gdn_td',td);saveTasks();updTUI();}}
+function updTUI(){['w','p','k','b'].forEach(function(k){var ck=document.getElementById('ck-'+k),lb=document.getElementById('lb-'+k);if(tasks[k].done){if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb){lb.classList.add('done');lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k];}}else{if(ck){ck.classList.remove('done');ck.textContent='';}if(lb){lb.classList.remove('done');lb.textContent=tasks[k].n>0?(tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k]):_taskFull[k];}}});}
 function saveProg(){localStorage.setItem('gdn_xp',JSON.stringify({xp:xp,level:level}));}
+function saveTasks(){var snap={};['w','p','k','b'].forEach(function(k){snap[k]={done:!!tasks[k].done,n:tasks[k].n||0};});localStorage.setItem('gdn_tasks',JSON.stringify({date:new Date().toDateString(),tasks:snap}));}
+function loadTasks(){try{var d=JSON.parse(localStorage.getItem('gdn_tasks')||'null');if(d&&d.date===new Date().toDateString()&&d.tasks){['w','p','k','b'].forEach(function(k){if(!d.tasks[k])return;tasks[k].done=!!d.tasks[k].done;tasks[k].n=d.tasks[k].n||0;});}}catch(e){}updTUI();}
 
 
 // ── İSTATİSTİKLER ─────────────────────────────────────────────────────────
 var stats = {water:0, plant:0, kill:0, bloom:0, time:0, streak:0, lastDay:'',
              tom:0, str:0, cuc:0, coin:0};
 var _sessionStart = Date.now();
+var _timeBase = 0;
+var _progressReady = false;
 
 function loadStats(){
   try{var d=JSON.parse(localStorage.getItem('gdn_stats')||'null');if(d)stats=Object.assign(stats,d);}catch(e){}
+  _timeBase = stats.time||0;
   // Streak hesapla
   var today=new Date().toDateString();
   if(stats.lastDay===''){stats.lastDay=today;stats.streak=1;}
@@ -37,11 +44,13 @@ function loadStats(){
     else if(diff>1){stats.streak=1;stats.lastDay=today;}
   }
   saveStats();updStats();
+  _progressReady = true;
 }
 function saveStats(){
-  stats.time=Math.floor((Date.now()-_sessionStart)/60000)+(stats.time||0);
+  stats.time=_timeBase+Math.floor((Date.now()-_sessionStart)/60000);
   localStorage.setItem('gdn_stats',JSON.stringify(stats));
 }
+function flushProgress(){if(!_progressReady)return;saveStats();saveProg();saveTasks();}
 function updStats(){
   var e=function(id){return document.getElementById(id);};
   if(e('st-water'))e('st-water').textContent=stats.water;
@@ -188,7 +197,7 @@ function loadProg(){
       localStorage.setItem('gdn_xp', localStorage.getItem(k));
     }
   });
-  try{var d=JSON.parse(localStorage.getItem('gdn_xp')||'null');if(d){xp=d.xp||0;level=d.level||1;}}catch(e){}updXP();rstTasks();}
+  try{var d=JSON.parse(localStorage.getItem('gdn_xp')||'null');if(d){xp=d.xp||0;level=d.level||1;}}catch(e){}updXP();rstTasks();loadTasks();}
 // ── GAME CONSTANTS ───────────────────────────────────────────────────────────
 var SAVE_KEY='gdn_save',DRY=.00001389,GROW=.000012,BDRAIN=.00018,SINT=15000;
 var flowers=[],bugs=[],badBugs=[],badM=[],decos=[];
@@ -203,9 +212,9 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
       petCount:pets.map(function(p){return{type:p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
     }));lastSave=now;isDirty=false;showSave();updateWidgetData();}catch(e){}}
-window.addEventListener('pagehide',function(){save(true);},{capture:true});
-window.addEventListener('beforeunload',function(){save(true);});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')save(true);});
+window.addEventListener('pagehide',function(){flushProgress();save(true);},{capture:true});
+window.addEventListener('beforeunload',function(){flushProgress();save(true);});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){flushProgress();save(true);}});
 // ── LOAD ─────────────────────────────────────────────────────────────────────
 function load(){
   // Eski versiyonlardan migration - hiçbir şey kaybolmasın
