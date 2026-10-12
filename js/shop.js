@@ -207,26 +207,57 @@ function renderShop() {
     var owned = item.type!=='flower' && !!purchasedItems[item.id];
     var canAfford = stats.coin >= item.price;
     var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
-    var badge = count ? '<div class="shop-owned-badge">x'+count+'</div>' : (owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : '');
+    var badge = count ? '<div class="shop-owned-badge">x'+count+'</div>' : (owned ? '<div class="shop-owned-badge">Koy</div>' : '');
     return `<div class="${cls}" onclick="window.buyItem('${item.id}')">
         ${badge}
         <div class="shop-emoji">${item.emoji}</div>
         <div class="shop-name">${item.name}</div>
         <div class="shop-desc">${item.desc}</div>
-        ${owned ? '<div class="shop-price">✓ Sahipsin</div>' : '<div class="shop-price">💰 ' + item.price + '</div>'}
+        ${owned ? '<div class="shop-price">Koy</div>' : '<div class="shop-price">💰 ' + item.price + '</div>'}
       </div>`;
   }).join('');
 }
+
+window.beginShopPlace = function(item){
+  if(typeof flowerPlaceMode !== 'undefined') flowerPlaceMode = false;
+  placementType = item.deco || item.id;
+  placementMode = true;
+  controls.enabled = false;
+  var bar = document.getElementById('pBar');
+  bar.classList.add('show');
+  bar.querySelector('span').textContent = item.emoji+' nereye koyalım?';
+  bar.querySelector('button').setAttribute('onclick', 'window.cancelPlace()');
+  openP = null;
+  document.getElementById('shopPanel').classList.remove('open');
+  document.getElementById('btnShop').classList.remove('on');
+  showToast(item.emoji+' yere dokun');
+};
+
+window.placeShopDeco = function(tp, x, z, ang){
+  if(tp==='golden_pot') mkGoldenPot(x,z);
+  else if(tp==='crystal_pond') mkCrystalPond(x,z);
+  else if(tp==='magic_lamp') mkMagicLamp(x,z);
+  else if(tp==='rainbow_arch') mkRainbowArch(x,z,ang);
+  else if(tp==='fountain') mkFountain(x,z);
+  else if(tp==='treehouse') mkTreehouse(x,z);
+  else if(tp==='angel_wing') mkAngelWing(x,z);
+  else if(tp==='dragon_egg'||tp==='moonflower'||tp==='golden_tree'||tp==='firefly_jar'){
+    var item = null;
+    SHOP_ITEMS.special.forEach(function(s){ if(s.id===tp) item=s; });
+    if(!item) return false;
+    placeSpecial(item, x, z);
+  } else return false;
+  return true;
+};
 
 window.buyItem = function(id) {
   var item = null;
   Object.values(SHOP_ITEMS).forEach(function(arr){ arr.forEach(function(i){ if(i.id===id) item=i; }); });
   if(!item) return;
   var seed = item.type==='flower';
-  if(!seed && purchasedItems[id]) { showToast('Zaten sahipsin! ✓'); return; }
-  if(stats.coin < item.price) { showToast('Yeterli coin yok! 💰'); return; }
-  stats.coin -= item.price;
+  if(stats.coin < item.price && (seed || !purchasedItems[id])) { showToast('Yeterli coin yok! 💰'); return; }
   if(seed){
+    stats.coin -= item.price;
     purchasedItems[id] = seedCount(id) + 1;
     selectedSeed = id;
     purchasedItems.sel = id;
@@ -235,26 +266,13 @@ window.buyItem = function(id) {
     tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
     return;
   }
-  purchasedItems[id] = true;
-  saveShop(); saveStats(); updStats(); renderShop();
-  if(item.deco) {
-    var a2=Math.random()*Math.PI*2, r2=3+Math.random()*8;
-    var x=Math.cos(a2)*r2, z=Math.sin(a2)*r2, ang=Math.random()*Math.PI*2;
-    if(item.deco==='golden_pot')       mkGoldenPot(x,z);
-    else if(item.deco==='crystal_pond') mkCrystalPond(x,z);
-    else if(item.deco==='magic_lamp')   mkMagicLamp(x,z);
-    else if(item.deco==='rainbow_arch') mkRainbowArch(x,z,ang);
-    else if(item.deco==='fountain')     mkFountain(x,z);
-    else if(item.deco==='treehouse')    mkTreehouse(x,z);
-    showToast(item.emoji+' '+item.name+' yerleştirildi!');
-  } else if(item.special) {
-    var sx=Math.random()*10-5, sz=Math.random()*10-5;
-    if(item.id==='angel_wing') mkAngelWing(sx, sz);
-    else placeSpecial(item, sx, sz);
-    showToast('✨ '+item.name+' bahçene eklendi!');
+  if(!purchasedItems[id]){
+    stats.coin -= item.price;
+    purchasedItems[id] = true;
+    saveShop(); saveStats(); updStats(); renderShop();
+    tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
   }
-  tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
-  markDirty(); save(true);
+  window.beginShopPlace(item);
 };
 
 // ── ÖZEL MAĞAZA OBJELERİ ───────────────────────────────────────────────────

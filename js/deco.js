@@ -141,7 +141,7 @@ planeR.rotation.x=-Math.PI/2;scene.add(planeR);
 var plRay=new THREE.Raycaster(),plM=new THREE.Vector2();
 var prevGhost=null,ghostMat=new THREE.MeshBasicMaterial({color:0x00ff88,wireframe:true,transparent:true,opacity:.5});
 window.startPlace=function(tp){placementType=tp;placementMode=true;controls.enabled=false;document.getElementById('pBar').classList.add('show');openP=null;document.getElementById('decoPanel').classList.remove('open');document.getElementById('btnDeco').classList.remove('on');showToast('Nereye koymak istiyorsun? 👆');};
-window.cancelPlace=function(){placementMode=false;placementType=null;controls.enabled=true;document.getElementById('pBar').classList.remove('show');if(prevGhost){scene.remove(prevGhost);prevGhost=null;}};
+window.cancelPlace=function(){placementMode=false;placementType=null;controls.enabled=true;var bar=document.getElementById('pBar');bar.classList.remove('show');var sp=bar.querySelector('span');if(sp)sp.textContent='👆 Sahneye dokun';if(prevGhost){scene.remove(prevGhost);prevGhost=null;}};
 window.cancelFlowerPlace=window.cancelFlowerPlace||function(){flowerPlaceMode=false;controls.enabled=true;document.getElementById('pBar').classList.remove('show');};
 window.addEventListener('pointermove',function(e){if(!placementMode)return;plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;plRay.setFromCamera(plM,camera);var hits=plRay.intersectObject(planeR);if(!hits.length)return;var pt=hits[0].point;if(!prevGhost){prevGhost=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.05,16),ghostMat.clone());scene.add(prevGhost);}prevGhost.position.set(pt.x,.03,pt.z);});
 window.addEventListener('pointerup',function(e){
@@ -192,6 +192,7 @@ window.addEventListener('pointerup',function(e){
   else if(tp==='tomato')mkHarvestPlant(pt.x,pt.z,'tomato');
   else if(tp==='strawberry')mkHarvestPlant(pt.x,pt.z,'strawberry');
   else if(tp==='cucumber')mkHarvestPlant(pt.x,pt.z,'cucumber');
+  else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
   sndPlant();showToast('✅ Yerleştirildi!');save(true);
 });
 window.addEventListener('keydown',function(e){if(e.key==='Escape')window.cancelPlace();});
