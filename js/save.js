@@ -271,10 +271,10 @@ function load(){
     // Restore harvest plants
     var sH=data.harvest||[];
     sH.forEach(function(h){
-      mkHarvestPlant(h.x,h.z,h.type,h.stage);
-      // growTimer geri yükle
+      mkHarvestPlant(h.x,h.z,h.type,h.stage||0);
       if(harvestItems.length>0) harvestItems[harvestItems.length-1].growTimer=h.growTimer||0;
     });
+    if(elapsed>0) advanceHarvest(elapsed);
     // Restore pets
     var sP=data.petCount||[];
     sP.forEach(function(p){if(p.type==='cat')mkCat(p.x,p.z);else mkDog(p.x,p.z);});

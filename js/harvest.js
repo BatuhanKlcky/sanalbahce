@@ -72,6 +72,47 @@ function harvestPlant(idx) {
   markDirty();
 }
 
+// growTime saniye cinsinden. Kare hızından bağımsız; sekme kapalıyken biriken süre de uygulanır.
+function advanceHarvest(seconds){
+  seconds=Number(seconds)||0;
+  if(seconds<=0) return 0;
+  var live=seconds<5;
+  var ripened=0, rebuilt=false;
+  var pending=harvestItems.slice();
+  pending.forEach(function(h){
+    if(!h||h.stage>=2||!h.cfg||!(h.cfg.growTime>0)) return;
+    var idx=harvestItems.indexOf(h);
+    if(idx<0) return;
+    var left=seconds, stage=h.stage, timer=h.growTimer||0, grow=h.cfg.growTime;
+    while(stage<2&&left>0){
+      if(timer>=grow){timer=0;stage++;continue;}
+      var need=grow-timer;
+      if(left<need){timer+=left;left=0;}
+      else{left-=need;timer=0;stage++;}
+    }
+    if(stage===h.stage){h.growTimer=timer;return;}
+    var hx=h.x,hz=h.z,htp=h.type;
+    h.group.traverse(function(ch){if(ch.geometry)ch.geometry.dispose();if(ch.material)ch.material.dispose();});
+    scene.remove(h.group);
+    harvestItems.splice(idx,1);
+    mkHarvestPlant(hx,hz,htp,stage);
+    var created=harvestItems[harvestItems.length-1];
+    if(created) created.growTimer=timer;
+    rebuilt=true;
+    if(stage===2){
+      ripened++;
+      if(live) showToast(HARVEST_TYPES[htp].emoji+' Hasat zamanı! Dokun! 🎉');
+    }
+  });
+  if(rebuilt){
+    harvestItems.forEach(function(it,i){
+      it.group.children.forEach(function(ch){if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i;});
+    });
+  }
+  if(!live&&ripened) showToast(ripened+' ürün hasat için hazır! 🎉');
+  return ripened;
+}
+
 // Hasat tıklama
 window.addEventListener('pointerdown', function(e){
   if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar'))return;
