@@ -125,4 +125,4 @@ function animate(){
   renderer.render(scene,camera);
 }
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
-loadProg();loadStats();loadShop();load();animate();
+loadProg();loadStats();loadShop();load();placeOwnedWing();animate();

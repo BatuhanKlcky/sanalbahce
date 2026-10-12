@@ -103,7 +103,7 @@ var SHOP_ITEMS = {
     {id:'treehouse',    emoji:'🏚️', name:'Ağaç Evi',     desc:'Mini ağaç üstü ev',           price:250, deco:'treehouse'},
   ],
   special: [
-    {id:'anwwqgel_wing', emoji:'❓', name:'???',    desc:'???',  price:3500, special:true, fn:'angesl_wingg'},
+    {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı', desc:'Beyaz altın kanat ve hale', price:3500, special:true},
     {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:1000, special:true},
     {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:700, special:true},
     {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:550, special:true},
@@ -113,9 +113,68 @@ var SHOP_ITEMS = {
 
 var purchasedItems = {};
 var currentShopTab = 'seeds';
+var selectedSeed = null;
+
+function seedCount(id){
+  var v = purchasedItems[id];
+  return typeof v === 'number' && v > 0 ? v : 0;
+}
+function seedItem(id){
+  var item = null;
+  SHOP_ITEMS.seeds.forEach(function(s){ if(s.id===id) item=s; });
+  return item;
+}
+function readySeedId(){
+  if(selectedSeed && seedCount(selectedSeed)>0) return selectedSeed;
+  var id = null;
+  SHOP_ITEMS.seeds.forEach(function(s){ if(!id && seedCount(s.id)>0) id=s.id; });
+  return id;
+}
+window.hasSeed = function(){ return !!readySeedId(); };
+window.takeSeed = function(){
+  var id = readySeedId();
+  if(!id) return null;
+  var left = seedCount(id) - 1;
+  if(left > 0) purchasedItems[id] = left;
+  else delete purchasedItems[id];
+  selectedSeed = readySeedId();
+  if(selectedSeed) purchasedItems.sel = selectedSeed;
+  else delete purchasedItems.sel;
+  saveShop();
+  renderShop();
+  return seedItem(id);
+};
+window.plantSeedAt = function(x, z){
+  var seed = window.takeSeed();
+  if(!seed){ showToast('Çantada tohum yok 🌱'); return false; }
+  mkFlower(x, z, {c:seed.color, t:Math.floor(Math.random()*4), h:.15, b:0, w:1, isStunted:false});
+  sndPlant(); chkTask('p', 20); stats.plant++; saveStats(); updStats(); save(true);
+  showToast(seed.emoji+' ekildi');
+  return true;
+};
+window.placeOwnedWing = function(){
+  if(!purchasedItems._placeWing) return;
+  delete purchasedItems._placeWing;
+  saveShop();
+  var has = false;
+  decos.forEach(function(d){ if(d.type==='angel_wing') has=true; });
+  if(!has) mkAngelWing(0, -4);
+};
 
 function loadShop(){
-  try{ purchasedItems=JSON.parse(localStorage.getItem('gdn_shop')||'{}'); }catch(e){}
+  try{ purchasedItems=JSON.parse(localStorage.getItem('gdn_shop')||'{}'); }catch(e){ purchasedItems={}; }
+  if(!purchasedItems || typeof purchasedItems!=='object') purchasedItems={};
+  SHOP_ITEMS.seeds.forEach(function(s){ if(purchasedItems[s.id]===true) delete purchasedItems[s.id]; });
+  if(purchasedItems.anwwqgel_wing || purchasedItems.angel_wingwg || purchasedItems.angel_winggg){
+    purchasedItems.angel_wing = true;
+    purchasedItems._placeWing = true;
+    delete purchasedItems.anwwqgel_wing;
+    delete purchasedItems.angel_wingwg;
+    delete purchasedItems.angel_winggg;
+    saveShop();
+  }
+  selectedSeed = typeof purchasedItems.sel==='string' ? purchasedItems.sel : null;
+  renderShop();
 }
 function saveShop(){
   localStorage.setItem('gdn_shop', JSON.stringify(purchasedItems));
@@ -135,16 +194,22 @@ function renderShop() {
   if(coinBar) coinBar.textContent = stats.coin;
   if(!grid) return;
   
+  var bag = document.getElementById('seedBagLine');
+  if(bag){
+    var parts = [];
+    SHOP_ITEMS.seeds.forEach(function(s){ var n=seedCount(s.id); if(n>0) parts.push(s.emoji+' '+n); });
+    bag.textContent = parts.length ? ('Çanta: '+parts.join(' · ')) : '';
+  }
   var items = SHOP_ITEMS[currentShopTab] || [];
   
   grid.innerHTML = items.map(function(item) {
-    var owned = purchasedItems[item.id];
+    var count = item.type==='flower' ? seedCount(item.id) : 0;
+    var owned = item.type!=='flower' && !!purchasedItems[item.id];
     var canAfford = stats.coin >= item.price;
     var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
-    
-    // ÇÖZÜM: "return" ve "`" (backtick) aynı satırda olmalı!
+    var badge = count ? '<div class="shop-owned-badge">x'+count+'</div>' : (owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : '');
     return `<div class="${cls}" onclick="window.buyItem('${item.id}')">
-        ${owned ? '<div class="shop-owned-badge">✓ Alındı</div>' : ''}
+        ${badge}
         <div class="shop-emoji">${item.emoji}</div>
         <div class="shop-name">${item.name}</div>
         <div class="shop-desc">${item.desc}</div>
@@ -154,22 +219,25 @@ function renderShop() {
 }
 
 window.buyItem = function(id) {
-  if(purchasedItems[id]) { showToast('Zaten sahipsin! ✓'); return; }
   var item = null;
   Object.values(SHOP_ITEMS).forEach(function(arr){ arr.forEach(function(i){ if(i.id===id) item=i; }); });
   if(!item) return;
+  var seed = item.type==='flower';
+  if(!seed && purchasedItems[id]) { showToast('Zaten sahipsin! ✓'); return; }
   if(stats.coin < item.price) { showToast('Yeterli coin yok! 💰'); return; }
   stats.coin -= item.price;
+  if(seed){
+    purchasedItems[id] = seedCount(id) + 1;
+    selectedSeed = id;
+    purchasedItems.sel = id;
+    saveShop(); saveStats(); updStats(); renderShop();
+    showToast(item.emoji+' çantada: '+purchasedItems[id]);
+    tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
+    return;
+  }
   purchasedItems[id] = true;
   saveShop(); saveStats(); updStats(); renderShop();
-  // Uygula
-  if(item.type==='flower') {
-    // Özel renkte çiçek ek
-    var a=Math.random()*Math.PI*2, r=2+Math.random()*10;
-    mkFlower(Math.cos(a)*r, Math.sin(a)*r, {c:item.color, t:Math.floor(Math.random()*4), h:.15, b:0, w:1.0, isStunted:false});
-    sndPlant();
-    showToast(item.emoji+' '+item.name+' ekildi! 🌱');
-  } else if(item.deco) {
+  if(item.deco) {
     var a2=Math.random()*Math.PI*2, r2=3+Math.random()*8;
     var x=Math.cos(a2)*r2, z=Math.sin(a2)*r2, ang=Math.random()*Math.PI*2;
     if(item.deco==='golden_pot')       mkGoldenPot(x,z);
@@ -181,7 +249,7 @@ window.buyItem = function(id) {
     showToast(item.emoji+' '+item.name+' yerleştirildi!');
   } else if(item.special) {
     var sx=Math.random()*10-5, sz=Math.random()*10-5;
-    if(item.id==='angel_wingwg') mkAngelWing(sx, sz);
+    if(item.id==='angel_wing') mkAngelWing(sx, sz);
     else placeSpecial(item, sx, sz);
     showToast('✨ '+item.name+' bahçene eklendi!');
   }
@@ -445,7 +513,7 @@ function mkAngelWing(x, z) {
 
   g.position.set(x, 0, z);
   scene.add(g);
-  decos.push({group: g, type: 'angel_winggg', light: lt, light2: lt2, halo: halo});
+  decos.push({group: g, type: 'angel_wing', light: lt, light2: lt2, halo: halo});
   markDirty();
 }
 

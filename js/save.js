@@ -255,7 +255,7 @@ function load(){
       else if(d.type==='rainbow_arch')mkRainbowArch(x,z,a);
       else if(d.type==='fountain')mkFountain(x,z);
       else if(d.type==='treehouse')mkTreehouse(x,z);
-      else if(d.type==='angel_wing')mkAngelWing(x,z);
+      else if(d.type==='angel_wing'||d.type==='angel_winggg')mkAngelWing(x,z);
       else if(d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar'){
         // Special items - find original item and re-place
         var sItem=null;

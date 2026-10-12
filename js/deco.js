@@ -173,9 +173,7 @@ window.addEventListener('pointerup',function(e){
     var hits=plRay.intersectObject(planeR);
     if(!hits.length)return;
     var pt=hits[0].point;
-    mkFlower(pt.x,pt.z);
-    sndPlant();chkTask('p',20);save(true);
-    showToast('🌱 Ekildi!');
+    if(!window.plantSeedAt(pt.x,pt.z)) window.cancelFlowerPlace();
     return;
   }
 

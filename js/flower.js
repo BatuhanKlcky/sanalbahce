@@ -39,6 +39,7 @@ var flowerPlaceMode = false;
 window.startFlowerPlace = function() {
     if (deleteMode) { window.toggleDeleteMode(); return; }
     if (placementMode) { window.cancelPlace(); return; }
+    if (!window.hasSeed()) { showToast('Çantada tohum yok 🌱'); return; }
     flowerPlaceMode = true;
     controls.enabled = false;
     document.getElementById('pBar').classList.add('show');
@@ -58,6 +59,5 @@ window.cancelFlowerPlace = function() {
 
 window.plant = function() {
     var a = Math.random() * Math.PI * 2, r = Math.random() * 13;
-    mkFlower(Math.cos(a) * r, Math.sin(a) * r);
-    sndPlant(); chkTask('p', 20); save(true); showToast('🌱 Yeni bitki ekildi!');
+    window.plantSeedAt(Math.cos(a) * r, Math.sin(a) * r);
 };
