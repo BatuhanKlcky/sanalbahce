@@ -51,20 +51,19 @@ function animate(){
     if(_rainAcc>=RAIN_EVERY){
       _rainAcc-=RAIN_EVERY;
       if(_rainAcc>RAIN_EVERY) _rainAcc=RAIN_EVERY;
-      if((dayPhase<.229||dayPhase>=.896)&&!isRaining&&Math.random()<.2){isRaining=true;initRain();rCvs.style.opacity='1';showToast('🌧️ Yağmur yağıyor!');flowers.forEach(function(f){f.w=Math.min(1.5,f.w+.3);});setTimeout(function(){isRaining=false;rCvs.style.opacity='0';},30000);}
+      if((dayPhase<.229||dayPhase>=.896)&&!isRaining&&Math.random()<.2){isRaining=true;initRain();rCvs.style.opacity='1';showToast('🌧️ Yağmur yağıyor!');flowers.forEach(function(f){soak(f,.3);});setTimeout(function(){isRaining=false;rCvs.style.opacity='0';},30000);}
     }
   }
   if(isRaining)drawRain();
   if(curWeather!=='clear')drawWx();
   // Bad bugs move
-  for(var bi=0;bi<badBugs.length;bi++){var bg=badBugs[bi],pl=flowers[bg.ti];if(pl){_tv.set(pl.mesh.position.x,pl.h*.7+.15,pl.mesh.position.z);bg.group.position.lerp(_tv,.025);pl.w=Math.max(0,pl.w-BDRAIN/60);if(_fc%2===0){bg.lp+=.36;var ch=bg.group.children;for(var li=1;li<=6&&li<ch.length;li++)ch[li].rotation.x=.3+Math.sin(bg.lp+li)*.15;}}}
+  for(var bi=0;bi<badBugs.length;bi++){var bg=badBugs[bi],pl=flowers[bg.ti];if(pl){_tv.set(pl.mesh.position.x,pl.h*.7+.15,pl.mesh.position.z);bg.group.position.lerp(_tv,.025);if(_fc%2===0){bg.lp+=.36;var ch=bg.group.children;for(var li=1;li<=6&&li<ch.length;li++)ch[li].rotation.x=.3+Math.sin(bg.lp+li)*.15;}}}
+  if(dt>0) advancePlants(dt);
   // Flowers
-  for(var fi=0;fi<flowers.length;fi++){var f=flowers[fi];f.w=Math.max(0,f.w-DRY/60);
-    if(f.w<.25){f.isStunted=true;if(_fc%3===0){var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){if(ch2[ci].material&&ch2[ci].material.color)ch2[ci].material.color.lerp(_cd,.015);}f.grass.material.color.lerp(_cd2,.015);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,.65,.025);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,.25,.025);}
-    else{if(_fc%3===0){_tc.set(f.c);var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){var mat=ch2[ci].material;if(mat&&mat.color&&mat.emissiveIntensity===undefined)mat.color.lerp(_tc,.04);}f.grass.material.color.lerp(_cg,.04);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,0,.04);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,0,.04);
-      var ph=f.h;if(!f.isStunted&&f.w>.35&&f.h<1.3){f.h+=GROW/60;for(var si=0;si<growSteps.length;si++){if(ph<growSteps[si]&&f.h>=growSteps[si]){if(si===3){stats.bloom++;saveStats();updStats();}showToast(growNames[si]+' oldu!');break;}}}
-    }
-    if(f.h>.5)f.b=Math.min(1,f.b+.012);f.head.scale.setScalar(f.b);
+  for(var fi=0;fi<flowers.length;fi++){var f=flowers[fi];
+    if(f.w<.25){if(_fc%3===0){var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){if(ch2[ci].material&&ch2[ci].material.color)ch2[ci].material.color.lerp(_cd,.015);}f.grass.material.color.lerp(_cd2,.015);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,.65,.025);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,.25,.025);}
+    else{if(_fc%3===0){_tc.set(f.c);var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){var mat=ch2[ci].material;if(mat&&mat.color&&mat.emissiveIntensity===undefined)mat.color.lerp(_tc,.04);}f.grass.material.color.lerp(_cg,.04);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,0,.04);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,0,.04);}
+    if(f.h>.5)f.b=Math.min(1,f.b+.72*dt);f.head.scale.setScalar(f.b);
     var sw=Math.sin(now*.8+f.mesh.position.x)*.018,fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);f.mesh.rotation.z+=(sw-f.mesh.rotation.z)*.05;
   }
   // Butterflies

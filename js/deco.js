@@ -173,7 +173,7 @@ window.addEventListener('pointerup',function(e){
     var hits=plRay.intersectObject(planeR);
     if(!hits.length)return;
     var pt=hits[0].point;
-    if(!window.plantSeedAt(pt.x,pt.z)) window.cancelFlowerPlace();
+    if(!window.plantSeedAt(pt.x,pt.z) && !window.hasSeed()) window.cancelFlowerPlace();
     return;
   }
 
@@ -187,6 +187,10 @@ window.addEventListener('pointerup',function(e){
   var pt=hits[0].point;
   if(Math.sqrt(pt.x*pt.x+pt.z*pt.z)>28){showToast('Çok uzak! 🚫');return;}
   var tp=placementType,ang=Math.random()*Math.PI*2;
+  if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='flower_wild') && window.gardenBlocked){
+    var blocked=window.gardenBlocked(pt.x,pt.z);
+    if(blocked){ showToast(blocked); return; }
+  }
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
   else if(tp==='house')mkHouse(pt.x,pt.z,ang);
   else if(tp==='tomato')mkHarvestPlant(pt.x,pt.z,'tomato');

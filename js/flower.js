@@ -30,7 +30,46 @@ function mkFlower(x,z,st){var group=new THREE.Group();var cols=[0xff3366,0x1a8cf
 window.addBug=function(){var bg=new THREE.Group(),bM=new THREE.MeshStandardMaterial({color:0x222222,roughness:.6});var body=new THREE.Mesh(new THREE.CylinderGeometry(.025,.04,.18,8),bM);body.rotation.x=Math.PI/2;bg.add(body);[-.03,.03].forEach(function(ox){var a=new THREE.Mesh(new THREE.CylinderGeometry(.005,.003,.12,4),bM);a.position.set(ox,.06,.09);a.rotation.x=-.3;bg.add(a);});var wc=[0x00ffcc,0xff66aa,0xffaa00,0x88aaff][Math.floor(Math.random()*4)];var wM=new THREE.MeshStandardMaterial({color:wc,transparent:true,opacity:.72,side:THREE.DoubleSide,roughness:.3,metalness:.2,emissive:new THREE.Color(wc),emissiveIntensity:.25});var uS=new THREE.Shape();uS.moveTo(0,0);uS.bezierCurveTo(.02,.12,.18,.18,.22,.10);uS.bezierCurveTo(.28,0,.20,-.12,.05,-.10);uS.bezierCurveTo(.02,-.08,0,-.04,0,0);var uG=new THREE.ShapeGeometry(uS,12);var lS=new THREE.Shape();lS.moveTo(0,0);lS.bezierCurveTo(.02,-.04,.16,-.14,.18,-.08);lS.bezierCurveTo(.20,-.02,.14,.04,.04,.02);lS.lineTo(0,0);var lG=new THREE.ShapeGeometry(lS,8);var wR1=new THREE.Mesh(uG,wM),wL1=new THREE.Mesh(uG,wM.clone()),wR2=new THREE.Mesh(lG,wM.clone()),wL2=new THREE.Mesh(lG,wM.clone());wR1.position.set(.02,0,0);wL1.position.set(-.02,0,0);wL1.rotation.y=Math.PI;wR2.position.set(.02,0,-.04);wR2.rotation.z=.1;wL2.position.set(-.02,0,-.04);wL2.rotation.y=Math.PI;wL2.rotation.z=-.1;bg.add(wR1,wL1,wR2,wL2);bg.position.set((Math.random()-.5)*20,2+Math.random()*2,(Math.random()-.5)*20);scene.add(bg);bugs.push({mesh:bg,wR1:wR1,wL1:wL1,wR2:wR2,wL2:wL2,target:null,time:Math.random()*100,speed:.008+Math.random()*.015});document.getElementById('bC').innerText=bugs.length;sndBug();chkTask('b',15);if(!isLoading){markDirty();save(true);}};
 
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
-window.waterAll=function(){flowers.forEach(function(f){f.w=Math.min(1.5,f.w+.8);f.isStunted=false;});sndWater();chkTask('w',30);stats.water++;saveStats();updStats();markDirty();save(true);showToast('💧 Tüm bitkiler sulandı!');};
+function soak(f,add){f.w=Math.min(1.5,f.w+(add||0));if(f.w>=.25)f.isStunted=false;}
+window.waterAll=function(){flowers.forEach(function(f){soak(f,.8);});sndWater();chkTask('w',30);stats.water++;saveStats();updStats();markDirty();save(true);showToast('💧 Tüm bitkiler sulandı!');};
+window.soakPlant=soak;
+// Su .35 üstündeyken büyür, .25 altına inince solar. Hız saniye cinsinden (60 karelik eski dilim değil).
+window.advancePlants=function(seconds){
+  seconds=Number(seconds)||0;
+  if(seconds<=0||!flowers.length) return 0;
+  if(seconds>86400) seconds=86400;
+  var live=seconds<5, crossed=0;
+  for(var fi=0;fi<flowers.length;fi++){
+    var f=flowers[fi], bugs=0, bi;
+    for(bi=0;bi<badBugs.length;bi++) if(badBugs[bi].ti===fi) bugs++;
+    var rate=DRY+bugs*BDRAIN, growFor=0, ph=f.h;
+    if(!f.isStunted&&f.w>.35&&f.h<1.3){
+      growFor=rate>0?Math.min(seconds,Math.max(0,(f.w-.35)/rate)):seconds;
+      if(growFor>0) f.h=Math.min(1.3,f.h+GROW*growFor);
+    }
+    f.w=Math.max(0,f.w-rate*seconds);
+    if(f.w<.25) f.isStunted=true;
+    if(typeof growSteps==='undefined') continue;
+    for(var si=0;si<growSteps.length;si++){
+      if(ph<growSteps[si]&&f.h>=growSteps[si]){
+        crossed++;
+        if(si===3){stats.bloom++;saveStats();updStats();}
+        if(live&&!isLoading) showToast(growNames[si]+' oldu!');
+      }
+    }
+  }
+  if(!live&&!isLoading&&crossed) showToast(crossed+' bitki büyüdü');
+  return crossed;
+};
+var GARDEN_R=28, PLANT_GAP=1.5;
+window.gardenBlocked=function(x,z){
+  if(Math.sqrt(x*x+z*z)>GARDEN_R) return 'Çok uzak! 🚫';
+  var i,p;
+  for(i=0;i<flowers.length;i++){p=flowers[i].mesh.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
+  for(i=0;i<harvestItems.length;i++){p=harvestItems[i];if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
+  for(i=0;i<decos.length;i++){if(decos[i].type!=='flower_wild')continue;p=decos[i].group.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
+  return '';
+};
 window.plant=function(){var a=Math.random()*Math.PI*2,r=Math.random()*13;mkFlower(Math.cos(a)*r,Math.sin(a)*r);sndPlant();chkTask('p',20);stats.plant++;saveStats();updStats();save(true);showToast('🌱 Yeni bitki ekildi!');};
 window.killAllBadBugs=function(){var cnt=badBugs.length;if(cnt===0){showToast('🌿 Bahçe temiz!');return;}for(var i=0;i<badBugs.length;i++){var bg=badBugs[i];bg.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});scene.remove(bg.group);}badBugs.length=0;badM.length=0;document.getElementById('bdC').innerText=0;sndKill();chkTask('k',25);stats.kill+=cnt;saveStats();updStats();showToast(cnt+' zararlı temizlendi! 🧹');markDirty();save(true);};
 // ── ÇİÇEK YERLEŞTİRME MODU ───────────────────────────────────────────────────
@@ -58,6 +97,10 @@ window.cancelFlowerPlace = function() {
 };
 
 window.plant = function() {
+  for(var i=0;i<8;i++){
     var a = Math.random() * Math.PI * 2, r = Math.random() * 13;
-    window.plantSeedAt(Math.cos(a) * r, Math.sin(a) * r);
+    var x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!window.gardenBlocked || !window.gardenBlocked(x,z)) { window.plantSeedAt(x, z); return; }
+  }
+  showToast('Boş yer yok 🌱');
 };

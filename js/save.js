@@ -226,7 +226,7 @@ function load(){
       console.log('Migrated from', k);
     }
   });
-  var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var data;try{data=JSON.parse(raw);}catch(e){localStorage.removeItem(SAVE_KEY);return;}isLoading=true;var elapsed=Math.max(0,(Date.now()-data.lastUpdate)/1000);var sB=data.badBugs||[];var offSp=Math.floor(elapsed*.000001);for(var i=0;i<offSp;i++){if(data.plants.length>0)sB.push({ti:Math.floor(Math.random()*data.plants.length)});}data.plants.forEach(function(p,idx){var bH=sB.filter(function(b){return b.ti===idx;});var drain=bH.length*elapsed*BDRAIN;var nW=Math.max(0,p.w-elapsed*DRY-drain);var nH=p.h;var stunted=p.isStunted||nW<.25;if(!stunted&&p.w>.35)nH=Math.min(1.3,p.h+elapsed*GROW);mkFlower(p.x,p.z,Object.assign({},p,{w:nW,h:nH,isStunted:stunted}));});sB.forEach(function(b){if(b.ti<flowers.length)mkBadBug(b.ti);});var bc=data.bugCount||0;for(var i=0;i<bc;i++)window.addBug();// Restore decos
+  var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var data;try{data=JSON.parse(raw);}catch(e){localStorage.removeItem(SAVE_KEY);return;}isLoading=true;var elapsed=Math.max(0,(Date.now()-data.lastUpdate)/1000);var sB=data.badBugs||[];(data.plants||[]).forEach(function(p){mkFlower(p.x,p.z,p);});sB.forEach(function(b){if(b.ti<flowers.length)mkBadBug(b.ti);});if(elapsed>0)advancePlants(elapsed);if(typeof BUG_EVERY!=='undefined'&&elapsed>=BUG_EVERY&&flowers.length)mkBadBug(Math.floor(Math.random()*flowers.length));var bc=data.bugCount||0;for(var i=0;i<bc;i++)window.addBug();// Restore decos
     var savedDecos=data.decos||[];
     savedDecos.forEach(function(d){
       var x=d.x,z=d.z,a=d.ry||0;
@@ -278,4 +278,4 @@ function load(){
     // Restore pets
     var sP=data.petCount||[];
     sP.forEach(function(p){if(p.type==='cat')mkCat(p.x,p.z);else mkDog(p.x,p.z);});
-    isLoading=false;lastSave=Date.now();}
+    isLoading=false;save(true);}

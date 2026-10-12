@@ -145,6 +145,8 @@ window.takeSeed = function(){
   return seedItem(id);
 };
 window.plantSeedAt = function(x, z){
+  var why = window.gardenBlocked ? window.gardenBlocked(x, z) : '';
+  if(why){ showToast(why); return false; }
   var seed = window.takeSeed();
   if(!seed){ showToast('Çantada tohum yok 🌱'); return false; }
   mkFlower(x, z, {c:seed.color, t:Math.floor(Math.random()*4), h:.15, b:0, w:1, isStunted:false});
