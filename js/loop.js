@@ -6,6 +6,8 @@ var growNames=['🌱 Tohum','🌿 Fide','🌸 Filiz','🌺 Tam Çiçek'];
 var growSteps=[.20,.45,.80,1.3];
 var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
 var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
+var _lastSim=0, _bugAcc=0, _rainAcc=0;
+var BUG_EVERY=5184/60, RAIN_EVERY=1800/60;
 window.togglePerf = function(){
   _perfMode = _perfMode==='low' ? 'high' : 'low';
   localStorage.setItem('gdn_perf', _perfMode);
@@ -22,8 +24,13 @@ function animate(){
   var _now=performance.now();
   if(_now-_lastFrame < _fpsInterval) return;
   _lastFrame=_now - ((_now-_lastFrame) % _fpsInterval);
+  if(!_lastSim) _lastSim=_now;
+  var dt=(_now-_lastSim)/1000;
+  _lastSim=_now;
+  if(!(dt>0)) dt=0;
+  if(dt>86400) dt=86400;
   _fc++;
-  var now=performance.now()*.001;
+  var now=_now*.001;
   // Clock
   if(_fc%60===0){var t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});if(t!==_lc){_eClock.innerText=t;_lc=t;}}
   // Day/night - sadece dakikada bir güncelle
@@ -32,10 +39,21 @@ function animate(){
     updDN(dayPhase);
   }
   if(skyMat&&_fc%2===0)skyMat.uniforms.uTime.value=now;
-  // Bad bug spawn: 10/day
-  if(_fc%5184===0&&flowers.length>0)mkBadBug(Math.floor(Math.random()*flowers.length));
-  // Rain at night
-  if(_fc%1800===0&&(dayPhase<.229||dayPhase>=.896)&&!isRaining&&Math.random()<.2){isRaining=true;initRain();rCvs.style.opacity='1';showToast('🌧️ Yağmur yağıyor!');flowers.forEach(function(f){f.w=Math.min(1.5,f.w+.3);});setTimeout(function(){isRaining=false;rCvs.style.opacity='0';},30000);}
+  // Zararlı ve yağmur duvar saatiyle. Uzun arka plan boşluğunda sürü halinde doğmaz.
+  if(dt>0){
+    _bugAcc+=dt;
+    if(_bugAcc>=BUG_EVERY&&flowers.length>0){
+      _bugAcc-=BUG_EVERY;
+      if(_bugAcc>BUG_EVERY) _bugAcc=BUG_EVERY;
+      mkBadBug(Math.floor(Math.random()*flowers.length));
+    }
+    _rainAcc+=dt;
+    if(_rainAcc>=RAIN_EVERY){
+      _rainAcc-=RAIN_EVERY;
+      if(_rainAcc>RAIN_EVERY) _rainAcc=RAIN_EVERY;
+      if((dayPhase<.229||dayPhase>=.896)&&!isRaining&&Math.random()<.2){isRaining=true;initRain();rCvs.style.opacity='1';showToast('🌧️ Yağmur yağıyor!');flowers.forEach(function(f){f.w=Math.min(1.5,f.w+.3);});setTimeout(function(){isRaining=false;rCvs.style.opacity='0';},30000);}
+    }
+  }
   if(isRaining)drawRain();
   if(curWeather!=='clear')drawWx();
   // Bad bugs move
@@ -66,25 +84,7 @@ function animate(){
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
-  // Harvest büyüme - saniye bazlı (60fps = 60 frame = 1 saniye)
-  if(_fc%60===0){
-    for(var hi=harvestItems.length-1;hi>=0;hi--){
-      var h=harvestItems[hi];
-      if(h.stage<2){
-        h.growTimer=(h.growTimer||0)+1;
-        if(h.growTimer>=h.cfg.growTime){
-          h.growTimer=0;
-          var nextStage=h.stage+1;
-          var hx=h.x,hz=h.z,htp=h.type;
-          h.group.traverse(function(ch){if(ch.geometry)ch.geometry.dispose();if(ch.material)ch.material.dispose();});
-          scene.remove(h.group);
-          harvestItems.splice(hi,1);
-          mkHarvestPlant(hx,hz,htp,nextStage);
-          if(nextStage===2)showToast(HARVEST_TYPES[htp].emoji+' Hasat zamanı! Dokun! 🎉');
-        }
-      }
-    }
-  }
+  if(dt>0) advanceHarvest(dt);
 
   // Evcil hayvan hareketi
   for(var pi=0;pi<pets.length;pi++){
