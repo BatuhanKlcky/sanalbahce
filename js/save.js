@@ -71,7 +71,7 @@ function loadTasks(){try{var d=JSON.parse(localStorage.getItem('gdn_tasks')||'nu
 
 // ── İSTATİSTİKLER ─────────────────────────────────────────────────────────
 var stats = {water:0, plant:0, kill:0, bloom:0, time:0, streak:0, lastDay:'',
-             tom:0, str:0, cuc:0, coin:0};
+             tom:0, str:0, cuc:0, pep:0, car:0, coin:0};
 var _sessionStart = Date.now();
 var _timeBase = 0;
 var _progressReady = false;
@@ -109,6 +109,8 @@ function updStats(){
   if(e('st-tom'))e('st-tom').textContent=stats.tom;
   if(e('st-str'))e('st-str').textContent=stats.str;
   if(e('st-cuc'))e('st-cuc').textContent=stats.cuc;
+  if(e('st-pep'))e('st-pep').textContent=stats.pep||0;
+  if(e('st-car'))e('st-car').textContent=stats.car||0;
   if(e('st-coin'))e('st-coin').textContent=stats.coin;
   var cb=document.getElementById('coinBadge');
   if(cb)cb.textContent='💰 '+stats.coin;
@@ -259,7 +261,7 @@ var flowers=[],bugs=[],badBugs=[],badM=[],decos=[];
 var badID=0,lastSave=0,isDirty=false,isLoading=false;
 function markDirty(){isDirty=true;}
 function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify({lastUpdate:now,
-      plants:flowers.map(function(f){return{x:f.mesh.position.x,z:f.mesh.position.z,h:f.h,b:f.b,w:f.w,c:f.c,t:f.t,isStunted:f.isStunted};}),
+      plants:flowers.map(function(f){return{x:f.mesh.position.x,z:f.mesh.position.z,h:f.h,b:f.b,w:f.w,c:f.c,t:f.t,k:f.k||'',isStunted:f.isStunted};}),
       badBugs:badBugs.map(function(b){return{ti:b.ti};}),
       bugCount:bugs.length,
       decos:decos.map(function(d){return{type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y};}),

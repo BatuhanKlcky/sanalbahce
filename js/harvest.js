@@ -5,7 +5,9 @@ var harvestItems = []; // {group, type, stage, growTimer, x, z}
 var HARVEST_TYPES = {
   tomato:    {emoji:'🍅', color:0xcc2200, stages:['🌱','🌿','🍅'], growTime:90,  coin:15, statKey:'tom'},
   strawberry:{emoji:'🍓', color:0xff2244, stages:['🌱','🌿','🍓'], growTime:60,  coin:10, statKey:'str'},
-  cucumber:  {emoji:'🥒', color:0x228822, stages:['🌱','🌿','🥒'], growTime:120, coin:20, statKey:'cuc'}
+  cucumber:  {emoji:'🥒', color:0x228822, stages:['🌱','🌿','🥒'], growTime:120, coin:20, statKey:'cuc'},
+  pepper:    {emoji:'🌶️', color:0xcc1e1e, stages:['🌱','🌿','🌶️'], growTime:75,  coin:18, statKey:'pep'},
+  carrot:    {emoji:'🥕', color:0xff7a1a, stages:['🌱','🌿','🥕'], growTime:80,  coin:12, statKey:'car'}
 };
 
 function mkHarvestPlant(x, z, type, stage) {
@@ -30,12 +32,16 @@ function mkHarvestPlant(x, z, type, stage) {
   }
   // Meyve (stage 2)
   if (stage === 2) {
-    var fruitGeo = type === 'cucumber'
-      ? new THREE.CylinderGeometry(.07,.06,.3,8)
-      : new THREE.SphereGeometry(.12, 10, 10);
+    var fruitGeo, fruitY=.55, fruitScale=null;
+    if(type==='cucumber'){fruitGeo=new THREE.CylinderGeometry(.07,.06,.3,8);fruitY=.7;}
+    else if(type==='pepper'){fruitGeo=new THREE.SphereGeometry(.1,10,8);fruitY=.62;fruitScale=[.75,1.35,.75];}
+    else if(type==='carrot'){fruitGeo=new THREE.ConeGeometry(.07,.34,8);fruitY=.3;}
+    else fruitGeo=new THREE.SphereGeometry(.12,10,10);
     var fruit = new THREE.Mesh(fruitGeo,
       new THREE.MeshStandardMaterial({color:cfg.color, roughness:.5, emissive:cfg.color, emissiveIntensity:.1}));
-    fruit.position.y = .55 + (type==='cucumber'?.15:0); g.add(fruit);
+    fruit.position.y = fruitY;
+    if(fruitScale) fruit.scale.set(fruitScale[0],fruitScale[1],fruitScale[2]);
+    g.add(fruit);
     // Parlayan halka (hasat hazır)
     var ring = new THREE.Mesh(new THREE.TorusGeometry(.22,.02,6,20),
       new THREE.MeshStandardMaterial({color:0xffcc00, emissive:0xffaa00, emissiveIntensity:1.5}));

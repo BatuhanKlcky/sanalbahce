@@ -187,7 +187,7 @@ window.addEventListener('pointerup',function(e){
   var pt=hits[0].point;
   if(Math.sqrt(pt.x*pt.x+pt.z*pt.z)>28){showToast('Çok uzak! 🚫');return;}
   var tp=placementType,ang=Math.random()*Math.PI*2;
-  if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='flower_wild') && window.gardenBlocked){
+  if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'||tp==='flower_wild') && window.gardenBlocked){
     var blocked=window.gardenBlocked(pt.x,pt.z);
     if(blocked){ showToast(blocked); return; }
   }
@@ -196,6 +196,8 @@ window.addEventListener('pointerup',function(e){
   else if(tp==='tomato')mkHarvestPlant(pt.x,pt.z,'tomato');
   else if(tp==='strawberry')mkHarvestPlant(pt.x,pt.z,'strawberry');
   else if(tp==='cucumber')mkHarvestPlant(pt.x,pt.z,'cucumber');
+  else if(tp==='pepper')mkHarvestPlant(pt.x,pt.z,'pepper');
+  else if(tp==='carrot')mkHarvestPlant(pt.x,pt.z,'carrot');
   else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
   sndPlant();showToast('✅ Yerleştirildi!');save(true);
 });
