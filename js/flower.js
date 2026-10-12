@@ -31,7 +31,7 @@ window.addBug=function(){var bg=new THREE.Group(),bM=new THREE.MeshStandardMater
 
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
 function soak(f,add){f.w=Math.min(1.5,f.w+(add||0));if(f.w>=.25)f.isStunted=false;}
-window.waterAll=function(){flowers.forEach(function(f){soak(f,.8);});sndWater();chkTask('w',30);stats.water++;saveStats();updStats();markDirty();save(true);showToast('💧 Tüm bitkiler sulandı!');};
+window.waterAll=function(){if(!flowers.length){showToast('Sulayacak bitki yok 🌱');return;}var n=flowers.length,was=tasks.w.done;flowers.forEach(function(f){soak(f,.8);});sndWater();chkTask('w',30,n);stats.water++;saveStats();updStats();markDirty();save(true);if(!tasks.w.done||was)showToast('💧 Tüm bitkiler sulandı!');};
 window.soakPlant=soak;
 // Su .35 üstündeyken büyür, .25 altına inince solar. Hız saniye cinsinden (60 karelik eski dilim değil).
 window.advancePlants=function(seconds){
@@ -71,7 +71,7 @@ window.gardenBlocked=function(x,z){
   return '';
 };
 window.plant=function(){var a=Math.random()*Math.PI*2,r=Math.random()*13;mkFlower(Math.cos(a)*r,Math.sin(a)*r);sndPlant();chkTask('p',20);stats.plant++;saveStats();updStats();save(true);showToast('🌱 Yeni bitki ekildi!');};
-window.killAllBadBugs=function(){var cnt=badBugs.length;if(cnt===0){showToast('🌿 Bahçe temiz!');return;}for(var i=0;i<badBugs.length;i++){var bg=badBugs[i];bg.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});scene.remove(bg.group);}badBugs.length=0;badM.length=0;document.getElementById('bdC').innerText=0;sndKill();chkTask('k',25);stats.kill+=cnt;saveStats();updStats();showToast(cnt+' zararlı temizlendi! 🧹');markDirty();save(true);};
+window.killAllBadBugs=function(){var cnt=badBugs.length;if(cnt===0){showToast('🌿 Bahçe temiz!');return;}var was=tasks.k.done;for(var i=0;i<badBugs.length;i++){var bg=badBugs[i];bg.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});scene.remove(bg.group);}badBugs.length=0;badM.length=0;document.getElementById('bdC').innerText=0;sndKill();chkTask('k',25);stats.kill+=cnt;saveStats();updStats();if(!tasks.k.done||was)showToast(cnt+' zararlı temizlendi! 🧹');markDirty();save(true);};
 // ── ÇİÇEK YERLEŞTİRME MODU ───────────────────────────────────────────────────
 var flowerPlaceMode = false;
 

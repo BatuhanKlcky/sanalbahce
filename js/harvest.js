@@ -59,7 +59,8 @@ function harvestPlant(idx) {
   if (!item || item.stage < 2) { showToast('Henüz hazır değil! ⏳'); return; }
   var cfg = item.cfg;
   stats[cfg.statKey]++;
-  addCoin(cfg.coin);
+  var pay=cfg.coin+Math.max(0,(level||1)-1);
+  addCoin(pay, true);
   // Sahne temizle
   item.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});
   scene.remove(item.group);
@@ -67,7 +68,7 @@ function harvestPlant(idx) {
   // Re-index hitboxes
   harvestItems.forEach(function(it, i){ it.group.children.forEach(function(ch){ if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i; }); });
   updStats(); saveStats();
-  showToast(cfg.emoji+' Hasat edildi! +'+cfg.coin+' 💰');
+  showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰');
   tone(880,'sine',.1,.1); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
   markDirty();
 }

@@ -150,8 +150,8 @@ window.plantSeedAt = function(x, z){
   var seed = window.takeSeed();
   if(!seed){ showToast('Çantada tohum yok 🌱'); return false; }
   mkFlower(x, z, {c:seed.color, t:Math.floor(Math.random()*4), h:.15, b:0, w:1, isStunted:false});
-  sndPlant(); chkTask('p', 20); stats.plant++; saveStats(); updStats(); save(true);
-  showToast(seed.emoji+' ekildi');
+  sndPlant(); var plantedDone=tasks.p.done; chkTask('p', 20); stats.plant++; saveStats(); updStats(); save(true);
+  if(!tasks.p.done||plantedDone) showToast(seed.emoji+' ekildi');
   return true;
 };
 window.placeOwnedWing = function(){

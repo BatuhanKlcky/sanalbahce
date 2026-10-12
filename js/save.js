@@ -14,9 +14,54 @@ var tasks={w:{done:false,n:0,need:5},p:{done:false,n:0,need:3},k:{done:false,n:0
 var _taskLabels={w:'bitki sula',p:'yeni bitki ek',k:'Zararlıları temizle',b:'dost böcek ekle'};
 var _taskFull={w:'5 bitki sula',p:'3 yeni bitki ek',k:'Zararlıları temizle',b:'2 dost böcek ekle'};
 var xp=0,level=1;
-function addXP(a){xp+=a;var mx=XPL[Math.min(level,10)];while(level<10&&xp>=mx){xp-=mx;level++;mx=XPL[Math.min(level,10)];sndLvl();showToast('🎉 Seviye '+level+'!');}updXP();saveProg();}
-function updXP(){var mx=XPL[Math.min(level,10)];document.getElementById('lvN').textContent=level;document.getElementById('xpC').textContent=Math.floor(xp);document.getElementById('xpM').textContent=mx;document.getElementById('xpFill').style.width=Math.min(100,xp/mx*100)+'%';document.getElementById('lvBadge').textContent='⭐ Lv.'+level;}
-function chkTask(k,r){if(!tasks[k]||tasks[k].done)return;tasks[k].n++;var lb=document.getElementById('lb-'+k);if(lb)lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k];if(tasks[k].n>=tasks[k].need){tasks[k].done=true;var ck=document.getElementById('ck-'+k);if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb)lb.classList.add('done');sndTask();addXP(r);showToast('✅ Görev! +'+r+' XP');}saveTasks();}
+var TASK_COIN={w:15,p:20,k:15,b:10};
+function addXP(a){
+  a=Math.max(0, Number(a)||0);
+  var purse=0;
+  xp+=a;
+  while(level<10){
+    var mx=XPL[level];
+    if(!(mx>0)||xp<mx) break;
+    xp-=mx;
+    level++;
+    purse+=level*25;
+    sndLvl();
+  }
+  if(purse){ stats.coin+=purse; updStats(); saveStats(); }
+  updXP();
+  saveProg();
+  return purse;
+}
+function updXP(){
+  var maxed=level>=10;
+  var mx=maxed?0:XPL[level];
+  document.getElementById('lvN').textContent=level;
+  document.getElementById('xpC').textContent=maxed?'Maks':Math.floor(xp);
+  document.getElementById('xpM').textContent=maxed?'—':mx;
+  document.getElementById('xpFill').style.width=(maxed?100:Math.min(100,mx?xp/mx*100:0))+'%';
+  document.getElementById('lvBadge').textContent='⭐ Lv.'+level;
+}
+function chkTask(k,r,count){
+  if(!tasks[k]||tasks[k].done) return;
+  var step=Math.max(1, Math.round(Number(count))||1);
+  tasks[k].n=Math.min(tasks[k].need, tasks[k].n+step);
+  var lb=document.getElementById('lb-'+k);
+  if(lb) lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k];
+  if(tasks[k].n>=tasks[k].need){
+    tasks[k].done=true;
+    var ck=document.getElementById('ck-'+k);
+    if(ck){ ck.classList.add('done'); ck.textContent='✓'; }
+    if(lb) lb.classList.add('done');
+    sndTask();
+    var coins=TASK_COIN[k]||0;
+    var before=level;
+    var bonus=addXP(r)||0;
+    if(coins) addCoin(coins, true);
+    if(level>before) showToast('🎉 Seviye '+level+'! +'+(coins+bonus)+' 💰');
+    else showToast('✅ Görev! +'+r+' XP +'+coins+' 💰');
+  }
+  saveTasks();
+}
 function rstTasks(){var td=new Date().toDateString();if(localStorage.getItem('gdn_td')!==td){['w','p','k','b'].forEach(function(k){tasks[k].done=false;tasks[k].n=0;});localStorage.setItem('gdn_td',td);saveTasks();updTUI();}}
 function updTUI(){['w','p','k','b'].forEach(function(k){var ck=document.getElementById('ck-'+k),lb=document.getElementById('lb-'+k);if(tasks[k].done){if(ck){ck.classList.add('done');ck.textContent='✓';}if(lb){lb.classList.add('done');lb.textContent=tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k];}}else{if(ck){ck.classList.remove('done');ck.textContent='';}if(lb){lb.classList.remove('done');lb.textContent=tasks[k].n>0?(tasks[k].n+'/'+tasks[k].need+' '+_taskLabels[k]):_taskFull[k];}}});}
 function saveProg(){localStorage.setItem('gdn_xp',JSON.stringify({xp:xp,level:level}));}
@@ -32,7 +77,9 @@ var _timeBase = 0;
 var _progressReady = false;
 
 function loadStats(){
-  try{var d=JSON.parse(localStorage.getItem('gdn_stats')||'null');if(d)stats=Object.assign(stats,d);}catch(e){}
+  var raw=localStorage.getItem('gdn_stats');
+  try{var d=JSON.parse(raw||'null');if(d)stats=Object.assign(stats,d);}catch(e){}
+  if(!raw) stats.coin=100;
   _timeBase = stats.time||0;
   // Streak hesapla
   var today=new Date().toDateString();
@@ -66,7 +113,15 @@ function updStats(){
   var cb=document.getElementById('coinBadge');
   if(cb)cb.textContent='💰 '+stats.coin;
 }
-function addCoin(n){stats.coin+=n;updStats();saveStats();showToast('+'+n+' 💰 coin!');}
+function addCoin(n, quiet){
+  n=Math.round(Number(n))||0;
+  if(n<=0) return 0;
+  stats.coin+=n;
+  updStats();
+  saveStats();
+  if(!quiet) showToast('+'+n+' 💰 coin!');
+  return n;
+}
 // ── BİLDİRİM SİSTEMİ ─────────────────────────────────────────────────────
 var notifPermission = false;
 
