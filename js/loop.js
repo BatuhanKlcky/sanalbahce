@@ -57,7 +57,7 @@ function stepPets(dt){
     if(pet.legs){
       for(var li=0;li<pet.legs.length;li++){
         var phase=(li===0||li===3)?0:Math.PI;
-        pet.legs[li].rotation.x=Math.sin((moving?gait:pet.time*1.5)+phase)*(moving?.5:.06);
+        pet.legs[li].rotation.x=Math.sin((moving?gait:pet.time*1.5)+phase)*(moving?0.32:0.05);
       }
     }
     if(pet.tail){

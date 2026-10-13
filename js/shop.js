@@ -8,45 +8,34 @@ function latheProfile(pts){
   geo.rotateX(Math.PI/2);
   return geo;
 }
-function petMat(hex, offset){
+function petMat(hex){
   if(!petMat.cache) petMat.cache={};
-  var key=hex+'|'+(offset||0);
+  var key=''+hex;
   if(!petMat.cache[key]){
-    var m=new THREE.MeshStandardMaterial({color:hex, roughness:.84});
-    if(offset){ m.polygonOffset=true; m.polygonOffsetFactor=offset; m.polygonOffsetUnits=offset; }
+    var m=new THREE.MeshStandardMaterial({color:hex, roughness:.78});
     m.userData.keep=true;
     petMat.cache[key]=m;
   }
   return petMat.cache[key];
 }
-function chainTail(mat, n, len, fat, curl){
-  var root=new THREE.Group(), parent=root, segs=[];
-  var alt=petMat(mat.color.getHex(), -2);
-  for(var i=0;i<n;i++){
-    var seg=new THREE.Group();
-    var r0=Math.max(.012, fat*(1-i/n*.45)), r1=Math.max(.008, fat*(1-(i+1)/n*.45));
-    var mesh=new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 7), i%2?alt:mat);
-    mesh.position.y=len*.5;
-    seg.add(mesh);
-    if(i) seg.position.y=len*.78;
-    seg.rotation.x=curl;
-    seg.userData.rx=curl;
-    parent.add(seg);
-    segs.push(seg);
-    parent=seg;
-  }
-  return {root:root, segs:segs};
+function petTail(mat, fat){
+  var curve=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,0,0),
+    new THREE.Vector3(0,.07,0),
+    new THREE.Vector3(.015,.15,.02),
+    new THREE.Vector3(.03,.23,0)
+  ]);
+  return new THREE.Mesh(new THREE.TubeGeometry(curve, 16, fat, 8, false), mat);
 }
 function petLimb(mat, x, y, z, len){
   var hip=new THREE.Group();
   hip.position.set(x, y, z);
-  var sunk=petMat(mat.color.getHex(), 1);
-  var leg=new THREE.Mesh(new THREE.CylinderGeometry(len*.34, len*.26, len*.86, 8), sunk);
-  leg.position.y=-len*.36;
+  var leg=new THREE.Mesh(new THREE.CylinderGeometry(len*.42, len*.3, len, 10), mat);
+  leg.position.y=-len*.38;
   hip.add(leg);
-  var paw=new THREE.Mesh(new THREE.SphereGeometry(len*.3, 8, 6), sunk);
-  paw.scale.set(1.12, .48, 1.28);
-  paw.position.y=-len*.86;
+  var paw=new THREE.Mesh(new THREE.SphereGeometry(len*.34, 8, 6), mat);
+  paw.scale.set(1.15, .42, 1.25);
+  paw.position.y=-len*.9;
   hip.add(paw);
   return hip;
 }
@@ -68,22 +57,20 @@ function petEye(fur, r){
 function mkCat(x, z) {
   var g=new THREE.Group();
   var mat=petMat(0xe08a42);
-  var body=new THREE.Mesh(latheProfile([[.05,.16],[.11,.08],[.125,0],[.11,-.05],[.072,-.09]]), mat);
-  body.position.set(0,.24,0);
-  var neck=new THREE.Mesh(new THREE.CylinderGeometry(.055,.072,.11,8), mat);
-  neck.rotation.x=Math.PI/2; neck.position.set(0,.05,.13); body.add(neck);
+  var body=new THREE.Mesh(latheProfile([[.1,.15],[.145,.05],[.15,-.02],[.12,-.1],[.09,-.17]]), mat);
+  body.position.set(0,.2,0);
   g.add(body);
-  var head=new THREE.Mesh(new THREE.SphereGeometry(.1,16,12), petMat(0xe08a42, -1));
-  head.scale.set(1.02,.96,1.02);
-  head.position.set(0,.34,.22);
-  var muzzle=new THREE.Mesh(new THREE.SphereGeometry(.04,10,8), petMat(0xfff3e8, -2));
-  muzzle.scale.set(1.15,.72,.85); muzzle.position.set(0,-.03,.085); head.add(muzzle);
-  var nose=new THREE.Mesh(new THREE.SphereGeometry(.014,8,6), petMat(0x2a1a14, -4));
-  nose.position.set(0,.01,.032); muzzle.add(nose);
+  var head=new THREE.Mesh(new THREE.SphereGeometry(.115,16,14), mat);
+  head.scale.set(1.02,.94,1.04);
+  head.position.set(0,.3,.12);
+  var muzzle=new THREE.Mesh(new THREE.SphereGeometry(.042,10,8), petMat(0xfff3e8));
+  muzzle.scale.set(1.15,.7,.8); muzzle.position.set(0,-.04,.09); head.add(muzzle);
+  var nose=new THREE.Mesh(new THREE.SphereGeometry(.015,8,6), petMat(0x2a1a14));
+  nose.position.set(0,.012,.03); muzzle.add(nose);
   [-1,1].forEach(function(s){
     for(var w=0;w<3;w++){
-      var whisk=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,.09,4), petMat(0x3a2a22, -4));
-      whisk.rotation.z=s*(.35+w*.22); whisk.position.set(s*.03, -.005+w*.012, .03);
+      var whisk=new THREE.Mesh(new THREE.CylinderGeometry(.0035,.0035,.08,4), petMat(0x3a2a22));
+      whisk.rotation.z=s*(.4+w*.2); whisk.position.set(s*.028, -.004+w*.01, .028);
       muzzle.add(whisk);
     }
   });
@@ -91,71 +78,67 @@ function mkCat(x, z) {
   var ears=[], lids=[];
   [-1,1].forEach(function(s){
     var pivot=new THREE.Group();
-    var ear=new THREE.Mesh(new THREE.ConeGeometry(.036,.12,7), mat);
-    ear.position.y=.06;
-    var inner=new THREE.Mesh(new THREE.ConeGeometry(.018,.07,6), petMat(0xe8a0b0, -2));
-    inner.position.set(0,.01,.008); ear.add(inner);
+    var ear=new THREE.Mesh(new THREE.ConeGeometry(.04,.13,8), mat);
+    ear.position.y=.055;
+    var inner=new THREE.Mesh(new THREE.ConeGeometry(.02,.07,6), petMat(0xe8a0b0));
+    inner.position.set(0,.008,.006); ear.add(inner);
     pivot.add(ear);
-    pivot.position.set(s*.04,.085,0);
-    pivot.rotation.z=s>0?-.38:.38;
+    pivot.position.set(s*.045,.07,-.01);
+    pivot.rotation.z=s>0?-.32:.32;
     pivot.userData.rz=pivot.rotation.z;
     head.add(pivot); ears.push(pivot);
     var eye=petEye(mat, .02);
-    eye.position.set(s*.04,.015,.078);
+    eye.position.set(s*.04,.012,.09);
     head.add(eye); lids.push(eye.userData.lid);
   });
-  var tailPack=chainTail(mat, 5, .055, .02, -.22);
-  var tail=tailPack.root;
-  tail.position.set(0,.28,-.16); tail.rotation.x=-.95; g.add(tail);
+  var tail=petTail(mat, .016);
+  tail.position.set(0,.26,-.1); tail.rotation.x=-1.15; g.add(tail);
   var legs=[];
-  [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
-    var hip=petLimb(mat, p[0]*.05, .17, p[1]*.055, .14);
+  [[-1,.6],[-1,-1],[1,.6],[1,-1]].forEach(function(p){
+    var hip=petLimb(mat, p[0]*.045, .16, p[1]*.05, .17);
     g.add(hip); legs.push(hip);
   });
   g.scale.setScalar(1.85);
-  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids, tailSegs:tailPack.segs});
+  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids});
 }
 
 function mkDog(x, z) {
   var g=new THREE.Group();
   var mat=petMat(0x8f5a34);
-  var dMat=petMat(0x5c381c, -1);
-  var body=new THREE.Mesh(latheProfile([[.05,.22],[.125,.1],[.15,0],[.13,-.08],[.08,-.14]]), mat);
-  body.position.set(0,.32,0);
-  var neck=new THREE.Mesh(new THREE.CylinderGeometry(.06,.082,.12,8), mat);
-  neck.rotation.x=Math.PI/2; neck.position.set(0,.055,.18); body.add(neck);
+  var dMat=petMat(0x5c381c);
+  var body=new THREE.Mesh(latheProfile([[.1,.2],[.15,.08],[.16,-.02],[.13,-.12],[.09,-.2]]), mat);
+  body.position.set(0,.26,0);
   g.add(body);
-  var head=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12), petMat(0x8f5a34, -1));
-  head.scale.set(1.04,.96,1);
-  head.position.set(0,.42,.27);
-  var snout=new THREE.Mesh(new THREE.CylinderGeometry(.038,.058,.11,12), mat);
-  snout.rotation.x=Math.PI/2; snout.position.set(0,-.025,.15); snout.userData.rx=Math.PI/2; head.add(snout);
-  var nose=new THREE.Mesh(new THREE.SphereGeometry(.026,8,6), petMat(0x1a120e, -4));
-  nose.scale.set(1,.82,.65); nose.position.set(0,.008,.06); snout.add(nose);
+  var head=new THREE.Mesh(new THREE.SphereGeometry(.12,16,14), mat);
+  head.scale.set(1.05,.95,1.02);
+  head.position.set(0,.38,.16);
+  var snout=new THREE.Mesh(new THREE.CylinderGeometry(.04,.062,.12,12), mat);
+  snout.rotation.x=Math.PI/2; snout.position.set(0,-.02,.1); snout.userData.rx=Math.PI/2; head.add(snout);
+  var nose=new THREE.Mesh(new THREE.SphereGeometry(.026,8,6), petMat(0x1a120e));
+  nose.scale.set(1,.8,.65); nose.position.set(0,.006,.055); snout.add(nose);
   g.add(head);
   var ears=[], lids=[];
   [-1,1].forEach(function(s){
     var pivot=new THREE.Group();
-    var ear=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8), dMat);
-    ear.scale.set(.55,1.7,.34); ear.position.y=-.05; pivot.add(ear);
-    pivot.position.set(s*.095,.06,0);
-    pivot.rotation.z=s>0?-.45:.45;
+    var ear=new THREE.Mesh(new THREE.SphereGeometry(.048,10,8), dMat);
+    ear.scale.set(.5,1.65,.32); ear.position.y=-.045; pivot.add(ear);
+    pivot.position.set(s*.08,.05,0);
+    pivot.rotation.z=s>0?-.4:.4;
     pivot.userData.rz=pivot.rotation.z;
     head.add(pivot); ears.push(pivot);
     var eye=petEye(mat, .018);
-    eye.position.set(s*.042,.02,.09);
+    eye.position.set(s*.042,.018,.095);
     head.add(eye); lids.push(eye.userData.lid);
   });
-  var tailPack=chainTail(mat, 4, .07, .024, .18);
-  var tail=tailPack.root;
-  tail.position.set(0,.38,-.22); tail.rotation.x=.85; g.add(tail);
+  var tail=petTail(mat, .02);
+  tail.position.set(0,.34,-.14); tail.rotation.x=.95; g.add(tail);
   var legs=[];
-  [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
-    var hip=petLimb(mat, p[0]*.065, .22, p[1]*.07, .16);
+  [[-1,.7],[-1,-.8],[1,.7],[1,-.8]].forEach(function(p){
+    var hip=petLimb(mat, p[0]*.055, .2, p[1]*.07, .2);
     g.add(hip); legs.push(hip);
   });
   g.scale.setScalar(1.75);
-  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids, tailSegs:tailPack.segs, jaw:snout});
+  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids, jaw:snout});
 }
 function placePet(g, type, x, z, tail, msg, legs, rig){
   var sh=new THREE.Mesh(new THREE.CircleGeometry(.32,10), new THREE.MeshBasicMaterial({color:0x1a2a14,transparent:true,opacity:.28,depthWrite:false}));
