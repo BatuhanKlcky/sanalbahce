@@ -42,32 +42,39 @@ function sailCloth(){
   return sailCloth.m;
 }
 
+function foliage(g, x, y, z, s, rnd){
+  var mat = rnd() > .55 ? window.surf.leaf : window.surf.leafDark;
+  [1.28, .62].forEach(function(tilt, i){
+    var p = new THREE.Mesh(new THREE.PlaneGeometry(s, s * (i ? .7 : .92)), mat);
+    p.position.set(x, y + (i ? 0 : s * .04), z);
+    p.rotation.order = 'YXZ';
+    p.rotation.y = rnd() * 6.28 + i * 1.2;
+    p.rotation.x = tilt + (rnd() - .5) * .12;
+    g.add(p);
+  });
+}
 function buildTree(x, z){
   var g = new THREE.Group();
   var rnd = gardenRand(x + 3.1, z + 1.7);
-  var th = 2.45 + rnd() * 1.05;
-  var trunk = new THREE.Mesh(new THREE.CylinderGeometry(.1, .18, th, 7), kept(0x6b4632, .96));
+  var th = 2.15 + rnd() * .55;
+  var trunk = new THREE.Mesh(new THREE.CylinderGeometry(.09, .16, th, 8), window.surf.bark);
   trunk.position.y = th * .48;
   g.add(trunk);
-  var flare = new THREE.Mesh(new THREE.CylinderGeometry(.16, .32, .26, 7), kept(0x5c3b2a, .96));
+  var flare = new THREE.Mesh(new THREE.CylinderGeometry(.14, .28, .28, 8), window.surf.bark);
   flare.position.y = .08;
   g.add(flare);
-  for(var b = 0; b < 2; b++){
+  for(var b = 0; b < 3; b++){
     var ang = rnd() * Math.PI * 2;
-    var limb = new THREE.Mesh(new THREE.CylinderGeometry(.032, .05, .8, 5), kept(0x6b4632, .96));
-    limb.position.set(Math.cos(ang) * .26, th * .68, Math.sin(ang) * .26);
-    limb.rotation.z = (b ? 1 : -1) * .8;
+    var limb = new THREE.Mesh(new THREE.CylinderGeometry(.02, .035, .45, 5), window.surf.bark);
+    limb.position.set(Math.cos(ang) * .12, th * .72 + b * .06, Math.sin(ang) * .12);
+    limb.rotation.z = Math.cos(ang) * .9;
     limb.rotation.y = ang;
     g.add(limb);
   }
-  var greens = [0x2c7438, 0x3c8a46, 0x245f30, 0x4b9a50];
-  [[0, th+.22, 0, .98, .58],[.55, th-.02, .2, .6, .38],[-.48, th+.04, -.16, .56, .36],[.16, th+.55, -.26, .5, .32],[-.2, th+.4, .3, .48, .3],[.06, th-.38, .38, .4, .26],[-.32, th-.22, .12, .38, .24]].forEach(function(p){
-    var leaf = new THREE.Mesh(new THREE.SphereGeometry(p[3], 8, 6), kept(greens[Math.floor(rnd()*greens.length)], .92));
-    leaf.scale.y = p[4] / p[3];
-    leaf.position.set(p[0], p[1], p[2]);
-    g.add(leaf);
+  [[0, th + .05, 0, 2.05],[.62, th - .2, .22, 1.45],[-.58, th - .12, -.16, 1.4],[.18, th + .42, -.22, 1.2],[-.22, th + .28, .4, 1.15],[.28, th - .55, -.35, 1.15]].forEach(function(p){
+    foliage(g, p[0], p[1], p[2], p[3], rnd);
   });
-  g.add(sitShadow(1.2));
+  g.add(sitShadow(1.15));
   g.position.set(x, 0, z);
   g.rotation.y = rnd() * Math.PI * 2;
   return g;
@@ -75,12 +82,8 @@ function buildTree(x, z){
 function buildBush(x, z){
   var g = new THREE.Group();
   var rnd = gardenRand(x + 8, z + 2);
-  var cols = [0x246b34, 0x2f7c3e, 0x1d5c2c];
-  [[0,0,0,.62,.4],[.36,.06,.14,.4,.26],[-.32,.02,-.12,.36,.24],[.06,.14,-.3,.3,.2],[-.08,.1,.28,.26,.18]].forEach(function(s){
-    var b = new THREE.Mesh(new THREE.SphereGeometry(s[3], 8, 6), kept(cols[Math.floor(rnd()*cols.length)], .9));
-    b.scale.y = s[4] / s[3];
-    b.position.set(s[0], s[1] + s[4] * .5, s[2]);
-    g.add(b);
+  [[0, .32, 0, 1.15],[.32, .28, .12, .8],[-.28, .26, -.1, .75],[.05, .42, -.22, .62]].forEach(function(p){
+    foliage(g, p[0], p[1], p[2], p[3], rnd);
   });
   if(typeof petalGeo === 'function'){
     for(var i = 0; i < 4; i++){
@@ -111,7 +114,7 @@ function buildStone(x, z){
     var w = .26 + rnd()*.32, h = .14 + rnd()*.16, d = .22 + rnd()*.28;
     var geo = new THREE.SphereGeometry(.3, 7, 5);
     geo.scale(w, h, d);
-    var s = new THREE.Mesh(geo, kept(cols[Math.floor(rnd()*cols.length)], .97));
+    var s = new THREE.Mesh(geo, window.surf.stone);
     s.position.set((rnd()-.5)*.4, h*.2, (rnd()-.5)*.35);
     s.rotation.y = rnd()*Math.PI;
     g.add(s);
@@ -121,19 +124,24 @@ function buildStone(x, z){
   return g;
 }
 function shroom(g, ox, oz, sc, rnd){
-  var stem = new THREE.Mesh(new THREE.CylinderGeometry(.05*sc, .08*sc, .28*sc, 7), kept(0xf3e6d0, 1));
-  stem.position.set(ox, .12*sc, oz);
+  var stemPts = [];
+  for(var i = 0; i <= 6; i++){
+    var t = i / 6;
+    stemPts.push(new THREE.Vector2((.05 + Math.sin(t * Math.PI) * .018) * sc, t * .24 * sc));
+  }
+  var stem = new THREE.Mesh(new THREE.LatheGeometry(stemPts, 8), window.surf.stem);
+  stem.position.set(ox, 0, oz);
   g.add(stem);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(.22*sc, 10, 8, 0, Math.PI*2, 0, Math.PI*.55), kept(0xc0392b, .72));
-  cap.position.set(ox, .24*sc, oz);
+  var capPts = [new THREE.Vector2(.012*sc,.18*sc), new THREE.Vector2(.1*sc,.16*sc), new THREE.Vector2(.2*sc,.09*sc), new THREE.Vector2(.25*sc,.02*sc), new THREE.Vector2(.18*sc,-.03*sc)];
+  var cap = new THREE.Mesh(new THREE.LatheGeometry(capPts, 14), window.surf.cap);
+  cap.position.set(ox, .2*sc, oz);
   g.add(cap);
-  for(var i = 0; i < 5; i++){
-    var a = (i/5)*Math.PI*2;
-    var rr = .11*sc;
-    var spot = new THREE.Mesh(new THREE.SphereGeometry(.04*sc, 5, 4), kept(0xfff8ee, .55));
-    spot.position.set(ox+Math.cos(a)*rr, .4*sc, oz+Math.sin(a)*rr);
-    spot.scale.y = .4;
-    g.add(spot);
+  for(var k = 0; k < 5; k++){
+    var a = (k/5)*Math.PI*2;
+    var spot = new THREE.Mesh(new THREE.SphereGeometry(.035*sc, 5, 4), kept(0xfff6ea, .5));
+    spot.scale.y = .35;
+    spot.position.set(Math.cos(a)*.12*sc, .12*sc, Math.sin(a)*.12*sc);
+    cap.add(spot);
   }
 }
 function buildMushroom(x, z){
@@ -149,8 +157,8 @@ function buildMushroom(x, z){
 }
 function buildFence(x, z, a){
   var g = new THREE.Group();
-  var wood = kept(0x8d6434, .9);
-  var dark = kept(0x6a4a24, .92);
+  var wood = window.surf.wood;
+  var dark = window.surf.woodDark;
   [-.58, .58].forEach(function(px){
     var post = new THREE.Mesh(new THREE.BoxGeometry(.08, .9, .08), dark);
     post.position.set(px, .45, 0);
@@ -182,7 +190,7 @@ function buildFence(x, z, a){
 }
 function buildBench(x, z, a){
   var g = new THREE.Group();
-  var wood = kept(0x7a5230, .9);
+  var wood = window.surf.wood;
   var iron = kept(0x3a3a3a, .45, .45);
   [[-.52,-.16],[.52,-.16],[-.52,.16],[.52,.16]].forEach(function(p){
     var leg = new THREE.Mesh(new THREE.BoxGeometry(.06, .42, .06), iron);
@@ -422,8 +430,8 @@ function buildBridge(x, z, a){
 }
 function buildWell(x, z){
   var g = new THREE.Group();
-  var stone = kept(0x8d7b62, .95);
-  var wood = kept(0x6b4a1e, .9);
+  var stone = window.surf.stone;
+  var wood = window.surf.wood;
   var body = new THREE.Mesh(new THREE.CylinderGeometry(.48, .52, .62, 12), stone);
   body.position.y = .3;
   g.add(body);
@@ -444,11 +452,11 @@ function buildWell(x, z){
   beam.rotation.z = Math.PI/2;
   beam.position.y = 1.55;
   g.add(beam);
-  var roofL = new THREE.Mesh(new THREE.BoxGeometry(.85, .05, .7), kept(0x7a3a28, .85));
+  var roofL = new THREE.Mesh(new THREE.BoxGeometry(.85, .05, .7), window.surf.tile);
   roofL.position.set(-.18, 1.78, 0);
   roofL.rotation.z = .5;
   g.add(roofL);
-  var roofR = new THREE.Mesh(new THREE.BoxGeometry(.85, .05, .7), kept(0x7a3a28, .85));
+  var roofR = new THREE.Mesh(new THREE.BoxGeometry(.85, .05, .7), window.surf.tile);
   roofR.position.set(.18, 1.78, 0);
   roofR.rotation.z = -.5;
   g.add(roofR);
@@ -479,31 +487,39 @@ function buildTable(x, z, a){
 }
 function buildWindmill(x, z){
   var g = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.CylinderGeometry(.26, .52, 2.5, 8), kept(0xd7c4a4, .85));
-  body.position.y = 1.25;
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(.22, .55, 2.7, 10), window.surf.stucco);
+  body.position.y = 1.35;
   g.add(body);
-  var cap = new THREE.Mesh(new THREE.ConeGeometry(.4, .5, 8), kept(0x6e3a2a, .8));
-  cap.position.y = 2.65;
+  var band = new THREE.Mesh(new THREE.CylinderGeometry(.34, .36, .12, 10), window.surf.woodDark);
+  band.position.y = 2.15;
+  g.add(band);
+  var cap = new THREE.Mesh(new THREE.ConeGeometry(.48, .55, 10), window.surf.tile);
+  cap.position.y = 2.85;
   g.add(cap);
-  var door = new THREE.Mesh(new THREE.BoxGeometry(.22, .38, .06), kept(0x5c3a1e, .85));
-  door.position.set(0, .38, .48);
+  var door = new THREE.Mesh(new THREE.BoxGeometry(.26, .46, .08), window.surf.wood);
+  door.position.set(0, .42, .5);
   g.add(door);
   var sails = new THREE.Group();
-  sails.add(new THREE.Mesh(new THREE.SphereGeometry(.09, 8, 6), kept(0x4a3424, .6)));
+  sails.add(new THREE.Mesh(new THREE.SphereGeometry(.1, 8, 6), window.surf.woodDark));
   for(var i = 0; i < 4; i++){
     var arm = new THREE.Group();
     arm.rotation.z = (i/4)*Math.PI*2;
-    var spar = new THREE.Mesh(new THREE.BoxGeometry(.05, 1.25, .04), kept(0x5c4030, .85));
-    spar.position.y = .72;
+    var spar = new THREE.Mesh(new THREE.BoxGeometry(.045, 1.35, .04), window.surf.woodDark);
+    spar.position.y = .78;
     arm.add(spar);
-    var sail = new THREE.Mesh(new THREE.PlaneGeometry(.55, 1.15), sailCloth());
-    sail.position.set(.2, .78, .04);
+    var sh = new THREE.Shape();
+    sh.moveTo(.02, .18);
+    sh.lineTo(.5, 1.15);
+    sh.lineTo(.06, 1.28);
+    sh.lineTo(0, .22);
+    var sail = new THREE.Mesh(new THREE.ShapeGeometry(sh, 3), window.surf.cloth);
+    sail.position.z = .03;
     arm.add(sail);
     sails.add(arm);
   }
-  sails.position.set(0, 2.05, .46);
+  sails.position.set(0, 2.2, .5);
   g.add(sails);
-  g.add(sitShadow(.7));
+  g.add(sitShadow(.75));
   g.position.set(x, 0, z);
   return {group:g, blades:sails};
 }
@@ -571,21 +587,30 @@ function buildWild(x, z){
 }
 function buildHouse(x, z, angle){
   var g = new THREE.Group();
-  var found = new THREE.Mesh(new THREE.BoxGeometry(3.35, .22, 2.95), kept(0x7d6a52, .95));
+  var found = new THREE.Mesh(new THREE.BoxGeometry(3.4, .24, 3.05), window.surf.stone);
   found.position.y = .1;
   g.add(found);
-  var walls = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.65, 2.55), kept(0xf3e2cc, .88));
-  walls.position.y = 1.02;
+  var walls = new THREE.Mesh(new THREE.BoxGeometry(3.05, 1.7, 2.6), window.surf.stucco);
+  walls.position.y = 1.05;
   g.add(walls);
-  var roofShape = new THREE.Shape();
-  roofShape.moveTo(-1.85, 0);
-  roofShape.lineTo(1.85, 0);
-  roofShape.lineTo(0, 1.12);
-  roofShape.lineTo(-1.85, 0);
-  var roof = new THREE.Mesh(new THREE.ExtrudeGeometry(roofShape, {depth:3.0, bevelEnabled:false}), kept(0xa33b24, .82));
-  roof.position.set(0, 1.84, -1.5);
-  g.add(roof);
-  var door = new THREE.Mesh(new THREE.BoxGeometry(.5, .9, .06), kept(0x5c3a1e, .8));
+  [1, -1].forEach(function(sign){
+    var slope = new THREE.Mesh(new THREE.BoxGeometry(2.05, .12, 3.35), window.surf.tile);
+    slope.position.set(sign * -.9, 2.38, 0);
+    slope.rotation.z = sign * .48;
+    g.add(slope);
+  });
+  var gableGeo = new THREE.Shape();
+  gableGeo.moveTo(-1.52, 0); gableGeo.lineTo(1.52, 0); gableGeo.lineTo(0, .92);
+  [1.32, -1.32].forEach(function(z){
+    var gable = new THREE.Mesh(new THREE.ShapeGeometry(gableGeo), window.surf.stucco);
+    gable.position.set(0, 1.9, z);
+    if(z < 0) gable.rotation.y = Math.PI;
+    g.add(gable);
+  });
+  var ridge = new THREE.Mesh(new THREE.BoxGeometry(.18, .1, 3.4), window.surf.woodDark);
+  ridge.position.y = 2.86;
+  g.add(ridge);
+  var door = new THREE.Mesh(new THREE.BoxGeometry(.5, .9, .06), window.surf.wood);
   door.position.set(0, .6, 1.3);
   g.add(door);
   var knob = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 6), kept(0xd4a017, .3, .55));

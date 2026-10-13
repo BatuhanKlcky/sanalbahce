@@ -73,11 +73,20 @@ function mkHarvestPlant(x, z, type, stage) {
       lf.rotation.x = 1.05; lf.rotation.y = a;
     }
     if(ripe){
-      [[.12,.1,.04],[-.1,.09,-.05],[.02,.11,-.12]].forEach(function(p){
-        var fr=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), fruitMat('strawberry'));
-        fr.scale.set(1,.78,1); fr.position.set(p[0], p[1]+.1, p[2]); pivot.add(fr);
-        var cap=new THREE.Mesh(new THREE.SphereGeometry(.04,5,4), new THREE.MeshStandardMaterial({color:0x2c7a34, roughness:.8}));
-        cap.scale.y=.35; cap.position.set(p[0], p[1]+.045, p[2]); pivot.add(cap);
+      [[.12,.12,.04],[-.1,.11,-.05],[.02,.13,-.12]].forEach(function(p){
+        var pts=[];
+        for(var t=0;t<=10;t++){
+          var u=t/10, bulge=Math.sin(Math.pow(u,.65)*Math.PI);
+          pts.push(new THREE.Vector2(Math.max(.006,bulge*.09), .12-u*.24));
+        }
+        var fr=new THREE.Mesh(new THREE.LatheGeometry(pts,10), fruitMat('strawberry'));
+        fr.position.set(p[0], p[1], p[2]); pivot.add(fr);
+        for(var k=0;k<5;k++){
+          var a=k/5*Math.PI*2;
+          var sep=new THREE.Mesh(new THREE.ConeGeometry(.012,.05,4), new THREE.MeshStandardMaterial({color:0x2c7a34,roughness:.8}));
+          sep.position.set(p[0]+Math.cos(a)*.03, p[1]+.12, p[2]+Math.sin(a)*.03);
+          sep.rotation.z=Math.cos(a)*.6; sep.rotation.x=Math.sin(a)*.6; pivot.add(sep);
+        }
       });
     }
   }else if(type==='carrot'){
@@ -87,8 +96,10 @@ function mkHarvestPlant(x, z, type, stage) {
       lf.rotation.y=a; lf.rotation.x=1.15;
     }
     if(ripe){
-      var root=new THREE.Mesh(new THREE.ConeGeometry(.12,.5,10), fruitMat('carrot'));
-      root.rotation.x=Math.PI; root.position.y=.2; pivot.add(root);
+      var cpts=[];
+      for(var t=0;t<=8;t++){var u=t/8; cpts.push(new THREE.Vector2(Math.max(.008,(1-u)*.11*(1+.06*Math.sin(u*18))), .28-u*.5));}
+      var root=new THREE.Mesh(new THREE.LatheGeometry(cpts,10), fruitMat('carrot'));
+      root.position.y=.16; pivot.add(root);
     }
   }else if(type==='cucumber'){
     var vine=new THREE.Mesh(new THREE.CylinderGeometry(.016,.022,.6,5), new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
@@ -96,8 +107,9 @@ function mkHarvestPlant(x, z, type, stage) {
     cropLeaf(pivot, .08, .16, .02, .55, grown?1:.55);
     cropLeaf(pivot, -.06, .12, -.04, -.6, grown?.85:.45);
     if(ripe){
-      var cuke=new THREE.Mesh(new THREE.CylinderGeometry(.08,.065,.52,10), fruitMat('cucumber'));
-      cuke.rotation.z=1.2; cuke.position.set(.28,.1,.05); pivot.add(cuke);
+      var cv=new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,0),new THREE.Vector3(.12,.03,.02),new THREE.Vector3(.28,.01,.03),new THREE.Vector3(.46,-.02,.01)]);
+      var cuke=new THREE.Mesh(new THREE.TubeGeometry(cv,8,.055,8,false), fruitMat('cucumber'));
+      cuke.position.set(.08,.08,0); pivot.add(cuke);
     }
   }else{
     var stemH = ripe ? .7 : (grown ? .46 : .22);
@@ -108,8 +120,10 @@ function mkHarvestPlant(x, z, type, stage) {
       cropLeaf(pivot, -.06, stemH*.4, .03, -.55, .9);
     }
     if(ripe && type==='pepper'){
-      var pep=new THREE.Mesh(new THREE.SphereGeometry(.13,12,10), fruitMat('pepper'));
-      pep.scale.set(.6,1.45,.6); pep.position.set(.12, stemH*.62, .06); pep.rotation.z=.6; pivot.add(pep);
+      var ppts=[];
+      for(var t=0;t<=10;t++){var u=t/10; ppts.push(new THREE.Vector2(Math.max(.01,Math.sin(u*Math.PI)*.07*(u<.2?u*4:1)), u*.32));}
+      var pep=new THREE.Mesh(new THREE.LatheGeometry(ppts,10), fruitMat('pepper'));
+      pep.position.set(.12, stemH*.45, .05); pep.rotation.z=.7; pivot.add(pep);
       var stem2=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.12,4), new THREE.MeshStandardMaterial({color:0x2c7a34, roughness:.8}));
       stem2.position.set(.06, stemH*.95, .02); pivot.add(stem2);
     }else if(ripe){
