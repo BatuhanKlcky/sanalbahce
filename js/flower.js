@@ -119,7 +119,7 @@ window.advancePlants=function(seconds){
   if(!live&&!isLoading&&crossed) showToast(crossed+' bitki büyüdü');
   return crossed;
 };
-var GARDEN_R=28, PLANT_GAP=1.5;
+var GARDEN_R=36, PLANT_GAP=1.5;
 window.gardenBlocked=function(x,z){
   if(Math.sqrt(x*x+z*z)>GARDEN_R) return 'Çok uzak! 🚫';
   var i,p;

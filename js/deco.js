@@ -690,7 +690,7 @@ function tidyPlace(tp, x, z){
         var sign = along >= 0 ? 1 : -1;
         var nx = best.group.position.x + sideX * span * sign;
         var nz = best.group.position.z + sideZ * span * sign;
-        if(Math.hypot(nx, nz) <= 28) return {x:nx, z:nz, a:a};
+        if(Math.hypot(nx, nz) <= GARDEN_R) return {x:nx, z:nz, a:a};
       }
     }
     return {x:x, z:z, a:a};
@@ -701,42 +701,174 @@ function tidyPlace(tp, x, z){
   return {x:x, z:z, a:a0};
 }
 
+var BLOOM_COLS = [0xffd23a, 0xfff6ea, 0xff5a2a, 0xe23b6a, 0xc44ad0, 0xff8a3a, 0xffffff, 0xfff2c4];
+function bedBloom(parent, x, y, z, col, sc){
+  var g = new THREE.Group();
+  var geo = petalGeo(.13 * sc, .24 * sc, .85);
+  var mat = petalMat(col, .2);
+  for(var k = 0; k < 6; k++){
+    var p = new THREE.Mesh(geo, mat);
+    p.rotation.order = 'YXZ';
+    p.rotation.y = (k / 6) * Math.PI * 2;
+    p.rotation.x = 1.25;
+    g.add(p);
+  }
+  var heart = new THREE.Mesh(new THREE.SphereGeometry(.05 * sc, 6, 4), kept(0xffe08a, .5));
+  heart.position.y = .035;
+  g.add(heart);
+  g.position.set(x, y, z);
+  parent.add(g);
+}
+function soilBed(x, z, r){
+  var g = new THREE.Group();
+  var soil = new THREE.Mesh(new THREE.CircleGeometry(r, 28), kept(0x4e3424, 1));
+  soil.rotation.x = -Math.PI / 2;
+  soil.position.y = .028;
+  g.add(soil);
+  var n = isMobile ? 12 : 18;
+  for(var i = 0; i < n; i++){
+    var a = (i / n) * Math.PI * 2;
+    var rock = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 4), window.surf.stone);
+    var s = .82 + (i % 4) * .08;
+    rock.scale.set(1.2 * s, .4, .95 * s);
+    rock.position.set(Math.cos(a) * (r + .06), .055, Math.sin(a) * (r + .06));
+    rock.rotation.y = a;
+    g.add(rock);
+  }
+  var rnd = gardenRand(x + 2.2, z + 4.4);
+  var blooms = isMobile ? 12 : 22;
+  for(var b = 0; b < blooms; b++){
+    var ba = (b / blooms) * Math.PI * 2 + rnd() * .25;
+    var ring = b % 3;
+    var br = r * (ring === 0 ? .78 : ring === 1 ? .56 : .36) + (rnd() - .5) * .2;
+    if(br < 1.05) br = 1.05;
+    bedBloom(g, Math.cos(ba) * br, .07, Math.sin(ba) * br, BLOOM_COLS[Math.floor(rnd() * BLOOM_COLS.length)], .75 + rnd() * .55);
+  }
+  g.position.set(x, 0, z);
+  scene.add(g);
+}
+function yardPost(x, z){
+  var post = new THREE.Mesh(new THREE.CylinderGeometry(.085, .11, 1.22, 6), window.surf.bark);
+  post.position.set(x, .56, z);
+  scene.add(post);
+}
+function yardRails(x, z, rot, len){
+  var g = new THREE.Group();
+  [.42, .78].forEach(function(py){
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(len, .07, .06), window.surf.wood);
+    rail.position.y = py;
+    g.add(rail);
+  });
+  g.position.set(x, 0, z);
+  g.rotation.y = rot;
+  scene.add(g);
+  return g;
+}
+function railEdge(x0, z0, x1, z1){
+  var dx = x1 - x0, dz = z1 - z0, L = Math.hypot(dx, dz);
+  var ux = dx / L, uz = dz / L, rot = Math.atan2(-uz, ux);
+  var n = Math.max(1, Math.round(L / (isMobile ? 3.15 : 2.45)));
+  var step = L / n, pts = [];
+  for(var i = 0; i <= n; i++) pts.push([x0 + ux * step * i, z0 + uz * step * i]);
+  for(var p = 0; p < pts.length; p++){
+    if(Math.abs(pts[p][0]) < 1.55 && pts[p][1] > 10.5) continue;
+    yardPost(pts[p][0], pts[p][1]);
+  }
+  for(var s = 0; s < n; s++){
+    var ax = pts[s][0], az = pts[s][1], bx = pts[s + 1][0], bz = pts[s + 1][1];
+    var mx = (ax + bx) / 2, mz = (az + bz) / 2;
+    if(Math.abs(mx) < 1.9 && mz > 10.5) continue;
+    yardRails(mx, mz, rot, step * .94);
+    if(s % 4 === 1){
+      var vine = new THREE.Group();
+      var rnd = gardenRand(mx + 1, mz + 2);
+      foliage(vine, (rnd() - .5) * step * .35, .95, .08, .95, rnd);
+      foliage(vine, (rnd() - .5) * step * .25, 1.15, -.02, .7, rnd);
+      vine.position.set(mx, 0, mz);
+      scene.add(vine);
+    }
+  }
+}
+function sceneryBarrel(x, z){
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(.34, .3, .58, 10), window.surf.wood);
+  body.position.y = .3;
+  g.add(body);
+  [.1, .5].forEach(function(py){
+    var band = new THREE.Mesh(new THREE.TorusGeometry(.34, .028, 6, 12), window.surf.woodDark);
+    band.rotation.x = Math.PI / 2;
+    band.position.y = py;
+    g.add(band);
+  });
+  g.position.set(x, 0, z);
+  g.rotation.y = .4;
+  scene.add(g);
+}
 function dressGarden(){
   window._dress = [];
+  window._mills = [];
+  var xL = -14.5, xR = 14.5, zB = -12.6, zF = 13.2;
+  railEdge(xL, zF, xR, zF);
+  railEdge(xR, zF, xR, zB);
+  railEdge(xR, zB, xL, zB);
+  railEdge(xL, zB, xL, zF);
+  soilBed(0, 6.2, 3.55);
+  soilBed(-8.2, -1.3, 3.15);
+  soilBed(8.2, -1.3, 3.15);
+  soilBed(0, -7.1, 2.85);
   var pathMat = kept(0x6b5340, 1);
-  var walk = new THREE.Mesh(new THREE.RingGeometry(13.2, 15.15, 72), pathMat);
-  walk.rotation.x = -Math.PI/2;
-  walk.position.y = .016;
-  walk.scale.set(1.12, .88, 1);
-  scene.add(walk);
-  var tongue = new THREE.Mesh(new THREE.BoxGeometry(10.5, .04, 1.8), pathMat);
-  tongue.position.set(14.2, .02, 14.2);
-  tongue.rotation.y = -Math.PI/4;
-  scene.add(tongue);
-  for(var i = 0; i < 20; i++){
-    var a = (i/20)*Math.PI*2;
-    var rock = new THREE.Mesh(new THREE.SphereGeometry(.16, 6, 4), kept(0x3f3b36, .97));
-    rock.scale.set(1.35, .38, 1);
-    rock.position.set(Math.cos(a)*17.2, .035, Math.sin(a)*13.6);
-    scene.add(rock);
-  }
-  var nTree = isMobile ? 8 : 14;
-  var nBush = isMobile ? 8 : 12;
+  var path = new THREE.Mesh(new THREE.BoxGeometry(1.85, .04, 8.4), pathMat);
+  path.position.set(0, .02, 17.6);
+  scene.add(path);
+  sceneryBarrel(11.4, -7.4);
+  var mill = buildWindmill(1.4, -16.6);
+  mill.group.scale.setScalar(isMobile ? 1.05 : 1.28);
+  scene.add(mill.group);
+  window._mills.push(mill.blades);
+  [[-16.5, 9.5, 1.7],[17.2, 8.2, 1.55],[-17.4, -9.2, 1.6],[18.4, -6.4, 1.65]].forEach(function(p, i){
+    if(isMobile && i > 1) return;
+    var tree = buildTree(p[0], p[1]);
+    tree.scale.setScalar(p[2]);
+    scene.add(tree);
+    window._dress.push(tree);
+  });
+  var yard = [[-20, 4], [16, 16], [-9, 19], [22, -14], [-21, -16], [6, 22], [-24, 14], [24, 6]];
+  yard.forEach(function(p, i){
+    if(isMobile && i % 2) return;
+    var stone = buildStone(p[0], p[1]);
+    scene.add(stone);
+  });
+  var nTree = isMobile ? 8 : 16;
+  var nBush = isMobile ? 6 : 12;
   for(var t = 0; t < nTree; t++){
-    var at = (t / nTree) * Math.PI * 2 + .4;
-    var rt = 34 + (t % 3) * 3.1;
-    var tree = buildTree(Math.cos(at)*rt, Math.sin(at)*rt);
-    tree.scale.setScalar(1.4);
+    var at = (t / nTree) * Math.PI * 2 + .35;
+    if(Math.abs(Math.atan2(Math.sin(at), Math.cos(at)) - Math.PI / 2) < .38) continue;
+    var rt = 42 + (t % 4) * 1.8;
+    var tree = buildTree(Math.cos(at) * rt, Math.sin(at) * rt);
+    tree.scale.setScalar(1.45 + (t % 3) * .12);
     scene.add(tree);
     window._dress.push(tree);
   }
   for(var b = 0; b < nBush; b++){
-    var ab = (b / nBush) * Math.PI * 2 + .15;
-    var rb = 30.5 + (b % 2) * 2.2;
-    var bush = buildBush(Math.cos(ab)*rb, Math.sin(ab)*rb);
-    bush.scale.setScalar(1.25);
+    var ab = (b / nBush) * Math.PI * 2 + .2;
+    var bx = Math.cos(ab) * (34 + (b % 2) * 2.4);
+    var bz = Math.sin(ab) * (34 + (b % 2) * 2.4);
+    if(Math.abs(bx) < 3.2 && bz > 8) continue;
+    var bush = buildBush(bx, bz);
+    bush.scale.setScalar(1.15);
     scene.add(bush);
     window._dress.push(bush);
+  }
+  var sprig = gardenRand(3, 9);
+  var sprigs = isMobile ? 6 : 14;
+  for(var s = 0; s < sprigs; s++){
+    var holder = new THREE.Group();
+    var ang = sprig() * Math.PI * 2, rad = 16 + sprig() * 12;
+    var sx = Math.cos(ang) * rad, sz = Math.sin(ang) * rad;
+    if(Math.abs(sx) < 14 && Math.abs(sz) < 13) continue;
+    bedBloom(holder, 0, .05, 0, BLOOM_COLS[Math.floor(sprig() * BLOOM_COLS.length)], .7 + sprig() * .4);
+    holder.position.set(sx, 0, sz);
+    scene.add(holder);
   }
   [[-70,-8,-58,44,.42],[62,-6,-78,36,.4],[86,-7,16,32,.38],[-28,-5,72,40,.36]].forEach(function(h){
     var hill = new THREE.Mesh(new THREE.SphereGeometry(h[3], 22, 14), kept(0x345c30, 1));
@@ -843,7 +975,7 @@ window.addEventListener('pointerup',function(e){
   if(!hits.length)return;
   var pt=hits[0].point;
   var tp=placementType,spot=tidyPlace(tp,pt.x,pt.z);
-  if(Math.sqrt(spot.x*spot.x+spot.z*spot.z)>28){showToast('Çok uzak! 🚫');return;}
+  if(Math.sqrt(spot.x*spot.x+spot.z*spot.z)>GARDEN_R){showToast('Çok uzak! 🚫');return;}
   pt.x=spot.x; pt.z=spot.z;
   var ang=spot.a;
   if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'||tp==='flower_wild') && window.gardenBlocked){

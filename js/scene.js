@@ -86,14 +86,14 @@ window.togglePanel=function(nm){if(placementMode){window.cancelPlace();return;}v
 var scene=new THREE.Scene();
 scene.fog=new THREE.FogExp2(0x0a1520, 0.005);
 var camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,5000);
-camera.position.set(22,16,22);
+camera.position.set(6,14,24);
 var isMobile=window.innerWidth<768;var renderer=new THREE.WebGLRenderer({antialias:!isMobile,powerPreference:"high-performance"});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2));
 renderer.shadowMap.enabled=false;
 document.body.appendChild(renderer.domElement);
 var controls=new THREE.OrbitControls(camera,renderer.domElement);
-window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}camera.position.set(22,16,22);controls.target.set(0,0,0);controls.update();showToast('Kamera sıfırlandı');};
+window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}camera.position.set(6,14,24);controls.target.set(0,0,0);controls.update();showToast('Kamera sıfırlandı');};
 
 // Sky
 var skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{uTime:{value:0},uNight:{value:1}},vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:['varying vec3 vP;uniform float uTime,uNight;','float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}','float n2(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(h2(i),h2(i+vec2(1,0)),u.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),u.x),u.y);}','void main(){vec3 d=normalize(vP);float up=clamp(d.y,0.,1.),hz=1.-up;','vec3 nc=mix(mix(vec3(.01,.02,.08),vec3(.04,.06,.18),smoothstep(0.,.5,up)),vec3(.10,.04,.22),pow(hz,3.));','vec3 dc=mix(vec3(.4,.65,1.),vec3(.75,.88,1.),up);','vec3 col=mix(dc,nc,uNight);','vec2 uv=vec2(atan(d.z,d.x)/6.28,d.y)*3.;','float nb=n2(uv*2.5+uTime*.008)*n2(uv*5.-uTime*.005);','nb=smoothstep(.25,.6,nb)*up*.55*uNight;','col+=mix(vec3(.15,.03,.35),vec3(.02,.10,.40),n2(uv*1.5))*nb;','float cl=n2(uv*2.2+vec2(uTime*.02,0.));','float cl2=n2(uv*4.6-vec2(uTime*.01,uTime*.015));','cl=smoothstep(.4,.72,cl*.55+cl2*.45);','cl*=mix(.8,1.,clamp(up*3.,0.,1.))*(1.-uNight);','col=mix(col,vec3(.96,.98,1.),cl*.92);','gl_FragColor=vec4(col,1.);}'].join('\n')});

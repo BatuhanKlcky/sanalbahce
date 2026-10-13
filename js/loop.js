@@ -7,7 +7,7 @@ var growSteps=[.20,.45,.80,1.3];
 var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
 var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
 var _lastSim=0, _bugAcc=0, _rainAcc=0;
-var BUG_EVERY=5184/60, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=16;
+var BUG_EVERY=5184/60, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=12;
 function stepWeather(dt){
   if(!(dt>0)) return;
   _rainAcc+=dt;
@@ -141,6 +141,7 @@ function animate(){
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
   if(window._dress){for(var si=0;si<window._dress.length;si++){var sg=window._dress[si];sg.rotation.z=Math.sin(now*.7+sg.position.x)*.012;}}
+  if(window._mills){for(var mi=0;mi<window._mills.length;mi++)window._mills[mi].rotation.z+=Math.min(dt,.05)*.7;}
   if(dt>0) advanceHarvest(dt);
   for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){hv.sway.rotation.z=Math.sin(now*1.35+hv.x)*.045;hv.sway.rotation.x=Math.sin(now*1.05+hv.z)*.03;}}
 
