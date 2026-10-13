@@ -34,20 +34,20 @@ function flowerLook(st){
 function petalMat(col,glow){var m=new THREE.MeshStandardMaterial({color:col,side:THREE.DoubleSide,roughness:.5});if(glow){m.emissive=new THREE.Color(col);m.emissiveIntensity=glow;}return m;}
 function tint(col, toward, amt){var c=new THREE.Color(col);c.lerp(new THREE.Color(toward), amt);return c;}
 function petalGeo(w,h,curl){var sh=new THREE.Shape();sh.moveTo(0,0);sh.bezierCurveTo(w,h*.15,w*(curl||.7),h*.62,0,h);sh.bezierCurveTo(-w*(curl||.7),h*.62,-w,h*.15,0,0);return new THREE.ShapeGeometry(sh,6);}
-function ringPetals(g,geo,col,n,tilt,spin,order,glow){for(var i=0;i<n;i++){var p=new THREE.Mesh(geo,petalMat(col,glow));if(order)p.rotation.order=order;p.rotation.y=(i/n)*Math.PI*2+(spin||0);p.rotation.x=tilt;p.position.y=.02;g.add(p);}}
+function ringPetals(g,geo,col,n,tilt,spin,order,glow){for(var i=0;i<n;i++){var p=new THREE.Mesh(geo,petalMat(col,glow));if(order)p.rotation.order=order;p.rotation.y=(i/n)*Math.PI*2+(spin||0);p.rotation.x=tilt;p.userData.px=tilt;p.userData.pi=i;p.position.y=.02;g.add(p);}}
 function headRose(col){var g=new THREE.Group();
   var bud=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),petalMat(tint(col,0x4a0010,.45)));bud.scale.set(1,.72,1);bud.position.y=.07;g.add(bud);
   [{n:5,r:.045,t:.42,s:.52,y:.08,light:.42,spin:.25},{n:7,r:.09,t:.78,s:.78,y:.03,light:.16,spin:.5},{n:8,r:.15,t:1.18,s:1.05,y:-.02,light:0,spin:.12}].forEach(function(l){
     var geo=petalGeo(.16*l.s,.34*l.s,.9);
     var pc=tint(col,0xffe4ea,l.light);
-    for(var i=0;i<l.n;i++){var a=(i/l.n)*Math.PI*2+l.spin;var p=new THREE.Mesh(geo,petalMat(pc,.2));p.rotation.y=a;p.rotation.x=l.t;p.position.set(Math.sin(a)*l.r,l.y,Math.cos(a)*l.r);g.add(p);}
+    for(var i=0;i<l.n;i++){var a=(i/l.n)*Math.PI*2+l.spin;var p=new THREE.Mesh(geo,petalMat(pc,.2));p.rotation.y=a;p.rotation.x=l.t;p.userData.px=l.t;p.userData.pi=i;p.position.set(Math.sin(a)*l.r,l.y,Math.cos(a)*l.r);g.add(p);}
   });
   var sepal=petalGeo(.07,.16,.5),sm=new THREE.MeshStandardMaterial({color:0x1f6a32,side:THREE.DoubleSide,roughness:.8});
   for(var i=0;i<5;i++){var a=(i/5)*Math.PI*2;var s=new THREE.Mesh(sepal,sm);s.rotation.y=a;s.rotation.x=1.35;s.position.set(Math.sin(a)*.08,-.06,Math.cos(a)*.08);g.add(s);}
   return g;}
 function headTulip(col){var g=new THREE.Group(),outer=petalGeo(.1,.58,.55),inner=petalGeo(.07,.5,.45);
-  for(var i=0;i<3;i++){var p=new THREE.Mesh(outer,petalMat(tint(col,0xfff0f3,.12),.16));var a=(i/3)*Math.PI*2;p.rotation.y=a;p.rotation.x=.55;p.position.set(Math.sin(a)*.02,0,Math.cos(a)*.02);g.add(p);}
-  for(var j=0;j<3;j++){var q=new THREE.Mesh(inner,petalMat(tint(col,0xfff7f8,.35),.12));var b=(j/3)*Math.PI*2+Math.PI/3;q.rotation.y=b;q.rotation.x=.3;q.position.y=.05;g.add(q);}
+  for(var i=0;i<3;i++){var p=new THREE.Mesh(outer,petalMat(tint(col,0xfff0f3,.12),.16));var a=(i/3)*Math.PI*2;p.rotation.y=a;p.rotation.x=.55;p.userData.px=.55;p.userData.pi=i;p.position.set(Math.sin(a)*.02,0,Math.cos(a)*.02);g.add(p);}
+  for(var j=0;j<3;j++){var q=new THREE.Mesh(inner,petalMat(tint(col,0xfff7f8,.35),.12));var b=(j/3)*Math.PI*2+Math.PI/3;q.rotation.y=b;q.rotation.x=.3;q.userData.px=.3;q.userData.pi=j+3;q.position.y=.05;g.add(q);}
   return g;}
 function headLotus(col){var g=new THREE.Group();
   [{n:8,w:.1,h:.34,tilt:.95,spin:0,shade:.1},{n:10,w:.16,h:.42,tilt:1.28,spin:.18,shade:0},{n:12,w:.14,h:.3,tilt:1.48,spin:.08,shade:-.15}].forEach(function(l){
@@ -56,7 +56,7 @@ function headLotus(col){var g=new THREE.Group();
   var c=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),new THREE.MeshStandardMaterial({color:0xf0c14a,roughness:.7}));c.scale.y=.28;c.position.y=.05;g.add(c);
   return g;}
 function headBell(col){var g=new THREE.Group(),stem=new THREE.MeshStandardMaterial({color:0x2c6a38,roughness:.9}),mat=petalMat(col);
-  for(var i=0;i<5;i++){var a=(i/5)*Math.PI*2;var spr=new THREE.Group();spr.rotation.y=a;spr.rotation.z=.55;spr.position.y=.02;g.add(spr);
+  for(var i=0;i<5;i++){var a=(i/5)*Math.PI*2;var spr=new THREE.Group();spr.rotation.y=a;spr.rotation.z=.55;spr.userData.bz=.55;spr.userData.pi=i;spr.position.y=.02;g.add(spr);
     var st=new THREE.Mesh(new THREE.CylinderGeometry(.007,.007,.16,4),stem);st.position.y=-.08;spr.add(st);
     var bell=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),mat);bell.scale.set(.85,1.15,.85);bell.position.y=-.18;spr.add(bell);
     var lip=new THREE.Mesh(new THREE.TorusGeometry(.04,.008,4,8),mat);lip.rotation.x=Math.PI/2;lip.position.y=-.22;spr.add(lip);

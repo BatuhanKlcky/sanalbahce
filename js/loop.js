@@ -64,6 +64,83 @@ function stepPets(dt){
       if(pet.type==='dog'){pet.tail.rotation.x=moving?1.15:.95;pet.tail.rotation.z=Math.sin(pet.time*(moving?7:12))*(moving?.28:.5);}
       else{pet.tail.rotation.x=-1.2+Math.sin(pet.time*2)*.18;pet.tail.rotation.z=Math.sin(pet.time*(moving?5:3))*.45;}
     }
+    var breath=Math.sin(pet.time*(pet.type==='cat'?1.7:2.4));
+    if(pet.body) pet.body.scale.set(1, 1+breath*(pet.type==='cat'?0.028:0.045), 1);
+    if(pet.head){
+      var nod=Math.sin(pet.time*1.15)*.05;
+      if(pet.type==='dog'&&moving) nod+=Math.sin(gait)*.07;
+      pet.head.rotation.x=nod;
+      pet.head.rotation.y=Math.sin(pet.time*.65+pi)*.1;
+    }
+    if(pet.ears){
+      for(var ei=0;ei<pet.ears.length;ei++){
+        var ear=pet.ears[ei];
+        var tw=Math.sin(pet.time*(pet.type==='cat'?4.4:1.5)+ei*1.8);
+        ear.rotation.z=(ear.userData.rz||0)+tw*(pet.type==='cat'?0.14:0.06);
+        if(pet.type==='dog') ear.rotation.x=Math.sin((moving?gait*.5:pet.time*2)+ei)*(moving?0.28:0.1);
+      }
+    }
+    if(pet.lids){
+      var win=pet.type==='cat'?3.4:2.5;
+      var bph=pet.time%win;
+      var shut=bph>win-.2?Math.sin((bph-(win-.2))/.2*Math.PI):0;
+      for(var ld=0;ld<pet.lids.length;ld++){
+        pet.lids[ld].scale.y=.28+shut*1.25;
+        pet.lids[ld].position.y=(pet.type==='cat'?.012:.01)-shut*.008;
+      }
+    }
+    if(pet.jaw){
+      var pant=Math.max(0, Math.sin(pet.time*(moving?9:3.2)));
+      pet.jaw.rotation.x=(pet.jaw.userData.rx||Math.PI/2)+pant*(moving?0.16:0.05);
+    }
+    if(pet.tailSegs){
+      for(var ti=0;ti<pet.tailSegs.length;ti++){
+        var seg=pet.tailSegs[ti];
+        var wag=Math.sin(pet.time*(pet.type==='dog'?(moving?10:5.5):2.4)+ti*.8);
+        seg.rotation.z=wag*(pet.type==='dog'?(moving?0.4:0.62):0.2);
+        seg.rotation.x=(seg.userData.rx||0)+wag*(pet.type==='cat'?0.16:0.08);
+      }
+    }
+  }
+}
+function stepBloom(f, now, wind){
+  if(!f.head||f.w<.25) return;
+  var tp=f.t, ph=now+f.mesh.position.x*.4, kids=f.head.children, i, p;
+  if(tp===2){
+    var sun=(typeof dayPhase==='number'?dayPhase:.5);
+    f.head.rotation.y=Math.sin((sun-.5)*Math.PI)*.7;
+  }
+  for(i=0;i<kids.length;i++){
+    p=kids[i];
+    if(p.userData.bz!==undefined && p.isGroup){
+      p.rotation.z=p.userData.bz+Math.sin(ph*2.1+(p.userData.pi||i))*(.16+Math.abs(wind)*.1);
+      continue;
+    }
+    if(p.userData.px===undefined) continue;
+    var n=p.userData.pi||i;
+    if(tp===0) p.rotation.x=p.userData.px+Math.sin(ph*.85)*.045;
+    else if(tp==='tulip') p.rotation.x=p.userData.px+(.5+.5*Math.sin(ph*.4))*(n<3?.14:.07);
+    else if(tp==='lotus') p.rotation.x=p.userData.px+Math.sin(ph*1.35+n*.5)*.07;
+    else if(tp==='cherry') p.rotation.x=p.userData.px+Math.sin(ph*3.1+n)*.12*Math.max(.35,Math.abs(wind));
+    else if(tp===2) p.rotation.x=p.userData.px+Math.sin(ph*1.1+n)*.035;
+    else p.rotation.x=p.userData.px+Math.sin(ph*1.5+n)*.06;
+  }
+}
+function rustle(g, now, amp){
+  var leaves=g.userData&&g.userData.leaves;
+  if(leaves){
+    for(var i=0;i<leaves.length;i++){
+      var lf=leaves[i];
+      lf.rotation.z=(lf.userData.rz||0)+Math.sin(now*1.7+lf.position.x*2+i)*amp*.12;
+      lf.rotation.x=lf.userData.rx+Math.sin(now*1.25+i*.7)*amp*.05;
+    }
+  }
+  var heads=g.userData&&g.userData.heads;
+  if(heads){
+    for(var h=0;h<heads.length;h++){
+      heads[h].position.y=(heads[h].userData.by||heads[h].position.y)+Math.sin(now*1.6+h)*.03*amp;
+      heads[h].rotation.z=Math.sin(now*1.3+h)*.08*amp;
+    }
   }
 }
 window.stepPets=stepPets; window.stepWeather=stepWeather;
@@ -121,12 +198,13 @@ function animate(){
     if(f.leaves){for(var li2=0;li2<f.leaves.length;li2++){var lf=f.leaves[li2];lf.rotation.z=lf.userData.bz+wind*(.12+li2*.05);}}
     if(f.h>.5)f.b=Math.min(1,f.b+.72*dt);f.head.scale.setScalar(f.b);
     if(f.head)f.head.rotation.z=wind*(f.w<.25?.02:.07);
+    stepBloom(f, now, wind);
     var fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);
   }
   // Butterflies
   for(var bi2=0;bi2<bugs.length;bi2++){var bug=bugs[bi2];bug.time+=dt;var flap=Math.sin(bug.time*18);bug.wR1.rotation.y=.7+flap*.42;bug.wL1.rotation.y=-(.7+flap*.42);bug.wR2.rotation.y=.15+flap*.28;bug.wL2.rotation.y=-(.15+flap*.28);if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.7||bug.time>(bug.until||0)){bug.until=bug.time+2+Math.random()*3;if(flowers.length>0&&Math.random()>.25){var rf=flowers[Math.floor(Math.random()*flowers.length)];bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.6,rf.h*rf.mesh.scale.y+.8+Math.random()*.6,rf.mesh.position.z+(Math.random()-.5)*.6);}else{bug.target=new THREE.Vector3((Math.random()-.5)*22,1.1+Math.random()*2.2,(Math.random()-.5)*22);}}if(bug.target){bug.mesh.position.y-=bug.bob||0;_tv.copy(bug.target).sub(bug.mesh.position);var dist=_tv.length();if(dist>.04){_tv.multiplyScalar(Math.min(1,(bug.flight||1.4)*dt/dist));bug.mesh.position.add(_tv);}bug.bob=Math.sin(bug.time*3.1)*.16;bug.mesh.position.y+=bug.bob;bug.mesh.lookAt(bug.target);bug.mesh.rotateZ(Math.sin(bug.time*2.4)*.28);}}
   // Decos
-  decos.forEach(function(d){if(d.type==='tree'||d.type==='bush'||d.type==='flower_wild')d.group.rotation.z=Math.sin(now*.8+d.group.position.x)*.02;if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
+  decos.forEach(function(d){if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
       if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
       if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;
@@ -140,10 +218,11 @@ function animate(){
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
-  if(window._dress){for(var si=0;si<window._dress.length;si++){var sg=window._dress[si];sg.rotation.z=Math.sin(now*.7+sg.position.x)*.012;}}
+  if(window._dress){for(var si=0;si<window._dress.length;si++)rustle(window._dress[si],now,.85);}
   if(window._mills){for(var mi=0;mi<window._mills.length;mi++)window._mills[mi].rotation.z+=Math.min(dt,.05)*.7;}
+  if(window._blooms){for(var bl=0;bl<window._blooms.length;bl++){var bloom=window._blooms[bl];bloom.rotation.z=Math.sin(now*1.25+(bloom.userData.spin||0))*.1;bloom.rotation.x=Math.sin(now*.8+(bloom.userData.spin||0))*.06;}}
   if(dt>0) advanceHarvest(dt);
-  for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){hv.sway.rotation.z=Math.sin(now*1.35+hv.x)*.045;hv.sway.rotation.x=Math.sin(now*1.05+hv.z)*.03;}}
+  for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){var spd=hv.type==='strawberry'?2.5:hv.type==='carrot'?1.05:hv.type==='cucumber'?.85:hv.type==='pepper'?1.7:1.15;var amp=hv.type==='strawberry'?.07:hv.type==='carrot'?.045:hv.type==='cucumber'?.09:hv.type==='pepper'?.06:.035;hv.sway.rotation.z=Math.sin(now*spd+hv.x)*amp;hv.sway.rotation.x=Math.sin(now*spd*.8+hv.z)*amp*.65;if(hv.type==='cucumber')hv.sway.rotation.y=Math.sin(now*.6+hv.z)*.12;}}
 
   stepPets(dt);
 

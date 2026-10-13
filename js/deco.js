@@ -50,6 +50,10 @@ function foliage(g, x, y, z, s, rnd){
     p.rotation.order = 'YXZ';
     p.rotation.y = rnd() * 6.28 + i * 1.2;
     p.rotation.x = tilt + (rnd() - .5) * .12;
+    p.userData.rx = p.rotation.x;
+    p.userData.rz = p.rotation.z;
+    if(!g.userData.leaves) g.userData.leaves = [];
+    g.userData.leaves.push(p);
     g.add(p);
   });
 }
@@ -89,6 +93,9 @@ function buildBush(x, z){
     for(var i = 0; i < 4; i++){
       var head = new THREE.Group();
       head.position.set((rnd()-.5)*.65, .52 + rnd()*.15, (rnd()-.5)*.55);
+      head.userData.by = head.position.y;
+      if(!g.userData.heads) g.userData.heads = [];
+      g.userData.heads.push(head);
       var col = [0xf2d24a, 0xf28cb0, 0xf7f4ee][Math.floor(rnd()*3)];
       for(var k = 0; k < 5; k++){
         var p = new THREE.Mesh(petalGeo(.04, .075, .75), petalMat(col));
@@ -135,6 +142,9 @@ function shroom(g, ox, oz, sc, rnd){
   var capPts = [new THREE.Vector2(.012*sc,.18*sc), new THREE.Vector2(.1*sc,.16*sc), new THREE.Vector2(.2*sc,.09*sc), new THREE.Vector2(.25*sc,.02*sc), new THREE.Vector2(.18*sc,-.03*sc)];
   var cap = new THREE.Mesh(new THREE.LatheGeometry(capPts, 14), window.surf.cap);
   cap.position.set(ox, .2*sc, oz);
+  cap.userData.by = cap.position.y;
+  if(!g.userData.caps) g.userData.caps = [];
+  g.userData.caps.push(cap);
   g.add(cap);
   for(var k = 0; k < 5; k++){
     var a = (k/5)*Math.PI*2;
@@ -221,6 +231,7 @@ function buildLantern(x, z){
   var glass = new THREE.Mesh(new THREE.BoxGeometry(.22, .3, .22), new THREE.MeshStandardMaterial({color:0xffcc66, emissive:0xffaa22, emissiveIntensity:1.35, transparent:true, opacity:.82, roughness:.25}));
   glass.position.y = 1.78;
   g.add(glass);
+  g.userData.flame = glass;
   [-.13,.13].forEach(function(ox){ [-.13,.13].forEach(function(oz){
     var bar = new THREE.Mesh(new THREE.BoxGeometry(.035, .38, .035), iron);
     bar.position.set(ox, 1.78, oz);
@@ -530,10 +541,13 @@ function buildScarecrow(x, z){
   var post = new THREE.Mesh(new THREE.CylinderGeometry(.04, .05, 1.85, 6), wood);
   post.position.y = .88;
   g.add(post);
+  var armPivot = new THREE.Group();
+  armPivot.position.y = 1.38;
   var arm = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, 1.2, 5), wood);
   arm.rotation.z = Math.PI/2;
-  arm.position.y = 1.38;
-  g.add(arm);
+  armPivot.add(arm);
+  g.add(armPivot);
+  g.userData.arm = armPivot;
   var shirt = new THREE.Mesh(new THREE.BoxGeometry(.42, .46, .14), kept(0x9d2a1c, .9));
   shirt.position.y = 1.16;
   g.add(shirt);
@@ -646,7 +660,7 @@ function buildHouse(x, z, angle){
   return {group:g, light:lt};
 }
 
-function mkLantern(x,z){var o=buildLantern(x,z); pushDeco(o.group,'lantern',{light:o.light});}
+function mkLantern(x,z){var o=buildLantern(x,z); pushDeco(o.group,'lantern',{light:o.light, flame:o.group.userData.flame});}
 function mkBench(x,z,a){pushDeco(buildBench(x,z,a),'bench');}
 function mkStone(x,z){pushDeco(buildStone(x,z),'stone');}
 function mkMushroom(x,z){pushDeco(buildMushroom(x,z),'mushroom');}
@@ -717,7 +731,10 @@ function bedBloom(parent, x, y, z, col, sc){
   heart.position.y = .035;
   g.add(heart);
   g.position.set(x, y, z);
+  g.userData.spin = x * 1.7 + z;
   parent.add(g);
+  if(!window._blooms) window._blooms = [];
+  window._blooms.push(g);
 }
 function soilBed(x, z, r){
   var g = new THREE.Group();
@@ -807,6 +824,7 @@ function sceneryBarrel(x, z){
 function dressGarden(){
   window._dress = [];
   window._mills = [];
+  window._blooms = [];
   var xL = -14.5, xR = 14.5, zB = -12.6, zF = 13.2;
   railEdge(xL, zF, xR, zF);
   railEdge(xR, zF, xR, zB);
