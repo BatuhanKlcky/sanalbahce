@@ -8,24 +8,30 @@ function mkCat(x, z) {
   var mat = new THREE.MeshStandardMaterial({color:0xf5a050, roughness:.8});
   // Gövde
   var body = new THREE.Mesh(new THREE.SphereGeometry(.16,10,8), mat);
-  body.scale.set(1,.75,1.3); body.position.y=.18; g.add(body);
-  // Baş
-  var head = new THREE.Mesh(new THREE.SphereGeometry(.12,10,8), mat);
-  head.position.set(0,.35,.18); g.add(head);
-  // Kulaklar
-  [-.07,.07].forEach(function(ox){
-    var ear = new THREE.Mesh(new THREE.ConeGeometry(.04,.08,4), mat);
-    ear.position.set(ox,.48,.18); g.add(ear);
+  body.scale.set(1.05,.58,1.65); body.position.y=.16; g.add(body);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), mat);
+  head.position.set(0,.3,.28);
+  var muzzle=new THREE.Mesh(new THREE.SphereGeometry(.045,6,5), new THREE.MeshStandardMaterial({color:0xfff1e4,roughness:.7}));
+  muzzle.scale.set(1,.7,1); muzzle.position.set(0,-.02,.09); head.add(muzzle);
+  var nose=new THREE.Mesh(new THREE.SphereGeometry(.016,5,4), new THREE.MeshStandardMaterial({color:0x2a1a14,roughness:.5}));
+  nose.position.set(0,.01,.04); muzzle.add(nose);
+  g.add(head);
+  [-.055,.055].forEach(function(ox){
+    var ear = new THREE.Mesh(new THREE.ConeGeometry(.045,.16,4), mat);
+    ear.position.set(ox,.44,.26);
+    var inner=new THREE.Mesh(new THREE.ConeGeometry(.022,.09,4), new THREE.MeshStandardMaterial({color:0xe8a0b0,roughness:.7}));
+    inner.position.y=-.01; ear.add(inner);
+    g.add(ear);
   });
   // Gözler
   var eMat = new THREE.MeshStandardMaterial({color:0x22aa44, emissive:0x004400, emissiveIntensity:.5});
   [-.04,.04].forEach(function(ox){
     var eye = new THREE.Mesh(new THREE.SphereGeometry(.02,6,6), eMat);
-    eye.position.set(ox,.37,.29); g.add(eye);
+    eye.position.set(ox,.33,.39); g.add(eye);
   });
   // Kuyruk
-  var tail = new THREE.Mesh(new THREE.CylinderGeometry(.015,.025,.28,6), mat);
-  tail.position.set(0,.12,-.22); tail.rotation.x=-.8; g.add(tail);
+  var tail = new THREE.Mesh(new THREE.CylinderGeometry(.012,.02,.34,6), mat);
+  tail.position.set(0,.2,-.28); tail.rotation.x=-1.15; g.add(tail);
   var legs=[];
   [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
     var hip=new THREE.Group();
@@ -33,7 +39,7 @@ function mkCat(x, z) {
     var leg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.02,.12,5), mat);
     leg.position.y=-.06; hip.add(leg); g.add(hip); legs.push(hip);
   });
-  g.scale.setScalar(.9);
+  g.scale.setScalar(1.15);
   placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs);
 }
 
@@ -43,23 +49,21 @@ function mkDog(x, z) {
   var dMat = new THREE.MeshStandardMaterial({color:0x6b4020, roughness:.85});
   // Gövde
   var body = new THREE.Mesh(new THREE.SphereGeometry(.18,10,8), mat);
-  body.scale.set(1,.7,1.5); body.position.y=.2; g.add(body);
-  // Baş
-  var head = new THREE.Mesh(new THREE.SphereGeometry(.14,10,8), mat);
-  head.position.set(0,.38,.24); g.add(head);
+  body.scale.set(.9,.6,1.75); body.position.y=.2; g.add(body);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(.13,10,8), mat);
+  head.position.set(0,.36,.32); g.add(head);
   // Burun
   var snout = new THREE.Mesh(new THREE.SphereGeometry(.07,8,6), mat);
   snout.scale.set(1,.7,1.2); snout.position.set(0,.34,.36); g.add(snout);
   var nose = new THREE.Mesh(new THREE.SphereGeometry(.025,6,6), new THREE.MeshStandardMaterial({color:0x111111}));
   nose.position.set(0,.36,.43); g.add(nose);
   // Kulaklar (sarkık)
-  [-.1,.1].forEach(function(ox){
-    var ear = new THREE.Mesh(new THREE.SphereGeometry(.07,6,6), dMat);
-    ear.scale.set(.5,1.2,.4); ear.position.set(ox,.46,.22); g.add(ear);
+  [-.09,.09].forEach(function(ox){
+    var ear = new THREE.Mesh(new THREE.SphereGeometry(.06,6,6), dMat);
+    ear.scale.set(.55,1.7,.4); ear.position.set(ox,.4,.28); ear.rotation.z=ox>0?-.35:.35; g.add(ear);
   });
-  // Kuyruk
-  var tail = new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.22,5), mat);
-  tail.position.set(0,.28,-.28); tail.rotation.x=.6; g.add(tail);
+  var tail = new THREE.Mesh(new THREE.CylinderGeometry(.018,.028,.26,5), mat);
+  tail.position.set(0,.32,-.26); tail.rotation.x=1.05; g.add(tail);
   var legs=[];
   [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
     var hip=new THREE.Group();

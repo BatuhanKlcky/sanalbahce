@@ -61,8 +61,8 @@ function stepPets(dt){
       }
     }
     if(pet.tail){
-      if(pet.type==='dog'){pet.tail.rotation.x=moving?.85:.55;pet.tail.rotation.z=Math.sin(pet.time*(moving?7:12))*(moving?.28:.5);}
-      else{pet.tail.rotation.x=-.75+Math.sin(pet.time*2)*.12;pet.tail.rotation.z=Math.sin(pet.time*(moving?5:3))*.4;}
+      if(pet.type==='dog'){pet.tail.rotation.x=moving?1.15:.95;pet.tail.rotation.z=Math.sin(pet.time*(moving?7:12))*(moving?.28:.5);}
+      else{pet.tail.rotation.x=-1.2+Math.sin(pet.time*2)*.18;pet.tail.rotation.z=Math.sin(pet.time*(moving?5:3))*.45;}
     }
   }
 }
