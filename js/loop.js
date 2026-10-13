@@ -85,8 +85,9 @@ function stepPets(dt){
       var bph=pet.time%win;
       var shut=bph>win-.2?Math.sin((bph-(win-.2))/.2*Math.PI):0;
       for(var ld=0;ld<pet.lids.length;ld++){
-        pet.lids[ld].scale.y=.28+shut*1.25;
-        pet.lids[ld].position.y=(pet.type==='cat'?.012:.01)-shut*.008;
+        var restS=pet.lids[ld].userData.restS||.12, restY=pet.lids[ld].userData.restY||.02;
+        pet.lids[ld].scale.y=restS+shut*1.15;
+        pet.lids[ld].position.y=restY-shut*restY;
       }
     }
     if(pet.jaw){
