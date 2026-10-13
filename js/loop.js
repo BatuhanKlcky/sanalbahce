@@ -149,7 +149,58 @@ function rustle(g, now, amp){
     }
   }
 }
-window.stepPets=stepPets; window.stepWeather=stepWeather;
+function stepButterflies(dt){
+  for(var bi2=0;bi2<bugs.length;bi2++){
+    var bug=bugs[bi2];
+    bug.time+=dt;
+    if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.9||bug.time>(bug.until||0)){
+      bug.until=bug.time+2.6+Math.random()*3.4;
+      if(flowers.length&&Math.random()>.2){
+        var rf=flowers[Math.floor(Math.random()*flowers.length)];
+        bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.9, rf.h*rf.mesh.scale.y+.62+Math.random()*.55, rf.mesh.position.z+(Math.random()-.5)*.9);
+      }else{
+        bug.target=new THREE.Vector3((Math.random()-.5)*18, 1.15+Math.random()*1.7, (Math.random()-.5)*18);
+      }
+    }
+    bug.mesh.position.y-=bug.bob||0;
+    _tv.copy(bug.target).sub(bug.mesh.position);
+    var dist=_tv.length();
+    var hovering=dist<1.25;
+    var speed=hovering?.62:(bug.flight||1.25);
+    var hx=0, hz=1, distH=Math.hypot(_tv.x,_tv.z);
+    if(distH>.08){ hx=_tv.x/distH; hz=_tv.z/distH; }
+    if(dist>.04){
+      _tv.multiplyScalar(Math.min(1, speed*dt/dist));
+      bug.mesh.position.add(_tv);
+    }
+    var phase=bug.time*(hovering?2.3:1.15)+bi2*1.7;
+    var drift=Math.sin(phase);
+    var dAmp=hovering?.32:.11;
+    var d=(drift-(bug._drift||0))*dAmp;
+    bug._drift=drift;
+    bug.mesh.position.x+=-hz*d;
+    bug.mesh.position.z+=hx*d;
+    var hzFlap=hovering?(bug.hz||10)*.62:(bug.hz||10);
+    var s=Math.sin(bug.time*hzFlap);
+    var s2=Math.sin(bug.time*hzFlap-.5);
+    var amp=hovering?.34:.86;
+    var open=hovering?.28:.4;
+    var lift=open+s*amp;
+    var liftH=open*.75+s2*amp*.7;
+    if(bug.wR1){ bug.wR1.rotation.z=lift; bug.wL1.rotation.z=-lift; }
+    if(bug.wR2){ bug.wR2.rotation.z=liftH; bug.wL2.rotation.z=-liftH; }
+    bug.bob=Math.sin(bug.time*hzFlap-.7)*(hovering?.035:.07)+Math.sin(bug.time*1.7)*.035;
+    bug.mesh.position.y+=bug.bob;
+    bug.mesh.lookAt(bug.target);
+    bug.mesh.rotateZ(drift*(hovering?.18:.42));
+    bug.mesh.rotateX(hovering?-.42:(-.2-Math.max(0,s)*.22));
+    if(bug.ants){
+      bug.ants[0].rotation.x=Math.sin(bug.time*2.6)*.18;
+      bug.ants[1].rotation.x=Math.sin(bug.time*2.6+.5)*.18;
+    }
+  }
+}
+window.stepPets=stepPets; window.stepWeather=stepWeather; window.stepButterflies=stepButterflies;
 window.togglePerf = function(){
   _perfMode = _perfMode==='low' ? 'high' : 'low';
   localStorage.setItem('gdn_perf', _perfMode);
@@ -208,7 +259,7 @@ function animate(){
     var fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);
   }
   // Butterflies
-  for(var bi2=0;bi2<bugs.length;bi2++){var bug=bugs[bi2];bug.time+=dt;var flap=Math.sin(bug.time*18);bug.wR1.rotation.y=.7+flap*.42;bug.wL1.rotation.y=-(.7+flap*.42);bug.wR2.rotation.y=.15+flap*.28;bug.wL2.rotation.y=-(.15+flap*.28);if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.7||bug.time>(bug.until||0)){bug.until=bug.time+2+Math.random()*3;if(flowers.length>0&&Math.random()>.25){var rf=flowers[Math.floor(Math.random()*flowers.length)];bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.6,rf.h*rf.mesh.scale.y+.8+Math.random()*.6,rf.mesh.position.z+(Math.random()-.5)*.6);}else{bug.target=new THREE.Vector3((Math.random()-.5)*22,1.1+Math.random()*2.2,(Math.random()-.5)*22);}}if(bug.target){bug.mesh.position.y-=bug.bob||0;_tv.copy(bug.target).sub(bug.mesh.position);var dist=_tv.length();if(dist>.04){_tv.multiplyScalar(Math.min(1,(bug.flight||1.4)*dt/dist));bug.mesh.position.add(_tv);}bug.bob=Math.sin(bug.time*3.1)*.16;bug.mesh.position.y+=bug.bob;bug.mesh.lookAt(bug.target);bug.mesh.rotateZ(Math.sin(bug.time*2.4)*.28);}}
+  if(dt>0) stepButterflies(dt);
   // Decos
   decos.forEach(function(d){if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
