@@ -26,6 +26,7 @@ function unlockAudio(){if(_muted)return;ac();startAmb();}
 window.toggleSound=function(){_muted=!_muted;localStorage.setItem('gdn_mute',_muted?'1':'0');if(_master)_master.gain.value=_muted?0:1;paintSound();if(!_muted){ac();startAmb();}showToast(_muted?'Ses kapalı 🔇':'Ses açık 🔊');};
 document.addEventListener('pointerdown',unlockAudio);
 document.addEventListener('touchstart',unlockAudio);
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
 paintSound();
 window.ambTick=ambTick;
 

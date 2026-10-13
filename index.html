@@ -2,7 +2,15 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07140c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sanal Bahçe">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 <title>Sanal Bahce</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -12,11 +20,12 @@ body{margin:0;overflow:hidden;background:#010103;touch-action:manipulation}
 canvas{touch-action:none}
 #dayOverlay{position:fixed;inset:0;pointer-events:none;z-index:5;transition:background 3s ease}
 .wfx{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity 1s}
-#sidebar{position:fixed;top:50%;left:10px;transform:translateY(-50%);z-index:1100;display:flex;flex-direction:column;gap:8px}
+#sidebar{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));bottom:calc(208px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));z-index:1100;display:flex;flex-direction:column;justify-content:safe center;gap:8px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+#sidebar::-webkit-scrollbar{width:0;height:0}
 .sbb{background:rgba(6,10,20,.88);border:1px solid rgba(255,255,255,.12);border-radius:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;backdrop-filter:blur(16px);transition:transform .2s,background .2s;-webkit-tap-highlight-color:transparent}
 .sbb:active{transform:scale(.88)}.sbb.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)}
-.spanel{position:fixed;top:50%;left:66px;transform:translateY(-50%) translateX(-8px);z-index:1100;background:rgba(6,10,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;width:min(236px, calc(100vw - 80px));backdrop-filter:blur(24px);color:#fff;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-height:80vh;overflow-y:auto}
-.spanel.open{opacity:1;pointer-events:auto;z-index:1200;transform:translateY(-50%) translateX(0)}
+.spanel{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:calc(66px + env(safe-area-inset-left,0px));transform:translateX(-8px);z-index:1100;background:rgba(6,10,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;width:min(236px, calc(100vw - 90px - env(safe-area-inset-left,0px)));backdrop-filter:blur(24px);color:#fff;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-height:calc(100vh - 220px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto}
+.spanel.open{opacity:1;pointer-events:auto;z-index:1200;transform:translateX(0)}
 .spanel h3{font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.4);margin:10px 0 7px;text-transform:uppercase}
 .spanel h3:first-child{margin-top:0}
 .dg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
@@ -32,11 +41,11 @@ canvas{touch-action:none}
 #xpLabel{font-size:10px;color:rgba(255,255,255,.5);margin:10px 0 4px;display:flex;justify-content:space-between}
 #xpTrack{background:rgba(255,255,255,.08);border-radius:10px;height:6px}
 #xpFill{height:6px;border-radius:10px;background:linear-gradient(90deg,#fbbf24,#f97316);width:0%;transition:width .6s}
-#pBar{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(6,10,20,.95);border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:10px 20px;color:#fbbf24;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:16px}
+#pBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(6,10,20,.95);border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:10px 20px;color:#fbbf24;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:16px;max-width:calc(100vw - 150px)}
 #pBar.show{display:flex}
 #pBar button{background:rgba(255,80,80,.2);border:1px solid rgba(255,80,80,.4);color:#ff6666;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer}
-#wIcon{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:1100;font-size:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
-#lvBadge{position:fixed;top:calc(50px + env(safe-area-inset-top,0px));right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)}
+#wIcon{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;font-size:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+#lvBadge{position:fixed;top:calc(50px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)}
 .ui-container{position:fixed;bottom:0;left:0;right:0;padding:0 12px 12px;z-index:1000}
 @supports (padding:env(safe-area-inset-bottom)){.ui-container{padding-bottom:calc(env(safe-area-inset-bottom) + 12px)}}
 .ui-panel{max-width:440px;margin:0 auto;background:rgba(6,10,20,.92);padding:14px;border-radius:24px;color:#fff;text-align:center;border:1px solid rgba(0,180,255,.12);backdrop-filter:blur(24px);box-shadow:0 -4px 40px rgba(0,0,0,.8)}
@@ -89,7 +98,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 
 @keyframes floatUp{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-180px) scale(.4)}}
 
-#delBar{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(30,0,0,.95);border:1px solid rgba(255,80,80,.4);border-radius:16px;padding:10px 20px;color:#ff6666;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:12px}
+#delBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(30,0,0,.95);border:1px solid rgba(255,80,80,.4);border-radius:16px;padding:10px 20px;color:#ff6666;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:12px;max-width:calc(100vw - 150px)}
 #delBar.show{display:flex}
 .del-highlight{outline:2px solid #ff4444;outline-offset:2px}
 </style>
@@ -208,8 +217,8 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 </div>
 <div id="wIcon">☀️</div>
 <div id="lvBadge">⭐ Lv.1</div>
-<div id="coinBadge" style="position:fixed;top:calc(86px + env(safe-area-inset-top,0px));right:14px;z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)">💰 0</div>
-<div class="sbb on" id="btnSnd" onclick="window.toggleSound()" style="position:fixed;top:calc(126px + env(safe-area-inset-top,0px));right:14px;z-index:1100">🔊</div>
+<div id="coinBadge" style="position:fixed;top:calc(86px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)">💰 0</div>
+<div class="sbb on" id="btnSnd" onclick="window.toggleSound()" style="position:fixed;top:calc(126px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100">🔊</div>
 <div id="saveInd">OK</div>
 <div id="toast"></div>
 <div class="ui-container">
