@@ -61,11 +61,15 @@ function stepPets(dt){
       }
     }
     if(pet.tail){
-      if(pet.type==='dog'){pet.tail.rotation.x=moving?1.15:.95;pet.tail.rotation.z=Math.sin(pet.time*(moving?7:12))*(moving?.28:.5);}
-      else{pet.tail.rotation.x=-1.2+Math.sin(pet.time*2)*.18;pet.tail.rotation.z=Math.sin(pet.time*(moving?5:3))*.45;}
+      if(pet.type==='dog'){pet.tail.rotation.x=.12;pet.tail.rotation.y=Math.sin(pet.time*(moving?8:5))*(moving?0.5:0.28);}
+      else{pet.tail.rotation.x=Math.sin(pet.time*2)*.06;pet.tail.rotation.y=.15+Math.sin(pet.time*2.2)*.4;}
     }
     var breath=Math.sin(pet.time*(pet.type==='cat'?1.7:2.4));
-    if(pet.body) pet.body.scale.set(1, 1+breath*(pet.type==='cat'?0.028:0.045), 1);
+    if(pet.body){
+      var baseS=pet.body.userData.base, br=1+breath*(pet.type==='cat'?0.028:0.045);
+      if(baseS) pet.body.scale.set(baseS.x, baseS.y*br, baseS.z);
+      else pet.body.scale.set(1, br, 1);
+    }
     if(pet.head){
       var nod=Math.sin(pet.time*1.15)*.05;
       if(pet.type==='dog'&&moving) nod+=Math.sin(gait)*.07;
@@ -77,7 +81,7 @@ function stepPets(dt){
         var ear=pet.ears[ei];
         var tw=Math.sin(pet.time*(pet.type==='cat'?4.4:1.5)+ei*1.8);
         ear.rotation.z=(ear.userData.rz||0)+tw*(pet.type==='cat'?0.14:0.06);
-        if(pet.type==='dog') ear.rotation.x=Math.sin((moving?gait*.5:pet.time*2)+ei)*(moving?0.28:0.1);
+        if(pet.type==='dog') ear.rotation.x=(ear.userData.rx||0)+Math.sin((moving?gait*.5:pet.time*2)+ei)*(moving?0.22:0.08);
       }
     }
     if(pet.lids){
@@ -92,7 +96,8 @@ function stepPets(dt){
     }
     if(pet.jaw){
       var pant=Math.max(0, Math.sin(pet.time*(moving?9:3.2)));
-      pet.jaw.rotation.x=(pet.jaw.userData.rx||Math.PI/2)+pant*(moving?0.16:0.05);
+      var jx=pet.jaw.userData.rx; if(jx==null) jx=Math.PI/2;
+      pet.jaw.rotation.x=jx+pant*(moving?0.2:0.06);
     }
     if(pet.tailSegs){
       for(var ti=0;ti<pet.tailSegs.length;ti++){
