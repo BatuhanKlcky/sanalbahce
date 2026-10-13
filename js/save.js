@@ -40,6 +40,7 @@ function updXP(){
   document.getElementById('xpM').textContent=maxed?'—':mx;
   document.getElementById('xpFill').style.width=(maxed?100:Math.min(100,mx?xp/mx*100:0))+'%';
   document.getElementById('lvBadge').textContent='⭐ Lv.'+level;
+  paintAccount();
 }
 function chkTask(k,r,count){
   if(!tasks[k]||tasks[k].done) return;
@@ -92,6 +93,7 @@ function loadStats(){
   }
   saveStats();updStats();
   _progressReady = true;
+  takeScoreHash();
 }
 function saveStats(){
   stats.time=_timeBase+Math.floor((Date.now()-_sessionStart)/60000);
@@ -114,6 +116,7 @@ function updStats(){
   if(e('st-coin'))e('st-coin').textContent=stats.coin;
   var cb=document.getElementById('coinBadge');
   if(cb)cb.textContent='💰 '+stats.coin;
+  paintAccount();
 }
 function addCoin(n, quiet){
   n=Math.round(Number(n))||0;
@@ -219,6 +222,8 @@ function updateWidgetData(){
     level: level,
     coin: stats.coin,
     streak: stats.streak,
+    name: accountName(),
+    score: gardenScore(),
     lastUpdate: Date.now()
   };
   localStorage.setItem('gdn_widget', JSON.stringify(widgetData));
@@ -227,14 +232,147 @@ function updateWidgetData(){
 // Widget verisi her 5 dakikada güncelle
 setInterval(updateWidgetData, 300000);
 
-// ── BAHÇE PAYLAŞIM ────────────────────────────────────────────────────────
+// ── HESAP / SKOR ──────────────────────────────────────────────────────────
+// Skor bu cihazda durur. Başka cihaz, kopyalanan bağlantıdaki kartla aynı
+// seviye, coin ve seriyi açar. Bahçe düzeni kartta yoktur.
+var ACCT_KEY='gdn_account';
+function accountName(){
+  try{var d=JSON.parse(localStorage.getItem(ACCT_KEY)||'null');if(d&&d.name)return d.name;}catch(e){}
+  return '';
+}
+function gardenScore(){
+  return (level|0)*1000+(stats.streak|0)*25+(Math.round(stats.coin)||0);
+}
+function nameOk(name){
+  if(name.length<2||name.length>16) return false;
+  if(/[\n\r|]/.test(name)) return false;
+  return /[0-9A-Za-zÀ-ÿĞğİıÖöŞşÜüÇç]/.test(name);
+}
+function b64utf(s){
+  return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function unb64utf(s){
+  s=String(s).replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4) s+='=';
+  return decodeURIComponent(escape(atob(s)));
+}
+function scoreSig(s){
+  var h=2166136261;
+  for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(36);
+}
+function makeScoreCard(){
+  var payload=['1',accountName(),level|0,Math.floor(xp),Math.round(stats.coin)||0,stats.streak|0,stats.lastDay||''].join('|');
+  return 'SB1.'+b64utf(payload)+'.'+scoreSig(payload);
+}
+function extractCard(raw){
+  var s=String(raw||'').trim();
+  var hash=s.match(/[#&?]skor=(SB1\.[A-Za-z0-9_-]+\.[a-z0-9]+)/);
+  if(hash) return hash[1];
+  var direct=s.replace(/\s+/g,'').match(/SB1\.[A-Za-z0-9_-]+\.[a-z0-9]+/);
+  return direct?direct[0]:'';
+}
+function whole(n){return typeof n==='number'&&isFinite(n)&&Math.floor(n)===n;}
+function applyScoreCard(raw){
+  var card=extractCard(raw);
+  var m=card.match(/^SB1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)$/);
+  if(!m) return null;
+  var payload;
+  try{payload=unb64utf(m[1]);}catch(e){return null;}
+  if(scoreSig(payload)!==m[2]) return null;
+  var p=payload.split('|');
+  if(p.length!==7||p[0]!=='1') return null;
+  var name=p[1].trim().replace(/\s+/g,' ');
+  if(!nameOk(name)) return null;
+  var lv=Number(p[2]),px=Number(p[3]),coin=Number(p[4]),streak=Number(p[5]);
+  if(!whole(lv)||lv<1||lv>10) return null;
+  if(!whole(px)||px<0||px>1000000) return null;
+  if(lv<10&&px>=XPL[lv]) return null;
+  if(!whole(coin)||coin<0||coin>9999999) return null;
+  if(!whole(streak)||streak<0||streak>9999) return null;
+  var day=p[6];
+  var parsed=Date.parse(day);
+  if(!day||day.length>40||isNaN(parsed)) return null;
+  if(parsed>Date.now()+36*3600*1000) return null;
+  return {name:name,level:lv,xp:px,coin:coin,streak:streak,lastDay:day};
+}
+function commitScore(got){
+  level=got.level;
+  xp=got.xp;
+  stats.coin=got.coin;
+  stats.streak=got.streak;
+  stats.lastDay=got.lastDay;
+  localStorage.setItem(ACCT_KEY,JSON.stringify({name:got.name}));
+  var nameEl=document.getElementById('acctName');
+  if(nameEl) nameEl.value=got.name;
+  saveProg();
+  saveStats();
+  updXP();
+  updStats();
+}
+function paintAccount(){
+  var name=accountName();
+  var who=document.getElementById('acctWho');
+  if(who) who.textContent=name||'İsim yok';
+  var sc=String(gardenScore());
+  var box=document.getElementById('acctScore');
+  if(box) box.textContent=sc;
+  var st=document.getElementById('st-score');
+  if(st) st.textContent=sc;
+  var card=document.getElementById('acctCard');
+  if(card&&document.activeElement!==card) card.value=name?makeScoreCard():'';
+}
+function takeScoreHash(){
+  if((location.hash||'').indexOf('skor=')<0) return;
+  var got=applyScoreCard(location.hash);
+  if(history.replaceState) history.replaceState(null,'',location.pathname+location.search);
+  if(got){commitScore(got);showToast(got.name+' skorun açıldı');}
+  else showToast('Kart okunamadı');
+}
+window.addEventListener('hashchange', takeScoreHash);
+window.saveAccount=function(){
+  var el=document.getElementById('acctName');
+  var name=((el&&el.value)||'').trim().replace(/\s+/g,' ');
+  if(!nameOk(name)){showToast('İsim 2-16 karakter olsun');return;}
+  localStorage.setItem(ACCT_KEY,JSON.stringify({name:name}));
+  if(el) el.value=name;
+  paintAccount();
+  showToast('Hesap kaydedildi');
+};
+window.copyScore=function(){
+  if(!accountName()){showToast('Önce bir isim kaydet');return;}
+  var link=makeScoreCard();
+  try{var u=new URL(location.href);u.hash='skor='+makeScoreCard();link=u.toString();}catch(e){}
+  var box=document.getElementById('acctPaste');
+  var done=function(){showToast('Bağlantı kopyalandı');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(done).catch(function(){
+      if(box){box.value=link;box.focus();box.select();}
+      showToast('Bağlantıyı kendin kopyala');
+    });
+  } else {
+    if(box){box.value=link;box.focus();box.select();}
+    showToast('Bağlantıyı kendin kopyala');
+  }
+};
+window.openScore=function(){
+  var el=document.getElementById('acctPaste');
+  var got=applyScoreCard(el&&el.value);
+  if(!got){showToast('Kart okunamadı');return;}
+  commitScore(got);
+  if(el) el.value='';
+  showToast('Skor açıldı');
+};
+window.gardenScore=gardenScore;
+
 window.shareBahce = function(){
   var tot=0; flowers.forEach(function(f){tot+=f.w;});
   var avgW = flowers.length ? Math.round(tot/flowers.length*100) : 0;
-  var text = '🌿 Sanal Bahçem\n'
+  var who=accountName();
+  var text = '🌿 '+(who?who+' bahçesi':'Sanal Bahçem')+'\n'
     + '🌸 '+flowers.length+' çiçek | 💧 %'+avgW+' nem\n'
-    + '⭐ Seviye '+level+' | 💰 '+stats.coin+' coin\n'
-    + '🔥 '+stats.streak+' günlük streak\n'
+    + '⭐ Seviye '+level+' | 🏆 Skor '+gardenScore()+'\n'
+    + '💰 '+stats.coin+' coin | 🔥 '+stats.streak+' gün\n'
     + 'Sanal Bahçe uygulamasında!';
   if(navigator.share){
     navigator.share({title:'Sanal Bahçem', text:text}).catch(function(){});

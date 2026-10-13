@@ -90,6 +90,14 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 #statsPanel .stat-val{font-weight:800;color:#fbbf24}
 #statsPanel .streak-fire{font-size:18px}
 .streak-active{color:#ff6b35!important}
+.acct-in{width:100%;margin:6px 0;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:700}
+#acctName{font-size:16px}
+.acct-row{display:flex;gap:6px;align-items:center}
+.acct-row .acct-in{flex:1;margin:6px 0}
+.acct-btn{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.12);color:#fbbf24;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;width:100%;margin:4px 0;-webkit-tap-highlight-color:transparent}
+.acct-row .acct-btn{width:auto;margin:6px 0;flex-shrink:0}
+.acct-hint{font-size:10px;color:rgba(255,255,255,.35);line-height:1.4;margin:4px 0 8px}
+#acctWho{font-size:13px;font-weight:800;color:#fff}
 
 
 
@@ -200,6 +208,18 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 
 <!-- İSTATİSTİKLER PANELİ -->
 <div class="spanel" id="statsPanel">
+  <h3>Hesap</h3>
+  <div id="acctWho">İsim yok</div>
+  <div class="acct-row">
+    <input class="acct-in" id="acctName" maxlength="16" placeholder="Bahçe adı" autocomplete="off" autocapitalize="words" onkeydown="if(event.key==='Enter')window.saveAccount()">
+    <button type="button" class="acct-btn" onclick="window.saveAccount()">Kaydet</button>
+  </div>
+  <div class="stat-row"><span>🏆 Skor</span><span class="stat-val" id="acctScore">0</span></div>
+  <input class="acct-in" id="acctCard" readonly placeholder="Skor kartın">
+  <button type="button" class="acct-btn" onclick="window.copyScore()">Bağlantıyı kopyala</button>
+  <input class="acct-in" id="acctPaste" placeholder="Kartı yapıştır" autocomplete="off">
+  <button type="button" class="acct-btn" onclick="window.openScore()">Bu cihazda aç</button>
+  <div class="acct-hint">Bağlantı, kopyaladığın andaki seviyeyi, coin’i ve seriyi diğer cihazda açar. Skor = seviye×1000 + seri×25 + coin.</div>
   <h3>📊 Bahçe İstatistikleri</h3>
   <div class="stat-row"><span>🌊 Toplam Sulama</span><span class="stat-val" id="st-water">0</span></div>
   <div class="stat-row"><span>🌱 Toplam Ekilen</span><span class="stat-val" id="st-plant">0</span></div>
@@ -214,6 +234,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
   <div class="stat-row"><span>🌶️ Biber</span><span class="stat-val" id="st-pep">0</span></div>
   <div class="stat-row"><span>🥕 Havuç</span><span class="stat-val" id="st-car">0</span></div>
   <div class="stat-row"><span>💰 Toplam Coin</span><span class="stat-val" id="st-coin">0</span></div>
+  <div class="stat-row"><span>🏆 Skor</span><span class="stat-val" id="st-score">0</span></div>
 </div>
 <div id="wIcon">☀️</div>
 <div id="lvBadge">⭐ Lv.1</div>
