@@ -140,6 +140,7 @@ function animate(){
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
+  if(window._dress){for(var si=0;si<window._dress.length;si++){var sg=window._dress[si];sg.rotation.z=Math.sin(now*.7+sg.position.x)*.012;}}
   if(dt>0) advanceHarvest(dt);
   for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){hv.sway.rotation.z=Math.sin(now*1.35+hv.x)*.045;hv.sway.rotation.x=Math.sin(now*1.05+hv.z)*.03;}}
 

@@ -126,8 +126,8 @@ function grassTile(){
     for(var x=0;x<s;x++){
       var u=x/s,v=y/s;
       var mid=vnoise(u*8,v*8,8),fine=vnoise(u*28,v*28,28);
-      var rr=54+mid*10+fine*6,gg=104+mid*12+fine*6,bb=48+mid*6;
-      if(fine<.22){rr*=.86;gg*=.88;bb*=.84;}
+      var rr=38+mid*14+fine*7,gg=74+mid*18+fine*8,bb=30+mid*7;
+      if(fine<.2){rr-=6;gg-=12;bb-=4;}
       var i=(y*s+x)*4;d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255;
     }
   }

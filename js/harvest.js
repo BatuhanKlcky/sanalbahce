@@ -40,58 +40,96 @@ function cropTexture(type){
   _cropTex[type]=tex;
   return tex;
 }
+function fruitMat(type){
+  return new THREE.MeshStandardMaterial({map:cropTexture(type),color:0xffffff,roughness:.62,metalness:0,emissive:0x000000,emissiveIntensity:0});
+}
+function cropLeaf(pivot, px, py, pz, rz, s){
+  var sh = new THREE.Shape();
+  sh.moveTo(0,0); sh.quadraticCurveTo(.24,.1,0,.5); sh.quadraticCurveTo(-.08,.18,0,0);
+  var m = new THREE.Mesh(new THREE.ShapeGeometry(sh, 6), new THREE.MeshStandardMaterial({color:0x2d7a38, side:THREE.DoubleSide, roughness:.75}));
+  m.position.set(px, py, pz);
+  m.rotation.set(.35, .2, rz);
+  m.scale.setScalar(s||1);
+  pivot.add(m);
+  return m;
+}
 function mkHarvestPlant(x, z, type, stage) {
   stage = stage || 0;
   var cfg = HARVEST_TYPES[type];
   if (!cfg) return;
   var g = new THREE.Group();
-  var soil = new THREE.Mesh(new THREE.CircleGeometry(.62, 12),
-    new THREE.MeshStandardMaterial({color:0x6a4428, roughness:1}));
-  soil.rotation.x = -Math.PI/2; soil.position.y = .008; g.add(soil);
+  var soilMat = new THREE.MeshStandardMaterial({color:0x6a4428, roughness:1});
+  var disc = new THREE.Mesh(new THREE.CircleGeometry(.5, 14), soilMat);
+  disc.rotation.x = -Math.PI/2; disc.position.y = .02; disc.scale.set(1.25, .8, 1); g.add(disc);
+  var mound = new THREE.Mesh(new THREE.SphereGeometry(.36, 10, 8), soilMat);
+  mound.scale.set(1.45, .42, 1.15); mound.position.y = .06; g.add(mound);
   var pivot = new THREE.Group(); g.add(pivot);
-  var stemH=.36+stage*.22;
-  var stem = new THREE.Mesh(new THREE.CylinderGeometry(.018,.026,stemH,6),
-    new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
-  stem.position.y = stemH/2; pivot.add(stem);
-  if (stage > 0) {
-    var lMat = new THREE.MeshStandardMaterial({color:0x217838, side:THREE.DoubleSide, roughness:.75});
-    var lSh = new THREE.Shape(); lSh.moveTo(0,0); lSh.quadraticCurveTo(.22,.08,0,.42); lSh.quadraticCurveTo(-.06,.18,0,0);
-    var lGeo = new THREE.ShapeGeometry(lSh, 6);
-    var lf = new THREE.Mesh(lGeo, lMat); lf.position.set(.04,stemH*.55,0); lf.rotation.set(.2,.3,.6); pivot.add(lf);
-    var lf2 = new THREE.Mesh(lGeo, lMat); lf2.position.set(-.04,stemH*.4,.02); lf2.rotation.set(-.15,-.4,-.55); pivot.add(lf2);
-  }
-  if (stage === 2) {
-    var fruitGeo, fruitY=stemH*.72, fruitScale=null, fruitRot=null;
-    if(type==='cucumber'){fruitGeo=new THREE.CylinderGeometry(.065,.05,.32,10);fruitY=stemH*.62;fruitRot=[0,0,.7];}
-    else if(type==='pepper'){fruitGeo=new THREE.SphereGeometry(.1,12,10);fruitY=stemH*.78;fruitScale=[.7,1.25,.7];fruitRot=[.2,0,.35];}
-    else if(type==='carrot'){fruitGeo=new THREE.ConeGeometry(.07,.36,10);fruitY=.16;}
-    else if(type==='strawberry'){fruitGeo=new THREE.SphereGeometry(.1,12,10);fruitY=stemH*.7;fruitScale=[1,.82,1];}
-    else fruitGeo=new THREE.SphereGeometry(.12,12,12);
-    var fruit = new THREE.Mesh(fruitGeo,
-      new THREE.MeshStandardMaterial({map:cropTexture(type),color:0xffffff,roughness:.62,metalness:0,emissive:0x000000,emissiveIntensity:0}));
-    fruit.position.y = fruitY;
-    if(fruitScale) fruit.scale.set(fruitScale[0],fruitScale[1],fruitScale[2]);
-    if(fruitRot) fruit.rotation.set(fruitRot[0],fruitRot[1],fruitRot[2]);
-    pivot.add(fruit);
-    if(type==='carrot'){
-      for(var li=0;li<3;li++){
-        var leaf=new THREE.Mesh(new THREE.ConeGeometry(.02,.16,5), new THREE.MeshStandardMaterial({color:0x2f8a34,roughness:.8}));
-        leaf.position.set(Math.cos(li*2.1)*.03,.4,Math.sin(li*2.1)*.03);
-        leaf.rotation.z=(li-1)*.35; pivot.add(leaf);
-      }
-    }else{
-      var cap=new THREE.Mesh(new THREE.SphereGeometry(.055,6,5), new THREE.MeshStandardMaterial({color:0x2c7a34,roughness:.8}));
-      cap.scale.set(1.15,.4,1.15); cap.position.y=fruitY+(type==='strawberry'?.06:.1); pivot.add(cap);
+  var grown = stage > 0;
+  var ripe = stage === 2;
+  if(type==='strawberry'){
+    for(var i=0;i<5;i++){
+      var a=i/5*Math.PI*2;
+      var lf=cropLeaf(pivot, Math.cos(a)*.14, .08, Math.sin(a)*.12, .9, grown?1:.5);
+      lf.rotation.x = 1.05; lf.rotation.y = a;
     }
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(.22,.012,6,20),
+    if(ripe){
+      [[.12,.1,.04],[-.1,.09,-.05],[.02,.11,-.12]].forEach(function(p){
+        var fr=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), fruitMat('strawberry'));
+        fr.scale.set(1,.78,1); fr.position.set(p[0], p[1]+.1, p[2]); pivot.add(fr);
+        var cap=new THREE.Mesh(new THREE.SphereGeometry(.04,5,4), new THREE.MeshStandardMaterial({color:0x2c7a34, roughness:.8}));
+        cap.scale.y=.35; cap.position.set(p[0], p[1]+.045, p[2]); pivot.add(cap);
+      });
+    }
+  }else if(type==='carrot'){
+    for(var i=0;i<5;i++){
+      var a=i/5*Math.PI*2;
+      var lf=cropLeaf(pivot, Math.cos(a)*.05, ripe?.34:.2, Math.sin(a)*.05, .2, grown?1:.55);
+      lf.rotation.y=a; lf.rotation.x=1.15;
+    }
+    if(ripe){
+      var root=new THREE.Mesh(new THREE.ConeGeometry(.12,.5,10), fruitMat('carrot'));
+      root.rotation.x=Math.PI; root.position.y=.2; pivot.add(root);
+    }
+  }else if(type==='cucumber'){
+    var vine=new THREE.Mesh(new THREE.CylinderGeometry(.016,.022,.6,5), new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
+    vine.rotation.z=1.15; vine.position.set(.2, grown?.16:.1, 0); pivot.add(vine);
+    cropLeaf(pivot, .08, .16, .02, .55, grown?1:.55);
+    cropLeaf(pivot, -.06, .12, -.04, -.6, grown?.85:.45);
+    if(ripe){
+      var cuke=new THREE.Mesh(new THREE.CylinderGeometry(.08,.065,.52,10), fruitMat('cucumber'));
+      cuke.rotation.z=1.2; cuke.position.set(.28,.1,.05); pivot.add(cuke);
+    }
+  }else{
+    var stemH = ripe ? .7 : (grown ? .46 : .22);
+    var stem=new THREE.Mesh(new THREE.CylinderGeometry(.016,.024,stemH,6), new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
+    stem.position.y=stemH/2; pivot.add(stem);
+    if(grown){
+      cropLeaf(pivot, .08, stemH*.55, 0, .6, 1);
+      cropLeaf(pivot, -.06, stemH*.4, .03, -.55, .9);
+    }
+    if(ripe && type==='pepper'){
+      var pep=new THREE.Mesh(new THREE.SphereGeometry(.13,12,10), fruitMat('pepper'));
+      pep.scale.set(.6,1.45,.6); pep.position.set(.12, stemH*.62, .06); pep.rotation.z=.6; pivot.add(pep);
+      var stem2=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.12,4), new THREE.MeshStandardMaterial({color:0x2c7a34, roughness:.8}));
+      stem2.position.set(.06, stemH*.95, .02); pivot.add(stem2);
+    }else if(ripe){
+      [[0,.02],[.12,-.06],[-.1,0]].forEach(function(p){
+        var tom=new THREE.Mesh(new THREE.SphereGeometry(.13,12,10), fruitMat('tomato'));
+        tom.position.set(p[0], stemH*.72+p[1], p[0]*.25); pivot.add(tom);
+        var cap=new THREE.Mesh(new THREE.SphereGeometry(.045,5,4), new THREE.MeshStandardMaterial({color:0x2c7a34, roughness:.8}));
+        cap.scale.set(1.2,.35,1.2); cap.position.set(p[0], stemH*.72+p[1]+.07, p[0]*.25); pivot.add(cap);
+      });
+    }
+  }
+  if(ripe){
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(.28,.012,6,20),
       new THREE.MeshStandardMaterial({color:0xe2b340, emissive:0xaa8800, emissiveIntensity:.45, roughness:.6}));
-    ring.rotation.x = Math.PI/2; ring.position.y = .04; g.add(ring);
+    ring.rotation.x = Math.PI/2; ring.position.y = .045; g.add(ring);
   }
   g.position.set(x, 0, z);
   scene.add(g);
   var item = {group:g, type:type, stage:stage, growTimer:0, x:x, z:z, cfg:cfg, sway:pivot};
   harvestItems.push(item);
-  // Tıklanabilir hitbox
   var hb = new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,.8,8),
     new THREE.MeshBasicMaterial({visible:false}));
   hb.userData.harvestIdx = harvestItems.length - 1;

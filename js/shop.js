@@ -8,7 +8,10 @@ function mkCat(x, z) {
   var mat = new THREE.MeshStandardMaterial({color:0xf5a050, roughness:.8});
   // Gövde
   var body = new THREE.Mesh(new THREE.SphereGeometry(.16,10,8), mat);
-  body.scale.set(1.05,.58,1.65); body.position.y=.16; g.add(body);
+  body.scale.set(1.05,.58,1.65); body.position.y=.16;
+  var chest=new THREE.Mesh(new THREE.SphereGeometry(.075,6,5), new THREE.MeshStandardMaterial({color:0xfff3e6,roughness:.75}));
+  chest.scale.set(1,.65,.55); chest.position.set(0,-.03,.1); body.add(chest);
+  g.add(body);
   var head = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), mat);
   head.position.set(0,.3,.28);
   var muzzle=new THREE.Mesh(new THREE.SphereGeometry(.045,6,5), new THREE.MeshStandardMaterial({color:0xfff1e4,roughness:.7}));
@@ -39,7 +42,7 @@ function mkCat(x, z) {
     var leg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.02,.12,5), mat);
     leg.position.y=-.06; hip.add(leg); g.add(hip); legs.push(hip);
   });
-  g.scale.setScalar(1.15);
+  g.scale.setScalar(2.05);
   placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs);
 }
 
@@ -71,9 +74,12 @@ function mkDog(x, z) {
     var leg=new THREE.Mesh(new THREE.CylinderGeometry(.03,.025,.15,5), mat);
     leg.position.y=-.075; hip.add(leg); g.add(hip); legs.push(hip);
   });
+  g.scale.setScalar(1.9);
   placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs);
 }
 function placePet(g, type, x, z, tail, msg, legs){
+  var sh=new THREE.Mesh(new THREE.CircleGeometry(.32,10), new THREE.MeshBasicMaterial({color:0x1a2a14,transparent:true,opacity:.28,depthWrite:false}));
+  sh.rotation.x=-Math.PI/2; sh.position.y=.02; g.add(sh);
   g.position.set(x, 0, z);
   scene.add(g);
   pets.push({mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail, legs:legs||null});
