@@ -4,20 +4,30 @@ function showToast(m){var e=document.getElementById('toast');e.textContent=m;e.c
 function showSave(){var e=document.getElementById('saveInd');e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},1800);}
 
 // ── AUDIO ────────────────────────────────────────────────────────────────────
-var _ac=null;
-function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
-function tone(f,t,d,v,dl){try{var c=ac(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t||'sine';o.frequency.setValueAtTime(f,c.currentTime+(dl||0));g.gain.setValueAtTime(v||.1,c.currentTime+(dl||0));g.gain.exponentialRampToValueAtTime(.001,c.currentTime+(dl||0)+d);o.start(c.currentTime+(dl||0));o.stop(c.currentTime+(dl||0)+d);}catch(e){}}
-function sndWater(){try{var c=ac(),b=c.createBuffer(1,c.sampleRate*.4,c.sampleRate),da=b.getChannelData(0);for(var i=0;i<da.length;i++)da[i]=(Math.random()*2-1)*.25;var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type='bandpass';f.frequency.value=700;g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);s.buffer=b;s.connect(f);f.connect(g);g.connect(c.destination);s.start();s.stop(c.currentTime+.4);}catch(e){}tone(520,'sine',.25,.07,.05);tone(680,'sine',.18,.05,.12);}
+var _ac=null,_master=null,_sndN=0,_amb=null,_muted=localStorage.getItem('gdn_mute')==='1';
+function canHear(){if(_muted)return false;if(document.visibilityState==='hidden')return false;if(typeof isLoading!=='undefined'&&isLoading)return false;return true;}
+function ac(){if(!_ac){_ac=new(window.AudioContext||window.webkitAudioContext)();_master=_ac.createGain();_master.gain.value=_muted?0:1;_master.connect(_ac.destination);}if(!_muted&&_ac.state==='suspended')_ac.resume();return _ac;}
+function tone(f,t,d,v,dl){if(!canHear())return;try{var c=ac(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(_master);o.type=t||'sine';o.frequency.setValueAtTime(f,c.currentTime+(dl||0));g.gain.setValueAtTime(v||.1,c.currentTime+(dl||0));g.gain.exponentialRampToValueAtTime(.001,c.currentTime+(dl||0)+d);o.start(c.currentTime+(dl||0));o.stop(c.currentTime+(dl||0)+d);_sndN++;}catch(e){}}
+function sndWater(){if(!canHear())return;try{var c=ac(),b=c.createBuffer(1,c.sampleRate*.4,c.sampleRate),da=b.getChannelData(0);for(var i=0;i<da.length;i++)da[i]=(Math.random()*2-1)*.25;var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type='bandpass';f.frequency.value=700;g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);s.buffer=b;s.connect(f);f.connect(g);g.connect(_master);s.start();s.stop(c.currentTime+.4);_sndN++;}catch(e){}tone(520,'sine',.25,.07,.05);tone(680,'sine',.18,.05,.12);}
 function sndPlant(){tone(440,'sine',.12,.09);tone(554,'sine',.12,.07,.13);tone(659,'sine',.2,.09,.25);}
 function sndBug(){tone(880,'sine',.07,.06);tone(1100,'sine',.07,.06,.1);tone(880,'sine',.07,.06,.2);}
 function sndKill(){tone(220,'sawtooth',.13,.12);tone(160,'sawtooth',.16,.09,.13);}
 function sndLvl(){[523,659,784,1047].forEach(function(f,i){tone(f,'sine',.26,.12,i*.12);});}
 function sndTask(){tone(784,'sine',.1,.09);tone(1047,'sine',.16,.09,.14);}
 function sndBird(){[[880,0],[1100,.13],[880,.26],[1320,.4],[1100,.53]].forEach(function(n){tone(n[0],'sine',.09,.03,n[1]);});}
-var _amb=null;
-function startAmb(){if(_amb)return;_amb=setInterval(function(){var ns=[330,392,440,494,523,587,659];if(Math.random()<.3)tone(ns[Math.floor(Math.random()*ns.length)],'sine',.55,.022+Math.random()*.025);if((dayPhase<.229||dayPhase>=.896)===false&&Math.random()<.06)sndBird();},2800);}
-document.addEventListener('click',startAmb,{once:true});
-document.addEventListener('touchstart',startAmb,{once:true});
+function sndCoin(){tone(880,'sine',.1,.1);tone(1100,'sine',.15,.08,.12);tone(1320,'sine',.2,.08,.25);}
+function sndPet(){tone(520,'sine',.1,.07);tone(640,'sine',.14,.06,.1);}
+function sndRain(){tone(740,'sine',.2,.04);tone(880,'sine',.25,.03,.12);tone(660,'sine',.3,.03,.22);}
+function daytime(){return !(dayPhase<.229||dayPhase>=.896);}
+function ambTick(){if(!canHear()||!daytime())return;var ns=[330,392,440,494,523,587,659];if(Math.random()<.3)tone(ns[Math.floor(Math.random()*ns.length)],'sine',.55,.022+Math.random()*.025);if(Math.random()<.06)sndBird();}
+function startAmb(){if(_amb)return;_amb=setInterval(ambTick,2800);}
+function paintSound(){var b=document.getElementById('btnSnd');if(!b)return;b.textContent=_muted?'🔇':'🔊';b.classList.toggle('on',!_muted);}
+function unlockAudio(){if(_muted)return;ac();startAmb();}
+window.toggleSound=function(){_muted=!_muted;localStorage.setItem('gdn_mute',_muted?'1':'0');if(_master)_master.gain.value=_muted?0:1;paintSound();if(!_muted){ac();startAmb();}showToast(_muted?'Ses kapalı 🔇':'Ses açık 🔊');};
+document.addEventListener('pointerdown',unlockAudio);
+document.addEventListener('touchstart',unlockAudio);
+paintSound();
+window.ambTick=ambTick;
 
 // ── WEATHER FX ───────────────────────────────────────────────────────────────
 var rCvs=document.getElementById('rainCvs'),rCtx=rCvs.getContext('2d');
@@ -29,9 +39,9 @@ function initRain(){rDrops=[];var rainCount=isMobile?60:120;for(var i=0;i<rainCo
 function drawRain(dt){var step=Math.min(Math.max(dt||0,0),.05);rCtx.clearRect(0,0,rCvs.width,rCvs.height);rDrops.forEach(function(d){rCtx.beginPath();rCtx.moveTo(d.x,d.y);rCtx.lineTo(d.x-2,d.y+d.l);rCtx.strokeStyle='rgba(180,220,255,'+d.o+')';rCtx.lineWidth=1;rCtx.stroke();d.y+=d.s*step;if(d.y>rCvs.height){d.y=-d.l;d.x=Math.random()*rCvs.width;}});}
 function initWx(tp){wxParts=[];var n=tp==='snow'?(isMobile?80:150):(isMobile?40:80);for(var i=0;i<n;i++)wxParts.push({x:Math.random()*wCvs.width,y:Math.random()*wCvs.height,sz:tp==='snow'?2+Math.random()*4:8+Math.random()*12,sp:(tp==='snow'?1+Math.random()*2:2+Math.random()*3)*60,dr:(Math.random()-.5)*48,rot:Math.random()*Math.PI*2,rs:(Math.random()-.5)*3,o:.4+Math.random()*.6,col:tp==='snow'?'#fff':['#e8732a','#d4522a','#c8a020','#8b4513'][Math.floor(Math.random()*4)]});}
 function drawWx(dt){var step=Math.min(Math.max(dt||0,0),.05);wCtx.clearRect(0,0,wCvs.width,wCvs.height);wxParts.forEach(function(p){wCtx.save();wCtx.globalAlpha=p.o;if(curWeather==='snow'){wCtx.fillStyle=p.col;wCtx.beginPath();wCtx.arc(p.x,p.y,p.sz,0,Math.PI*2);wCtx.fill();}else{wCtx.translate(p.x,p.y);wCtx.rotate(p.rot);wCtx.fillStyle=p.col;wCtx.beginPath();wCtx.ellipse(0,0,p.sz,p.sz*.5,0,0,Math.PI*2);wCtx.fill();}wCtx.restore();p.y+=p.sp*step;p.x+=p.dr*step+Math.sin(p.y*.02)*30*step;p.rot+=p.rs*step;if(p.y>wCvs.height+20){p.y=-20;p.x=Math.random()*wCvs.width;}});}
-function startRain(){if(isRaining)return;isRaining=true;_rainLeft=RAIN_DUR;initRain();rCvs.style.opacity='1';if(typeof flowers!=='undefined')flowers.forEach(function(f){soak(f,.3);});if(!isLoading)showToast('🌧️ Yağmur yağıyor!');}
+function startRain(){if(isRaining)return;isRaining=true;_rainLeft=RAIN_DUR;initRain();rCvs.style.opacity='1';if(typeof flowers!=='undefined')flowers.forEach(function(f){soak(f,.3);});if(!isLoading){showToast('🌧️ Yağmur yağıyor!');sndRain();}}
 function stopRain(){if(!isRaining&&!rDrops.length)return;isRaining=false;_rainLeft=0;rDrops=[];rCtx.clearRect(0,0,rCvs.width,rCvs.height);rCvs.style.opacity='0';}
-window.setWeather=function(tp){curWeather=tp;if(tp==='clear'){wCvs.style.opacity='0';wxParts=[];wCtx.clearRect(0,0,wCvs.width,wCvs.height);if(!isLoading)showToast('☀️ Hava açıldı!');}else{initWx(tp);wCvs.style.opacity='1';if(!isLoading)showToast(tp==='snow'?'❄️ Kar yağıyor, bitkiler üşüdü':'🍂 Yapraklar dökülüyor...');}markDirty();};
+window.setWeather=function(tp){curWeather=tp;if(tp==='clear'){wCvs.style.opacity='0';wxParts=[];wCtx.clearRect(0,0,wCvs.width,wCvs.height);if(!isLoading){showToast('☀️ Hava açıldı!');tone(720,'sine',.16,.05);}}else{initWx(tp);wCvs.style.opacity='1';if(!isLoading){showToast(tp==='snow'?'❄️ Kar yağıyor, bitkiler üşüdü':'🍂 Yapraklar dökülüyor...');tone(tp==='snow'?392:520,'triangle',.2,.05);}}markDirty();};
 window.startRain=startRain;window.stopRain=stopRain;
 
 // ── DAY/NIGHT ────────────────────────────────────────────────────────────────

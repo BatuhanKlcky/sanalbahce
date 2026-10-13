@@ -71,6 +71,7 @@ function placePet(g, type, x, z, tail, msg){
   pets.push({mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail});
   if(isLoading) return;
   showToast(msg);
+  sndPet();
   markDirty(); save(true);
 }
 
@@ -264,14 +265,14 @@ window.buyItem = function(id) {
     purchasedItems.sel = id;
     saveShop(); saveStats(); updStats(); renderShop();
     showToast(item.emoji+' çantada: '+purchasedItems[id]);
-    tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
+    sndCoin();
     return;
   }
   if(!purchasedItems[id]){
     stats.coin -= item.price;
     purchasedItems[id] = true;
     saveShop(); saveStats(); updStats(); renderShop();
-    tone(880,'sine',.1,.12); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
+    sndCoin();
   }
   window.beginShopPlace(item);
 };

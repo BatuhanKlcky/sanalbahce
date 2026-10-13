@@ -75,7 +75,7 @@ function harvestPlant(idx) {
   harvestItems.forEach(function(it, i){ it.group.children.forEach(function(ch){ if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i; }); });
   updStats(); saveStats();
   showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰');
-  tone(880,'sine',.1,.1); tone(1100,'sine',.15,.1,.12); tone(1320,'sine',.2,.1,.25);
+  sndCoin();
   markDirty();
 }
 
