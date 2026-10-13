@@ -10,46 +10,86 @@ var HARVEST_TYPES = {
   carrot:    {emoji:'🥕', color:0xff7a1a, stages:['🌱','🌿','🥕'], growTime:80,  coin:12, statKey:'car'}
 };
 
+var _cropTex={};
+function cropTexture(type){
+  if(_cropTex[type]) return _cropTex[type];
+  var c=document.createElement('canvas');c.width=c.height=64;
+  var g=c.getContext('2d');
+  if(type==='strawberry'){
+    g.fillStyle='#d4143a';g.fillRect(0,0,64,64);
+    g.fillStyle='#f3d27a';
+    for(var i=0;i<32;i++){g.beginPath();g.arc((i*19)%60+2,(i*13)%58+3,1.4,0,6.28);g.fill();}
+  }else if(type==='cucumber'){
+    g.fillStyle='#3c9a3a';g.fillRect(0,0,64,64);
+    g.strokeStyle='#1e5c24';g.lineWidth=4;
+    for(var i=0;i<6;i++){g.beginPath();g.moveTo(0,i*11);g.lineTo(64,i*11+6);g.stroke();}
+  }else if(type==='pepper'){
+    var grd=g.createLinearGradient(0,0,64,64);
+    grd.addColorStop(0,'#ff5a42');grd.addColorStop(1,'#8a140e');
+    g.fillStyle=grd;g.fillRect(0,0,64,64);
+  }else if(type==='carrot'){
+    var grd=g.createLinearGradient(0,0,0,64);
+    grd.addColorStop(0,'#ffc56a');grd.addColorStop(1,'#e25800');
+    g.fillStyle=grd;g.fillRect(0,0,64,64);
+  }else{
+    var grd=g.createRadialGradient(24,20,4,32,34,34);
+    grd.addColorStop(0,'#ff6844');grd.addColorStop(1,'#9c1a0c');
+    g.fillStyle=grd;g.fillRect(0,0,64,64);
+  }
+  var tex=new THREE.CanvasTexture(c);
+  _cropTex[type]=tex;
+  return tex;
+}
 function mkHarvestPlant(x, z, type, stage) {
   stage = stage || 0;
   var cfg = HARVEST_TYPES[type];
   if (!cfg) return;
   var g = new THREE.Group();
-  // Toprak yaması
-  var soil = new THREE.Mesh(new THREE.CircleGeometry(.7, 12),
-    new THREE.MeshStandardMaterial({color:0x3d1f00, roughness:1}));
-  soil.rotation.x = -Math.PI/2; soil.position.y = .005; g.add(soil);
-  // Sap
-  var stem = new THREE.Mesh(new THREE.CylinderGeometry(.025,.03,.4+stage*.2,6),
-    new THREE.MeshStandardMaterial({color:0x2d7a20, roughness:.9}));
-  stem.position.y = .2+stage*.1; g.add(stem);
-  // Yaprak
+  var soil = new THREE.Mesh(new THREE.CircleGeometry(.62, 12),
+    new THREE.MeshStandardMaterial({color:0x6a4428, roughness:1}));
+  soil.rotation.x = -Math.PI/2; soil.position.y = .008; g.add(soil);
+  var pivot = new THREE.Group(); g.add(pivot);
+  var stemH=.36+stage*.22;
+  var stem = new THREE.Mesh(new THREE.CylinderGeometry(.018,.026,stemH,6),
+    new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
+  stem.position.y = stemH/2; pivot.add(stem);
   if (stage > 0) {
-    var lMat = new THREE.MeshStandardMaterial({color:0x1a8c30, side:THREE.DoubleSide, roughness:.8});
-    var lSh = new THREE.Shape(); lSh.moveTo(0,0); lSh.quadraticCurveTo(.2,.1,0,.4); lSh.quadraticCurveTo(-.05,.2,0,0);
+    var lMat = new THREE.MeshStandardMaterial({color:0x217838, side:THREE.DoubleSide, roughness:.75});
+    var lSh = new THREE.Shape(); lSh.moveTo(0,0); lSh.quadraticCurveTo(.22,.08,0,.42); lSh.quadraticCurveTo(-.06,.18,0,0);
     var lGeo = new THREE.ShapeGeometry(lSh, 6);
-    var lf = new THREE.Mesh(lGeo, lMat); lf.position.set(.05,.3,0); lf.rotation.set(.1,.2,.5); g.add(lf);
+    var lf = new THREE.Mesh(lGeo, lMat); lf.position.set(.04,stemH*.55,0); lf.rotation.set(.2,.3,.6); pivot.add(lf);
+    var lf2 = new THREE.Mesh(lGeo, lMat); lf2.position.set(-.04,stemH*.4,.02); lf2.rotation.set(-.15,-.4,-.55); pivot.add(lf2);
   }
-  // Meyve (stage 2)
   if (stage === 2) {
-    var fruitGeo, fruitY=.55, fruitScale=null;
-    if(type==='cucumber'){fruitGeo=new THREE.CylinderGeometry(.07,.06,.3,8);fruitY=.7;}
-    else if(type==='pepper'){fruitGeo=new THREE.SphereGeometry(.1,10,8);fruitY=.62;fruitScale=[.75,1.35,.75];}
-    else if(type==='carrot'){fruitGeo=new THREE.ConeGeometry(.07,.34,8);fruitY=.3;}
-    else fruitGeo=new THREE.SphereGeometry(.12,10,10);
+    var fruitGeo, fruitY=stemH*.72, fruitScale=null, fruitRot=null;
+    if(type==='cucumber'){fruitGeo=new THREE.CylinderGeometry(.065,.05,.32,10);fruitY=stemH*.62;fruitRot=[0,0,.7];}
+    else if(type==='pepper'){fruitGeo=new THREE.SphereGeometry(.1,12,10);fruitY=stemH*.78;fruitScale=[.7,1.25,.7];fruitRot=[.2,0,.35];}
+    else if(type==='carrot'){fruitGeo=new THREE.ConeGeometry(.07,.36,10);fruitY=.16;}
+    else if(type==='strawberry'){fruitGeo=new THREE.SphereGeometry(.1,12,10);fruitY=stemH*.7;fruitScale=[1,.82,1];}
+    else fruitGeo=new THREE.SphereGeometry(.12,12,12);
     var fruit = new THREE.Mesh(fruitGeo,
-      new THREE.MeshStandardMaterial({color:cfg.color, roughness:.5, emissive:cfg.color, emissiveIntensity:.1}));
+      new THREE.MeshStandardMaterial({map:cropTexture(type),color:0xffffff,roughness:.62,metalness:0,emissive:0x000000,emissiveIntensity:0}));
     fruit.position.y = fruitY;
     if(fruitScale) fruit.scale.set(fruitScale[0],fruitScale[1],fruitScale[2]);
-    g.add(fruit);
-    // Parlayan halka (hasat hazır)
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(.22,.02,6,20),
-      new THREE.MeshStandardMaterial({color:0xffcc00, emissive:0xffaa00, emissiveIntensity:1.5}));
-    ring.rotation.x = Math.PI/2; ring.position.y = .05; g.add(ring);
+    if(fruitRot) fruit.rotation.set(fruitRot[0],fruitRot[1],fruitRot[2]);
+    pivot.add(fruit);
+    if(type==='carrot'){
+      for(var li=0;li<3;li++){
+        var leaf=new THREE.Mesh(new THREE.ConeGeometry(.02,.16,5), new THREE.MeshStandardMaterial({color:0x2f8a34,roughness:.8}));
+        leaf.position.set(Math.cos(li*2.1)*.03,.4,Math.sin(li*2.1)*.03);
+        leaf.rotation.z=(li-1)*.35; pivot.add(leaf);
+      }
+    }else{
+      var cap=new THREE.Mesh(new THREE.SphereGeometry(.055,6,5), new THREE.MeshStandardMaterial({color:0x2c7a34,roughness:.8}));
+      cap.scale.set(1.15,.4,1.15); cap.position.y=fruitY+(type==='strawberry'?.06:.1); pivot.add(cap);
+    }
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(.22,.012,6,20),
+      new THREE.MeshStandardMaterial({color:0xe2b340, emissive:0xaa8800, emissiveIntensity:.45, roughness:.6}));
+    ring.rotation.x = Math.PI/2; ring.position.y = .04; g.add(ring);
   }
   g.position.set(x, 0, z);
   scene.add(g);
-  var item = {group:g, type:type, stage:stage, growTimer:0, x:x, z:z, cfg:cfg};
+  var item = {group:g, type:type, stage:stage, growTimer:0, x:x, z:z, cfg:cfg, sway:pivot};
   harvestItems.push(item);
   // Tıklanabilir hitbox
   var hb = new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,.8,8),

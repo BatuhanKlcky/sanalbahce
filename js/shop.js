@@ -26,13 +26,15 @@ function mkCat(x, z) {
   // Kuyruk
   var tail = new THREE.Mesh(new THREE.CylinderGeometry(.015,.025,.28,6), mat);
   tail.position.set(0,.12,-.22); tail.rotation.x=-.8; g.add(tail);
-  // Bacaklar
+  var legs=[];
   [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
-    var leg = new THREE.Mesh(new THREE.CylinderGeometry(.025,.02,.12,5), mat);
-    leg.position.set(p[0]*.08,.06,p[1]*.1); g.add(leg);
+    var hip=new THREE.Group();
+    hip.position.set(p[0]*.08,.12,p[1]*.1);
+    var leg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.02,.12,5), mat);
+    leg.position.y=-.06; hip.add(leg); g.add(hip); legs.push(hip);
   });
   g.scale.setScalar(.9);
-  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!');
+  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs);
 }
 
 function mkDog(x, z) {
@@ -58,17 +60,19 @@ function mkDog(x, z) {
   // Kuyruk
   var tail = new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.22,5), mat);
   tail.position.set(0,.28,-.28); tail.rotation.x=.6; g.add(tail);
-  // Bacaklar
+  var legs=[];
   [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(p){
-    var leg = new THREE.Mesh(new THREE.CylinderGeometry(.03,.025,.15,5), mat);
-    leg.position.set(p[0]*.1,.07,p[1]*.12); g.add(leg);
+    var hip=new THREE.Group();
+    hip.position.set(p[0]*.1,.15,p[1]*.12);
+    var leg=new THREE.Mesh(new THREE.CylinderGeometry(.03,.025,.15,5), mat);
+    leg.position.y=-.075; hip.add(leg); g.add(hip); legs.push(hip);
   });
-  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!');
+  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs);
 }
-function placePet(g, type, x, z, tail, msg){
+function placePet(g, type, x, z, tail, msg, legs){
   g.position.set(x, 0, z);
   scene.add(g);
-  pets.push({mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail});
+  pets.push({mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail, legs:legs||null});
   if(isLoading) return;
   showToast(msg);
   sndPet();
@@ -339,8 +343,7 @@ function mkFountain(x,z){
   var base=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.6,.25,16,1,true),sM);base.position.y=.12;g.add(base);
   var floor=new THREE.Mesh(new THREE.CircleGeometry(1.4,16),sM);floor.rotation.x=-Math.PI/2;floor.position.y=.01;g.add(floor);
   // Su
-  var wM=new THREE.MeshStandardMaterial({color:0x44aadd,roughness:0,metalness:.2,transparent:true,opacity:.8});
-  var water=new THREE.Mesh(new THREE.CircleGeometry(1.3,16),wM);water.rotation.x=-Math.PI/2;water.position.y=.2;g.add(water);
+  var water=new THREE.Mesh(new THREE.CircleGeometry(1.3,16),window._waterMat);water.rotation.x=-Math.PI/2;water.position.y=.2;g.add(water);
   // Orta sütun
   var col=new THREE.Mesh(new THREE.CylinderGeometry(.08,.12,.6,8),sM);col.position.y=.55;g.add(col);
   // Üst kase

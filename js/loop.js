@@ -1,6 +1,6 @@
 // Oyun dongusu.
 // ── ANIMATE ──────────────────────────────────────────────────────────────────
-var _tc=new THREE.Color(),_cd=new THREE.Color(0x2a1a0a),_cg=new THREE.Color(0x0f2e1a),_cd2=new THREE.Color(0x0a0a0a),_tv=new THREE.Vector3();
+var _tc=new THREE.Color(),_cd=new THREE.Color(0x2a1a0a),_soil=new THREE.Color(0x6b4f32),_cd2=new THREE.Color(0x2a2218),_tv=new THREE.Vector3(),_petDir=new THREE.Vector3();
 var _fc=0,_lc='',_eClock=document.getElementById('clock'),_eHp=document.getElementById('hp');
 var growNames=['🌱 Tohum','🌿 Fide','🌸 Filiz','🌺 Tam Çiçek'];
 var growSteps=[.20,.45,.80,1.3];
@@ -41,17 +41,29 @@ function stepPets(dt){
     pet.wander=(pet.wander||0)+dt;
     var arrived=pet.target&&pet.mesh.position.distanceTo(pet.target)<.5;
     if(!pet.target||arrived||pet.wander>6){ pet.wander=0; pickPetTarget(pet); }
-    var dir=pet.target.clone().sub(pet.mesh.position); dir.y=0;
-    if(dir.length()>.05){
-      var step=Math.min(dir.length(), PET_SPEED*dt);
-      dir.normalize().multiplyScalar(step);
-      pet.mesh.position.add(dir);
+    _petDir.copy(pet.target).sub(pet.mesh.position); _petDir.y=0;
+    var moving=false;
+    if(_petDir.length()>.05){
+      var step=Math.min(_petDir.length(), PET_SPEED*dt);
+      moving=step>.004;
+      _petDir.normalize().multiplyScalar(step);
+      pet.mesh.position.add(_petDir);
       var rad=Math.hypot(pet.mesh.position.x, pet.mesh.position.z);
       if(rad>PET_R){ pet.mesh.position.x*=PET_R/rad; pet.mesh.position.z*=PET_R/rad; }
     }
-    pet.mesh.position.y=Math.abs(Math.sin(pet.time*8))*.04;
+    var gait=pet.time*(pet.type==='dog'?11:9);
+    pet.mesh.position.y=moving?Math.abs(Math.sin(gait))*.03:Math.sin(pet.time*2)*.008;
     pet.mesh.lookAt(pet.target.x, pet.mesh.position.y, pet.target.z);
-    if(pet.tail) pet.tail.rotation.z=Math.sin(pet.time*(pet.type==='dog'?12:3))*(pet.type==='dog'?0.5:0.4);
+    if(pet.legs){
+      for(var li=0;li<pet.legs.length;li++){
+        var phase=(li===0||li===3)?0:Math.PI;
+        pet.legs[li].rotation.x=Math.sin((moving?gait:pet.time*1.5)+phase)*(moving?.5:.06);
+      }
+    }
+    if(pet.tail){
+      if(pet.type==='dog'){pet.tail.rotation.x=moving?.85:.55;pet.tail.rotation.z=Math.sin(pet.time*(moving?7:12))*(moving?.28:.5);}
+      else{pet.tail.rotation.x=-.75+Math.sin(pet.time*2)*.12;pet.tail.rotation.z=Math.sin(pet.time*(moving?5:3))*.4;}
+    }
   }
 }
 window.stepPets=stepPets; window.stepWeather=stepWeather;
@@ -86,6 +98,7 @@ function animate(){
     updDN(dayPhase);
   }
   if(skyMat&&_fc%2===0)skyMat.uniforms.uTime.value=now;
+  if(window._waterMat)window._waterMat.uniforms.uTime.value=now;
   // Zararlı ve yağmur duvar saatiyle. Uzun arka plan boşluğunda sürü halinde doğmaz.
   if(dt>0){
     _bugAcc+=dt;
@@ -101,15 +114,19 @@ function animate(){
   if(dt>0) advancePlants(dt);
   // Flowers
   for(var fi=0;fi<flowers.length;fi++){var f=flowers[fi];
-    if(f.w<.25){if(_fc%3===0){var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){if(ch2[ci].material&&ch2[ci].material.color)ch2[ci].material.color.lerp(_cd,.015);}f.grass.material.color.lerp(_cd2,.015);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,.65,.025);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,.25,.025);}
-    else{if(_fc%3===0){_tc.set(f.c);var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){var mat=ch2[ci].material;if(mat&&mat.color&&mat.emissiveIntensity===undefined)mat.color.lerp(_tc,.04);}f.grass.material.color.lerp(_cg,.04);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,0,.04);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,0,.04);}
+    var wind=Math.sin(now*1.15+f.mesh.position.x*.65+f.mesh.position.z*.4);
+    var gust=.65+.35*Math.sin(now*.33+f.mesh.position.z);
+    if(f.w<.25){if(_fc%3===0){var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){if(ch2[ci].material&&ch2[ci].material.color)ch2[ci].material.color.lerp(_cd,.015);}f.grass.material.color.lerp(_cd2,.015);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,.55+wind*.04,.12);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,.22,.12);}
+    else{if(_fc%3===0){_tc.set(f.c);var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){var mat=ch2[ci].material;if(mat&&mat.color&&mat.emissiveIntensity===undefined)mat.color.lerp(_tc,.04);}f.grass.material.color.lerp(_soil,.04);}var amp=(.04+gust*.028)*(.55+Math.min(f.w,1.2)*.4);f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,wind*amp,.08);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,Math.sin(now*.9+f.mesh.position.z)*amp*.35,.08);}
+    if(f.leaves){for(var li2=0;li2<f.leaves.length;li2++){var lf=f.leaves[li2];lf.rotation.z=lf.userData.bz+wind*(.12+li2*.05);}}
     if(f.h>.5)f.b=Math.min(1,f.b+.72*dt);f.head.scale.setScalar(f.b);
-    var sw=Math.sin(now*.8+f.mesh.position.x)*.018,fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);f.mesh.rotation.z+=(sw-f.mesh.rotation.z)*.05;
+    if(f.head)f.head.rotation.z=wind*(f.w<.25?.02:.07);
+    var fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);
   }
   // Butterflies
-  for(var bi2=0;bi2<bugs.length;bi2++){var bug=bugs[bi2];bug.time+=.15;if(_fc%2!==0)continue;var fl2=Math.sin(bug.time*5)*.95;bug.wR1.rotation.y=fl2;bug.wL1.rotation.y=-fl2;bug.wR2.rotation.y=fl2*.6;bug.wL2.rotation.y=-fl2*.6;if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.4||Math.random()<.004){if(flowers.length>0&&Math.random()>.25){var rf=flowers[Math.floor(Math.random()*flowers.length)];bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.5,rf.h*rf.mesh.scale.y+1,rf.mesh.position.z+(Math.random()-.5)*.5);}else{bug.target=new THREE.Vector3((Math.random()-.5)*22,1+Math.random()*4,(Math.random()-.5)*22);}}bug.mesh.position.lerp(bug.target,bug.speed);bug.mesh.position.y+=Math.sin(bug.time*1.5)*.015;bug.mesh.lookAt(bug.target);}
+  for(var bi2=0;bi2<bugs.length;bi2++){var bug=bugs[bi2];bug.time+=dt;var flap=Math.sin(bug.time*18);bug.wR1.rotation.y=.7+flap*.42;bug.wL1.rotation.y=-(.7+flap*.42);bug.wR2.rotation.y=.15+flap*.28;bug.wL2.rotation.y=-(.15+flap*.28);if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.7||bug.time>(bug.until||0)){bug.until=bug.time+2+Math.random()*3;if(flowers.length>0&&Math.random()>.25){var rf=flowers[Math.floor(Math.random()*flowers.length)];bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.6,rf.h*rf.mesh.scale.y+.8+Math.random()*.6,rf.mesh.position.z+(Math.random()-.5)*.6);}else{bug.target=new THREE.Vector3((Math.random()-.5)*22,1.1+Math.random()*2.2,(Math.random()-.5)*22);}}if(bug.target){bug.mesh.position.y-=bug.bob||0;_tv.copy(bug.target).sub(bug.mesh.position);var dist=_tv.length();if(dist>.04){_tv.multiplyScalar(Math.min(1,(bug.flight||1.4)*dt/dist));bug.mesh.position.add(_tv);}bug.bob=Math.sin(bug.time*3.1)*.16;bug.mesh.position.y+=bug.bob;bug.mesh.lookAt(bug.target);bug.mesh.rotateZ(Math.sin(bug.time*2.4)*.28);}}
   // Decos
-  decos.forEach(function(d){if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=.01;
+  decos.forEach(function(d){if(d.type==='tree'||d.type==='bush'||d.type==='flower_wild')d.group.rotation.z=Math.sin(now*.8+d.group.position.x)*.02;if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
       if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
       if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;
@@ -124,6 +141,7 @@ function animate(){
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
   if(dt>0) advanceHarvest(dt);
+  for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){hv.sway.rotation.z=Math.sin(now*1.35+hv.x)*.045;hv.sway.rotation.x=Math.sin(now*1.05+hv.z)*.03;}}
 
   stepPets(dt);
 
