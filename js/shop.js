@@ -6,7 +6,6 @@ var PET_TYPES = ['cat','dog'];
 function mkCat(x, z) {
   var g = new THREE.Group();
   var mat = new THREE.MeshStandardMaterial({color:0xf5a050, roughness:.8});
-  var wMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:.8});
   // Gövde
   var body = new THREE.Mesh(new THREE.SphereGeometry(.16,10,8), mat);
   body.scale.set(1,.75,1.3); body.position.y=.18; g.add(body);
@@ -32,12 +31,8 @@ function mkCat(x, z) {
     var leg = new THREE.Mesh(new THREE.CylinderGeometry(.025,.02,.12,5), mat);
     leg.position.set(p[0]*.08,.06,p[1]*.1); g.add(leg);
   });
-  g.position.set(x, 0, z);
   g.scale.setScalar(.9);
-  scene.add(g);
-  pets.push({mesh:g, type:'cat', target:null, time:Math.random()*100, bobPhase:Math.random()*Math.PI*2, tailAngle:0});
-  showToast('🐱 Kedi bahçeye katıldı!');
-  markDirty(); save(true);
+  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!');
 }
 
 function mkDog(x, z) {
@@ -68,10 +63,14 @@ function mkDog(x, z) {
     var leg = new THREE.Mesh(new THREE.CylinderGeometry(.03,.025,.15,5), mat);
     leg.position.set(p[0]*.1,.07,p[1]*.12); g.add(leg);
   });
+  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!');
+}
+function placePet(g, type, x, z, tail, msg){
   g.position.set(x, 0, z);
   scene.add(g);
-  pets.push({mesh:g, type:'dog', target:null, time:Math.random()*100, bobPhase:Math.random()*Math.PI*2, tailAngle:0});
-  showToast('🐶 Köpek bahçeye katıldı!');
+  pets.push({mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail});
+  if(isLoading) return;
+  showToast(msg);
   markDirty(); save(true);
 }
 

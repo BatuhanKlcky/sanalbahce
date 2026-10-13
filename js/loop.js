@@ -7,7 +7,54 @@ var growSteps=[.20,.45,.80,1.3];
 var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
 var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
 var _lastSim=0, _bugAcc=0, _rainAcc=0;
-var BUG_EVERY=5184/60, RAIN_EVERY=1800/60;
+var BUG_EVERY=5184/60, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=16;
+function stepWeather(dt){
+  if(!(dt>0)) return;
+  _rainAcc+=dt;
+  if(_rainAcc>=RAIN_EVERY){
+    _rainAcc-=RAIN_EVERY;
+    if(_rainAcc>RAIN_EVERY) _rainAcc=RAIN_EVERY;
+    var night=dayPhase<.229||dayPhase>=.896;
+    if(night&&curWeather==='clear'&&!isRaining&&Math.random()<.2) startRain();
+  }
+  if(isRaining){
+    _rainLeft-=dt;
+    if(_rainLeft<=0) stopRain();
+    else drawRain(dt);
+  }
+  if(curWeather!=='clear') drawWx(dt);
+}
+function pickPetTarget(pet){
+  if(flowers.length>0&&Math.random()>.3){
+    var rf2=flowers[Math.floor(Math.random()*flowers.length)];
+    pet.target=new THREE.Vector3(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
+  }else{
+    var a=Math.random()*Math.PI*2, r=Math.random()*PET_R;
+    pet.target=new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r);
+  }
+}
+function stepPets(dt){
+  if(!(dt>0)||!pets.length) return;
+  for(var pi=0;pi<pets.length;pi++){
+    var pet=pets[pi];
+    pet.time+=dt;
+    pet.wander=(pet.wander||0)+dt;
+    var arrived=pet.target&&pet.mesh.position.distanceTo(pet.target)<.5;
+    if(!pet.target||arrived||pet.wander>6){ pet.wander=0; pickPetTarget(pet); }
+    var dir=pet.target.clone().sub(pet.mesh.position); dir.y=0;
+    if(dir.length()>.05){
+      var step=Math.min(dir.length(), PET_SPEED*dt);
+      dir.normalize().multiplyScalar(step);
+      pet.mesh.position.add(dir);
+      var rad=Math.hypot(pet.mesh.position.x, pet.mesh.position.z);
+      if(rad>PET_R){ pet.mesh.position.x*=PET_R/rad; pet.mesh.position.z*=PET_R/rad; }
+    }
+    pet.mesh.position.y=Math.abs(Math.sin(pet.time*8))*.04;
+    pet.mesh.lookAt(pet.target.x, pet.mesh.position.y, pet.target.z);
+    if(pet.tail) pet.tail.rotation.z=Math.sin(pet.time*(pet.type==='dog'?12:3))*(pet.type==='dog'?0.5:0.4);
+  }
+}
+window.stepPets=stepPets; window.stepWeather=stepWeather;
 window.togglePerf = function(){
   _perfMode = _perfMode==='low' ? 'high' : 'low';
   localStorage.setItem('gdn_perf', _perfMode);
@@ -47,15 +94,8 @@ function animate(){
       if(_bugAcc>BUG_EVERY) _bugAcc=BUG_EVERY;
       mkBadBug(Math.floor(Math.random()*flowers.length));
     }
-    _rainAcc+=dt;
-    if(_rainAcc>=RAIN_EVERY){
-      _rainAcc-=RAIN_EVERY;
-      if(_rainAcc>RAIN_EVERY) _rainAcc=RAIN_EVERY;
-      if((dayPhase<.229||dayPhase>=.896)&&!isRaining&&Math.random()<.2){isRaining=true;initRain();rCvs.style.opacity='1';showToast('🌧️ Yağmur yağıyor!');flowers.forEach(function(f){soak(f,.3);});setTimeout(function(){isRaining=false;rCvs.style.opacity='0';},30000);}
-    }
+    stepWeather(dt);
   }
-  if(isRaining)drawRain();
-  if(curWeather!=='clear')drawWx();
   // Bad bugs move
   for(var bi=0;bi<badBugs.length;bi++){var bg=badBugs[bi],pl=flowers[bg.ti];if(pl){_tv.set(pl.mesh.position.x,pl.h*.7+.15,pl.mesh.position.z);bg.group.position.lerp(_tv,.025);if(_fc%2===0){bg.lp+=.36;var ch=bg.group.children;for(var li=1;li<=6&&li<ch.length;li++)ch[li].rotation.x=.3+Math.sin(bg.lp+li)*.15;}}}
   if(dt>0) advancePlants(dt);
@@ -85,36 +125,7 @@ function animate(){
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
   if(dt>0) advanceHarvest(dt);
 
-  // Evcil hayvan hareketi
-  for(var pi=0;pi<pets.length;pi++){
-    var pet=pets[pi]; pet.time+=.08;
-    if(!pet.target||pet.mesh.position.distanceTo(pet.target)<.5||Math.random()<.003){
-      if(flowers.length>0&&Math.random()>.3){
-        var rf2=flowers[Math.floor(Math.random()*flowers.length)];
-        pet.target=new THREE.Vector3(rf2.mesh.position.x+(Math.random()-.5)*1.5,.0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
-      } else {
-        pet.target=new THREE.Vector3((Math.random()-.5)*16,.0,(Math.random()-.5)*16);
-      }
-    }
-    var dir=pet.target.clone().sub(pet.mesh.position);
-    if(dir.length()>.1){
-      dir.normalize().multiplyScalar(.025);
-      pet.mesh.position.add(dir);
-      pet.mesh.lookAt(pet.target);
-    }
-    // Bob hareketi (kedi kuyruk, köpek sallanma)
-    pet.mesh.position.y=Math.abs(Math.sin(pet.time*3))*.04;
-    // Köpek kuyruk sallama
-    if(pet.type==='dog'){
-      var tailMesh=pet.mesh.children[4];
-      if(tailMesh)tailMesh.rotation.z=Math.sin(pet.time*8)*.4;
-    }
-    // Kedi kuyruk
-    if(pet.type==='cat'){
-      var catTail=pet.mesh.children[4];
-      if(catTail)catTail.rotation.z=Math.sin(pet.time*2)*.3;
-    }
-  }
+  stepPets(dt);
 
   // Stats
   if(_fc%120===0){var tot=0;for(var fi2=0;fi2<flowers.length;fi2++)tot+=flowers[fi2].w;_eHp.innerText=Math.round(flowers.length?tot/flowers.length*100:0);}

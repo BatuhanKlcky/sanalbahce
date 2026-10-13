@@ -68,7 +68,7 @@ window.advancePlants=function(seconds){
     var f=flowers[fi], bugs=0, bi;
     for(bi=0;bi<badBugs.length;bi++) if(badBugs[bi].ti===fi) bugs++;
     var rate=DRY+bugs*BDRAIN, growFor=0, ph=f.h;
-    if(!f.isStunted&&f.w>.35&&f.h<1.3){
+    if(!f.isStunted&&f.w>.35&&f.h<1.3&&curWeather!=='snow'){
       growFor=rate>0?Math.min(seconds,Math.max(0,(f.w-.35)/rate)):seconds;
       if(growFor>0) f.h=Math.min(1.3,f.h+GROW*growFor);
     }
