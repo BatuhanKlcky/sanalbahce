@@ -9,7 +9,7 @@
     {
       id: 'meadow', name: 'Çayır', emoji: '🌸',
       center: true, R: 20,
-      grass: 0xd8f0a8, rim: 0xc4895a, mid: 0xa86f45, cork: 0x7a4a2e, moss: 0x7ed96a,
+      grass: 0x7ec85a, rim: 0xc4895a, mid: 0xa86f45, cork: 0x7a4a2e, moss: 0x4fa84a,
       fog: 0xd9c4b0, sun: 0xffe2c4, glow: 0xffd2a0,
       phase: 0.62
     },
