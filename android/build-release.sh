@@ -56,11 +56,21 @@ export ANDROID_SDK_ROOT="$ANDROID_HOME"
 printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
 ./gradlew :app:bundleRelease :app:assembleRelease
 
+VER="$(python3 - <<'PY'
+import re
+from pathlib import Path
+t = Path("app/build.gradle").read_text()
+m = re.search(r'versionName\s+"([^"]+)"', t)
+print(m.group(1) if m else "0.0.0")
+PY
+)"
 mkdir -p "$ROOT/android/dist" /opt/cursor/artifacts/play-store
-cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-2.1.5.aab"
-cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-2.1.5.apk"
-cp "$ROOT/android/dist/sanalbahce-2.1.5.aab" /opt/cursor/artifacts/play-store/
-cp "$ROOT/android/dist/sanalbahce-2.1.5.apk" /opt/cursor/artifacts/play-store/
-cp "$ROOT/android/dist/sanalbahce-2.1.5.apk" "$ROOT/sanal-bahce.apk"
-echo "Built:"
+# Drop previous versioned packages so only the current build remains.
+rm -f "$ROOT/android/dist"/sanalbahce-*.aab "$ROOT/android/dist"/sanalbahce-*.apk
+cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-${VER}.aab"
+cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-${VER}.apk"
+cp "$ROOT/android/dist/sanalbahce-${VER}.aab" /opt/cursor/artifacts/play-store/
+cp "$ROOT/android/dist/sanalbahce-${VER}.apk" /opt/cursor/artifacts/play-store/
+cp "$ROOT/android/dist/sanalbahce-${VER}.apk" "$ROOT/sanal-bahce.apk"
+echo "Built v${VER}:"
 ls -lh "$ROOT/android/dist"
