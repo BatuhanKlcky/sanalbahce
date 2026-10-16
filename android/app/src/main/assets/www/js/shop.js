@@ -7,7 +7,8 @@ function petMat(hex){
   if(!petMat.cache) petMat.cache={};
   var key=''+hex;
   if(!petMat.cache[key]){
-    var m=new THREE.MeshStandardMaterial({color:hex, roughness:.78});
+    // Soft toy-like fur shading for cozy diorama pets.
+    var m=new THREE.MeshStandardMaterial({color:hex, roughness:.72, flatShading:false});
     m.userData.keep=true;
     petMat.cache[key]=m;
   }
@@ -56,15 +57,19 @@ function petEye(fur, r){
 }
 function mkCat(x, z) {
   var g=new THREE.Group();
-  var mat=petMat(0xe08a42);
+  var mat=petMat(0xf0a35a);
   var body=new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), mat);
-  body.scale.set(.15, .115, .22);
-  body.position.set(0, .23, -.04);
+  body.scale.set(.18, .145, .24);
+  body.position.set(0, .26, -.04);
   body.userData.base=body.scale.clone();
   g.add(body);
+  var belly=new THREE.Mesh(new THREE.SphereGeometry(1, 18, 14), petMat(0xfff1e4));
+  belly.scale.set(.11, .1, .14);
+  belly.position.set(0, .2, .02);
+  g.add(belly);
   var skull=new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), mat);
-  skull.scale.set(.105, .098, .1);
-  skull.position.set(0, .3, .14);
+  skull.scale.set(.125, .118, .12);
+  skull.position.set(0, .36, .16);
   g.add(skull);
   var snout=new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), petMat(0xfff1e4));
   snout.scale.set(.05, .038, .072);
@@ -112,22 +117,26 @@ function mkCat(x, z) {
     var hip=petLimb(mat, p[0], .13, p[1], .14);
     g.add(hip); legs.push(hip);
   });
-  g.scale.setScalar(2.15);
+  g.scale.setScalar(2.35);
   placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids});
 }
 
 function mkDog(x, z) {
   var g=new THREE.Group();
-  var mat=petMat(0x8f5a34);
-  var dMat=petMat(0x5c381c);
+  var mat=petMat(0xc4895a);
+  var dMat=petMat(0x8a5a34);
   var body=new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), mat);
-  body.scale.set(.155, .12, .28);
-  body.position.set(0, .25, -.06);
+  body.scale.set(.185, .15, .3);
+  body.position.set(0, .28, -.06);
   body.userData.base=body.scale.clone();
   g.add(body);
+  var belly=new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), petMat(0xfff4e8));
+  belly.scale.set(.12, .1, .16);
+  belly.position.set(0, .22, .02);
+  g.add(belly);
   var skull=new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), mat);
-  skull.scale.set(.11, .1, .115);
-  skull.position.set(0, .33, .18);
+  skull.scale.set(.13, .12, .13);
+  skull.position.set(0, .38, .2);
   g.add(skull);
   var snout=new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), mat);
   snout.scale.set(.055, .045, .12);
@@ -169,7 +178,7 @@ function mkDog(x, z) {
     var hip=petLimb(mat, p[0], .14, p[1], .15);
     g.add(hip); legs.push(hip);
   });
-  g.scale.setScalar(2);
+  g.scale.setScalar(2.3);
   placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids, jaw:jaw});
 }
 function placePet(g, type, x, z, tail, msg, legs, rig){

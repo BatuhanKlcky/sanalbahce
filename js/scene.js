@@ -146,15 +146,36 @@ window._flatGnd=gnd;
 (function(){
   var root=new THREE.Group();
   var R=20;
-  var top=new THREE.Mesh(new THREE.CircleGeometry(R,64),new THREE.MeshStandardMaterial({map:_grassMap.clone?_grassMap.clone():_grassMap,color:0xf2ffe8,roughness:1,metalness:0}));
-  if(top.material.map){top.material.map.repeat.set(6,6);top.material.map.needsUpdate=true;}
-  top.rotation.x=-Math.PI/2;top.position.y=.02;root.add(top);
-  var rim=new THREE.Mesh(new THREE.CylinderGeometry(R+.35,R+.95,2.4,48,1,true),new THREE.MeshStandardMaterial({color:0x8b5e3c,roughness:.92,metalness:0,side:THREE.DoubleSide}));
-  rim.position.y=-1.15;root.add(rim);
-  var cork=new THREE.Mesh(new THREE.CylinderGeometry(R+.2,R*.72,1.6,40),new THREE.MeshStandardMaterial({color:0x6e452c,roughness:1}));
-  cork.position.y=-2.1;root.add(cork);
-  var soilEdge=new THREE.Mesh(new THREE.TorusGeometry(R-.05,.18,8,64),new THREE.MeshStandardMaterial({color:0x5a3a22,roughness:1}));
-  soilEdge.rotation.x=Math.PI/2;soilEdge.position.y=.01;root.add(soilEdge);
+  var grassMat=new THREE.MeshStandardMaterial({map:_grassMap.clone?_grassMap.clone():_grassMap,color:0xeaffd8,roughness:1,metalness:0});
+  if(grassMat.map){grassMat.map.repeat.set(5,5);grassMat.map.needsUpdate=true;}
+  var top=new THREE.Mesh(new THREE.CircleGeometry(R,72),grassMat);
+  top.rotation.x=-Math.PI/2;top.position.y=.03;root.add(top);
+  // Soft dirt cliff bands
+  var rim=new THREE.Mesh(new THREE.CylinderGeometry(R+.2,R+1.05,2.6,56,1,true),new THREE.MeshStandardMaterial({color:0xc4895a,roughness:.9,metalness:0,side:THREE.DoubleSide}));
+  rim.position.y=-1.25;root.add(rim);
+  var mid=new THREE.Mesh(new THREE.CylinderGeometry(R+.15,R*.85,1.4,48),new THREE.MeshStandardMaterial({color:0xa86f45,roughness:.95}));
+  mid.position.y=-2.3;root.add(mid);
+  var cork=new THREE.Mesh(new THREE.CylinderGeometry(R*.82,R*.45,1.5,40),new THREE.MeshStandardMaterial({color:0x7a4a2e,roughness:1}));
+  cork.position.y=-3.4;root.add(cork);
+  var moss=new THREE.Mesh(new THREE.TorusGeometry(R-.08,.22,10,72),new THREE.MeshStandardMaterial({color:0x6ecf7a,roughness:.88}));
+  moss.rotation.x=Math.PI/2;moss.position.y=.04;root.add(moss);
+  // Rim flowers / pebbles for diorama charm
+  for(var i=0;i<28;i++){
+    var a=(i/28)*Math.PI*2, rr=R-0.55-(i%3)*.15;
+    var bloom=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshStandardMaterial({color:[0xff8ab8,0xffd56a,0xb79bff,0xffffff][i%4],roughness:.55,emissive:[0xff8ab8,0xffd56a,0xb79bff,0xffffff][i%4],emissiveIntensity:.18}));
+    bloom.scale.set(1,.45,1);
+    bloom.position.set(Math.cos(a)*rr,.12,Math.sin(a)*rr);
+    root.add(bloom);
+    if(i%2===0){
+      var tuft=new THREE.Mesh(new THREE.SphereGeometry(.18,8,6),new THREE.MeshStandardMaterial({color:0x7ed96a,roughness:.9}));
+      tuft.scale.set(1,.55,1);
+      tuft.position.set(Math.cos(a+0.08)*(rr-.35),.08,Math.sin(a+0.08)*(rr-.35));
+      root.add(tuft);
+    }
+  }
+  // Soft under-glow so island floats
+  var glow=new THREE.PointLight(0xffd2a0,.55,40);
+  glow.position.set(0,-1.5,0);root.add(glow);
   root.visible=false;scene.add(root);window._islandRoot=root;window._islandR=R;
 })();
 window.surf=(function(){
