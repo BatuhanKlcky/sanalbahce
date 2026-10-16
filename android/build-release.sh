@@ -44,9 +44,9 @@ printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
 ./gradlew :app:bundleRelease :app:assembleRelease
 
 mkdir -p "$ROOT/android/dist" /opt/cursor/artifacts/play-store
-cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-2.1.3.aab"
-cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-2.1.3.apk"
-cp "$ROOT/android/dist/sanalbahce-2.1.3.aab" /opt/cursor/artifacts/play-store/
-cp "$ROOT/android/dist/sanalbahce-2.1.3.apk" /opt/cursor/artifacts/play-store/
+cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-2.1.4.aab"
+cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-2.1.4.apk"
+cp "$ROOT/android/dist/sanalbahce-2.1.4.aab" /opt/cursor/artifacts/play-store/
+cp "$ROOT/android/dist/sanalbahce-2.1.4.apk" /opt/cursor/artifacts/play-store/
 echo "Built:"
 ls -lh "$ROOT/android/dist"
