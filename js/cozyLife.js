@@ -60,9 +60,8 @@
     var R = (window._islandR || 16) * .85;
     m.position.set((Math.random()-.5)*R*1.4, .4+Math.random()*1.6, (Math.random()-.5)*R*1.4);
     scene.add(m);
-    var light = new THREE.PointLight(0xc8ff60, .35, 2.2);
-    m.add(light);
-    return { mesh:m, light:light, t:Math.random()*10, ox:m.position.x, oy:m.position.y, oz:m.position.z };
+    // Skip per-firefly PointLights — dozens of lights freeze mobile WebView.
+    return { mesh:m, light:null, t:Math.random()*10, ox:m.position.x, oy:m.position.y, oz:m.position.z };
   }
 
   function mkSparkleField(){
@@ -82,7 +81,7 @@
       g.add(m);
     }
     scene.add(g);
-    return { mesh:g, t:0 };
+    return { mesh:g, mat:mat, t:0 };
   }
 
   function seedAmbientButterflies(){
@@ -132,7 +131,7 @@
     _lifeReady = true;
     var birdN = isMobile ? 3 : 5;
     for(var i = 0; i < birdN; i++) window._birds.push(mkBird());
-    var flyN = isMobile ? 8 : 14;
+    var flyN = isMobile ? 5 : 8;
     for(var j = 0; j < flyN; j++) window._fireflies.push(mkFirefly());
     window._sparkles.push(mkSparkleField());
     seedAmbientButterflies();
@@ -175,10 +174,12 @@
     });
 
     window._sparkles.forEach(function(s){
+      if(!s || !s.mesh) return;
       s.mesh.visible = true;
       s.t += dt;
       s.mesh.rotation.y = s.t * .05;
-      s.mesh.material.opacity = .45 + .35*Math.sin(s.t*1.5);
+      // mesh is a Group of orbs sharing s.mat (not PointsMaterial)
+      if(s.mat) s.mat.opacity = .45 + .35*Math.sin(s.t*1.5);
     });
 
     if(window._meadow) window._meadow.forEach(function(m){ m.visible = true; });

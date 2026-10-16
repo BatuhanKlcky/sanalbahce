@@ -132,8 +132,16 @@
         return nm;
       });
       c.material = out.length === 1 ? out[0] : out;
-      c.castShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
-      c.receiveShadow = c.castShadow;
+      // Shadows only on chunkier meshes — every flower casting = diorama hitch.
+      var cast = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
+      if(cast && c.geometry){
+        if(!c.geometry.boundingSphere) c.geometry.computeBoundingSphere();
+        var r = c.geometry.boundingSphere ? c.geometry.boundingSphere.radius : 1;
+        var n2 = ((out[0] && out[0].name) || '').toLowerCase();
+        if(r < 0.35 || /flower|grass|mushroom|leaf|wheat|corn|berry/.test(n2)) cast = false;
+      }
+      c.castShadow = cast;
+      c.receiveShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
       c.frustumCulled = true;
     });
   }
@@ -503,12 +511,15 @@
         if(left<=0){
           ready = true;
           installBuilders();
-          if(typeof window.redressGardenModels === 'function'){
-            try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-          }
-          if(typeof window.reseedMeadowPatches === 'function'){
-            try{ window.reseedMeadowPatches(); }catch(e){}
-          }
+          // Defer heavy clone/Box3 work so the first frames stay responsive.
+          setTimeout(function(){
+            if(typeof window.redressGardenModels === 'function'){
+              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
+            }
+            if(typeof window.reseedMeadowPatches === 'function'){
+              try{ window.reseedMeadowPatches(); }catch(e){}
+            }
+          }, 0);
           if(bar) bar.classList.remove('show');
           waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
           if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
@@ -519,9 +530,11 @@
         if(left<=0){
           ready = true;
           installBuilders();
-          if(typeof window.redressGardenModels === 'function'){
-            try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-          }
+          setTimeout(function(){
+            if(typeof window.redressGardenModels === 'function'){
+              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
+            }
+          }, 0);
           if(bar) bar.classList.remove('show');
           waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
         }

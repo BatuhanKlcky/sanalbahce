@@ -110,13 +110,14 @@ scene.add(new THREE.HemisphereLight(0xffe8d6,0x6a8f52,.55));
 window.mLight=new THREE.DirectionalLight(0xffe2c4,1.35);mLight.position.set(12,28,14);
 mLight.castShadow=!isMobile;
 if(mLight.castShadow){
-  mLight.shadow.mapSize.width=isMobile?512:1536;
-  mLight.shadow.mapSize.height=isMobile?512:1536;
-  mLight.shadow.camera.near=2; mLight.shadow.camera.far=70;
-  mLight.shadow.camera.left=-28; mLight.shadow.camera.right=28;
-  mLight.shadow.camera.top=28; mLight.shadow.camera.bottom=-28;
+  // 1024 is enough for the island; 1536 was hitching diorama on mid GPUs.
+  mLight.shadow.mapSize.width=1024;
+  mLight.shadow.mapSize.height=1024;
+  mLight.shadow.camera.near=2; mLight.shadow.camera.far=55;
+  mLight.shadow.camera.left=-22; mLight.shadow.camera.right=22;
+  mLight.shadow.camera.top=22; mLight.shadow.camera.bottom=-22;
   mLight.shadow.bias=-0.00025; mLight.shadow.normalBias=0.035;
-  mLight.shadow.radius=3;
+  mLight.shadow.radius=2;
 }
 scene.add(mLight);
 var fL=new THREE.DirectionalLight(0xffc8a8,.35);fL.position.set(-15,8,-12);scene.add(fL);

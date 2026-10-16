@@ -260,7 +260,10 @@ function animate(){
   }
   // Butterflies
   if(dt>0) stepButterflies(dt);
-  if(typeof window.stepCozyLife==='function') window.stepCozyLife(dt, now);
+  if(typeof window.stepCozyLife==='function'){
+    try{ window.stepCozyLife(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepCozyLife', e); }
+  }
   // Decos
   decos.forEach(function(d){if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
@@ -276,9 +279,10 @@ function animate(){
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
     if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0)d.light.intensity=1.2+Math.sin(_fc*.3+d.group.position.x)*.4;if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
-  if(window._dress){for(var si=0;si<window._dress.length;si++)rustle(window._dress[si],now,.85);}
+  // Skip rustling hidden classic dress while diorama is on (saves CPU).
+  if(window._dress && !(typeof isCozy==='function'&&isCozy())){for(var si=0;si<window._dress.length;si++)rustle(window._dress[si],now,.85);}
   if(window._mills){for(var mi=0;mi<window._mills.length;mi++)window._mills[mi].rotation.z+=Math.min(dt,.05)*.7;}
-  if(window._blooms){for(var bl=0;bl<window._blooms.length;bl++){var bloom=window._blooms[bl];bloom.rotation.z=Math.sin(now*1.25+(bloom.userData.spin||0))*.1;bloom.rotation.x=Math.sin(now*.8+(bloom.userData.spin||0))*.06;}}
+  if(window._blooms && _fc%2===0){for(var bl=0;bl<window._blooms.length;bl++){var bloom=window._blooms[bl];if(!bloom||!bloom.rotation)continue;bloom.rotation.z=Math.sin(now*1.25+(bloom.userData.spin||0))*.1;bloom.rotation.x=Math.sin(now*.8+(bloom.userData.spin||0))*.06;}}
   if(dt>0) advanceHarvest(dt);
   for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){var spd=hv.type==='strawberry'?2.5:hv.type==='carrot'?1.05:hv.type==='cucumber'?.85:hv.type==='pepper'?1.7:1.15;var amp=hv.type==='strawberry'?.07:hv.type==='carrot'?.045:hv.type==='cucumber'?.09:hv.type==='pepper'?.06:.035;hv.sway.rotation.z=Math.sin(now*spd+hv.x)*amp;hv.sway.rotation.x=Math.sin(now*spd*.8+hv.z)*amp*.65;if(hv.type==='cucumber')hv.sway.rotation.y=Math.sin(now*.6+hv.z)*.12;}}
 

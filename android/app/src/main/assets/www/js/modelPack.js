@@ -96,9 +96,9 @@
     _tmpColor.copy(color);
     var hsl = { h:0, s:0, l:0 };
     _tmpColor.getHSL(hsl);
-    // Quaternius packs ship very dark PBR — lift toward soft diorama pastels
-    hsl.l = Math.min(0.78, hsl.l * 2.05 + 0.14);
-    hsl.s = Math.min(0.72, hsl.s * 1.18 + 0.06);
+    // Quaternius ships dark PBR — lift a bit, keep saturated cozy greens/woods
+    hsl.l = Math.min(0.62, hsl.l * 1.55 + 0.08);
+    hsl.s = Math.min(0.78, hsl.s * 1.35 + 0.1);
     _tmpColor.setHSL(hsl.h, hsl.s, hsl.l);
     color.copy(_tmpColor);
   }
@@ -119,21 +119,29 @@
         nm.side = THREE.FrontSide;
         nm.flatShading = false;
         nm.userData.keep = true;
-        // Soft leaf glow so canopies read from afar
+        // Soft leaf glow so canopies read from afar (keep subtle — avoid milky wash)
         var n = (nm.name || '').toLowerCase();
-        if(/green|leaf|grass|plant|moss|flower|berry/.test(n) && nm.emissive){
-          nm.emissive.copy(nm.color).multiplyScalar(0.18);
-          nm.emissiveIntensity = 0.22;
+        if(/green|leaf|grass|plant|moss/.test(n) && nm.emissive){
+          nm.emissive.copy(nm.color).multiplyScalar(0.1);
+          nm.emissiveIntensity = 0.12;
         }
         if(/flower|mushroom|berry|hay|wheat|corn/.test(n) && nm.emissive){
-          nm.emissive.copy(nm.color).multiplyScalar(0.25);
-          nm.emissiveIntensity = 0.28;
+          nm.emissive.copy(nm.color).multiplyScalar(0.16);
+          nm.emissiveIntensity = 0.18;
         }
         return nm;
       });
       c.material = out.length === 1 ? out[0] : out;
-      c.castShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
-      c.receiveShadow = c.castShadow;
+      // Shadows only on chunkier meshes — every flower casting = diorama hitch.
+      var cast = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
+      if(cast && c.geometry){
+        if(!c.geometry.boundingSphere) c.geometry.computeBoundingSphere();
+        var r = c.geometry.boundingSphere ? c.geometry.boundingSphere.radius : 1;
+        var n2 = ((out[0] && out[0].name) || '').toLowerCase();
+        if(r < 0.35 || /flower|grass|mushroom|leaf|wheat|corn|berry/.test(n2)) cast = false;
+      }
+      c.castShadow = cast;
+      c.receiveShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
       c.frustumCulled = true;
     });
   }
@@ -503,12 +511,15 @@
         if(left<=0){
           ready = true;
           installBuilders();
-          if(typeof window.redressGardenModels === 'function'){
-            try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-          }
-          if(typeof window.reseedMeadowPatches === 'function'){
-            try{ window.reseedMeadowPatches(); }catch(e){}
-          }
+          // Defer heavy clone/Box3 work so the first frames stay responsive.
+          setTimeout(function(){
+            if(typeof window.redressGardenModels === 'function'){
+              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
+            }
+            if(typeof window.reseedMeadowPatches === 'function'){
+              try{ window.reseedMeadowPatches(); }catch(e){}
+            }
+          }, 0);
           if(bar) bar.classList.remove('show');
           waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
           if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
@@ -519,9 +530,11 @@
         if(left<=0){
           ready = true;
           installBuilders();
-          if(typeof window.redressGardenModels === 'function'){
-            try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-          }
+          setTimeout(function(){
+            if(typeof window.redressGardenModels === 'function'){
+              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
+            }
+          }, 0);
           if(bar) bar.classList.remove('show');
           waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
         }

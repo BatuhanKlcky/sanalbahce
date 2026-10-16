@@ -339,7 +339,7 @@
   // Dense grass field on island
   window.spawnIslandGrass = function(){
     if(window._grassField || !window._islandRoot) return;
-    var count = isMobile ? 280 : 520;
+    var count = isMobile ? 140 : 260;
     var blade = new THREE.ConeGeometry(.035, .28, 3);
     blade.translate(0, .14, 0);
     var gmat = mat({ color:0x5fd16a, roughness:.9 });
