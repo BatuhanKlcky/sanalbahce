@@ -289,6 +289,18 @@ window.addBug=function(kind){
   sndBug(); chkTask('b',15);
   if(!isLoading){ markDirty(); save(true); }
 };
+window.removeBug=function(){
+  if(!bugs.length){ showToast('Kelebek yok 🦋'); return; }
+  var b=bugs.pop();
+  if(b&&b.mesh){
+    if(b.mesh.parent) b.mesh.parent.remove(b.mesh);
+    else scene.remove(b.mesh);
+  }
+  var el=document.getElementById('bC');
+  if(el) el.innerText=bugs.length;
+  showToast('🦋 Kelebek azaldı ('+bugs.length+')');
+  if(!isLoading){ markDirty(); save(true); }
+};
 
 // ── ACTIONS ──────────────────────────────────────────────────────────────────
 function soak(f,add){f.w=Math.min(1.5,f.w+(add||0));if(f.w>=.25)f.isStunted=false;}

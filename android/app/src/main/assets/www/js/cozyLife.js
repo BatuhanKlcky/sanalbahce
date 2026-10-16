@@ -66,7 +66,7 @@
 
   function mkSparkleField(){
     // Tiny emissive orbs — PointsMaterial squares look broken on many mobile GPUs.
-    var n = isMobile ? 10 : 16;
+    var n = isMobile ? 18 : 28;
     var g = new THREE.Group();
     var R = (window._islandR || 16);
     var mat = new THREE.MeshBasicMaterial({ color:0xffe6a8, transparent:true, opacity:.55, depthWrite:false });
@@ -86,22 +86,14 @@
 
   function seedAmbientButterflies(){
     if(typeof window.addBug !== 'function') return;
-    var want = isMobile ? 2 : 3;
+    var want = isMobile ? 4 : 7;
     var guard = 0;
-    while(bugs.length < want && guard < 8){
+    while(bugs.length < want && guard < 12){
       var prev = isLoading;
       isLoading = true; // avoid save spam / toasts
       window.addBug();
       isLoading = prev;
       guard++;
-    }
-    // Cap excess butterflies from saves / prior sessions
-    while(bugs.length > want){
-      var extra = bugs.pop();
-      if(extra && extra.mesh){
-        if(extra.mesh.parent) extra.mesh.parent.remove(extra.mesh);
-        else scene.remove(extra.mesh);
-      }
     }
     var el = document.getElementById('bC');
     if(el) el.innerText = bugs.length;
@@ -152,9 +144,9 @@
   window.ensureCozyLife = function(){
     if(_lifeReady) return;
     _lifeReady = true;
-    var birdN = isMobile ? 1 : 2;
+    var birdN = isMobile ? 3 : 5;
     for(var i = 0; i < birdN; i++) window._birds.push(mkBird());
-    var flyN = isMobile ? 2 : 4;
+    var flyN = isMobile ? 5 : 8;
     for(var j = 0; j < flyN; j++) window._fireflies.push(mkFirefly());
     window._sparkles.push(mkSparkleField());
     seedAmbientButterflies();

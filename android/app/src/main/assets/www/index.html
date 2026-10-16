@@ -56,13 +56,14 @@ canvas{touch-action:none}
 #dayLabel{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-top:2px}
 #stats{display:flex;justify-content:center;gap:6px;margin-top:8px;flex-wrap:wrap}
 .sp{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px}
-.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:12px}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:5px;margin-top:12px}
 button.act{border:none;padding:0;border-radius:16px;color:#fff;font-weight:800;cursor:pointer;font-size:9px;letter-spacing:.05em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:58px;transition:transform .15s,filter .15s;-webkit-tap-highlight-color:transparent}
 button.act:active{transform:scale(.93);filter:brightness(.88)}
 .bi{font-size:18px;line-height:1}
 .bw{background:linear-gradient(145deg,#003660,#005db8)}
 .bs{background:linear-gradient(145deg,#0a2800,#2d7a00)}
 .bb{background:linear-gradient(145deg,#2a0040,#9424b8)}
+.br{background:linear-gradient(145deg,#1a1028,#5a3a78)}
 .bk{background:linear-gradient(145deg,#3a0000,#cc1100)}
 #toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.88);background:rgba(8,14,26,.95);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 20px;font-size:13px;font-weight:600;color:#fff;z-index:9999;pointer-events:none;opacity:0;transition:opacity .22s,transform .22s;backdrop-filter:blur(20px);white-space:nowrap}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -298,6 +299,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
       <button class="act bw" onclick="window.waterAll()"><span class="bi">💧</span>SULA</button>
       <button class="act bs" onclick="window.startFlowerPlace()"><span class="bi">🌿</span>EK</button>
       <button class="act bb" onclick="window.addBug()"><span class="bi">🦋</span>DOST</button>
+      <button class="act br" onclick="window.removeBug()"><span class="bi">🦋−</span>AZALT</button>
       <button class="act bk" onclick="window.killAllBadBugs()"><span class="bi">🐛</span>TEMİZLE</button>
     </div>
   </div>
