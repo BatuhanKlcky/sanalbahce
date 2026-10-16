@@ -21,10 +21,9 @@
     "alias": "upload"
   },
   "appVersionName": "2.0.0",
-  "appVersionCode": 2,
-  "minSdkVersion": 24,
-  "targetSdkVersion": 35,
-  "orientation": "portrait",
+  "appVersionCode": 3,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://batuhanklcky.github.io/sanalbahce/manifest.json",
   "fallbackType": "customtabs",
   "features": {
@@ -42,12 +41,13 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://batuhanklcky.github.io/sanalbahce/",
-  "minFullScreenHeight": 0,
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
   "protocolHandlers": [],
   "fileHandlers": [],
-  "shortcuts": [],
-  "generatorApp": "bubblewrap",
-  "additionalTrustedOrigins": [],
-  "retainedCertificates": [],
-  "additionalMetadata": []
+  "displayOverride": [],
+  "appVersion": "2.0.0"
 }
