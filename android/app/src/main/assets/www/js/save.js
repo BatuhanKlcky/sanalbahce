@@ -445,6 +445,9 @@ function load(){
       else if(d.type==='scarecrow')mkScarecrow(x,z);
       else if(d.type==='flower_wild')mkWildFlower(x,z);
       else if(d.type==='house')mkHouse(x,z,a);
+      else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[d.type] && typeof mkPackProp==='function'){
+        if(!mkPackProp(d.type, x, z, a)) return;
+      }
       else if(d.type==='golden_pot')mkGoldenPot(x,z);
       else if(d.type==='crystal_pond')mkCrystalPond(x,z);
       else if(d.type==='magic_lamp')mkMagicLamp(x,z);

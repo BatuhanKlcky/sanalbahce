@@ -18,11 +18,14 @@
     'pine_1': 'nature/PineTree_1.glb',
     'pine_2': 'nature/PineTree_2.glb',
     'pine_3': 'nature/PineTree_3.glb',
+    'pine_4': 'nature/PineTree_4.glb',
+    'pine_5': 'nature/PineTree_5.glb',
     'birch_1': 'nature/BirchTree_1.glb',
     'birch_2': 'nature/BirchTree_2.glb',
     'birch_3': 'nature/BirchTree_3.glb',
     'willow_1': 'nature/Willow_1.glb',
     'willow_2': 'nature/Willow_2.glb',
+    'dead_tree': 'nature/CommonTree_Dead_1.glb',
     // bushes / plants
     'bush_1': 'nature/Bush_1.glb',
     'bush_2': 'nature/Bush_2.glb',
@@ -32,16 +35,21 @@
     'plant_2': 'nature/Plant_2.glb',
     'plant_3': 'nature/Plant_3.glb',
     'plant_4': 'nature/Plant_4.glb',
+    'plant_5': 'nature/Plant_5.glb',
     // rocks / logs
     'rock_1': 'nature/Rock_1.glb',
     'rock_2': 'nature/Rock_2.glb',
     'rock_3': 'nature/Rock_3.glb',
+    'rock_4': 'nature/Rock_4.glb',
+    'rock_5': 'nature/Rock_5.glb',
     'rock_m1': 'nature/Rock_Moss_1.glb',
     'rock_m2': 'nature/Rock_Moss_2.glb',
     'rock_m3': 'nature/Rock_Moss_3.glb',
+    'rock_m4': 'nature/Rock_Moss_4.glb',
     'log': 'nature/WoodLog.glb',
     'log_moss': 'nature/WoodLog_Moss.glb',
     'stump': 'nature/TreeStump_Moss.glb',
+    'stump_plain': 'nature/TreeStump.glb',
     // meadow
     // flowers / flower_* intentionally omitted — procedural flowerArt is used instead
     'grass': 'nature/Grass.glb',
@@ -60,6 +68,11 @@
     'tomato': 'crops/Tomato_4.glb',
     'lettuce': 'crops/Lettuce_4.glb',
     'berry_bush': 'crops/BushBerries_4.glb',
+    'bamboo': 'crops/Bamboo_4.glb',
+    'palm': 'crops/PalmTree_4.glb',
+    'cactus': 'crops/Cactus_4.glb',
+    'watermelon': 'crops/Watermelon_4.glb',
+    'apple_tree': 'crops/Apple_4.glb',
     // village
     'house_1': 'village/House_1.glb',
     'house_2': 'village/House_2.glb',
@@ -77,9 +90,20 @@
     'crate': 'village/Crate.glb',
     'hay': 'village/Hay.glb',
     'path': 'village/Path_Straight.glb',
+    'path_sq': 'village/Path_Square.glb',
     'stand': 'village/MarketStand_1.glb',
+    'stand_2': 'village/MarketStand_2.glb',
     'cart': 'village/Cart.glb',
-    'stable': 'village/Stable.glb'
+    'stable': 'village/Stable.glb',
+    'bag': 'village/Bag.glb',
+    'bags': 'village/Bags.glb',
+    'cauldron': 'village/Cauldron.glb',
+    'package_1': 'village/Package_1.glb',
+    'package_2': 'village/Package_2.glb',
+    'stairs': 'village/Stairs.glb',
+    'blacksmith': 'village/Blacksmith.glb',
+    'bell': 'village/Bell.glb',
+    'sawmill': 'village/Sawmill.glb'
   };
 
   function box3(){
@@ -215,7 +239,7 @@
 
     buildTree = function(x, z){
       var rnd = _rnd(x, z);
-      var keys = ['tree_1','tree_2','tree_3','tree_4','tree_5','pine_1','pine_2','birch_1','birch_2','willow_1'];
+      var keys = ['tree_1','tree_2','tree_3','tree_4','tree_5','pine_1','pine_2','pine_4','pine_5','birch_1','birch_2','willow_1'];
       var key = keys[Math.floor(rnd()*keys.length)];
       var h = 2.6 + rnd()*1.1;
       if(key.indexOf('pine')===0) h = 3.1 + rnd()*1.2;
@@ -257,7 +281,7 @@
 
     buildStone = function(x, z){
       var rnd = _rnd(x+3, z+1);
-      var key = pick('rock_m1','rock_m2','rock_m3','rock_1','rock_2','rock_3') || 'rock_1';
+      var key = pick('rock_m1','rock_m2','rock_m3','rock_m4','rock_1','rock_2','rock_3','rock_4','rock_5') || 'rock_1';
       var o = cloneKey(key, 0.45 + rnd()*0.55);
       var g = wrapAt(x, z, rnd()*Math.PI*2, o);
       if(rnd() > .55){

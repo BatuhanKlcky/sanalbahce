@@ -697,6 +697,68 @@ function mkScarecrow(x,z){pushDeco(buildScarecrow(x,z),'scarecrow');}
 function mkWildFlower(x,z){pushDeco(buildWild(x,z),'flower_wild');}
 function mkHouse(x,z,angle){var o=buildHouse(x,z,angle); pushDeco(o.group,'house',{light:o.light});}
 
+/** Placeable Quaternius pack props (catalog key + fit height). */
+var PACK_PROPS = {
+  pine:       { keys:['pine_4','pine_5','pine_1','pine_2','pine_3'], h:3.4, shadow:1.1, spin:true },
+  birch:      { keys:['birch_1','birch_2','birch_3'], h:3.0, shadow:1.0, spin:true },
+  willow:     { keys:['willow_1','willow_2'], h:3.0, shadow:1.15, spin:true },
+  dead_tree:  { keys:['dead_tree'], h:2.8, shadow:0.9, spin:true },
+  log:        { keys:['log_moss','log'], h:0.55, shadow:0.7, spin:true },
+  stump:      { keys:['stump','stump_plain'], h:0.55, shadow:0.55, spin:true },
+  plant:      { keys:['plant_5','plant_4','plant_3','plant_1'], h:0.7, shadow:0.45, spin:true },
+  bamboo:     { keys:['bamboo'], h:2.6, shadow:0.55, spin:true },
+  palm:       { keys:['palm'], h:3.2, shadow:1.1, spin:true },
+  cactus:     { keys:['cactus'], h:1.6, shadow:0.55, spin:true },
+  apple_tree: { keys:['apple_tree'], h:2.6, shadow:1.0, spin:true },
+  pumpkin:    { keys:['pumpkin'], h:0.55, shadow:0.45, spin:true },
+  watermelon: { keys:['watermelon'], h:0.5, shadow:0.4, spin:true },
+  gazebo:     { keys:['gazebo'], h:3.4, shadow:1.8 },
+  cart:       { keys:['cart'], h:1.35, shadow:1.0 },
+  market:     { keys:['stand','stand_2'], h:2.0, shadow:1.2 },
+  barrel:     { keys:['barrel'], h:0.85, shadow:0.5, spin:true },
+  crate:      { keys:['crate'], h:0.7, shadow:0.5, spin:true },
+  hay:        { keys:['hay'], h:0.9, shadow:0.7, spin:true },
+  bonfire:    { keys:['bonfire'], h:1.1, shadow:0.7, light:true },
+  inn:        { keys:['inn'], h:4.2, shadow:2.2 },
+  stable:     { keys:['stable'], h:3.6, shadow:2.0 },
+  path:       { keys:['path','path_sq'], h:0.08, shadow:0 },
+  cauldron:   { keys:['cauldron'], h:0.85, shadow:0.55, spin:true },
+  bags:       { keys:['bags','bag'], h:0.55, shadow:0.4, spin:true },
+  package:    { keys:['package_1','package_2'], h:0.55, shadow:0.4, spin:true },
+  stairs:     { keys:['stairs'], h:1.2, shadow:0.7 },
+  blacksmith: { keys:['blacksmith'], h:3.8, shadow:2.0 },
+  bell:       { keys:['bell'], h:1.4, shadow:0.5, spin:true },
+  sawmill:    { keys:['sawmill'], h:3.6, shadow:2.0 }
+};
+
+function mkPackProp(type, x, z, ang){
+  var def = PACK_PROPS[type];
+  if(!def || typeof window.spawnModel !== 'function') return false;
+  var o = null, i;
+  for(i=0;i<def.keys.length;i++){
+    o = window.spawnModel(def.keys[i], def.h);
+    if(o) break;
+  }
+  if(!o) return false;
+  var g = new THREE.Group();
+  g.add(o);
+  g.position.set(x, 0, z);
+  if(ang != null) g.rotation.y = ang;
+  else if(def.spin) g.rotation.y = Math.random() * Math.PI * 2;
+  if(def.shadow && typeof sitShadow === 'function') g.add(sitShadow(def.shadow));
+  var extra = null;
+  if(def.light){
+    var lt = new THREE.PointLight(0xffa040, 1.6, 8, 1.6);
+    lt.position.set(0, 0.9, 0);
+    g.add(lt);
+    extra = { light: lt };
+  }
+  pushDeco(g, type, extra);
+  return true;
+}
+window.mkPackProp = mkPackProp;
+window.PACK_PROPS = PACK_PROPS;
+
 var PLACE_SPAN = {fence:1.16, wall:1.5, bench:1.35, table:1.3, arch:1.65, pergola:2.3, bridge:1.7, house:0};
 function tidyPlace(tp, x, z){
   // Cozy free-place: no fence/wall snapping — drop exactly where you tap.
@@ -1169,6 +1231,7 @@ window.addEventListener('pointerup',function(e){
   else if(tp==='cucumber')mkHarvestPlant(pt.x,pt.z,'cucumber');
   else if(tp==='pepper')mkHarvestPlant(pt.x,pt.z,'pepper');
   else if(tp==='carrot')mkHarvestPlant(pt.x,pt.z,'carrot');
+  else if(PACK_PROPS[tp]){ if(!mkPackProp(tp, pt.x, pt.z, ang)){ showToast('Model henüz yüklenmedi ⏳'); return; } }
   else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
   sndPlant();showToast('✅ Yerleştirildi!');save(true);
 });
