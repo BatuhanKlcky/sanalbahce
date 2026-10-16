@@ -209,7 +209,7 @@ function wrapDayClock(){
 
 window.addEventListener('pointerup', function(e){
   if(!editMode || deleteMode || placementMode || flowerPlaceMode) return;
-  var uiHit = e.target.closest('.ui-container') || e.target.closest('.spanel') || e.target.closest('#sidebar') || e.target.closest('#pBar') || e.target.closest('#delBar') || e.target.closest('#editBar');
+  var uiHit = e.target.closest('.ui-container') || e.target.closest('.spanel') || e.target.closest('#sidebar') || e.target.closest('#biomeBar') || e.target.closest('#pBar') || e.target.closest('#delBar') || e.target.closest('#editBar');
   if(uiHit) return;
 
   if(_moveArmed && selectedDeco){
@@ -219,10 +219,8 @@ window.addEventListener('pointerup', function(e){
     var hits = plRay.intersectObject(planeR);
     if(!hits.length) return;
     var pt = hits[0].point;
-    var lim = cozyMode
-      ? ((window.getActiveBiome && window.getActiveBiome()) ? window.getActiveBiome().R - 1.2 : 18)
-      : GARDEN_R;
-    if(Math.hypot(pt.x, pt.z) > lim){ showToast('Ada dışına çıkamaz 🚫'); return; }
+    if(typeof window.tooFar === 'function' ? window.tooFar(pt.x, pt.z)
+        : Math.hypot(pt.x, pt.z) > GARDEN_R){ showToast('Ada dışına çıkamaz 🚫'); return; }
     selectedDeco.group.position.x = pt.x;
     selectedDeco.group.position.z = pt.z;
     if(_selRing){ _selRing.position.x = pt.x; _selRing.position.z = pt.z; }

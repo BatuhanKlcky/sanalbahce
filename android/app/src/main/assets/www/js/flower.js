@@ -2,7 +2,7 @@
 // ── RAYCASTER (bad bug tap) ──────────────────────────────────────────────────
 var ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
 window.addEventListener('pointerdown',function(e){
-  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||placementMode)return;
+  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||placementMode)return;
   mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse,camera);
   var hits=ray.intersectObjects(badM);if(!hits.length)return;
@@ -323,8 +323,22 @@ window.advancePlants=function(seconds){
   return crossed;
 };
 var GARDEN_R=36, PLANT_GAP=1.5;
+/** Active placeable disk: biome pad center+R in cozy multi-biome, else classic garden. */
+window.placeZone=function(){
+  if(typeof isCozy==='function'&&isCozy()&&typeof window.getActiveBiome==='function'){
+    var b=window.getActiveBiome();
+    if(b) return {cx:b.cx||0, cz:b.cz||0, r:Math.max(4,(b.R||15)-1.2)};
+  }
+  if(typeof isCozy==='function'&&isCozy()&&window._islandR)
+    return {cx:0, cz:0, r:Math.max(4,window._islandR-1.2)};
+  return {cx:0, cz:0, r:GARDEN_R};
+};
+window.tooFar=function(x,z){
+  var zn=window.placeZone();
+  return Math.hypot(x-zn.cx, z-zn.cz)>zn.r;
+};
 window.gardenBlocked=function(x,z){
-  if(Math.sqrt(x*x+z*z)>GARDEN_R) return 'Çok uzak! 🚫';
+  if(window.tooFar(x,z)) return 'Çok uzak! 🚫';
   var i,p;
   for(i=0;i<flowers.length;i++){p=flowers[i].mesh.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
   for(i=0;i<harvestItems.length;i++){p=harvestItems[i];if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}

@@ -7,7 +7,7 @@ var growSteps=[.20,.45,.80,1.3];
 var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
 var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
 var _lastSim=0, _bugAcc=0, _rainAcc=0;
-var BUG_EVERY=5184/60, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=12;
+var BUG_EVERY=5184/60*2.2, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=12;
 function stepWeather(dt){
   if(!(dt>0)) return;
   _rainAcc+=dt;

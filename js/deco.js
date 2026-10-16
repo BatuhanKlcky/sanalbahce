@@ -1113,7 +1113,7 @@ window.cancelPlace=function(){placementMode=false;placementType=null;controls.en
 window.cancelFlowerPlace=window.cancelFlowerPlace||function(){flowerPlaceMode=false;controls.enabled=true;document.getElementById('pBar').classList.remove('show');};
 window.addEventListener('pointermove',function(e){if(!placementMode)return;plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;plRay.setFromCamera(plM,camera);var hits=plRay.intersectObject(planeR);if(!hits.length)return;var pt=hits[0].point;if(!prevGhost){prevGhost=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.05,16),ghostMat.clone());scene.add(prevGhost);}prevGhost.position.set(pt.x,.03,pt.z);});
 window.addEventListener('pointerup',function(e){
-  var uiHit = e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#pBar')||e.target.closest('#delBar');
+  var uiHit = e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||e.target.closest('#pBar')||e.target.closest('#delBar');
 
   // DELETE MODE
   if(deleteMode && !uiHit){
@@ -1154,8 +1154,8 @@ window.addEventListener('pointerup',function(e){
   if(!hits.length)return;
   var pt=hits[0].point;
   var tp=placementType,spot=tidyPlace(tp,pt.x,pt.z);
-  var placeLim=(typeof isCozy==='function'&&isCozy()&&window._islandR)?window._islandR-1.2:GARDEN_R;
-  if(Math.sqrt(spot.x*spot.x+spot.z*spot.z)>placeLim){showToast('Çok uzak! 🚫');return;}
+  if(typeof window.tooFar==='function' ? window.tooFar(spot.x,spot.z)
+      : Math.sqrt(spot.x*spot.x+spot.z*spot.z)>GARDEN_R){showToast('Çok uzak! 🚫');return;}
   pt.x=spot.x; pt.z=spot.z;
   var ang=spot.a;
   if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'||tp==='flower_wild') && window.gardenBlocked){

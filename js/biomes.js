@@ -439,6 +439,8 @@
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'biomeChip' + (_focus === b.id ? ' on' : '');
+      btn.title = b.name;
+      btn.setAttribute('aria-label', b.name);
       btn.innerHTML = '<span class="be">' + b.emoji + '</span><span class="bn">' + b.name + '</span>';
       btn.onclick = function(){ window.focusBiome(b.id); };
       bar.appendChild(btn);

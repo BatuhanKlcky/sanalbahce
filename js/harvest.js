@@ -214,7 +214,7 @@ function advanceHarvest(seconds){
 
 // Hasat tıklama
 window.addEventListener('pointerdown', function(e){
-  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar'))return;
+  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar'))return;
   if(placementMode||deleteMode||flowerPlaceMode)return;
   var m2 = new THREE.Vector2((e.clientX/innerWidth)*2-1, -(e.clientY/innerHeight)*2+1);
   var r2 = new THREE.Raycaster(); r2.setFromCamera(m2, camera);

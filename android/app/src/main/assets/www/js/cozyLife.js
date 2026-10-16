@@ -66,7 +66,7 @@
 
   function mkSparkleField(){
     // Tiny emissive orbs — PointsMaterial squares look broken on many mobile GPUs.
-    var n = isMobile ? 18 : 28;
+    var n = isMobile ? 10 : 16;
     var g = new THREE.Group();
     var R = (window._islandR || 16);
     var mat = new THREE.MeshBasicMaterial({ color:0xffe6a8, transparent:true, opacity:.55, depthWrite:false });
@@ -86,14 +86,22 @@
 
   function seedAmbientButterflies(){
     if(typeof window.addBug !== 'function') return;
-    var want = isMobile ? 4 : 7;
+    var want = isMobile ? 2 : 3;
     var guard = 0;
-    while(bugs.length < want && guard < 12){
+    while(bugs.length < want && guard < 8){
       var prev = isLoading;
       isLoading = true; // avoid save spam / toasts
       window.addBug();
       isLoading = prev;
       guard++;
+    }
+    // Cap excess butterflies from saves / prior sessions
+    while(bugs.length > want){
+      var extra = bugs.pop();
+      if(extra && extra.mesh){
+        if(extra.mesh.parent) extra.mesh.parent.remove(extra.mesh);
+        else scene.remove(extra.mesh);
+      }
     }
     var el = document.getElementById('bC');
     if(el) el.innerText = bugs.length;
@@ -144,9 +152,9 @@
   window.ensureCozyLife = function(){
     if(_lifeReady) return;
     _lifeReady = true;
-    var birdN = isMobile ? 3 : 5;
+    var birdN = isMobile ? 1 : 2;
     for(var i = 0; i < birdN; i++) window._birds.push(mkBird());
-    var flyN = isMobile ? 5 : 8;
+    var flyN = isMobile ? 2 : 4;
     for(var j = 0; j < flyN; j++) window._fireflies.push(mkFirefly());
     window._sparkles.push(mkSparkleField());
     seedAmbientButterflies();
@@ -164,12 +172,17 @@
     }
     if(!_lifeReady) window.ensureCozyLife();
 
+    var lifeCx = 0, lifeCz = 0;
+    if(typeof window.getActiveBiome === 'function'){
+      var ab = window.getActiveBiome();
+      if(ab){ lifeCx = ab.cx || 0; lifeCz = ab.cz || 0; }
+    }
     window._birds.forEach(function(b){
       b.mesh.visible = true;
       b.t += dt * b.speed;
       var ang = b.t + b.phase;
-      b.mesh.position.x = Math.cos(ang) * b.radius;
-      b.mesh.position.z = Math.sin(ang) * b.radius;
+      b.mesh.position.x = lifeCx + Math.cos(ang) * b.radius;
+      b.mesh.position.z = lifeCz + Math.sin(ang) * b.radius;
       b.mesh.position.y = b.height + Math.sin(b.t*2.2) * b.bob;
       b.mesh.rotation.y = -ang + Math.PI/2;
       var flap = Math.sin(b.t * 14) * .55;

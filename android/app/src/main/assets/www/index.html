@@ -14,8 +14,8 @@
 <title>Sanal Bahçe</title>
 <meta name="description" content="Kendi sanal bahçeni büyüt, hasat et ve evcil dostlarınla vakit geçir.">
 <link rel="privacy-policy" href="./gizlilik.html">
-<script src="vendor/supabase.js"></script>
-<script src="vendor/three.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="js/lib/GLTFLoader.js"></script>
 <style>
 *{padding:0;margin:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
@@ -127,11 +127,14 @@ body.photo-mode #sidebar,body.photo-mode .ui-container,body.photo-mode #lvBadge,
 #modelLoad{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;background:rgba(8,14,10,.72);backdrop-filter:blur(8px);color:#ffe6c4;font-weight:800;font-size:14px}
 #modelLoad.show{display:flex}
 #modelLoad span{background:rgba(30,22,16,.95);border:1px solid rgba(255,210,160,.3);padding:14px 22px;border-radius:16px}
-#biomeBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(158px + env(safe-area-inset-bottom,0px));z-index:1200;display:none;gap:8px;padding:8px 10px;max-width:min(96vw,560px);overflow-x:auto;background:rgba(28,20,16,.88);border:1px solid rgba(255,210,160,.22);border-radius:18px;backdrop-filter:blur(14px);-webkit-overflow-scrolling:touch;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+/* Biyom seçici: sağ kenar, emoji-only — alt/sol buton karmaşasından ayrı */
+#biomeBar{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:1200;display:none;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;max-height:min(56vh,420px);overflow-y:auto;background:rgba(28,20,16,.82);border:1px solid rgba(255,210,160,.2);border-radius:18px;backdrop-filter:blur(14px);-webkit-overflow-scrolling:touch;box-shadow:0 8px 28px rgba(0,0,0,.35)}
 #biomeBar.show{display:flex}
-.biomeChip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:8px 10px;border-radius:14px;border:1px solid rgba(255,210,160,.16);background:rgba(255,220,170,.06);color:#ffe8c8;font-weight:800;font-size:10px;cursor:pointer}
-.biomeChip .be{font-size:18px;line-height:1}
-.biomeChip.on{background:rgba(255,200,120,.22);border-color:rgba(255,210,160,.45);box-shadow:0 0 0 1px rgba(255,200,140,.2) inset}
+.biomeChip{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:14px;border:1px solid rgba(255,210,160,.16);background:rgba(255,220,170,.06);color:#ffe8c8;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.biomeChip .be{font-size:20px;line-height:1}
+.biomeChip .bn{display:none}
+.biomeChip.on{background:rgba(255,200,120,.28);border-color:rgba(255,210,160,.5);box-shadow:0 0 0 1px rgba(255,200,140,.25) inset}
+body.cozy-mode #btnStats{display:none!important}
 body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 </style>
 </head>
