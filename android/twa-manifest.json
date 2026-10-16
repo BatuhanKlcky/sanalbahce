@@ -1,0 +1,53 @@
+{
+  "packageId": "com.batuhanklcky.sanalbahce",
+  "host": "batuhanklcky.github.io",
+  "name": "Sanal Bahçe",
+  "launcherName": "Sanal Bahçe",
+  "display": "standalone",
+  "themeColor": "#07140C",
+  "themeColorDark": "#07140C",
+  "navigationColor": "#07140C",
+  "navigationColorDark": "#07140C",
+  "navigationDividerColor": "#07140C",
+  "navigationDividerColorDark": "#07140C",
+  "backgroundColor": "#07140C",
+  "enableNotifications": true,
+  "startUrl": "/sanalbahce/",
+  "iconUrl": "https://batuhanklcky.github.io/sanalbahce/icon-512.png",
+  "maskableIconUrl": "https://batuhanklcky.github.io/sanalbahce/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android-upload.keystore",
+    "alias": "upload"
+  },
+  "appVersionName": "2.0.0",
+  "appVersionCode": 2,
+  "minSdkVersion": 24,
+  "targetSdkVersion": 35,
+  "orientation": "portrait",
+  "webManifestUrl": "https://batuhanklcky.github.io/sanalbahce/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://batuhanklcky.github.io/sanalbahce/",
+  "minFullScreenHeight": 0,
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "shortcuts": [],
+  "generatorApp": "bubblewrap",
+  "additionalTrustedOrigins": [],
+  "retainedCertificates": [],
+  "additionalMetadata": []
+}

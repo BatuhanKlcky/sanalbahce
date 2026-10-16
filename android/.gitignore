@@ -1,0 +1,10 @@
+android-upload.keystore
+*.keystore
+*.jks
+app/
+store_credentials.ini
+.bubblewrap/
+node_modules/
+*.apk
+*.aab
+*.pepk

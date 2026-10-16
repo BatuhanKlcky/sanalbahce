@@ -58,11 +58,14 @@ Sonrasında `anasayfa.html` dosyasına çift tıklaman yeterli — herhangi bir 
 - [ ] Ses efektleri
 - [x] Mobil uyumlu tasarım (web) — çentik güvenlik alanı, esnek panel genişliği, performans modu
 - [ ] Kayıt/skor sistemi
-- [ ] APK'yı Google Play'e taşımak
+- [x] Google Play hazırlığı (gizlilik, TWA iskeleti, asset links)
+- [ ] Google Play production yayını
 
 ## 🔒 Gizlilik
 
-Uygulamayı daha iyi hale getirebilmek için ziyaret istatistiklerini (örn. IP adresi, tarayıcı bilgisi) anonim şekilde kaydediyoruz. Bu bilgiler yalnızca kullanım analizi için tutulur, üçüncü kişilerle paylaşılmaz ve kimseyle ticari amaçla kullanılmaz.
+Tam metin: [Gizlilik Politikası](https://batuhanklcky.github.io/sanalbahce/gizlilik.html)
+
+Ziyaret istatistikleri (örn. IP, tarayıcı bilgisi) anonim şekilde kaydedilebilir. Oyun kaydı cihazında kalır; veriler satılmaz.
 
 ## 🤝 Katkıda Bulunma
 

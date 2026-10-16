@@ -1,10 +1,12 @@
-var CACHE = 'sanalbahce-shell-13';
+var CACHE = 'sanalbahce-shell-14';
 var LOCAL = [
   './',
   './index.html',
+  './gizlilik.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './icon-maskable-512.png',
   './js/scene.js',
   './js/save.js',
   './js/harvest.js',

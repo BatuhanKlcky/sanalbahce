@@ -11,7 +11,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<title>Sanal Bahce</title>
+<title>Sanal Bahçe</title>
+<meta name="description" content="Kendi sanal bahçeni büyüt, hasat et ve evcil dostlarınla vakit geçir.">
+<link rel="privacy-policy" href="./gizlilik.html">
 <script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
@@ -97,6 +99,8 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 .acct-btn{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.12);color:#fbbf24;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;width:100%;margin:4px 0;-webkit-tap-highlight-color:transparent}
 .acct-row .acct-btn{width:auto;margin:6px 0;flex-shrink:0}
 .acct-hint{font-size:10px;color:rgba(255,255,255,.35);line-height:1.4;margin:4px 0 8px}
+.acct-legal{display:block;margin:10px 0 2px;font-size:11px;font-weight:700;color:#7dca8a;text-decoration:none}
+.acct-legal:active{opacity:.75}
 #acctWho{font-size:13px;font-weight:800;color:#fff}
 
 
@@ -235,6 +239,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
   <div class="stat-row"><span>🥕 Havuç</span><span class="stat-val" id="st-car">0</span></div>
   <div class="stat-row"><span>💰 Toplam Coin</span><span class="stat-val" id="st-coin">0</span></div>
   <div class="stat-row"><span>🏆 Skor</span><span class="stat-val" id="st-score">0</span></div>
+  <a class="acct-legal" href="./gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
 </div>
 <div id="wIcon">☀️</div>
 <div id="lvBadge">⭐ Lv.1</div>
