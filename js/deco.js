@@ -241,7 +241,7 @@ function buildLantern(x, z){
     var bar = new THREE.Mesh(new THREE.BoxGeometry(.04, cageH+.04, .04), iron);
     bar.position.set(p[0], headY, p[1]); g.add(bar);
   });
-  var glassMat = new THREE.MeshStandardMaterial({color:0xffe8b0, emissive:0xffaa44, emissiveIntensity:1.75, transparent:true, opacity:.88, roughness:.18, side:THREE.DoubleSide});
+  var glassMat = new THREE.MeshStandardMaterial({color:0xfff0c8, emissive:0xffb050, emissiveIntensity:2.8, transparent:true, opacity:.92, roughness:.14, side:THREE.DoubleSide});
   glassMat.userData.keep = true;
   var paneGeo = new THREE.PlaneGeometry(cageW-.08, cageH-.08);
   [[0,hw],[0,-hw],[hw,0],[-hw,0]].forEach(function(p,i){
@@ -250,18 +250,18 @@ function buildLantern(x, z){
     if(i>=2) pane.rotation.y = Math.PI/2;
     g.add(pane);
   });
-  var flame = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 10), new THREE.MeshStandardMaterial({color:0xfff2c8, emissive:0xff9944, emissiveIntensity:2.35, roughness:.3}));
+  var flame = new THREE.Mesh(new THREE.SphereGeometry(.14, 12, 10), new THREE.MeshStandardMaterial({color:0xfff6d0, emissive:0xffaa44, emissiveIntensity:3.6, roughness:.25}));
   flame.material.userData.keep = true;
-  flame.scale.set(.85, 1.15, .85); flame.position.y = headY; g.add(flame);
+  flame.scale.set(.85, 1.2, .85); flame.position.y = headY; g.add(flame);
   g.userData.flame = flame;
   var roof = new THREE.Mesh(new THREE.ConeGeometry(.34, .22, 4), iron);
   roof.position.y = headY + cageH*.5 + .14; roof.rotation.y = Math.PI/4; g.add(roof);
   var finial = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), brass);
   finial.position.y = headY + cageH*.5 + .28; g.add(finial);
-  var lt = new THREE.PointLight(0xffc278, 2.85, 12);
+  var lt = new THREE.PointLight(0xffd090, 4.6, 18);
   lt.position.y = headY; g.add(lt);
-  var fill = new THREE.PointLight(0xffaa55, 1.15, 8);
-  fill.position.y = .85; g.add(fill);
+  var fill = new THREE.PointLight(0xffb060, 2.15, 14);
+  fill.position.y = .9; g.add(fill);
   g.userData.fillLight = fill;
   g.add(sitShadow(.4));
   g.position.set(x, 0, z);

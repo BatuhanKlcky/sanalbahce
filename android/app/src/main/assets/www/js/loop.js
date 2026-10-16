@@ -277,7 +277,7 @@ function animate(){
     if(d.type==='golden_pot'&&d.light&&_fc%3===0)d.light.intensity=.6+Math.sin(_fc*.25)*.3;
     if(d.type==='crystal_pond'&&d.light&&_fc%3===0)d.light.intensity=.6+Math.sin(_fc*.15)*.3;
     if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
-    if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0){d.light.intensity=2.55+Math.sin(_fc*.3+d.group.position.x)*.55;if(d.group&&d.group.userData&&d.group.userData.fillLight)d.group.userData.fillLight.intensity=1.05+Math.sin(_fc*.22+d.group.position.z)*.25;}if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
+    if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0){d.light.intensity=4.2+Math.sin(_fc*.3+d.group.position.x)*.75;if(d.group&&d.group.userData&&d.group.userData.fillLight)d.group.userData.fillLight.intensity=1.95+Math.sin(_fc*.22+d.group.position.z)*.4;}if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
     if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}});
   // Skip rustling hidden classic dress while diorama is on (saves CPU).
   if(window._dress && !(typeof isCozy==='function'&&isCozy())){for(var si=0;si<window._dress.length;si++)rustle(window._dress[si],now,.85);}

@@ -336,12 +336,12 @@
 
       // Glass panes (4 sides) — warm emissive
       var glassMat = new THREE.MeshStandardMaterial({
-        color: 0xffe8b0,
-        emissive: 0xffaa44,
-        emissiveIntensity: 1.75,
+        color: 0xfff0c8,
+        emissive: 0xffb050,
+        emissiveIntensity: 2.8,
         transparent: true,
-        opacity: 0.88,
-        roughness: 0.18,
+        opacity: 0.92,
+        roughness: 0.14,
         metalness: 0.05,
         side: THREE.DoubleSide
       });
@@ -357,10 +357,10 @@
 
       // Inner flame bulb
       var flame = new THREE.Mesh(
-        new THREE.SphereGeometry(0.1, 12, 10),
-        mat(0xfff0c0, 0.35, 0, 0xff9944, 1.6)
+        new THREE.SphereGeometry(0.14, 12, 10),
+        mat(0xfff6d0, 0.25, 0, 0xffaa44, 3.6)
       );
-      flame.scale.set(0.85, 1.15, 0.85);
+      flame.scale.set(0.85, 1.2, 0.85);
       flame.position.y = headY;
       g.add(flame);
       g.userData.flame = flame;
@@ -382,14 +382,19 @@
       arm.position.y = headY - cageH * 0.5 - 0.06;
       g.add(arm);
 
-      var lt = new THREE.PointLight(0xffb060, 1.7, 7.5);
+      var lt = new THREE.PointLight(0xffd090, 4.6, 18);
       lt.position.set(0, headY, 0);
       g.add(lt);
+      // Extra warm fill so the lawn around the pole lights up
+      var fill = new THREE.PointLight(0xffb060, 2.15, 14);
+      fill.position.set(0, 0.9, 0);
+      g.add(fill);
+      g.userData.fillLight = fill;
 
       // Soft halo
       var halo = new THREE.Mesh(
-        new THREE.SphereGeometry(0.32, 16, 12),
-        new THREE.MeshBasicMaterial({ color: 0xffc878, transparent: true, opacity: 0.12, depthWrite: false })
+        new THREE.SphereGeometry(0.55, 16, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffd090, transparent: true, opacity: 0.34, depthWrite: false })
       );
       halo.position.y = headY;
       halo.material.userData.keep = true;
