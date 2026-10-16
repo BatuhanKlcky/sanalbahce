@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-14';
+var CACHE = 'sanalbahce-shell-15';
 var LOCAL = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ var LOCAL = [
   './js/harvest.js',
   './js/shop.js',
   './js/flower.js',
+  './js/flowerArt.js',
   './js/deco.js',
   './js/loop.js'
 ];
