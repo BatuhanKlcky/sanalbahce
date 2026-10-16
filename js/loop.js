@@ -293,4 +293,10 @@ function animate(){
   else renderer.render(scene,camera);
 }
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
-loadProg();loadStats();loadShop();load();placeOwnedWing();animate();
+function bootGame(){
+  loadProg();loadStats();loadShop();load();placeOwnedWing();
+  if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
+}
+animate();
+if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);
+else bootGame();

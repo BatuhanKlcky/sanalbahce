@@ -193,8 +193,10 @@
     }
   };
 
-  // Boot life shortly after cozy mode applies
-  setTimeout(function(){
+  // Boot life after models are ready (so meadow uses GLB flowers)
+  function bootLife(){
     if(typeof isCozy === 'function' && isCozy()) window.ensureCozyLife();
-  }, 400);
+  }
+  if(typeof window.whenModelsReady === 'function') window.whenModelsReady(bootLife);
+  else setTimeout(bootLife, 500);
 })();
