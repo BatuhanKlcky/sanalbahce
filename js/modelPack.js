@@ -336,12 +336,12 @@
 
       // Glass panes (4 sides) — warm emissive
       var glassMat = new THREE.MeshStandardMaterial({
-        color: 0xffe2a0,
+        color: 0xffe8b0,
         emissive: 0xffaa44,
-        emissiveIntensity: 1.15,
+        emissiveIntensity: 1.75,
         transparent: true,
-        opacity: 0.78,
-        roughness: 0.2,
+        opacity: 0.88,
+        roughness: 0.18,
         metalness: 0.05,
         side: THREE.DoubleSide
       });

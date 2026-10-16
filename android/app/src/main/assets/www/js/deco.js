@@ -241,7 +241,7 @@ function buildLantern(x, z){
     var bar = new THREE.Mesh(new THREE.BoxGeometry(.04, cageH+.04, .04), iron);
     bar.position.set(p[0], headY, p[1]); g.add(bar);
   });
-  var glassMat = new THREE.MeshStandardMaterial({color:0xffe2a0, emissive:0xffaa44, emissiveIntensity:1.15, transparent:true, opacity:.78, roughness:.2, side:THREE.DoubleSide});
+  var glassMat = new THREE.MeshStandardMaterial({color:0xffe8b0, emissive:0xffaa44, emissiveIntensity:1.75, transparent:true, opacity:.88, roughness:.18, side:THREE.DoubleSide});
   glassMat.userData.keep = true;
   var paneGeo = new THREE.PlaneGeometry(cageW-.08, cageH-.08);
   [[0,hw],[0,-hw],[hw,0],[-hw,0]].forEach(function(p,i){
@@ -250,7 +250,7 @@ function buildLantern(x, z){
     if(i>=2) pane.rotation.y = Math.PI/2;
     g.add(pane);
   });
-  var flame = new THREE.Mesh(new THREE.SphereGeometry(.1, 12, 10), new THREE.MeshStandardMaterial({color:0xfff0c0, emissive:0xff9944, emissiveIntensity:1.6, roughness:.35}));
+  var flame = new THREE.Mesh(new THREE.SphereGeometry(.12, 12, 10), new THREE.MeshStandardMaterial({color:0xfff2c8, emissive:0xff9944, emissiveIntensity:2.35, roughness:.3}));
   flame.material.userData.keep = true;
   flame.scale.set(.85, 1.15, .85); flame.position.y = headY; g.add(flame);
   g.userData.flame = flame;
@@ -258,8 +258,11 @@ function buildLantern(x, z){
   roof.position.y = headY + cageH*.5 + .14; roof.rotation.y = Math.PI/4; g.add(roof);
   var finial = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), brass);
   finial.position.y = headY + cageH*.5 + .28; g.add(finial);
-  var lt = new THREE.PointLight(0xffb060, 1.7, 7.5);
+  var lt = new THREE.PointLight(0xffc278, 2.85, 12);
   lt.position.y = headY; g.add(lt);
+  var fill = new THREE.PointLight(0xffaa55, 1.15, 8);
+  fill.position.y = .85; g.add(fill);
+  g.userData.fillLight = fill;
   g.add(sitShadow(.4));
   g.position.set(x, 0, z);
   return {group:g, light:lt};
