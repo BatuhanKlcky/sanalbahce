@@ -59,8 +59,8 @@
           warm: b.glow,
           cool: b.moss,
           dirt: b.rim,
-          repeat: b.center ? 7 : 5.5,
-          normalScale: 1.05,
+          repeat: b.center ? 4.5 : 3.8,
+          normalScale: 0.75,
           color: 0xffffff
         })
       : new THREE.MeshStandardMaterial({ color: b.grass, roughness: 0.92 });

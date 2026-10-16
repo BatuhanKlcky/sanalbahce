@@ -124,7 +124,7 @@ var fL=new THREE.DirectionalLight(0xffc8a8,.35);fL.position.set(-15,8,-12);scene
 var gL=new THREE.PointLight(0xfff2cc,.45,36);gL.position.set(0,3,0);scene.add(gL);
 // Premium lawn (albedo + normal + roughness). Fallback if groundArt missing.
 var _lawnMat = typeof window.createLawnMaterial==='function'
-  ? window.createLawnMaterial({ key:'classic', tint:0x5fad52, repeat:16, normalScale:0.95 })
+  ? window.createLawnMaterial({ key:'classic', tint:0x5fad52, repeat:9, normalScale:0.7 })
   : new THREE.MeshStandardMaterial({ color:0x5a9a48, roughness:0.95 });
 window._grassMap = _lawnMat.map || null;
 var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220, isMobile?1:1), _lawnMat);

@@ -105,12 +105,12 @@
     // Optional drawn blade strokes for crisp close-up read
     ag.putImageData(aImg, 0, 0);
     ag.globalCompositeOperation = 'multiply';
-    for(var k = 0; k < (isMobile ? 900 : 1800); k++){
+    for(var k = 0; k < (isMobile ? 420 : 900); k++){
       var bx = Math.random() * size, by = Math.random() * size;
-      var len2 = 4 + Math.random() * 10;
-      var ang = -0.4 + Math.random() * 0.8;
-      ag.strokeStyle = 'rgba(20,50,18,' + (0.04 + Math.random() * 0.07) + ')';
-      ag.lineWidth = 0.8 + Math.random();
+      var len2 = 3 + Math.random() * 7;
+      var ang = -0.35 + Math.random() * 0.7;
+      ag.strokeStyle = 'rgba(20,50,18,' + (0.025 + Math.random() * 0.04) + ')';
+      ag.lineWidth = 0.6 + Math.random() * 0.7;
       ag.beginPath();
       ag.moveTo(bx, by);
       ag.lineTo(bx + Math.sin(ang) * len2, by - Math.cos(ang) * len2);
