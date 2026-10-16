@@ -20,8 +20,8 @@
     "path": "./android-upload.keystore",
     "alias": "upload"
   },
-  "appVersionName": "2.0.0",
-  "appVersionCode": 3,
+  "appVersionName": "2.0.1",
+  "appVersionCode": 5,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://batuhanklcky.github.io/sanalbahce/manifest.json",
@@ -49,5 +49,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "displayOverride": [],
-  "appVersion": "2.0.0"
+  "appVersion": "2.0.1"
 }
