@@ -11,6 +11,9 @@
 captures/
 .DS_Store
 keystore.properties
+*.keystore
+*.jks
+local.properties
 
 !dist/
 !dist/*.aab
