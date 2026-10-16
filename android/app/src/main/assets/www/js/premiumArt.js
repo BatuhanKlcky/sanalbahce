@@ -309,6 +309,11 @@
 
   // Keep other cozyArt overrides (fence/bench/etc) — re-upgrade wild + windmill lightly
   buildWild = function(x, z){
+    if(typeof window.buildPerfectWild === 'function'){
+      var g = window.buildPerfectWild(x, z);
+      if(typeof addContact === 'function') addContact(g, .5);
+      return g;
+    }
     var g = new THREE.Group();
     g.userData.heads = [];
     var rnd = gardenRand(x+5, z+3);

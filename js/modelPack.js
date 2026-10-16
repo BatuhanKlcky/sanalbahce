@@ -218,12 +218,20 @@
       var o = cloneKey(key, 0.85 + rnd()*0.55);
       var g = wrapAt(x, z, rnd()*Math.PI*2, o);
       for(var i=0;i<3;i++){
-        var fk = ['flower_1','flower_2','flower_3','flower_4'][Math.floor(rnd()*4)];
-        var fl = cloneKey(fk, 0.35+rnd()*0.25);
-        if(fl){
+        if(typeof window.mkPerfectBloom === 'function'){
+          var kinds = (window._flowerArt && window._flowerArt.kinds) || ['daisy','rose','tulip','cherry'];
+          var cols = (window._flowerArt && window._flowerArt.cols) || [0xff5a9a,0xffd056,0xffffff];
+          var fl = window.mkPerfectBloom(kinds[Math.floor(rnd()*kinds.length)], cols[Math.floor(rnd()*cols.length)], 0.7+rnd()*0.35);
           fl.position.set((rnd()-.5)*.75, 0, (rnd()-.5)*.75);
-          groundAlign(fl);
           g.add(fl);
+        } else {
+          var fk = ['flower_1','flower_2','flower_3','flower_4'][Math.floor(rnd()*4)];
+          var fl2 = cloneKey(fk, 0.35+rnd()*0.25);
+          if(fl2){
+            fl2.position.set((rnd()-.5)*.75, 0, (rnd()-.5)*.75);
+            groundAlign(fl2);
+            g.add(fl2);
+          }
         }
       }
       if(typeof sitShadow === 'function') g.add(sitShadow(.75));
@@ -440,10 +448,16 @@
           pad.position.set(Math.cos(j*1.7)*.7, .05, Math.sin(j*1.7)*.55);
           g.add(pad);
         }
-        var fl = cloneKey(['flower_1','flower_2','flower_3'][j%3], 0.4);
-        if(fl){
+        if(typeof window.mkPerfectBloom === 'function'){
+          var fl = window.mkPerfectBloom(['lotus','daisy','cherry'][j%3], [0xff69b4,0xffffff,0xffb7c5][j%3], 0.85);
           fl.position.set(Math.cos(j)*1.75, 0, Math.sin(j)*1.35);
-          groundAlign(fl); g.add(fl);
+          g.add(fl);
+        } else {
+          var fl2 = cloneKey(['flower_1','flower_2','flower_3'][j%3], 0.4);
+          if(fl2){
+            fl2.position.set(Math.cos(j)*1.75, 0, Math.sin(j)*1.35);
+            groundAlign(fl2); g.add(fl2);
+          }
         }
       }
       var lt = new THREE.PointLight(0x88e0d0, .6, 5.5);
@@ -458,14 +472,23 @@
       var g = new THREE.Group();
       var well = cloneKey('well', 1.9);
       if(well) g.add(well);
-      var fl = cloneKey('flower_2', 0.45);
-      if(fl){ fl.position.set(0.7,0,0.55); groundAlign(fl); g.add(fl); }
+      if(typeof window.mkPerfectBloom === 'function'){
+        var fl = window.mkPerfectBloom('daisy', 0xffd056, 0.9);
+        fl.position.set(0.7,0,0.55); g.add(fl);
+      } else {
+        var fl2 = cloneKey('flower_2', 0.45);
+        if(fl2){ fl2.position.set(0.7,0,0.55); groundAlign(fl2); g.add(fl2); }
+      }
       if(typeof sitShadow === 'function') g.add(sitShadow(1.0));
       g.position.set(x, 0, z);
       return g;
     };
 
     buildWild = function(x, z){
+      // Polished procedural blooms — Quaternius crop flowers read as toys up close.
+      if(typeof window.buildPerfectWild === 'function'){
+        return window.buildPerfectWild(x, z);
+      }
       var g = new THREE.Group();
       var rnd = _rnd(x+5, z+3);
       g.userData.heads = [];
@@ -495,10 +518,16 @@
       var house = cloneKey(key, 3.4 + rnd()*0.5);
       if(house) g.add(house);
       for(var i=0;i<3;i++){
-        var fl = cloneKey(['flower_1','flower_3','bush_1'][i%3], 0.45+i*.08);
-        if(fl){
+        if(typeof window.mkPerfectBloom === 'function'){
+          var fl = window.mkPerfectBloom(['rose','tulip','daisy'][i%3], [0xff3366,0xff69b4,0xffd056][i%3], 0.85+i*.08);
           fl.position.set((i-1)*0.7, 0, 1.55);
-          groundAlign(fl); g.add(fl);
+          g.add(fl);
+        } else {
+          var fl2 = cloneKey(['flower_1','flower_3','bush_1'][i%3], 0.45+i*.08);
+          if(fl2){
+            fl2.position.set((i-1)*0.7, 0, 1.55);
+            groundAlign(fl2); g.add(fl2);
+          }
         }
       }
       var crate = cloneKey('crate', 0.45);
@@ -521,10 +550,16 @@
       var fence = cloneKey('fence', 0.95);
       if(fence){ fence.position.set(0,0,0.15); groundAlign(fence); g.add(fence); }
       for(var i=0;i<5;i++){
-        var fl = cloneKey(['flower_1','flower_2','flower_3','flower_4'][i%4], 0.42);
-        if(fl){
+        if(typeof window.mkPerfectBloom === 'function'){
+          var fl = window.mkPerfectBloom(['cherry','daisy','rose','tulip','peony'][i%5], [0xffb7c5,0xffffff,0xcc0022,0xff3366,0xff69b4][i%5], 0.8);
           fl.position.set((i-2)*.38, 0, 0.45);
-          groundAlign(fl); g.add(fl);
+          g.add(fl);
+        } else {
+          var fl2 = cloneKey(['flower_1','flower_2','flower_3','flower_4'][i%4], 0.42);
+          if(fl2){
+            fl2.position.set((i-2)*.38, 0, 0.45);
+            groundAlign(fl2); g.add(fl2);
+          }
         }
       }
       if(typeof sitShadow === 'function') g.add(sitShadow(1.2));
@@ -574,8 +609,13 @@
       var g = new THREE.Group();
       var pot = cloneKey(pick('barrel','crate') || 'barrel', 0.42);
       if(pot) g.add(pot);
-      var fl = cloneKey(['flower_1','flower_2','flower_3','flower_4','lettuce','tomato'][Math.floor(Math.random()*6)], 0.55);
-      if(fl){ fl.position.y = 0.35; g.add(fl); }
+      if(typeof window.mkPerfectBloom === 'function'){
+        var fl = window.mkPerfectBloom(['rose','tulip','daisy','cherry'][Math.floor(Math.random()*4)], [0xcc0022,0xff3366,0xffd056,0xffb7c5][Math.floor(Math.random()*4)], 0.95);
+        fl.position.y = 0.28; g.add(fl);
+      } else {
+        var fl2 = cloneKey(['flower_1','flower_2','flower_3','flower_4','lettuce','tomato'][Math.floor(Math.random()*6)], 0.55);
+        if(fl2){ fl2.position.y = 0.35; g.add(fl2); }
+      }
       if(typeof sitShadow === 'function') g.add(sitShadow(.3));
       g.position.set(x,0,z);
       return g;

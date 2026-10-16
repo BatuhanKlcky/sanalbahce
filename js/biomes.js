@@ -122,6 +122,18 @@
     return null;
   }
 
+  function spawnBloom(kind, col, sc){
+    if(typeof window.mkPerfectBloom === 'function'){
+      return window.mkPerfectBloom(kind || 'daisy', col || 0xffd056, sc == null ? 1 : sc);
+    }
+    return spawn(kind === 'lotus' ? 'flower_3' : 'flower_1', 0.45);
+  }
+
+  function spawnWildPatch(x, z){
+    if(typeof window.buildPerfectWild === 'function') return window.buildPerfectWild(x, z);
+    return spawn('flowers', 0.55);
+  }
+
   function ringSlots(n, r0, r1, seed){
     var r = rnd(seed);
     var out = [];
@@ -161,7 +173,15 @@
       if(pond && pond.group){ pond.group.scale.setScalar(0.85); root.add(pond.group); }
     }
     ringSlots(isMobile ? 6 : 10, 3, R * 0.5, 33).forEach(function(s){
-      addAt(root, spawn(['flower_1','flower_2','flower_3','flowers'][Math.floor(s.r()*4)], 0.45), s.x, s.z, 1, s.a);
+      var kinds = ['daisy','rose','tulip','cherry','peony','lotus'];
+      var cols = [0xff5a9a,0xffd056,0xffffff,0xffb7c5,0x9b7efa,0xff3366];
+      var patch = spawnWildPatch(s.x, s.z);
+      if(patch){
+        patch.rotation.y = s.a;
+        root.add(patch);
+      } else {
+        addAt(root, spawnBloom(kinds[Math.floor(s.r()*kinds.length)], cols[Math.floor(s.r()*cols.length)], 0.9), s.x, s.z, 1, s.a);
+      }
     });
   }
 
@@ -226,7 +246,13 @@
       addAt(root, spawn(['rock_1','rock_2','rock_m3'][Math.floor(s.r()*3)], 0.45), s.x, s.z, 1, s.a);
     });
     ringSlots(isMobile ? 5 : 8, 5, R * 0.8, 304).forEach(function(s){
-      addAt(root, spawn(['flower_1','flower_3','plant_2','grass_2'][Math.floor(s.r()*4)], 0.5), s.x, s.z, 1, s.a);
+      if(s.r() > 0.45){
+        var patch = spawnWildPatch(s.x, s.z);
+        if(patch){ patch.rotation.y = s.a; root.add(patch); }
+        else addAt(root, spawnBloom('lotus', 0xff69b4, 0.95), s.x, s.z, 1, s.a);
+      } else {
+        addAt(root, spawn(['plant_2','grass_2'][Math.floor(s.r()*2)], 0.5), s.x, s.z, 1, s.a);
+      }
     });
   }
 
@@ -247,8 +273,10 @@
     ringSlots(isMobile ? 4 : 6, R * 0.75, R * 0.95, 402).forEach(function(s){
       addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
     });
-    addAt(root, spawn('flower_2', 0.5), 2.0, 2.5, 1, 0);
-    addAt(root, spawn('flower_1', 0.5), -2.2, 2.8, 1, 0);
+    addAt(root, spawnBloom('rose', 0xcc0022, 1.05), 2.0, 2.5, 1, 0);
+    addAt(root, spawnBloom('tulip', 0xff3366, 1.05), -2.2, 2.8, 1, 0);
+    var villagePatch = spawnWildPatch(0.5, 3.8);
+    if(villagePatch) root.add(villagePatch);
     if(typeof buildLantern === 'function'){
       [[6.2, 5.5],[-6.5, -5.0],[0.5, 6.8]].forEach(function(p, i){
         if(isMobile && i > 1) return;

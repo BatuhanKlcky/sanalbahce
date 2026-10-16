@@ -574,6 +574,7 @@
 
   // ── WILD: flower cluster ──────────────────────────────────────────────────
   buildWild = function(x, z){
+    if(typeof window.buildPerfectWild === 'function') return window.buildPerfectWild(x, z);
     var g = new THREE.Group();
     g.userData.heads = [];
     var rnd = gardenRand(x+5, z+3);

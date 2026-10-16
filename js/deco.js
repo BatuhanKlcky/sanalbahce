@@ -587,6 +587,7 @@ function buildScarecrow(x, z){
   return g;
 }
 function buildWild(x, z){
+  if(typeof window.buildPerfectWild === 'function') return window.buildPerfectWild(x, z);
   var g = new THREE.Group();
   var rnd = gardenRand(x+11, z+6);
   var cols = [0xffd24a, 0xf28a3a, 0xee5b9a, 0x8a6ae0, 0x6eb6f2, 0xf7f4ee];
@@ -735,20 +736,28 @@ function tidyPlace(tp, x, z){
 
 var BLOOM_COLS = [0xffd23a, 0xfff6ea, 0xff5a2a, 0xe23b6a, 0xc44ad0, 0xff8a3a, 0xffffff, 0xfff2c4];
 function bedBloom(parent, x, y, z, col, sc){
-  var g = new THREE.Group();
-  var geo = petalGeo(.13 * sc, .24 * sc, .85);
-  var mat = petalMat(col, .2);
-  for(var k = 0; k < 6; k++){
-    var p = new THREE.Mesh(geo, mat);
-    p.rotation.order = 'YXZ';
-    p.rotation.y = (k / 6) * Math.PI * 2;
-    p.rotation.x = 1.25;
-    g.add(p);
+  var g;
+  if(typeof window.mkPerfectBloom === 'function'){
+    var kinds = ['daisy','rose','tulip','cherry','peony'];
+    var kind = kinds[Math.abs((x * 10 + z * 7) | 0) % kinds.length];
+    g = window.mkPerfectBloom(kind, col, (sc || 1) * 0.85);
+    g.position.set(x, y, z);
+  } else {
+    g = new THREE.Group();
+    var geo = petalGeo(.13 * sc, .24 * sc, .85);
+    var mat = petalMat(col, .2);
+    for(var k = 0; k < 6; k++){
+      var p = new THREE.Mesh(geo, mat);
+      p.rotation.order = 'YXZ';
+      p.rotation.y = (k / 6) * Math.PI * 2;
+      p.rotation.x = 1.25;
+      g.add(p);
+    }
+    var heart = new THREE.Mesh(new THREE.SphereGeometry(.05 * sc, 6, 4), kept(0xffe08a, .5));
+    heart.position.y = .035;
+    g.add(heart);
+    g.position.set(x, y, z);
   }
-  var heart = new THREE.Mesh(new THREE.SphereGeometry(.05 * sc, 6, 4), kept(0xffe08a, .5));
-  heart.position.y = .035;
-  g.add(heart);
-  g.position.set(x, y, z);
   g.userData.spin = x * 1.7 + z;
   parent.add(g);
   if(!window._blooms) window._blooms = [];
