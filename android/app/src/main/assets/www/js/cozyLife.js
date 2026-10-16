@@ -106,20 +106,35 @@
       window._meadow.forEach(function(m){ if(m && m.parent) m.parent.remove(m); else if(m) scene.remove(m); });
       window._meadow = [];
     }
+    // Biome pads already auto-plant flowers — keep only a light sprinkle on meadow.
+    if(window._biomeRoot){
+      var nLite = isMobile ? 4 : 6;
+      for(var i = 0; i < nLite; i++){
+        var a = (i/nLite)*Math.PI*2 + 0.2;
+        var r = 5 + (i%3)*1.4;
+        if(typeof buildWild === 'function'){
+          var patch = buildWild(Math.cos(a)*r, Math.sin(a)*r);
+          patch.scale.setScalar(.5 + Math.random()*.25);
+          scene.add(patch);
+          window._meadow.push(patch);
+        }
+      }
+      return;
+    }
     var n = isMobile ? 10 : 18;
     var R = (window._islandR || 18) - 2;
-    for(var i = 0; i < n; i++){
-      var a = (i/n)*Math.PI*2 + Math.random()*.4;
-      var r = 4 + Math.random()*(R-5);
-      var x = Math.cos(a)*r, z = Math.sin(a)*r;
+    for(var j = 0; j < n; j++){
+      var a2 = (j/n)*Math.PI*2 + Math.random()*.4;
+      var r2 = 4 + Math.random()*(R-5);
+      var x = Math.cos(a2)*r2, z = Math.sin(a2)*r2;
       if(typeof buildWild === 'function'){
-        var patch = buildWild(x, z);
-        patch.scale.setScalar(.55 + Math.random()*.35);
-        scene.add(patch);
-        window._meadow.push(patch);
+        var patch2 = buildWild(x, z);
+        patch2.scale.setScalar(.55 + Math.random()*.35);
+        scene.add(patch2);
+        window._meadow.push(patch2);
         if(!window._blooms) window._blooms = [];
-        if(patch.userData.heads){
-          patch.userData.heads.forEach(function(h){ window._blooms.push(h); });
+        if(patch2.userData.heads){
+          patch2.userData.heads.forEach(function(h){ window._blooms.push(h); });
         }
       }
     }

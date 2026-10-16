@@ -156,15 +156,17 @@ function applyCozyLights(){
 }
 
 function applyCozyScenery(){
-  if(!window._dress) return;
   if(window._dress) window._dress.forEach(function(o){ if(o) o.visible = !cozyMode; });
   if(window._dressStones) window._dressStones.forEach(function(o){ if(o) o.visible = !cozyMode; });
   if(window._dressSprigs) window._dressSprigs.forEach(function(o){ if(o) o.visible = !cozyMode; });
   if(window._millGroups) window._millGroups.forEach(function(o){ if(o) o.visible = !cozyMode; });
-  if(window._cozyDress) window._cozyDress.forEach(function(o){ if(o) o.visible = !!cozyMode; });
+  // Prefer multi-biome archipelago; hide legacy single-island dress when biomes exist.
+  var hasBiomes = !!(window._biomeRoot && window._biomes && window._biomes.length);
+  if(window._cozyDress) window._cozyDress.forEach(function(o){ if(o) o.visible = !!cozyMode && !hasBiomes; });
   if(window._cozyHills) window._cozyHills.forEach(function(h){ h.visible = !cozyMode; });
-  if(window._islandRoot) window._islandRoot.visible = !!cozyMode;
+  if(window._islandRoot) window._islandRoot.visible = !!cozyMode && !hasBiomes;
   if(window._flatGnd) window._flatGnd.visible = !cozyMode;
+  if(typeof window.setBiomesVisible === 'function') window.setBiomesVisible(!!cozyMode);
 }
 
 function applyCozyHUD(){
@@ -183,8 +185,12 @@ function applyCozyMode(toastCam){
     DRY = cozyMode ? 0 : window._dryClassic;
   }
   if(cozyMode && typeof window.ensureCozyLife === 'function') window.ensureCozyLife();
-  if(cozyMode && typeof window.spawnIslandGrass === 'function') window.spawnIslandGrass();
-  if(toastCam && typeof window.resetCamera === 'function'){
+  // Island grass only on legacy pad; biomes have their own ground tint.
+  if(cozyMode && !window._biomeRoot && typeof window.spawnIslandGrass === 'function') window.spawnIslandGrass();
+  if(cozyMode && typeof window.focusBiome === 'function'){
+    var bid = localStorage.getItem('gdn_biome') || 'meadow';
+    window.focusBiome(bid, !!toastCam);
+  } else if(toastCam && typeof window.resetCamera === 'function'){
     // camera already set in applyCozyCamera
   }
 }
@@ -196,7 +202,7 @@ function wrapDayClock(){
   if(_origGetRDP) return;
   _origGetRDP = getRDP;
   getRDP = function(){
-    if(cozyMode) return _cozyPhase;
+    if(cozyMode) return (window._biomePhase != null ? window._biomePhase : _cozyPhase);
     return _origGetRDP();
   };
 }
@@ -213,7 +219,9 @@ window.addEventListener('pointerup', function(e){
     var hits = plRay.intersectObject(planeR);
     if(!hits.length) return;
     var pt = hits[0].point;
-    var lim = cozyMode ? 18 : GARDEN_R;
+    var lim = cozyMode
+      ? ((window.getActiveBiome && window.getActiveBiome()) ? window.getActiveBiome().R - 1.2 : 18)
+      : GARDEN_R;
     if(Math.hypot(pt.x, pt.z) > lim){ showToast('Ada dışına çıkamaz 🚫'); return; }
     selectedDeco.group.position.x = pt.x;
     selectedDeco.group.position.z = pt.z;

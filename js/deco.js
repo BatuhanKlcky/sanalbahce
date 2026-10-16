@@ -1016,7 +1016,13 @@ function dressGarden(){
 window.redressGardenModels = function(){
   clearDressProps();
   placeDressProps();
-  dressCozyIsland();
+  // Legacy single-island dress replaced by multi-biome archipelago when available.
+  if(typeof window.buildAllBiomes === 'function'){
+    try{ window.buildAllBiomes(); }
+    catch(e){ console.warn('biomes', e); dressCozyIsland(); }
+  } else {
+    dressCozyIsland();
+  }
   if(typeof window.reseedMeadowPatches === 'function') window.reseedMeadowPatches();
   if(typeof applyCozyScenery === 'function') applyCozyScenery();
   else if(typeof window.applyCozyMode === 'function') window.applyCozyMode(false);

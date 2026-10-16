@@ -544,6 +544,7 @@
 
   window.modelPackReady = function(){ return ready; };
   window.whenModelsReady = whenReady;
+  window.spawnModel = function(key, height){ return cloneKey(key, height); };
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(startLoad, 0); });
   else setTimeout(startLoad, 0);
