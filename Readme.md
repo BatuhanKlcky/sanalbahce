@@ -5,17 +5,17 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 
 🔗 **Resmi Site (İndir & Sürüm Bilgisi):** [Sanal Bahçe — İndir](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
 
-📱 **Android APK:** [⬇️ APK'yı indir](../../releases/latest) *(en son sürümü Releases sekmesinden indirebilirsin)*
+📱 **Android:** Play Store / kapalı test için yerel paket (`android/dist/sanalbahce-2.1.0.aab`). Oyun dosyaları APK içinde; Chrome veya site adresi açılmaz.
 
 ---
 
 ## 🌐 Hangi versiyonu kullanmalıyım?
 
-| | Web (GitHub Pages) | Android (APK) |
+| | Web (GitHub Pages) | Android (Play / APK) |
 |---|---|---|
-| Kurulum gerekir mi? | Hayır, direkt tarayıcıda açılır | Evet, APK dosyasını indirip kurman gerekir |
-| Güncellik | Her zaman en güncel | Yeni release yayınlandığında güncellenir |
-| Önerilen kullanım | Hızlı deneme, masaüstü | Telefonda kalıcı kullanım |
+| Kurulum gerekir mi? | Hayır, tarayıcıda açılır | Evet |
+| Nasıl çalışır? | Site üzerinden | Oyun APK içine paketlenir (WebView) |
+| Önerilen kullanım | Hızlı deneme | Telefonda kalıcı kullanım |
 
 ---
 
