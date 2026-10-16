@@ -2,7 +2,6 @@ package com.batuhanklcky.sanalbahce;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -67,17 +65,7 @@ public class MainActivity extends Activity {
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
         } else {
-            // Packaged local game — never opens Chrome / github.io.
             webView.loadUrl("file:///android_asset/www/index.html");
-            try {
-                PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
-                Toast.makeText(
-                        this,
-                        "Sanal Bahçe " + info.versionName + " (yerel)",
-                        Toast.LENGTH_SHORT
-                ).show();
-            } catch (Exception ignored) {
-            }
         }
     }
 
