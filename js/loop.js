@@ -289,7 +289,8 @@ function animate(){
   if(Date.now()-lastSave>SINT)save(false);
   if(_fc%3600===0){saveStats();checkNotifications();}
   controls.update();
-  renderer.render(scene,camera);
+  if(typeof window.renderWithFX==='function'&&window._fxBloom) window.renderWithFX();
+  else renderer.render(scene,camera);
 }
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
 loadProg();loadStats();loadShop();load();placeOwnedWing();animate();
