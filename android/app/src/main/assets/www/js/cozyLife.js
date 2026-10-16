@@ -66,23 +66,23 @@
   }
 
   function mkSparkleField(){
-    var n = isMobile ? 40 : 70;
-    var pos = new Float32Array(n*3);
+    // Tiny emissive orbs — PointsMaterial squares look broken on many mobile GPUs.
+    var n = isMobile ? 18 : 28;
+    var g = new THREE.Group();
     var R = (window._islandR || 16);
+    var mat = new THREE.MeshBasicMaterial({ color:0xffe6a8, transparent:true, opacity:.55, depthWrite:false });
+    mat.userData.keep = true;
+    var geo = new THREE.SphereGeometry(0.035, 6, 5);
     for(var i = 0; i < n; i++){
       var a = Math.random()*Math.PI*2;
-      var r = Math.random()*R*.9;
-      pos[i*3] = Math.cos(a)*r;
-      pos[i*3+1] = .3 + Math.random()*2.5;
-      pos[i*3+2] = Math.sin(a)*r;
+      var r = Math.random()*R*.85;
+      var m = new THREE.Mesh(geo, mat);
+      m.position.set(Math.cos(a)*r, .35 + Math.random()*2.1, Math.sin(a)*r);
+      m.scale.setScalar(.6 + Math.random()*.8);
+      g.add(m);
     }
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    var mat = new THREE.PointsMaterial({ color:0xffe6a8, size:isMobile?2.2:3.2, transparent:true, opacity:.75, depthWrite:false, sizeAttenuation:true });
-    mat.userData.keep = true;
-    var pts = new THREE.Points(geo, mat);
-    scene.add(pts);
-    return { mesh:pts, t:0 };
+    scene.add(g);
+    return { mesh:g, t:0 };
   }
 
   function seedAmbientButterflies(){
@@ -100,9 +100,13 @@
     if(el) el.innerText = bugs.length;
   }
 
-  function seedMeadowPatches(){
+  function seedMeadowPatches(force){
     if(!window._meadow) window._meadow = [];
-    if(window._meadow.length) return;
+    if(window._meadow.length && !force) return;
+    if(force && window._meadow.length){
+      window._meadow.forEach(function(m){ if(m && m.parent) m.parent.remove(m); else if(m) scene.remove(m); });
+      window._meadow = [];
+    }
     var n = isMobile ? 10 : 18;
     var R = (window._islandR || 18) - 2;
     for(var i = 0; i < n; i++){
@@ -121,6 +125,7 @@
       }
     }
   }
+  window.reseedMeadowPatches = function(){ seedMeadowPatches(true); };
 
   window.ensureCozyLife = function(){
     if(_lifeReady) return;

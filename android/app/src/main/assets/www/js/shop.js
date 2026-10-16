@@ -7,8 +7,11 @@ function petMat(hex){
   if(!petMat.cache) petMat.cache={};
   var key=''+hex;
   if(!petMat.cache[key]){
-    // Soft toy-like fur shading for cozy diorama pets.
-    var m=new THREE.MeshStandardMaterial({color:hex, roughness:.72, flatShading:false});
+    // Soft toy-like fur — slight emissive lift so pets stay readable against foliage.
+    var m=new THREE.MeshStandardMaterial({
+      color:hex, roughness:.68, metalness:0, flatShading:false,
+      emissive:hex, emissiveIntensity:.08
+    });
     m.userData.keep=true;
     petMat.cache[key]=m;
   }

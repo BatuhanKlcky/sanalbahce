@@ -157,7 +157,11 @@ function applyCozyLights(){
 
 function applyCozyScenery(){
   if(!window._dress) return;
-  window._dress.forEach(function(o){ if(o) o.visible = !cozyMode; });
+  if(window._dress) window._dress.forEach(function(o){ if(o) o.visible = !cozyMode; });
+  if(window._dressStones) window._dressStones.forEach(function(o){ if(o) o.visible = !cozyMode; });
+  if(window._dressSprigs) window._dressSprigs.forEach(function(o){ if(o) o.visible = !cozyMode; });
+  if(window._millGroups) window._millGroups.forEach(function(o){ if(o) o.visible = !cozyMode; });
+  if(window._cozyDress) window._cozyDress.forEach(function(o){ if(o) o.visible = !!cozyMode; });
   if(window._cozyHills) window._cozyHills.forEach(function(h){ h.visible = !cozyMode; });
   if(window._islandRoot) window._islandRoot.visible = !!cozyMode;
   if(window._flatGnd) window._flatGnd.visible = !cozyMode;
@@ -226,6 +230,7 @@ window.addEventListener('pointerup', function(e){
 });
 
 window.applyCozyMode = applyCozyMode;
+window.applyCozyScenery = applyCozyScenery;
 
 // Boot after scene + dressGarden exist
 function bootCozy(){

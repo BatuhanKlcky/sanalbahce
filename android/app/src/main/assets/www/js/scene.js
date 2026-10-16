@@ -90,7 +90,9 @@ camera.position.set(0,16,22);
 var isMobile=window.innerWidth<768;var renderer=new THREE.WebGLRenderer({antialias:!isMobile,powerPreference:"high-performance"});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2));
-renderer.shadowMap.enabled=false;
+// Soft shadows on desktop — big depth cue for Quaternius props (skip on mobile GPU).
+renderer.shadowMap.enabled=!isMobile;
+if(renderer.shadowMap.enabled && THREE.PCFSoftShadowMap!=null) renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 var controls=new THREE.OrbitControls(camera,renderer.domElement);
 window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}if(typeof window.applyCozyMode==='function'&&typeof isCozy==='function'&&isCozy()){camera.position.set(0,16,22);controls.target.set(0,.4,0);}else{camera.position.set(6,14,24);controls.target.set(0,0,0);}controls.update();showToast('Kamera sıfırlandı');};
@@ -105,7 +107,18 @@ skyMat.fog=false;scene.add(new THREE.Mesh(new THREE.SphereGeometry(800,32,20),sk
 // Lights
 scene.add(new THREE.AmbientLight(0xfff0e0,.95));
 scene.add(new THREE.HemisphereLight(0xffe8d6,0x6a8f52,.55));
-window.mLight=new THREE.DirectionalLight(0xffe2c4,1.25);mLight.position.set(12,28,14);mLight.castShadow=false;mLight.shadow.mapSize.width=1024;mLight.shadow.mapSize.height=1024;scene.add(mLight);
+window.mLight=new THREE.DirectionalLight(0xffe2c4,1.35);mLight.position.set(12,28,14);
+mLight.castShadow=!isMobile;
+if(mLight.castShadow){
+  mLight.shadow.mapSize.width=isMobile?512:1536;
+  mLight.shadow.mapSize.height=isMobile?512:1536;
+  mLight.shadow.camera.near=2; mLight.shadow.camera.far=70;
+  mLight.shadow.camera.left=-28; mLight.shadow.camera.right=28;
+  mLight.shadow.camera.top=28; mLight.shadow.camera.bottom=-28;
+  mLight.shadow.bias=-0.00025; mLight.shadow.normalBias=0.035;
+  mLight.shadow.radius=3;
+}
+scene.add(mLight);
 var fL=new THREE.DirectionalLight(0xffc8a8,.35);fL.position.set(-15,8,-12);scene.add(fL);
 var gL=new THREE.PointLight(0xfff2cc,.45,36);gL.position.set(0,3,0);scene.add(gL);
 // Ground: seamless grass so the lawn repeats without a plastic disc.
@@ -140,7 +153,7 @@ function grassTile(){
 }
 var _grassMap=grassTile();
 var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220),new THREE.MeshStandardMaterial({map:_grassMap,color:0xffffff,roughness:1,metalness:0}));
-gnd.rotation.x=-Math.PI/2;scene.add(gnd);
+gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=!isMobile;scene.add(gnd);
 window._flatGnd=gnd;
 // Cozyrama-style floating island (shown in cozy mode)
 (function(){
@@ -149,7 +162,7 @@ window._flatGnd=gnd;
   var grassMat=new THREE.MeshStandardMaterial({map:_grassMap.clone?_grassMap.clone():_grassMap,color:0xeaffd8,roughness:1,metalness:0});
   if(grassMat.map){grassMat.map.repeat.set(5,5);grassMat.map.needsUpdate=true;}
   var top=new THREE.Mesh(new THREE.CircleGeometry(R,72),grassMat);
-  top.rotation.x=-Math.PI/2;top.position.y=.03;root.add(top);
+  top.rotation.x=-Math.PI/2;top.position.y=.03;top.receiveShadow=!isMobile;root.add(top);
   // Soft dirt cliff bands
   var rim=new THREE.Mesh(new THREE.CylinderGeometry(R+.2,R+1.05,2.6,56,1,true),new THREE.MeshStandardMaterial({color:0xc4895a,roughness:.9,metalness:0,side:THREE.DoubleSide}));
   rim.position.y=-1.25;root.add(rim);

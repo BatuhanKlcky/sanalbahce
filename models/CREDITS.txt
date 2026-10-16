@@ -1,4 +1,5 @@
-3D models from Kenney (https://kenney.nl)
+3D models from Quaternius (https://quaternius.com)
 License: Creative Commons CC0 1.0 Universal
-Packs used: Nature Kit, Fantasy Town Kit, Mini Forest
-Support Kenney: https://kenney.nl/donate
+Packs used: Nature Pack, Medieval Village Pack, Crops Pack
+Mirrored via https://quaternius.trebeljahr.com
+Support Quaternius: https://quaternius.com

@@ -11,7 +11,7 @@
   if(renderer.outputEncoding != null && THREE.sRGBEncoding != null){
     renderer.outputEncoding = THREE.sRGBEncoding;
   }
-  renderer.domElement.style.filter = 'saturate(1.18) contrast(1.06) brightness(1.02)';
+  renderer.domElement.style.filter = 'saturate(1.28) contrast(1.1) brightness(1.0)';
 
   // Soft contact vignette overlay (2D) — adds depth without heavy post stack
   var vig = document.createElement('div');
@@ -25,8 +25,8 @@
   grade.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,210,160,.12),transparent 38%,rgba(120,80,180,.06));mix-blend-mode:soft-light;';
   document.body.appendChild(grade);
 
-  // Lightweight bloom: second pass only on desktop / high perf
-  var useBloom = !isMobile && (typeof _perfMode === 'undefined' || _perfMode !== 'low');
+  // Bloom off by default — the cheap fullscreen pass draws milky squares over props.
+  var useBloom = false;
   var bloom = null;
 
   function initBloom(){

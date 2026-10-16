@@ -25,8 +25,8 @@
   grade.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,210,160,.12),transparent 38%,rgba(120,80,180,.06));mix-blend-mode:soft-light;';
   document.body.appendChild(grade);
 
-  // Lightweight bloom: second pass only on desktop / high perf
-  var useBloom = !isMobile && (typeof _perfMode === 'undefined' || _perfMode !== 'low');
+  // Bloom off by default — the cheap fullscreen pass draws milky squares over props.
+  var useBloom = false;
   var bloom = null;
 
   function initBloom(){

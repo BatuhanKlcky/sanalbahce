@@ -823,10 +823,168 @@ function sceneryBarrel(x, z){
   g.rotation.y = .4;
   scene.add(g);
 }
+function clearDressProps(){
+  function wipe(arr){
+    if(!arr) return;
+    for(var i=0;i<arr.length;i++){
+      var o = arr[i];
+      if(!o) continue;
+      if(o.parent) o.parent.remove(o);
+      else scene.remove(o);
+    }
+    arr.length = 0;
+  }
+  wipe(window._dress);
+  wipe(window._dressStones);
+  wipe(window._dressSprigs);
+  wipe(window._millGroups);
+  wipe(window._cozyDress);
+  wipe(window._meadow);
+  window._mills = [];
+  window._dress = [];
+  window._dressStones = [];
+  window._dressSprigs = [];
+  window._millGroups = [];
+  window._cozyDress = [];
+  window._meadow = [];
+}
+
+function placeDressProps(){
+  window._dress = window._dress || [];
+  window._mills = window._mills || [];
+  window._millGroups = window._millGroups || [];
+  window._dressStones = window._dressStones || [];
+  window._dressSprigs = window._dressSprigs || [];
+  window._blooms = window._blooms || [];
+
+  var mill = buildWindmill(1.4, -16.6);
+  mill.group.scale.setScalar(isMobile ? 1.05 : 1.28);
+  scene.add(mill.group);
+  window._millGroups.push(mill.group);
+  if(mill.blades) window._mills.push(mill.blades);
+
+  // Corner trees — Quaternius already sized; light parent scale only
+  [[-16.5, 9.5, 1.15],[17.2, 8.2, 1.1],[-17.4, -9.2, 1.12],[18.4, -6.4, 1.14]].forEach(function(p, i){
+    if(isMobile && i > 1) return;
+    var tree = buildTree(p[0], p[1]);
+    tree.scale.setScalar(p[2]);
+    scene.add(tree);
+    window._dress.push(tree);
+  });
+
+  var yard = [[-20, 4], [16, 16], [-9, 19], [22, -14], [-21, -16], [6, 22], [-24, 14], [24, 6]];
+  yard.forEach(function(p, i){
+    if(isMobile && i % 2) return;
+    var stone = buildStone(p[0], p[1]);
+    scene.add(stone);
+    window._dressStones.push(stone);
+  });
+
+  var nTree = isMobile ? 8 : 16;
+  var nBush = isMobile ? 6 : 12;
+  for(var t = 0; t < nTree; t++){
+    var at = (t / nTree) * Math.PI * 2 + .35;
+    if(Math.abs(Math.atan2(Math.sin(at), Math.cos(at)) - Math.PI / 2) < .38) continue;
+    var rt = 42 + (t % 4) * 1.8;
+    var tree = buildTree(Math.cos(at) * rt, Math.sin(at) * rt);
+    tree.scale.setScalar(1.2 + (t % 3) * .08);
+    scene.add(tree);
+    window._dress.push(tree);
+  }
+  for(var b = 0; b < nBush; b++){
+    var ab = (b / nBush) * Math.PI * 2 + .2;
+    var bx = Math.cos(ab) * (34 + (b % 2) * 2.4);
+    var bz = Math.sin(ab) * (34 + (b % 2) * 2.4);
+    if(Math.abs(bx) < 3.2 && bz > 8) continue;
+    var bush = buildBush(bx, bz);
+    bush.scale.setScalar(1.05);
+    scene.add(bush);
+    window._dress.push(bush);
+  }
+
+  var sprig = gardenRand(3, 9);
+  var sprigs = isMobile ? 6 : 14;
+  for(var s = 0; s < sprigs; s++){
+    var holder = new THREE.Group();
+    var ang = sprig() * Math.PI * 2, rad = 16 + sprig() * 12;
+    var sx = Math.cos(ang) * rad, sz = Math.sin(ang) * rad;
+    if(Math.abs(sx) < 14 && Math.abs(sz) < 13) continue;
+    if(typeof buildWild === 'function' && window.modelPackReady && window.modelPackReady()){
+      holder = buildWild(sx, sz);
+    } else {
+      bedBloom(holder, 0, .05, 0, BLOOM_COLS[Math.floor(sprig() * BLOOM_COLS.length)], .7 + sprig() * .4);
+      holder.position.set(sx, 0, sz);
+    }
+    scene.add(holder);
+    window._dressSprigs.push(holder);
+  }
+}
+
+// Cozy island showcase — stays visible in cozy mode (unlike outer _dress ring).
+function dressCozyIsland(){
+  window._cozyDress = window._cozyDress || [];
+  var cozy = typeof isCozy === 'function' ? isCozy() : true;
+  function add(obj, scale){
+    if(!obj) return;
+    if(scale) obj.scale.setScalar(scale);
+    scene.add(obj);
+    obj.visible = cozy;
+    window._cozyDress.push(obj);
+  }
+  function addRec(rec, scale){
+    if(!rec || !rec.group) return;
+    if(scale) rec.group.scale.setScalar(scale);
+    scene.add(rec.group);
+    rec.group.visible = cozy;
+    window._cozyDress.push(rec.group);
+  }
+
+  // Cottage nestled on the back half of the island
+  addRec(buildHouse(-5.5, -4.2, 0.35), 1.0);
+  addRec(buildHouse(7.2, -2.8, -0.55), 0.85);
+
+  // Grove + pines framing the beds
+  [[-11, 6],[11, 5],[-10, -8],[9.5, -9],[-3, 10],[4, 9],[-13, -1],[13, 0]].forEach(function(p, i){
+    if(isMobile && i > 4) return;
+    add(buildTree(p[0], p[1]), 1.05 + (i%3)*0.06);
+  });
+
+  // Bushes along fence inside
+  [[-12, 10],[12, 9],[-12, -10],[11, -11],[-6, 11],[6, 11]].forEach(function(p, i){
+    if(isMobile && i > 3) return;
+    add(buildBush(p[0], p[1]), 1.0);
+  });
+
+  add(buildWell(5.5, 3.2), 1.0);
+  add(buildPergola(-7.5, 3.8, 0.2), 0.95);
+  add(buildBench(2.2, 4.5, -0.4), 1.0);
+  add(buildBench(-2.8, -9.5, 0.2), 1.0);
+  addRec(buildPond(-0.5, -0.2), 0.9);
+  add(buildStone(-8, 1.5), 1.1);
+  add(buildStone(8.5, 2.2), 1.0);
+  add(buildMushroom(-9.5, -5.5), 1.1);
+  add(buildTable(3.8, -8.5, 0.3), 0.95);
+  add(buildScarecrow(10.5, 2.5), 1.0);
+
+  // Replace classic mill with island landmark mill (visible in cozy)
+  var mill = buildWindmill(1.2, -12.5);
+  if(mill && mill.group){
+    mill.group.scale.setScalar(isMobile ? 0.9 : 1.05);
+    scene.add(mill.group);
+    mill.group.visible = cozy;
+    window._cozyDress.push(mill.group);
+    if(mill.blades) window._mills.push(mill.blades);
+  }
+}
+
 function dressGarden(){
   window._dress = [];
   window._mills = [];
+  window._millGroups = [];
+  window._dressStones = [];
+  window._dressSprigs = [];
   window._blooms = [];
+  window._cozyDress = [];
   var xL = -14.5, xR = 14.5, zB = -12.6, zF = 13.2;
   railEdge(xL, zF, xR, zF);
   railEdge(xR, zF, xR, zB);
@@ -841,55 +999,9 @@ function dressGarden(){
   path.position.set(0, .02, 17.6);
   scene.add(path);
   sceneryBarrel(11.4, -7.4);
-  var mill = buildWindmill(1.4, -16.6);
-  mill.group.scale.setScalar(isMobile ? 1.05 : 1.28);
-  scene.add(mill.group);
-  window._mills.push(mill.blades);
-  [[-16.5, 9.5, 1.7],[17.2, 8.2, 1.55],[-17.4, -9.2, 1.6],[18.4, -6.4, 1.65]].forEach(function(p, i){
-    if(isMobile && i > 1) return;
-    var tree = buildTree(p[0], p[1]);
-    tree.scale.setScalar(p[2]);
-    scene.add(tree);
-    window._dress.push(tree);
-  });
-  var yard = [[-20, 4], [16, 16], [-9, 19], [22, -14], [-21, -16], [6, 22], [-24, 14], [24, 6]];
-  yard.forEach(function(p, i){
-    if(isMobile && i % 2) return;
-    var stone = buildStone(p[0], p[1]);
-    scene.add(stone);
-  });
-  var nTree = isMobile ? 8 : 16;
-  var nBush = isMobile ? 6 : 12;
-  for(var t = 0; t < nTree; t++){
-    var at = (t / nTree) * Math.PI * 2 + .35;
-    if(Math.abs(Math.atan2(Math.sin(at), Math.cos(at)) - Math.PI / 2) < .38) continue;
-    var rt = 42 + (t % 4) * 1.8;
-    var tree = buildTree(Math.cos(at) * rt, Math.sin(at) * rt);
-    tree.scale.setScalar(1.45 + (t % 3) * .12);
-    scene.add(tree);
-    window._dress.push(tree);
-  }
-  for(var b = 0; b < nBush; b++){
-    var ab = (b / nBush) * Math.PI * 2 + .2;
-    var bx = Math.cos(ab) * (34 + (b % 2) * 2.4);
-    var bz = Math.sin(ab) * (34 + (b % 2) * 2.4);
-    if(Math.abs(bx) < 3.2 && bz > 8) continue;
-    var bush = buildBush(bx, bz);
-    bush.scale.setScalar(1.15);
-    scene.add(bush);
-    window._dress.push(bush);
-  }
-  var sprig = gardenRand(3, 9);
-  var sprigs = isMobile ? 6 : 14;
-  for(var s = 0; s < sprigs; s++){
-    var holder = new THREE.Group();
-    var ang = sprig() * Math.PI * 2, rad = 16 + sprig() * 12;
-    var sx = Math.cos(ang) * rad, sz = Math.sin(ang) * rad;
-    if(Math.abs(sx) < 14 && Math.abs(sz) < 13) continue;
-    bedBloom(holder, 0, .05, 0, BLOOM_COLS[Math.floor(sprig() * BLOOM_COLS.length)], .7 + sprig() * .4);
-    holder.position.set(sx, 0, sz);
-    scene.add(holder);
-  }
+
+  placeDressProps();
+
   window._cozyHills = [];
   [[-70,-8,-58,44,.42],[62,-6,-78,36,.4],[86,-7,16,32,.38],[-28,-5,72,40,.36]].forEach(function(h){
     var hill = new THREE.Mesh(new THREE.SphereGeometry(h[3], 22, 14), kept(0x345c30, 1));
@@ -899,6 +1011,16 @@ function dressGarden(){
     window._cozyHills.push(hill);
   });
 }
+
+// Rebuild props once real GLBs are ready (dressGarden runs before async model pack).
+window.redressGardenModels = function(){
+  clearDressProps();
+  placeDressProps();
+  dressCozyIsland();
+  if(typeof window.reseedMeadowPatches === 'function') window.reseedMeadowPatches();
+  if(typeof applyCozyScenery === 'function') applyCozyScenery();
+  else if(typeof window.applyCozyMode === 'function') window.applyCozyMode(false);
+};
 
 dressGarden();
 
