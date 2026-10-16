@@ -26,7 +26,7 @@ function unlockAudio(){if(_muted)return;ac();startAmb();}
 window.toggleSound=function(){_muted=!_muted;localStorage.setItem('gdn_mute',_muted?'1':'0');if(_master)_master.gain.value=_muted?0:1;paintSound();if(!_muted){ac();startAmb();}showToast(_muted?'Ses kapalı 🔇':'Ses açık 🔊');};
 document.addEventListener('pointerdown',unlockAudio);
 document.addEventListener('touchstart',unlockAudio);
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+if('serviceWorker' in navigator && location.protocol!=='file:'){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
 paintSound();
 window.ambTick=ambTick;
 
@@ -135,7 +135,7 @@ window._flatGnd=gnd;
   var root=new THREE.Group();
   var R=20;
   var grassMat = typeof window.createLawnMaterial==='function'
-    ? window.createLawnMaterial({ key:'island', tint:0x8fd96a, color:0xf2ffe8, repeat:7, normalScale:1.05 })
+    ? window.createLawnMaterial({ key:'island', tint:0x8fd96a, color:0xf2ffe8, repeat:4.5, normalScale:0.8 })
     : new THREE.MeshStandardMaterial({ color:0xb8e878, roughness:0.92 });
   var top=new THREE.Mesh(new THREE.CircleGeometry(R, isMobile?48:84), grassMat);
   top.rotation.x=-Math.PI/2;top.position.y=.03;top.receiveShadow=!isMobile;

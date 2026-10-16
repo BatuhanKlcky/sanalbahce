@@ -143,17 +143,40 @@
     };
   }
 
-  var _cache = {};
-  function mapsFor(key, opts){
-    if(_cache[key]) return _cache[key];
-    _cache[key] = buildMaps(opts);
-    return _cache[key];
-  }
+  var _albCache = {};
+  var _sharedNR = {};
 
   window.createLawnMaterial = function(opts){
     opts = opts || {};
-    var key = (opts.key || 'default') + ':' + (opts.tint || 0) + ':' + (opts.size || 0);
-    var maps = mapsFor(key, opts);
+    var size = opts.size || (isMobile ? 512 : 768);
+    var tint = opts.tint != null ? opts.tint : 0x6db85a;
+    var albKey = size + ':' + tint + ':' + (opts.warm || 0) + ':' + (opts.cool || 0) + ':' + (opts.dirt || 0);
+    var sk = 'nr:' + size;
+    var maps;
+    if(!_sharedNR[sk]){
+      // First lawn at this resolution builds full set; keep NR forever.
+      maps = buildMaps(Object.assign({}, opts, { size: size }));
+      _sharedNR[sk] = { normalMap: maps.normalMap, roughnessMap: maps.roughnessMap };
+      _albCache[albKey] = maps.map;
+    } else if(_albCache[albKey]){
+      maps = {
+        map: _albCache[albKey],
+        normalMap: _sharedNR[sk].normalMap,
+        roughnessMap: _sharedNR[sk].roughnessMap
+      };
+    } else {
+      // Later tints: full bake once for albedo, then share the existing NR pair.
+      var baked = buildMaps(Object.assign({}, opts, { size: size }));
+      _albCache[albKey] = baked.map;
+      // Drop duplicate NR textures from this bake — reuse shared.
+      if(baked.normalMap && baked.normalMap.dispose) baked.normalMap.dispose();
+      if(baked.roughnessMap && baked.roughnessMap.dispose) baked.roughnessMap.dispose();
+      maps = {
+        map: baked.map,
+        normalMap: _sharedNR[sk].normalMap,
+        roughnessMap: _sharedNR[sk].roughnessMap
+      };
+    }
     var repeat = opts.repeat != null ? opts.repeat : 12;
     var mat = new THREE.MeshStandardMaterial({
       map: maps.map,

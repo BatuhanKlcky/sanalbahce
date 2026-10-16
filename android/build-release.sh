@@ -3,11 +3,24 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP_WWW="$ROOT/android/app/src/main/assets/www"
 
-mkdir -p "$APP_WWW/js" "$APP_WWW/vendor"
+mkdir -p "$APP_WWW/js" "$APP_WWW/vendor" "$APP_WWW/models"
 cp "$ROOT/index.html" "$ROOT/gizlilik.html" "$ROOT/manifest.json" \
   "$ROOT/icon-192.png" "$ROOT/icon-512.png" "$ROOT/icon-maskable-512.png" \
   "$ROOT/sw.js" "$APP_WWW/"
 cp "$ROOT/js/"*.js "$APP_WWW/js/"
+if [[ -d "$ROOT/js/lib" ]]; then
+  mkdir -p "$APP_WWW/js/lib"
+  cp "$ROOT/js/lib/"*.js "$APP_WWW/js/lib/" 2>/dev/null || true
+fi
+if [[ -d "$ROOT/models" ]]; then
+  rm -rf "$APP_WWW/models"
+  mkdir -p "$APP_WWW/models"
+  cp -a "$ROOT/models/." "$APP_WWW/models/"
+  # Procedural flowers replace these GLBs — drop from APK to shrink package, same look.
+  rm -f "$APP_WWW/models/crops/Flower_1.glb" "$APP_WWW/models/crops/Flower_2.glb" \
+        "$APP_WWW/models/crops/Flower_3.glb" "$APP_WWW/models/crops/Flower_4.glb" \
+        "$APP_WWW/models/nature/Flowers.glb"
+fi
 
 # Prefer packaged vendor copies for offline play.
 if [[ ! -f "$APP_WWW/vendor/three.min.js" ]]; then
@@ -44,9 +57,10 @@ printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
 ./gradlew :app:bundleRelease :app:assembleRelease
 
 mkdir -p "$ROOT/android/dist" /opt/cursor/artifacts/play-store
-cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-2.1.4.aab"
-cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-2.1.4.apk"
-cp "$ROOT/android/dist/sanalbahce-2.1.4.aab" /opt/cursor/artifacts/play-store/
-cp "$ROOT/android/dist/sanalbahce-2.1.4.apk" /opt/cursor/artifacts/play-store/
+cp app/build/outputs/bundle/release/app-release.aab "$ROOT/android/dist/sanalbahce-2.1.5.aab"
+cp app/build/outputs/apk/release/app-release.apk "$ROOT/android/dist/sanalbahce-2.1.5.apk"
+cp "$ROOT/android/dist/sanalbahce-2.1.5.aab" /opt/cursor/artifacts/play-store/
+cp "$ROOT/android/dist/sanalbahce-2.1.5.apk" /opt/cursor/artifacts/play-store/
+cp "$ROOT/android/dist/sanalbahce-2.1.5.apk" "$ROOT/sanal-bahce.apk"
 echo "Built:"
 ls -lh "$ROOT/android/dist"

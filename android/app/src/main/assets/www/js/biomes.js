@@ -342,6 +342,15 @@
         window._islandRoot.visible = false; // replaced by biome meadow pad
       }
     }
+    // Freeze static pad shells (discs/rims) — props/lights keep updating as needed.
+    root.traverse(function(c){
+      if(!c.isMesh) return;
+      if(c.parent && c.parent.name && c.parent.name.indexOf('props_') === 0) return;
+      if(c.parent && c.parent.name && c.parent.name.indexOf('biome_') === 0){
+        c.matrixAutoUpdate = false;
+        c.updateMatrix();
+      }
+    });
     _built = true;
     paintBiomeBar();
     applyBiomeTheme(_focus, false);

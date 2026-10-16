@@ -11,7 +11,7 @@
   if(renderer.outputEncoding != null && THREE.sRGBEncoding != null){
     renderer.outputEncoding = THREE.sRGBEncoding;
   }
-  renderer.domElement.style.filter = 'saturate(1.18) contrast(1.06) brightness(1.02)';
+  renderer.domElement.style.filter = 'saturate(1.28) contrast(1.1) brightness(1.0)';
 
   // Soft contact vignette overlay (2D) — adds depth without heavy post stack
   var vig = document.createElement('div');

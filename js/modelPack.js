@@ -43,7 +43,7 @@
     'log_moss': 'nature/WoodLog_Moss.glb',
     'stump': 'nature/TreeStump_Moss.glb',
     // meadow
-    'flowers': 'nature/Flowers.glb',
+    // flowers / flower_* intentionally omitted — procedural flowerArt is used instead
     'grass': 'nature/Grass.glb',
     'grass_2': 'nature/Grass_2.glb',
     'grass_s': 'nature/Grass_Short.glb',
@@ -51,10 +51,6 @@
     'wheat': 'nature/Wheat.glb',
     'corn': 'nature/Corn_1.glb',
     // crops pack accents
-    'flower_1': 'crops/Flower_1.glb',
-    'flower_2': 'crops/Flower_2.glb',
-    'flower_3': 'crops/Flower_3.glb',
-    'flower_4': 'crops/Flower_4.glb',
     'shroom_1': 'crops/Mushroom_1.glb',
     'shroom_2': 'crops/Mushroom_2.glb',
     'shroom_3': 'crops/Mushroom_3.glb',
@@ -165,10 +161,31 @@
   function cloneKey(key, height){
     var path = CATALOG[key];
     if(!path || !templates[path]) return null;
-    var o = templates[path].clone(true);
-    fixMats(o);
+    var tmpl = templates[path];
+    var o = tmpl.clone(true);
+    // Re-share materials with the prepared template (clone() duplicates mats).
+    var srcMeshes = [];
+    tmpl.traverse(function(c){ if(c.isMesh) srcMeshes.push(c); });
+    var mi = 0;
+    o.traverse(function(c){
+      if(!c.isMesh) return;
+      var src = srcMeshes[mi++];
+      if(src){
+        c.material = src.material;
+        c.castShadow = src.castShadow;
+        c.receiveShadow = src.receiveShadow;
+      }
+      c.frustumCulled = true;
+      // Static props: skip per-frame matrix work until something moves them.
+      c.matrixAutoUpdate = false;
+      c.updateMatrix();
+    });
+    o.matrixAutoUpdate = true; // groups still place/rotate at spawn
     if(height != null) fitHeight(o, height);
     else groundAlign(o);
+    o.traverse(function(c){
+      if(c.isMesh){ c.updateMatrix(); c.matrixAutoUpdate = false; }
+    });
     return o;
   }
 
@@ -649,6 +666,10 @@
     loader = new THREE.GLTFLoader();
     var paths = Object.keys(CATALOG).map(function(k){ return CATALOG[k]; });
     paths = paths.filter(function(p,i){ return paths.indexOf(p)===i; });
+    // Skip crop/nature flower GLBs if any leftover keys still point at them.
+    paths = paths.filter(function(p){
+      return !/\/Flower[_s]|\bFlowers\.glb$/i.test(p);
+    });
     var left = paths.length;
     var bar = document.getElementById('modelLoad');
     if(bar) bar.classList.add('show');

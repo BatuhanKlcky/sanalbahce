@@ -3,8 +3,17 @@
   var _petalCache = {};
   var _leafCache = {};
 
+  var _matCache = {};
+  var _shareDecorMats = false;
   function softMat(col, opts){
     opts = opts || {};
+    if(_shareDecorMats && opts.keep == null) opts.keep = true;
+    // Decorative (keep) mats are immutable — share across identical blooms.
+    var cacheable = !!opts.keep;
+    var ck = cacheable
+      ? [col, opts.roughness, opts.metalness, opts.transparent, opts.opacity, opts.emissive, opts.eInt].join('|')
+      : null;
+    if(ck && _matCache[ck]) return _matCache[ck];
     var m = new THREE.MeshStandardMaterial({
       color: col,
       side: THREE.DoubleSide,
@@ -18,6 +27,7 @@
       m.emissiveIntensity = opts.eInt != null ? opts.eInt : 0.22;
     }
     if(opts.keep) m.userData.keep = true;
+    if(ck) _matCache[ck] = m;
     return m;
   }
 
@@ -334,6 +344,7 @@
     sc = sc == null ? 1 : sc;
     var g = new THREE.Group();
     var hh = 0.32 + (typeof kind === 'string' && kind === 'tulip' ? 0.08 : 0);
+    _shareDecorMats = true;
     var stem = new THREE.Mesh(
       new THREE.CylinderGeometry(0.012, 0.018, hh, 6),
       softMat(0x2f8a42, { roughness: 0.9, keep: true })
@@ -346,6 +357,7 @@
     leaf.scale.setScalar(0.55);
     g.add(leaf);
     var head = buildHead(kind, col);
+    _shareDecorMats = false;
     head.position.y = hh;
     head.scale.setScalar(0.55 * sc);
     g.add(head);
