@@ -122,48 +122,30 @@ if(mLight.castShadow){
 scene.add(mLight);
 var fL=new THREE.DirectionalLight(0xffc8a8,.35);fL.position.set(-15,8,-12);scene.add(fL);
 var gL=new THREE.PointLight(0xfff2cc,.45,36);gL.position.set(0,3,0);scene.add(gL);
-// Ground: seamless grass so the lawn repeats without a plastic disc.
-function grassTile(){
-  var s=isMobile?256:384,c=document.createElement('canvas');c.width=c.height=s;
-  var g=c.getContext('2d'),img=g.createImageData(s,s),d=img.data;
-  function hash(ix,iy){var v=Math.sin(ix*127.1+iy*311.7)*43758.5453;return v-Math.floor(v);}
-  function vnoise(x,y,period){
-    var x0=Math.floor(x)%period;if(x0<0)x0+=period;
-    var y0=Math.floor(y)%period;if(y0<0)y0+=period;
-    var fx=x-Math.floor(x),fy=y-Math.floor(y);
-    fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
-    var x1=(x0+1)%period,y1=(y0+1)%period;
-    var a=hash(x0,y0),b=hash(x1,y0),cc=hash(x0,y1),dd=hash(x1,y1);
-    return a+(b-a)*fx+(cc-a)*fy+(a-b-cc+dd)*fx*fy;
-  }
-  for(var y=0;y<s;y++){
-    for(var x=0;x<s;x++){
-      var u=x/s,v=y/s;
-      var mid=vnoise(u*8,v*8,8),fine=vnoise(u*28,v*28,28);
-      var rr=38+mid*14+fine*7,gg=74+mid*18+fine*8,bb=30+mid*7;
-      if(fine<.2){rr-=6;gg-=12;bb-=4;}
-      var i=(y*s+x)*4;d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255;
-    }
-  }
-  g.putImageData(img,0,0);
-  var tex=new THREE.CanvasTexture(c);
-  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.repeat.set(14,14);
-  tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
-  return tex;
-}
-var _grassMap=grassTile();
-var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220),new THREE.MeshStandardMaterial({map:_grassMap,color:0xffffff,roughness:1,metalness:0}));
+// Premium lawn (albedo + normal + roughness). Fallback if groundArt missing.
+var _lawnMat = typeof window.createLawnMaterial==='function'
+  ? window.createLawnMaterial({ key:'classic', tint:0x5fad52, repeat:16, normalScale:0.95 })
+  : new THREE.MeshStandardMaterial({ color:0x5a9a48, roughness:0.95 });
+window._grassMap = _lawnMat.map || null;
+var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220, isMobile?1:1), _lawnMat);
 gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=!isMobile;scene.add(gnd);
 window._flatGnd=gnd;
 // Cozyrama-style floating island (shown in cozy mode)
 (function(){
   var root=new THREE.Group();
   var R=20;
-  var grassMat=new THREE.MeshStandardMaterial({map:_grassMap.clone?_grassMap.clone():_grassMap,color:0xeaffd8,roughness:1,metalness:0});
-  if(grassMat.map){grassMat.map.repeat.set(5,5);grassMat.map.needsUpdate=true;}
-  var top=new THREE.Mesh(new THREE.CircleGeometry(R,72),grassMat);
-  top.rotation.x=-Math.PI/2;top.position.y=.03;top.receiveShadow=!isMobile;root.add(top);
+  var grassMat = typeof window.createLawnMaterial==='function'
+    ? window.createLawnMaterial({ key:'island', tint:0x8fd96a, color:0xf2ffe8, repeat:7, normalScale:1.05 })
+    : new THREE.MeshStandardMaterial({ color:0xb8e878, roughness:0.92 });
+  var top=new THREE.Mesh(new THREE.CircleGeometry(R, isMobile?48:84), grassMat);
+  top.rotation.x=-Math.PI/2;top.position.y=.03;top.receiveShadow=!isMobile;
+  if(typeof window.sculptGroundCircle==='function'){
+    // sculpt before rotation uses geometry XY; CircleGeometry is XY plane
+    top.rotation.x=0;
+    window.sculptGroundCircle(top, R, 0.42);
+    top.rotation.x=-Math.PI/2;
+  }
+  root.add(top);
   // Soft dirt cliff bands
   var rim=new THREE.Mesh(new THREE.CylinderGeometry(R+.2,R+1.05,2.6,56,1,true),new THREE.MeshStandardMaterial({color:0xc4895a,roughness:.9,metalness:0,side:THREE.DoubleSide}));
   rim.position.y=-1.25;root.add(rim);

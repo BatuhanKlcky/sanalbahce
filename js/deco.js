@@ -740,9 +740,13 @@ function bedBloom(parent, x, y, z, col, sc){
 }
 function soilBed(x, z, r){
   var g = new THREE.Group();
-  var soil = new THREE.Mesh(new THREE.CircleGeometry(r, 28), kept(0x4e3424, 1));
+  var soilMat = typeof window.createSoilMaterial==='function'
+    ? window.createSoilMaterial({ key:'bed-'+Math.round(x*10)+'-'+Math.round(z*10), tint:0x5a3c28, repeat:2.8 })
+    : kept(0x4e3424, 1);
+  var soil = new THREE.Mesh(new THREE.CircleGeometry(r, 36), soilMat);
   soil.rotation.x = -Math.PI / 2;
   soil.position.y = .028;
+  soil.receiveShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
   g.add(soil);
   var n = isMobile ? 12 : 18;
   for(var i = 0; i < n; i++){

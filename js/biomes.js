@@ -52,15 +52,26 @@
     var g = new THREE.Group();
     g.name = 'biome_' + b.id;
     var R = b.R;
-    var grassMat = new THREE.MeshStandardMaterial({
-      map: (window._grassMap && window._grassMap.clone) ? window._grassMap.clone() : null,
-      color: b.grass, roughness: 1, metalness: 0
-    });
-    if(grassMat.map){ grassMat.map.repeat.set(4, 4); grassMat.map.needsUpdate = true; }
-    var top = new THREE.Mesh(new THREE.CircleGeometry(R, isMobile ? 40 : 64), grassMat);
-    top.rotation.x = -Math.PI / 2;
+    var grassMat = typeof window.createLawnMaterial === 'function'
+      ? window.createLawnMaterial({
+          key: 'biome-' + b.id,
+          tint: b.grass,
+          warm: b.glow,
+          cool: b.moss,
+          dirt: b.rim,
+          repeat: b.center ? 7 : 5.5,
+          normalScale: 1.05,
+          color: 0xffffff
+        })
+      : new THREE.MeshStandardMaterial({ color: b.grass, roughness: 0.92 });
+    var segs = isMobile ? 40 : 72;
+    var top = new THREE.Mesh(new THREE.CircleGeometry(R, segs), grassMat);
     top.position.y = 0.03;
     top.receiveShadow = !!(renderer && renderer.shadowMap && renderer.shadowMap.enabled);
+    if(typeof window.sculptGroundCircle === 'function'){
+      window.sculptGroundCircle(top, R, b.center ? 0.4 : 0.32);
+    }
+    top.rotation.x = -Math.PI / 2;
     g.add(top);
 
     var rim = new THREE.Mesh(
