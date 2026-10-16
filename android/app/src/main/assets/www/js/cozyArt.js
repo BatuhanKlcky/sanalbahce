@@ -28,28 +28,30 @@
   // ── TREE: candy canopy layers ─────────────────────────────────────────────
   buildTree = function(x, z){
     var g = new THREE.Group();
+    g.userData.leaves = [];
     var rnd = gardenRand(x + 3.1, z + 1.7);
-    var greens = [0x7ecf6a, 0x5bb86a, 0x8fd96a, 0x49a85a];
+    var greens = [0x7ecf6a, 0x5bb86a, 0x8fd96a, 0x49a85a, 0xa8e86a];
     var trunkM = cMat(0xc4895a, .92);
-    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(.11, .18, 1.35, 10), trunkM);
-    trunk.position.y = .68;
+    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(.12, .2, 1.45, 12), trunkM);
+    trunk.position.y = .72;
     g.add(trunk);
-    var base = new THREE.Mesh(new THREE.SphereGeometry(.28, 10, 8), trunkM);
-    base.scale.set(1.35, .45, 1.35);
-    base.position.y = .12;
+    var base = new THREE.Mesh(new THREE.SphereGeometry(.32, 12, 10), trunkM);
+    base.scale.set(1.4, .48, 1.4);
+    base.position.y = .14;
     g.add(base);
-    var h = 1.55 + rnd() * .35;
-    [[0, h, 0, 1.15],[.55, h-.25, .2, .82],[-.5, h-.2, -.25, .78],[.15, h+.35, -.15, .7],[-.2, h+.15, .45, .68],[.35, h-.5, -.4, .62]].forEach(function(p, i){
-      puff(g, p[0], p[1], p[2], p[3], p[3]*0.85, p[3], cMat(greens[i%greens.length], .86));
+    var h = 1.65 + rnd() * .4;
+    [[0, h, 0, 1.25],[.6, h-.28, .22, .9],[-.55, h-.22, -.28, .86],[.18, h+.42, -.18, .78],[-.24, h+.2, .48, .74],[.4, h-.55, -.45, .7],[-.42, h-.48, .35, .66]].forEach(function(p, i){
+      var leaf = puff(g, p[0], p[1], p[2], p[3], p[3]*0.82, p[3], cMat(greens[i%greens.length], .84));
+      leaf.userData.rx = 0; leaf.userData.rz = 0; leaf.userData.by = p[1];
+      g.userData.leaves.push(leaf);
     });
-    // tiny fruit/flower accents
-    for(var i = 0; i < 5; i++){
+    for(var i = 0; i < 8; i++){
       var a = rnd()*Math.PI*2;
-      var berry = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 6), cMat([0xff7a8a,0xffd166,0xff9ecd][i%3], .55, [0xff7a8a,0xffd166,0xff9ecd][i%3], .2));
-      berry.position.set(Math.cos(a)*.7, h-.1+rnd()*.4, Math.sin(a)*.7);
+      var berry = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 6), cMat([0xff7a8a,0xffd166,0xff9ecd,0xffb347][i%4], .5, [0xff7a8a,0xffd166,0xff9ecd,0xffb347][i%4], .28));
+      berry.position.set(Math.cos(a)*.75, h-.15+rnd()*.5, Math.sin(a)*.75);
       g.add(berry);
     }
-    g.add(sitShadow(1.2));
+    g.add(sitShadow(1.25));
     g.position.set(x, 0, z);
     g.rotation.y = rnd()*Math.PI*2;
     return g;
@@ -418,6 +420,186 @@
     g.add(sitShadow(.6));
     g.position.set(x, 0, z);
     g.rotation.y = a || 0;
+    return g;
+  };
+
+  // ── WINDMILL: toy mill ────────────────────────────────────────────────────
+  buildWindmill = function(x, z){
+    var g = new THREE.Group();
+    var tower = new THREE.Mesh(new THREE.CylinderGeometry(.35, .55, 2.2, 12), cMat(0xfff0e0, .88));
+    tower.position.y = 1.1;
+    g.add(tower);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(.55, .55, 8), cMat(0xff7a6a, .7));
+    roof.position.y = 2.45;
+    g.add(roof);
+    var hub = new THREE.Group();
+    hub.position.set(0, 1.85, .45);
+    g.add(hub);
+    for(var i = 0; i < 4; i++){
+      var blade = new THREE.Mesh(new THREE.BoxGeometry(.18, 1.15, .04), cMat(0xffe0a0, .75));
+      blade.position.y = .55;
+      var arm = new THREE.Group();
+      arm.rotation.z = (i/4)*Math.PI*2;
+      arm.add(blade);
+      hub.add(arm);
+    }
+    var door = new THREE.Mesh(new THREE.BoxGeometry(.28, .45, .06), cMat(0xd4a06a, .85));
+    door.position.set(0, .35, .52);
+    g.add(door);
+    g.add(sitShadow(.9));
+    g.position.set(x, 0, z);
+    return { group:g, blades:hub };
+  };
+
+  // ── SCARECROW: cute friend ────────────────────────────────────────────────
+  buildScarecrow = function(x, z){
+    var g = new THREE.Group();
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(.04, .05, 1.5, 8), cMat(0xc4895a, .9));
+    pole.position.y = .75;
+    g.add(pole);
+    var body = new THREE.Mesh(new THREE.SphereGeometry(.28, 14, 12), cMat(0xffb347, .75));
+    body.scale.set(1, 1.15, .7);
+    body.position.y = 1.15;
+    g.add(body);
+    var head = new THREE.Mesh(new THREE.SphereGeometry(.2, 14, 12), cMat(0xffe0b0, .7));
+    head.position.y = 1.55;
+    g.add(head);
+    var hat = new THREE.Mesh(new THREE.CylinderGeometry(.08, .28, .12, 12), cMat(0x5a3a28, .8));
+    hat.position.y = 1.72;
+    g.add(hat);
+    [-1,1].forEach(function(s){
+      var eye = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), cMat(0x2a2018, .5));
+      eye.position.set(s*.07, 1.58, .16);
+      g.add(eye);
+      var arm = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .7, 6), cMat(0xd4a06a, .85));
+      arm.rotation.z = s * 1.1;
+      arm.position.set(s*.35, 1.25, 0);
+      g.add(arm);
+    });
+    var smile = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 10, Math.PI), cMat(0xff6b8a, .6));
+    smile.position.set(0, 1.48, .17);
+    smile.rotation.x = Math.PI;
+    g.add(smile);
+    g.add(sitShadow(.4));
+    g.position.set(x, 0, z);
+    return g;
+  };
+
+  // ── ARCH: flower gate ─────────────────────────────────────────────────────
+  buildArch = function(x, z, a){
+    var g = new THREE.Group();
+    var wood = cMat(0xe8c89a, .85);
+    [-.7, .7].forEach(function(px){
+      var post = new THREE.Mesh(new THREE.CylinderGeometry(.07, .08, 1.8, 10), wood);
+      post.position.set(px, .9, 0);
+      g.add(post);
+    });
+    var beam = new THREE.Mesh(new THREE.TorusGeometry(.75, .07, 8, 20, Math.PI), wood);
+    beam.rotation.z = Math.PI;
+    beam.position.y = 1.75;
+    g.add(beam);
+    for(var i = 0; i < 14; i++){
+      var t = i/13;
+      var ang = -Math.PI/2 + t*Math.PI;
+      var fl = new THREE.Mesh(new THREE.SphereGeometry(.09, 8, 6), cMat([0xff7aad,0xffd166,0xb79bff,0x7ecfff,0xffffff][i%5], .5, 0xffa0c8, .22));
+      fl.position.set(Math.cos(ang)*.75, 1.75+Math.sin(ang)*.75, (i%2)*.08);
+      g.add(fl);
+    }
+    g.add(sitShadow(1.0));
+    g.position.set(x, 0, z);
+    g.rotation.y = a || 0;
+    return g;
+  };
+
+  // ── PERGOLA: vine canopy ──────────────────────────────────────────────────
+  buildPergola = function(x, z, a){
+    var g = new THREE.Group();
+    var wood = cMat(0xe0b07a, .86);
+    [[-1,-.8],[1,-.8],[-1,.8],[1,.8]].forEach(function(p){
+      var post = new THREE.Mesh(new THREE.CylinderGeometry(.06, .07, 1.6, 8), wood);
+      post.position.set(p[0], .8, p[1]);
+      g.add(post);
+    });
+    for(var i = 0; i < 5; i++){
+      var beam = new THREE.Mesh(new THREE.BoxGeometry(2.2, .06, .08), wood);
+      beam.position.set(0, 1.62, -0.8 + i*.4);
+      g.add(beam);
+    }
+    for(var j = 0; j < 18; j++){
+      var leaf = new THREE.Mesh(new THREE.SphereGeometry(.12, 8, 6), cMat([0x6ecf7a,0x8ed97a,0x5bb86a][j%3], .85));
+      leaf.scale.set(1, .45, 1);
+      leaf.position.set((Math.random()-.5)*2, 1.7+Math.random()*.15, (Math.random()-.5)*1.5);
+      g.add(leaf);
+      if(j%3===0){
+        var grape = new THREE.Mesh(new THREE.SphereGeometry(.05, 6, 5), cMat(0xb28dff, .55, 0xb28dff, .2));
+        grape.position.copy(leaf.position);
+        grape.position.y -= .15;
+        g.add(grape);
+      }
+    }
+    g.add(sitShadow(1.3));
+    g.position.set(x, 0, z);
+    g.rotation.y = a || 0;
+    return g;
+  };
+
+  // ── BRIDGE: arched footbridge ─────────────────────────────────────────────
+  buildBridge = function(x, z, a){
+    var g = new THREE.Group();
+    var wood = cMat(0xe8c49a, .84);
+    for(var i = 0; i < 7; i++){
+      var t = (i/6)*2 - 1;
+      var plank = new THREE.Mesh(new THREE.BoxGeometry(.95, .06, .28), wood);
+      plank.position.set(0, .2 + (1-t*t)*.45, t*1.05);
+      plank.rotation.x = t * -.35;
+      g.add(plank);
+    }
+    [-.42, .42].forEach(function(sx){
+      for(var k = 0; k < 5; k++){
+        var t2 = (k/4)*2 - 1;
+        var post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .35, 6), cMat(0xc49a6a, .88));
+        post.position.set(sx, .35+(1-t2*t2)*.4, t2*1.0);
+        g.add(post);
+      }
+      var rail = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, 2.2, 6), wood);
+      rail.rotation.x = Math.PI/2;
+      rail.position.set(sx, .55, 0);
+      g.add(rail);
+    });
+    g.add(sitShadow(1.1));
+    g.position.set(x, 0, z);
+    g.rotation.y = a || 0;
+    return g;
+  };
+
+  // ── WILD: flower cluster ──────────────────────────────────────────────────
+  buildWild = function(x, z){
+    var g = new THREE.Group();
+    g.userData.heads = [];
+    var rnd = gardenRand(x+5, z+3);
+    var cols = [0xff6b9d, 0xffd166, 0x9b7efa, 0x7ecfff, 0xff8c42, 0xffffff];
+    for(var i = 0; i < 7; i++){
+      var stem = new THREE.Mesh(new THREE.CylinderGeometry(.015, .02, .35+rnd()*.25, 5), cMat(0x3d9a4a, .88));
+      var ox = (rnd()-.5)*.55, oz = (rnd()-.5)*.55;
+      stem.position.set(ox, .2, oz);
+      g.add(stem);
+      var head = new THREE.Group();
+      head.position.set(ox, .42+rnd()*.15, oz);
+      head.userData.by = head.position.y;
+      var col = cols[Math.floor(rnd()*cols.length)];
+      for(var k = 0; k < 6; k++){
+        var p = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 6), cMat(col, .5, col, .22));
+        p.scale.set(1, .4, .7);
+        p.position.set(Math.sin(k/6*Math.PI*2)*.07, 0, Math.cos(k/6*Math.PI*2)*.07);
+        head.add(p);
+      }
+      var c = new THREE.Mesh(new THREE.SphereGeometry(.045, 8, 6), cMat(0xfff3a0, .45, 0xffe066, .3));
+      head.add(c);
+      g.add(head);
+      g.userData.heads.push(head);
+    }
+    g.add(sitShadow(.45));
+    g.position.set(x, 0, z);
     return g;
   };
 

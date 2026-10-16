@@ -260,6 +260,7 @@ function animate(){
   }
   // Butterflies
   if(dt>0) stepButterflies(dt);
+  if(typeof window.stepCozyLife==='function') window.stepCozyLife(dt, now);
   // Decos
   decos.forEach(function(d){if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){

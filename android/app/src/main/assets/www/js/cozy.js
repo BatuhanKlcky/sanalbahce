@@ -178,6 +178,7 @@ function applyCozyMode(toastCam){
     window._dryClassic = window._dryClassic != null ? window._dryClassic : DRY;
     DRY = cozyMode ? 0 : window._dryClassic;
   }
+  if(cozyMode && typeof window.ensureCozyLife === 'function') window.ensureCozyLife();
   if(toastCam && typeof window.resetCamera === 'function'){
     // camera already set in applyCozyCamera
   }
