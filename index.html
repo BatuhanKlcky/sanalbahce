@@ -113,6 +113,16 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 #delBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(30,0,0,.95);border:1px solid rgba(255,80,80,.4);border-radius:16px;padding:10px 20px;color:#ff6666;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:12px;max-width:calc(100vw - 150px)}
 #delBar.show{display:flex}
 .del-highlight{outline:2px solid #ff4444;outline-offset:2px}
+body.cozy-mode{background:#1a1410}
+body.cozy-mode #btnTask,body.cozy-mode #taskPanel,body.cozy-mode #lvBadge{display:none!important}
+body.cozy-mode #stats .sp:last-child{display:none}
+body.cozy-mode .ui-panel{background:rgba(40,28,22,.82);border-color:rgba(255,210,160,.14)}
+body.cozy-mode #clock{text-shadow:0 0 24px rgba(255,180,120,.45)}
+body.cozy-mode .sbb{background:rgba(48,34,26,.9);border-color:rgba(255,210,160,.16)}
+#editBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(36,26,20,.95);border:1px solid rgba(255,210,160,.35);border-radius:16px;padding:8px 12px;color:#ffe2b8;font-size:11px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px)}
+#editBar.show{display:flex}
+#editBar button{background:rgba(255,220,170,.12);border:1px solid rgba(255,210,160,.28);color:#ffe6c4;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer}
+body.photo-mode #sidebar,body.photo-mode .ui-container,body.photo-mode #lvBadge,body.photo-mode #coinBadge,body.photo-mode #btnSnd,body.photo-mode #wIcon,body.photo-mode .spanel,body.photo-mode #pBar,body.photo-mode #delBar,body.photo-mode #editBar,body.photo-mode #toast,body.photo-mode #saveInd{opacity:0!important;pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -124,14 +134,26 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 <canvas id="wxCvs" class="wfx"></canvas>
 <div id="pBar"><span>👆 Sahneye dokun</span><button onclick="window.cancelPlace()">✕ İptal</button></div>
 <div id="delBar"><span>🗑️ Silmek istediğin objeye dokun</span><button onclick="window.toggleDeleteMode()">✕ İptal</button></div>
+<div id="editBar">
+  <span>✨ Düzenle</span>
+  <button type="button" onclick="window.rotateSelected(-1)">↺</button>
+  <button type="button" onclick="window.rotateSelected(1)">↻</button>
+  <button type="button" onclick="window.scaleSelected(-1)">−</button>
+  <button type="button" onclick="window.scaleSelected(1)">+</button>
+  <button type="button" onclick="window.armMoveSelected()">📍</button>
+  <button type="button" onclick="window.deselectDeco()">✕</button>
+</div>
 <div id="sidebar">
+  <div class="sbb on" id="btnCozy" onclick="window.toggleCozy()" title="Rahat diorama">☁️</div>
   <div class="sbb" id="btnDeco" onclick="window.togglePanel('deco')">🏡</div>
+  <div class="sbb" id="btnEdit" onclick="window.toggleEditMode()" title="Düzenle">✋</div>
   <div class="sbb" id="btnTask" onclick="window.togglePanel('task')">📋</div>
   <div class="sbb" id="btnDel" onclick="window.toggleDeleteMode()">🗑️</div>
   <div class="sbb" onclick="window.addPet('cat')">🐱</div>
   <div class="sbb" onclick="window.addPet('dog')">🐶</div>
   <div class="sbb" id="btnShop" onclick="window.togglePanel('shop')">🏪</div>
   <div class="sbb" id="btnStats" onclick="window.togglePanel('stats')">📊</div>
+  <div class="sbb" onclick="window.photoMode()" title="Foto">📷</div>
   <div class="sbb" onclick="window.shareBahce()" title="Paylaş">📤</div>
   <div class="sbb" id="btnPerf" onclick="window.togglePerf()">⚡</div>
   <div class="sbb" onclick="window.resetCamera()">🏠</div>
@@ -271,6 +293,7 @@ button.act:active{transform:scale(.93);filter:brightness(.88)}
 <script src="js/shop.js"></script>
 <script src="js/flower.js"></script>
 <script src="js/deco.js"></script>
+<script src="js/cozy.js"></script>
 <script src="js/loop.js"></script>
 </body>
 </html>

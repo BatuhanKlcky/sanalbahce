@@ -19,6 +19,16 @@ Kendi sanal bahçeni oluştur, tohum ek, bitkilerini sula ve zamanla büyümeler
 
 ---
 
+## ☁️ Rahat diorama (Cozyrama tarzı)
+
+Sol menüdeki **☁️** ile aç/kapa (varsayılan: açık):
+- Yüzen ada, yumuşak ışık, sabit sıcak gün ışığı
+- Görev/XP baskısı gizlenir, zararlı böcek doğmaz, bitkiler kuramaz
+- **✋ Düzenle**: objeye dokun → döndür / büyüt-küçült / taşı
+- **📷 Foto**: arayüzü gizleyip sahneyi çek
+
+Klasik bahçe moduna dönmek için ☁️’ye tekrar bas.
+
 ## 🎮 Özellikler
 
 - 🔔 **Bildirimler** — Sulama zamanı, hasat hazır, zararlı böcek ve günlük görev hatırlatıcıları

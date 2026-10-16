@@ -682,6 +682,8 @@ function mkHouse(x,z,angle){var o=buildHouse(x,z,angle); pushDeco(o.group,'house
 
 var PLACE_SPAN = {fence:1.16, wall:1.5, bench:1.35, table:1.3, arch:1.65, pergola:2.3, bridge:1.7, house:0};
 function tidyPlace(tp, x, z){
+  // Cozy free-place: no fence/wall snapping — drop exactly where you tap.
+  if(typeof isCozy==='function' && isCozy()) return {x:x, z:z, a:0};
   var span = PLACE_SPAN[tp];
   if(span === undefined) return {x:x, z:z, a:0};
   var best = null, bestD = 2.3;
@@ -888,11 +890,13 @@ function dressGarden(){
     holder.position.set(sx, 0, sz);
     scene.add(holder);
   }
+  window._cozyHills = [];
   [[-70,-8,-58,44,.42],[62,-6,-78,36,.4],[86,-7,16,32,.38],[-28,-5,72,40,.36]].forEach(function(h){
     var hill = new THREE.Mesh(new THREE.SphereGeometry(h[3], 22, 14), kept(0x345c30, 1));
     hill.scale.y = h[4];
     hill.position.set(h[0], h[1], h[2]);
     scene.add(hill);
+    window._cozyHills.push(hill);
   });
 }
 
@@ -993,7 +997,8 @@ window.addEventListener('pointerup',function(e){
   if(!hits.length)return;
   var pt=hits[0].point;
   var tp=placementType,spot=tidyPlace(tp,pt.x,pt.z);
-  if(Math.sqrt(spot.x*spot.x+spot.z*spot.z)>GARDEN_R){showToast('Çok uzak! 🚫');return;}
+  var placeLim=(typeof isCozy==='function'&&isCozy()&&window._islandR)?window._islandR-1.2:GARDEN_R;
+  if(Math.sqrt(spot.x*spot.x+spot.z*spot.z)>placeLim){showToast('Çok uzak! 🚫');return;}
   pt.x=spot.x; pt.z=spot.z;
   var ang=spot.a;
   if((tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'||tp==='flower_wild') && window.gardenBlocked){
@@ -1010,4 +1015,4 @@ window.addEventListener('pointerup',function(e){
   else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
   sndPlant();showToast('✅ Yerleştirildi!');save(true);
 });
-window.addEventListener('keydown',function(e){if(e.key==='Escape')window.cancelPlace();});
+window.addEventListener('keydown',function(e){if(e.key==='Escape'){window.cancelPlace();if(typeof window.deselectDeco==='function')window.deselectDeco();}});

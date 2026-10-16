@@ -84,16 +84,16 @@ window.togglePanel=function(nm){if(placementMode){window.cancelPlace();return;}v
 
 // ── SCENE ────────────────────────────────────────────────────────────────────
 var scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x0a1520, 0.005);
-var camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,5000);
-camera.position.set(6,14,24);
+scene.fog=new THREE.FogExp2(0xd9c4b0, 0.0045);
+var camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,5000);
+camera.position.set(0,16,22);
 var isMobile=window.innerWidth<768;var renderer=new THREE.WebGLRenderer({antialias:!isMobile,powerPreference:"high-performance"});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2));
 renderer.shadowMap.enabled=false;
 document.body.appendChild(renderer.domElement);
 var controls=new THREE.OrbitControls(camera,renderer.domElement);
-window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}camera.position.set(6,14,24);controls.target.set(0,0,0);controls.update();showToast('Kamera sıfırlandı');};
+window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}if(typeof window.applyCozyMode==='function'&&typeof isCozy==='function'&&isCozy()){camera.position.set(0,16,22);controls.target.set(0,.4,0);}else{camera.position.set(6,14,24);controls.target.set(0,0,0);}controls.update();showToast('Kamera sıfırlandı');};
 
 // Sky
 var skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{uTime:{value:0},uNight:{value:1}},vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:['varying vec3 vP;uniform float uTime,uNight;','float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}','float n2(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(h2(i),h2(i+vec2(1,0)),u.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),u.x),u.y);}','void main(){vec3 d=normalize(vP);float up=clamp(d.y,0.,1.),hz=1.-up;','vec3 nc=mix(mix(vec3(.01,.02,.08),vec3(.04,.06,.18),smoothstep(0.,.5,up)),vec3(.10,.04,.22),pow(hz,3.));','vec3 dc=mix(vec3(.4,.65,1.),vec3(.75,.88,1.),up);','vec3 col=mix(dc,nc,uNight);','vec2 uv=vec2(atan(d.z,d.x)/6.28,d.y)*3.;','float nb=n2(uv*2.5+uTime*.008)*n2(uv*5.-uTime*.005);','nb=smoothstep(.25,.6,nb)*up*.55*uNight;','col+=mix(vec3(.15,.03,.35),vec3(.02,.10,.40),n2(uv*1.5))*nb;','float cl=n2(uv*2.2+vec2(uTime*.02,0.));','float cl2=n2(uv*4.6-vec2(uTime*.01,uTime*.015));','cl=smoothstep(.4,.72,cl*.55+cl2*.45);','cl*=mix(.8,1.,clamp(up*3.,0.,1.))*(1.-uNight);','col=mix(col,vec3(.96,.98,1.),cl*.92);','gl_FragColor=vec4(col,1.);}'].join('\n')});
@@ -103,11 +103,11 @@ skyMat.fog=false;scene.add(new THREE.Mesh(new THREE.SphereGeometry(800,32,20),sk
 // Moon/Sun
 (function(){var moon=new THREE.Mesh(new THREE.SphereGeometry(8,24,24),new THREE.MeshStandardMaterial({color:0xdde8ff,roughness:.95,emissive:0x8899cc,emissiveIntensity:.25}));moon.position.set(120,80,140);scene.add(moon);var mh=new THREE.Mesh(new THREE.SphereGeometry(14,16,16),new THREE.MeshBasicMaterial({color:0x6677bb,transparent:true,opacity:.06,side:THREE.BackSide}));mh.position.copy(moon.position);scene.add(mh);window._sun=new THREE.Mesh(new THREE.SphereGeometry(6,16,16),new THREE.MeshBasicMaterial({color:0xffee88}));window._sun.position.set(100,90,-80);scene.add(window._sun);window._sHalo=new THREE.Mesh(new THREE.SphereGeometry(10,16,16),new THREE.MeshBasicMaterial({color:0xffcc44,transparent:true,opacity:.08,side:THREE.BackSide}));window._sHalo.position.copy(window._sun.position);scene.add(window._sHalo);})();
 // Lights
-scene.add(new THREE.AmbientLight(0x1a2a4a,.72));
-scene.add(new THREE.HemisphereLight(0xd7ecff,0x3a5c2a,.28));
-window.mLight=new THREE.DirectionalLight(0xaabfff,.9);mLight.position.set(12,28,14);mLight.castShadow=false;mLight.shadow.mapSize.width=1024;mLight.shadow.mapSize.height=1024;scene.add(mLight);
-var fL=new THREE.DirectionalLight(0x220a44,.4);fL.position.set(-15,8,-12);scene.add(fL);
-var gL=new THREE.PointLight(0x002211,.6,30);gL.position.set(0,2,0);scene.add(gL);
+scene.add(new THREE.AmbientLight(0xfff0e0,.95));
+scene.add(new THREE.HemisphereLight(0xffe8d6,0x6a8f52,.55));
+window.mLight=new THREE.DirectionalLight(0xffe2c4,1.25);mLight.position.set(12,28,14);mLight.castShadow=false;mLight.shadow.mapSize.width=1024;mLight.shadow.mapSize.height=1024;scene.add(mLight);
+var fL=new THREE.DirectionalLight(0xffc8a8,.35);fL.position.set(-15,8,-12);scene.add(fL);
+var gL=new THREE.PointLight(0xfff2cc,.45,36);gL.position.set(0,3,0);scene.add(gL);
 // Ground: seamless grass so the lawn repeats without a plastic disc.
 function grassTile(){
   var s=isMobile?256:384,c=document.createElement('canvas');c.width=c.height=s;
@@ -138,8 +138,25 @@ function grassTile(){
   tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   return tex;
 }
-var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220),new THREE.MeshStandardMaterial({map:grassTile(),color:0xffffff,roughness:1,metalness:0}));
+var _grassMap=grassTile();
+var gnd=new THREE.Mesh(new THREE.PlaneGeometry(220,220),new THREE.MeshStandardMaterial({map:_grassMap,color:0xffffff,roughness:1,metalness:0}));
 gnd.rotation.x=-Math.PI/2;scene.add(gnd);
+window._flatGnd=gnd;
+// Cozyrama-style floating island (shown in cozy mode)
+(function(){
+  var root=new THREE.Group();
+  var R=20;
+  var top=new THREE.Mesh(new THREE.CircleGeometry(R,64),new THREE.MeshStandardMaterial({map:_grassMap.clone?_grassMap.clone():_grassMap,color:0xf2ffe8,roughness:1,metalness:0}));
+  if(top.material.map){top.material.map.repeat.set(6,6);top.material.map.needsUpdate=true;}
+  top.rotation.x=-Math.PI/2;top.position.y=.02;root.add(top);
+  var rim=new THREE.Mesh(new THREE.CylinderGeometry(R+.35,R+.95,2.4,48,1,true),new THREE.MeshStandardMaterial({color:0x8b5e3c,roughness:.92,metalness:0,side:THREE.DoubleSide}));
+  rim.position.y=-1.15;root.add(rim);
+  var cork=new THREE.Mesh(new THREE.CylinderGeometry(R+.2,R*.72,1.6,40),new THREE.MeshStandardMaterial({color:0x6e452c,roughness:1}));
+  cork.position.y=-2.1;root.add(cork);
+  var soilEdge=new THREE.Mesh(new THREE.TorusGeometry(R-.05,.18,8,64),new THREE.MeshStandardMaterial({color:0x5a3a22,roughness:1}));
+  soilEdge.rotation.x=Math.PI/2;soilEdge.position.y=.01;root.add(soilEdge);
+  root.visible=false;scene.add(root);window._islandRoot=root;window._islandR=R;
+})();
 window.surf=(function(){
   function tex(w,h,draw){
     var c=document.createElement('canvas');c.width=w;c.height=h;

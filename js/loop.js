@@ -239,7 +239,7 @@ function animate(){
     if(_bugAcc>=BUG_EVERY&&flowers.length>0){
       _bugAcc-=BUG_EVERY;
       if(_bugAcc>BUG_EVERY) _bugAcc=BUG_EVERY;
-      mkBadBug(Math.floor(Math.random()*flowers.length));
+      if(!(typeof isCozy==='function'&&isCozy())) mkBadBug(Math.floor(Math.random()*flowers.length));
     }
     stepWeather(dt);
   }
