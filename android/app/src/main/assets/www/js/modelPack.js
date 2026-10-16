@@ -275,24 +275,129 @@
     };
 
     buildLantern = function(x, z){
-      // Barrel + warm flame stand-in (village pack has no lantern)
+      // Classic garden lamp-post — reads clearly as a fener (not a barrel).
       var g = new THREE.Group();
-      var post = cloneKey('barrel', 0.55);
-      if(post) g.add(post);
-      var lt = new THREE.PointLight(0xffb060, 1.55, 6.5);
-      lt.position.set(0, 1.15, 0);
-      g.add(lt);
-      var glow = new THREE.Mesh(
-        new THREE.SphereGeometry(.14, 14, 12),
-        new THREE.MeshStandardMaterial({ color:0xffc878, emissive:0xff9944, emissiveIntensity:1.35, transparent:true, opacity:.6 })
+      function mat(hex, rough, metal, emissive, eInt){
+        var o = { color:hex, roughness:rough==null?0.7:rough, metalness:metal||0 };
+        if(emissive!=null){ o.emissive = emissive; o.emissiveIntensity = eInt==null?0.4:eInt; }
+        var m = new THREE.MeshStandardMaterial(o);
+        m.userData.keep = true;
+        return m;
+      }
+      var iron = mat(0x2a2430, 0.45, 0.55);
+      var ironDark = mat(0x1a1520, 0.55, 0.4);
+      var brass = mat(0xb8893a, 0.35, 0.65, 0x6a4010, 0.15);
+      var stone = mat(0x8a8074, 0.95, 0);
+
+      // Pedestal
+      var plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.14, 10), stone);
+      plinth.position.y = 0.07;
+      g.add(plinth);
+      var plinth2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.1, 10), stone);
+      plinth2.position.y = 0.18;
+      g.add(plinth2);
+
+      // Pole
+      var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 1.55, 10), iron);
+      pole.position.y = 1.0;
+      g.add(pole);
+      var collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.022, 8, 16), brass);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.y = 1.55;
+      g.add(collar);
+      var collar2 = collar.clone();
+      collar2.position.y = 0.42;
+      g.add(collar2);
+
+      // Lamp head cage (square lantern body)
+      var headY = 1.95;
+      var cageW = 0.38, cageH = 0.42;
+      var frame = ironDark;
+      // Bottom / top plates
+      var floor = new THREE.Mesh(new THREE.BoxGeometry(cageW + 0.06, 0.05, cageW + 0.06), brass);
+      floor.position.y = headY - cageH * 0.5;
+      g.add(floor);
+      var ceiling = new THREE.Mesh(new THREE.BoxGeometry(cageW + 0.04, 0.045, cageW + 0.04), brass);
+      ceiling.position.y = headY + cageH * 0.5;
+      g.add(ceiling);
+      // Corner posts
+      var hw = cageW * 0.5;
+      [[-hw,-hw],[hw,-hw],[-hw,hw],[hw,hw]].forEach(function(p){
+        var bar = new THREE.Mesh(new THREE.BoxGeometry(0.04, cageH + 0.04, 0.04), frame);
+        bar.position.set(p[0], headY, p[1]);
+        g.add(bar);
+      });
+      // Cross braces mid
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){
+        var rail = new THREE.Mesh(new THREE.BoxGeometry(d[0] ? 0.03 : cageW - 0.02, 0.03, d[1] ? 0.03 : cageW - 0.02), frame);
+        rail.position.set(d[0] * hw, headY, d[1] * hw);
+        g.add(rail);
+      });
+
+      // Glass panes (4 sides) — warm emissive
+      var glassMat = new THREE.MeshStandardMaterial({
+        color: 0xffe2a0,
+        emissive: 0xffaa44,
+        emissiveIntensity: 1.15,
+        transparent: true,
+        opacity: 0.78,
+        roughness: 0.2,
+        metalness: 0.05,
+        side: THREE.DoubleSide
+      });
+      glassMat.userData.keep = true;
+      var paneGeo = new THREE.PlaneGeometry(cageW - 0.08, cageH - 0.08);
+      [[0, hw],[0, -hw],[hw, 0],[-hw, 0]].forEach(function(p, i){
+        var pane = new THREE.Mesh(paneGeo, glassMat);
+        pane.position.set(p[0], headY, p[1]);
+        if(i < 2) pane.rotation.y = 0;
+        else pane.rotation.y = Math.PI / 2;
+        g.add(pane);
+      });
+
+      // Inner flame bulb
+      var flame = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1, 12, 10),
+        mat(0xfff0c0, 0.35, 0, 0xff9944, 1.6)
       );
-      glow.position.y = 1.1;
-      glow.material.userData.keep = true;
-      g.add(glow);
-      g.userData.flame = glow;
-      if(typeof sitShadow === 'function') g.add(sitShadow(.35));
+      flame.scale.set(0.85, 1.15, 0.85);
+      flame.position.y = headY;
+      g.add(flame);
+      g.userData.flame = flame;
+
+      // Pagoda / pyramid roof
+      var roof = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.22, 4), iron);
+      roof.position.y = headY + cageH * 0.5 + 0.14;
+      roof.rotation.y = Math.PI / 4;
+      g.add(roof);
+      var finial = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), brass);
+      finial.position.y = headY + cageH * 0.5 + 0.28;
+      g.add(finial);
+      var spike = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.12, 6), brass);
+      spike.position.y = headY + cageH * 0.5 + 0.36;
+      g.add(spike);
+
+      // Arm brace under head
+      var arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.12), iron);
+      arm.position.y = headY - cageH * 0.5 - 0.06;
+      g.add(arm);
+
+      var lt = new THREE.PointLight(0xffb060, 1.7, 7.5);
+      lt.position.set(0, headY, 0);
+      g.add(lt);
+
+      // Soft halo
+      var halo = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 16, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffc878, transparent: true, opacity: 0.12, depthWrite: false })
+      );
+      halo.position.y = headY;
+      halo.material.userData.keep = true;
+      g.add(halo);
+
+      if(typeof sitShadow === 'function') g.add(sitShadow(0.4));
       g.position.set(x, 0, z);
-      return { group:g, light:lt };
+      return { group: g, light: lt };
     };
 
     buildBridge = function(x, z, a){

@@ -223,31 +223,44 @@ function buildBench(x, z, a){
   return g;
 }
 function buildLantern(x, z){
+  // Fallback classic lamp-post (modelPack replaces with richer version when ready).
   var g = new THREE.Group();
-  var iron = kept(0x2c2418, .5, .35);
-  var pole = new THREE.Mesh(new THREE.CylinderGeometry(.04, .055, 1.65, 8), iron);
-  pole.position.y = .82;
-  g.add(pole);
-  var glass = new THREE.Mesh(new THREE.BoxGeometry(.22, .3, .22), new THREE.MeshStandardMaterial({color:0xffcc66, emissive:0xffaa22, emissiveIntensity:1.35, transparent:true, opacity:.82, roughness:.25}));
-  glass.position.y = 1.78;
-  g.add(glass);
-  g.userData.flame = glass;
-  [-.13,.13].forEach(function(ox){ [-.13,.13].forEach(function(oz){
-    var bar = new THREE.Mesh(new THREE.BoxGeometry(.035, .38, .035), iron);
-    bar.position.set(ox, 1.78, oz);
-    g.add(bar);
-  }); });
-  var lip = new THREE.Mesh(new THREE.BoxGeometry(.32, .04, .32), iron);
-  lip.position.y = 1.58;
-  g.add(lip);
-  var cap = new THREE.Mesh(new THREE.ConeGeometry(.24, .18, 4), iron);
-  cap.position.y = 2.04;
-  cap.rotation.y = Math.PI/4;
-  g.add(cap);
-  var lt = new THREE.PointLight(0xffaa33, 1.2, 5);
-  lt.position.y = 1.78;
-  g.add(lt);
-  g.add(sitShadow(.28));
+  var iron = kept(0x2a2430, .45, .55);
+  var brass = kept(0xb8893a, .35, .65);
+  var stone = kept(0x8a8074, .95);
+  var plinth = new THREE.Mesh(new THREE.CylinderGeometry(.28, .34, .14, 10), stone);
+  plinth.position.y = .07; g.add(plinth);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(.045, .06, 1.55, 10), iron);
+  pole.position.y = 1.0; g.add(pole);
+  var headY = 1.95, cageW = .38, cageH = .42, hw = cageW * .5;
+  var floor = new THREE.Mesh(new THREE.BoxGeometry(cageW+.06, .05, cageW+.06), brass);
+  floor.position.y = headY - cageH*.5; g.add(floor);
+  var ceiling = new THREE.Mesh(new THREE.BoxGeometry(cageW+.04, .045, cageW+.04), brass);
+  ceiling.position.y = headY + cageH*.5; g.add(ceiling);
+  [[-hw,-hw],[hw,-hw],[-hw,hw],[hw,hw]].forEach(function(p){
+    var bar = new THREE.Mesh(new THREE.BoxGeometry(.04, cageH+.04, .04), iron);
+    bar.position.set(p[0], headY, p[1]); g.add(bar);
+  });
+  var glassMat = new THREE.MeshStandardMaterial({color:0xffe2a0, emissive:0xffaa44, emissiveIntensity:1.15, transparent:true, opacity:.78, roughness:.2, side:THREE.DoubleSide});
+  glassMat.userData.keep = true;
+  var paneGeo = new THREE.PlaneGeometry(cageW-.08, cageH-.08);
+  [[0,hw],[0,-hw],[hw,0],[-hw,0]].forEach(function(p,i){
+    var pane = new THREE.Mesh(paneGeo, glassMat);
+    pane.position.set(p[0], headY, p[1]);
+    if(i>=2) pane.rotation.y = Math.PI/2;
+    g.add(pane);
+  });
+  var flame = new THREE.Mesh(new THREE.SphereGeometry(.1, 12, 10), new THREE.MeshStandardMaterial({color:0xfff0c0, emissive:0xff9944, emissiveIntensity:1.6, roughness:.35}));
+  flame.material.userData.keep = true;
+  flame.scale.set(.85, 1.15, .85); flame.position.y = headY; g.add(flame);
+  g.userData.flame = flame;
+  var roof = new THREE.Mesh(new THREE.ConeGeometry(.34, .22, 4), iron);
+  roof.position.y = headY + cageH*.5 + .14; roof.rotation.y = Math.PI/4; g.add(roof);
+  var finial = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), brass);
+  finial.position.y = headY + cageH*.5 + .28; g.add(finial);
+  var lt = new THREE.PointLight(0xffb060, 1.7, 7.5);
+  lt.position.y = headY; g.add(lt);
+  g.add(sitShadow(.4));
   g.position.set(x, 0, z);
   return {group:g, light:lt};
 }

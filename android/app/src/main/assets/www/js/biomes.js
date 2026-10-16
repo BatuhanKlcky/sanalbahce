@@ -148,6 +148,13 @@
     addAt(root, spawn('well', 1.8), 5.2, 3.0, 1, 0);
     addAt(root, spawn('gazebo', 2.5), -7.0, 3.2, 0.9, 0.2);
     addAt(root, spawn('bench_1', 0.7), 2.0, 4.2, 1, -0.3);
+    if(typeof buildLantern === 'function'){
+      [[-8.5, 5.5],[8.2, 4.8],[-3.5, -8.8]].forEach(function(p, i){
+        if(isMobile && i > 1) return;
+        var lan = buildLantern(p[0], p[1]);
+        if(lan && lan.group) root.add(lan.group);
+      });
+    }
     // center pond via builder if available
     if(typeof buildPond === 'function'){
       var pond = buildPond(0, 0.2);
@@ -242,6 +249,13 @@
     });
     addAt(root, spawn('flower_2', 0.5), 2.0, 2.5, 1, 0);
     addAt(root, spawn('flower_1', 0.5), -2.2, 2.8, 1, 0);
+    if(typeof buildLantern === 'function'){
+      [[6.2, 5.5],[-6.5, -5.0],[0.5, 6.8]].forEach(function(p, i){
+        if(isMobile && i > 1) return;
+        var lan = buildLantern(p[0], p[1]);
+        if(lan && lan.group) root.add(lan.group);
+      });
+    }
   }
 
   var FILLERS = {
