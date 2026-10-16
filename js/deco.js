@@ -27,10 +27,30 @@ function sitShadow(r){
   m.position.y = .02;
   return m;
 }
+function decoWorldTag(){
+  return (typeof isCozy === 'function' && isCozy()) ? 'cozy' : 'classic';
+}
+function syncDecoWorldVisibility(){
+  var cozy = typeof isCozy === 'function' && isCozy();
+  if(typeof decos === 'undefined' || !decos) return;
+  for(var i = 0; i < decos.length; i++){
+    var d = decos[i];
+    if(!d || !d.group) continue;
+    var w = d.world;
+    // Legacy saves without a world tag stay shared (both modes).
+    if(!w || w === 'both'){ d.group.visible = true; continue; }
+    d.group.visible = cozy ? (w === 'cozy') : (w === 'classic');
+  }
+}
+window.syncDecoWorldVisibility = syncDecoWorldVisibility;
+
 function pushDeco(g, type, extra){
   scene.add(g);
-  var rec = {group:g, type:type};
+  var rec = {group:g, type:type, world:decoWorldTag()};
   if(extra){ for(var k in extra) rec[k] = extra[k]; }
+  // Respect active mode immediately (classic placements hide in diorama, etc.).
+  if(rec.world === 'cozy') g.visible = !(typeof isCozy === 'function') || isCozy();
+  else if(rec.world === 'classic') g.visible = !(typeof isCozy === 'function') || !isCozy();
   decos.push(rec);
   markDirty();
 }
@@ -1183,12 +1203,18 @@ window.addEventListener('pointerup',function(e){
     plRay.setFromCamera(plM,camera);
     // collect all deco meshes
     var allGroups=[];
-    decos.forEach(function(d){d.group.traverse(function(ch){if(ch.isMesh)allGroups.push(ch);});});
+    decos.forEach(function(d){
+      if(!d.group||d.group.visible===false)return;
+      d.group.traverse(function(ch){if(ch.isMesh)allGroups.push(ch);});
+    });
     var hits=plRay.intersectObjects(allGroups,true);
     if(hits.length>0){
       var hitObj=hits[0].object;
       var foundGroup=null;
-      decos.forEach(function(d){d.group.traverse(function(ch){if(ch===hitObj)foundGroup=d.group;});});
+      decos.forEach(function(d){
+        if(!d.group||d.group.visible===false)return;
+        d.group.traverse(function(ch){if(ch===hitObj)foundGroup=d.group;});
+      });
       if(foundGroup)deleteDeco(foundGroup);
     } else {
       showToast('Objeye dokun 👆');

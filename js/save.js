@@ -402,7 +402,7 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       plants:flowers.map(function(f){return{x:f.mesh.position.x,z:f.mesh.position.z,h:f.h,b:f.b,w:f.w,c:f.c,t:f.t,k:f.k||'',isStunted:f.isStunted};}),
       badBugs:badBugs.map(function(b){return{ti:b.ti};}),
       bugCount:bugs.length,
-      decos:decos.map(function(d){return{type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1};}),
+      decos:decos.map(function(d){return{type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};}),
       weather:curWeather,
       harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
       petCount:pets.map(function(p){return{type:p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
@@ -423,7 +423,16 @@ function load(){
   });
   var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var data;try{data=JSON.parse(raw);}catch(e){localStorage.removeItem(SAVE_KEY);return;}isLoading=true;var elapsed=Math.max(0,(Date.now()-data.lastUpdate)/1000);var sB=data.badBugs||[];(data.plants||[]).forEach(function(p){mkFlower(p.x,p.z,p);});if(!(typeof isCozy==='function'&&isCozy())){sB.forEach(function(b){if(b.ti<flowers.length)mkBadBug(b.ti);});}if(elapsed>0)advancePlants(elapsed);if(!(typeof isCozy==='function'&&isCozy())&&typeof BUG_EVERY!=='undefined'&&elapsed>=BUG_EVERY&&flowers.length)mkBadBug(Math.floor(Math.random()*flowers.length));var bc=data.bugCount||0;for(var i=0;i<bc;i++)window.addBug();// Restore decos
     var savedDecos=data.decos||[];
-    function _applyXform(d){var last=decos[decos.length-1];if(!last)return;if(d.ry!=null)last.group.rotation.y=d.ry;if(d.sc&&d.sc!==1)last.group.scale.setScalar(d.sc);}
+    function _applyXform(d){
+      var last=decos[decos.length-1];if(!last)return;
+      if(d.ry!=null)last.group.rotation.y=d.ry;
+      if(d.sc&&d.sc!==1)last.group.scale.setScalar(d.sc);
+      // Restore mode ownership (diorama vs classic).
+      // Untagged + far from classic garden → likely a diorama/biome placement (pre-fix saves).
+      if(d.world) last.world = d.world;
+      else if(Math.hypot(d.x||0, d.z||0) > 18) last.world = 'cozy';
+      else last.world = 'both';
+    }
     savedDecos.forEach(function(d){
       var x=d.x,z=d.z,a=d.ry||0;
       if(d.type==='lantern')mkLantern(x,z);
@@ -464,6 +473,7 @@ function load(){
       }
       _applyXform(d);
     });
+    if(typeof window.syncDecoWorldVisibility==='function') window.syncDecoWorldVisibility();
     // Restore weather
     if(data.weather&&data.weather!=='clear')window.setWeather(data.weather);
     // Re-render shop with current coins

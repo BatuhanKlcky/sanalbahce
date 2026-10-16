@@ -690,7 +690,13 @@ function placeSpecial(item, x, z){
     glow.position.y=.18;g.add(glow);
     decos.push({group:g,type:'firefly_jar',light:lt4});
   }
-  g.position.set(x,0,z);scene.add(g);markDirty();
+  g.position.set(x,0,z);scene.add(g);
+  var last=decos[decos.length-1];
+  if(last){
+    last.world=(typeof isCozy==='function'&&isCozy())?'cozy':'classic';
+    last.group.visible=!(typeof isCozy==='function')|| (last.world==='cozy'?isCozy():!isCozy());
+  }
+  markDirty();
 }
 
 

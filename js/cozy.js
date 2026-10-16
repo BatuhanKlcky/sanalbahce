@@ -46,6 +46,7 @@ function findDecoAt(clientX, clientY){
   plRay.setFromCamera(plM, camera);
   var meshes = [];
   decos.forEach(function(d){
+    if(!d.group || d.group.visible === false) return;
     d.group.traverse(function(ch){ if(ch.isMesh) meshes.push(ch); });
   });
   var hits = plRay.intersectObjects(meshes, true);
@@ -167,6 +168,8 @@ function applyCozyScenery(){
   if(window._islandRoot) window._islandRoot.visible = !!cozyMode && !hasBiomes;
   if(window._flatGnd) window._flatGnd.visible = !cozyMode;
   if(typeof window.setBiomesVisible === 'function') window.setBiomesVisible(!!cozyMode);
+  // User props placed in diorama must not leak into classic garden (and vice versa).
+  if(typeof window.syncDecoWorldVisibility === 'function') window.syncDecoWorldVisibility();
 }
 
 function applyCozyHUD(){

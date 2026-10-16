@@ -354,7 +354,13 @@ window.gardenBlocked=function(x,z){
   var i,p;
   for(i=0;i<flowers.length;i++){p=flowers[i].mesh.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
   for(i=0;i<harvestItems.length;i++){p=harvestItems[i];if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
-  for(i=0;i<decos.length;i++){if(decos[i].type!=='flower_wild')continue;p=decos[i].group.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';}
+  var cozyNow=typeof isCozy==='function'&&isCozy();
+  for(i=0;i<decos.length;i++){
+    if(decos[i].type!=='flower_wild')continue;
+    var dw=decos[i].world;
+    if(dw&&dw!=='both'&&((cozyNow&&dw!=='cozy')||(!cozyNow&&dw!=='classic'))) continue;
+    p=decos[i].group.position;if(Math.hypot(p.x-x,p.z-z)<PLANT_GAP) return 'Burada bitki var 🌱';
+  }
   return '';
 };
 window.plant=function(){var a=Math.random()*Math.PI*2,r=Math.random()*13;mkFlower(Math.cos(a)*r,Math.sin(a)*r);sndPlant();chkTask('p',20);stats.plant++;saveStats();updStats();save(true);showToast('🌱 Yeni bitki ekildi!');};
