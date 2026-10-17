@@ -341,12 +341,13 @@
     if(!houseRec){ showToast('Önce çiftçi evi koy 🏠'); return false; }
     if(houseRec.level >= 2){ showToast('Çiftçi evi maksimum seviyede ⭐'); return false; }
     var cost = 120;
-    if(typeof stats !== 'undefined' && stats.coin < cost){
+    if(typeof stats === 'undefined' || stats.coin < cost){
       showToast('Yükseltme için ' + cost + ' 💰 gerekli');
       return false;
     }
-    if(typeof stats !== 'undefined' && typeof addCoin === 'function') addCoin(-cost, true);
-    else if(typeof stats !== 'undefined') stats.coin -= cost;
+    stats.coin -= cost;
+    if(typeof updStats === 'function') updStats();
+    if(typeof saveStats === 'function') saveStats();
     houseRec.level = 2;
     rebuildHouseVisual();
     showToast('🏠 Çiftçi evi Seviye 2 — 2 çiftçi!');
