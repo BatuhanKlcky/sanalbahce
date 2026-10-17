@@ -6,11 +6,9 @@
   var farmers = [];
   var houseRec = null; // {group, level, world, beds:[]}
   var _mats = {};
-  var _rigMale = null;
-  var _rigFemale = null;
-  var _rigClips = null; // name -> AnimationClip (shared clip names from male pack)
-  var _clipsMale = null;
-  var _clipsFemale = null;
+  // ArrayBuffers — each farmer is a fresh GLTFLoader.parse (no skinned clone = no spaghetti).
+  var _bufMale = null;
+  var _bufFemale = null;
   var _rigReady = false;
   var _rigWait = [];
   var RIG_MALE = 'models/characters/FarmerAnim.glb';
@@ -33,8 +31,8 @@
     else _rigWait.push(fn);
   }
 
-  function findClip(name, kind){
-    var pack = (kind === 'female' ? _clipsFemale : _clipsMale) || _rigClips;
+  function findClip(f, name){
+    var pack = f && f.clips;
     if(!pack) return null;
     if(pack[name]) return pack[name];
     var keys = Object.keys(pack);
@@ -42,25 +40,6 @@
       if(keys[i] === name || keys[i].indexOf('|'+name) >= 0 || keys[i].endsWith(name)) return pack[keys[i]];
     }
     return null;
-  }
-
-  function cloneSkinned(source){
-    var sourceLookup = {}, cloneLookup = {};
-    var clone = source.clone(true);
-    function walk(a, b){
-      sourceLookup[a.uuid] = a; cloneLookup[a.uuid] = b;
-      for(var i=0;i<a.children.length;i++) walk(a.children[i], b.children[i]);
-    }
-    walk(source, clone);
-    clone.traverse(function(node){
-      if(!node.isSkinnedMesh) return;
-      var matched = null;
-      for(var id in cloneLookup){ if(cloneLookup[id] === node){ matched = sourceLookup[id]; break; } }
-      if(!matched || !matched.skeleton) return;
-      var bones = matched.skeleton.bones.map(function(b){ return cloneLookup[b.uuid] || b; });
-      node.bind(new THREE.Skeleton(bones, matched.skeleton.boneInverses), matched.bindMatrix);
-    });
-    return clone;
   }
 
   function cozyLift(root){
@@ -78,13 +57,18 @@
         m.roughness = Math.min(0.92, (m.roughness != null ? m.roughness : 0.8) * 0.95 + 0.05);
         m.userData.keep = true;
       });
+      // skinned meshes must keep matrix updates for AnimationMixer
+      if(c.isSkinnedMesh){
+        c.frustumCulled = false;
+        c.matrixAutoUpdate = true;
+      }
     });
   }
 
   function playClip(f, clipName, opts){
     opts = opts || {};
     if(!f.mixer || !f.actions) return;
-    var clip = findClip(clipName, f.kind);
+    var clip = findClip(f, clipName);
     if(!clip) return;
     var key = clip.name;
     if(!f.actions[key]) f.actions[key] = f.mixer.clipAction(clip);
@@ -104,12 +88,23 @@
     f.animName = clipName;
   }
 
+  function loadArrayBuffer(url, cb){
+    var req = new XMLHttpRequest();
+    req.open('GET', url, true);
+    req.responseType = 'arraybuffer';
+    req.onload = function(){
+      if(req.status >= 200 && req.status < 300) cb(null, req.response);
+      else cb(new Error('HTTP '+req.status));
+    };
+    req.onerror = function(){ cb(new Error('network')); };
+    req.send(null);
+  }
+
   function loadFarmerRig(){
     if(typeof THREE === 'undefined' || !THREE.GLTFLoader){
       _rigReady = true; _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
       return;
     }
-    var loader = new THREE.GLTFLoader();
     var left = 2;
     function doneOne(){
       left--;
@@ -117,19 +112,45 @@
       _rigReady = true;
       _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
     }
-    function ingest(gltf, isFemale){
-      cozyLift(gltf.scene);
-      var map = {};
-      (gltf.animations || []).forEach(function(c){ map[c.name] = c; });
-      if(isFemale){ _rigFemale = gltf.scene; _clipsFemale = map; }
-      else { _rigMale = gltf.scene; _clipsMale = map; _rigClips = map; }
+    loadArrayBuffer(RIG_MALE, function(err, buf){
+      if(err) console.warn('FarmerAnim buf', err);
+      else _bufMale = buf;
       doneOne();
-    }
-    loader.load(RIG_MALE, function(g){ ingest(g, false); }, undefined, function(err){
-      console.warn('FarmerAnim load fail', err); doneOne();
     });
-    loader.load(RIG_FEMALE, function(g){ ingest(g, true); }, undefined, function(err){
-      console.warn('FarmerAnim_F load fail', err); doneOne();
+    loadArrayBuffer(RIG_FEMALE, function(err, buf){
+      if(err) console.warn('FarmerAnim_F buf', err);
+      else _bufFemale = buf;
+      doneOne();
+    });
+  }
+
+  /** Fresh parse per farmer — keeps skin binds intact (unlike scene.clone). */
+  function parseFarmerInstance(kind, onDone){
+    var buf = kind === 'female' ? _bufFemale : _bufMale;
+    if(!buf){ onDone(null); return; }
+    var loader = new THREE.GLTFLoader();
+    loader.parse(buf, '', function(gltf){
+      var body = gltf.scene;
+      cozyLift(body);
+      body.updateMatrixWorld(true);
+      var box = new THREE.Box3().setFromObject(body);
+      var h = Math.max(1e-4, box.max.y - box.min.y);
+      if(isFinite(box.min.y)) body.position.y -= box.min.y;
+      // Scale OUTER group only — never scale skinned root (avoids bind explode).
+      var g = new THREE.Group();
+      g.add(body);
+      g.scale.setScalar(1.62 / h);
+      // Reset skeletons to bind pose before first clip
+      body.traverse(function(c){
+        if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+      });
+      var mixer = new THREE.AnimationMixer(body);
+      var clips = {};
+      (gltf.animations || []).forEach(function(c){ clips[c.name] = c; });
+      onDone({ group: g, mixer: mixer, clips: clips, body: body });
+    }, function(err){
+      console.warn('parse farmer', err);
+      onDone(null);
     });
   }
 
@@ -232,30 +253,12 @@
     return g;
   }
 
-  // ── Real Quaternius farmer meshes + retargeted Idle/Walk/Duck/Punch clips ──
-  function buildAnimatedFarmer(kind){
+  // ── Real Quaternius farmer meshes + rotation-only retargeted clips ─────────────
+  function buildStubFarmer(){
     var g = new THREE.Group();
-    var mixer = null, actions = {};
-    var src = kind === 'female' ? (_rigFemale || _rigMale) : (_rigMale || _rigFemale);
-    if(src){
-      var body = cloneSkinned(src);
-      // fit ~1.6m human farmer
-      body.updateMatrixWorld(true);
-      var box = new THREE.Box3().setFromObject(body);
-      var h = box.max.y - box.min.y;
-      if(h > 1e-4) body.scale.multiplyScalar(1.62 / h);
-      body.updateMatrixWorld(true);
-      box.setFromObject(body);
-      if(isFinite(box.min.y)) body.position.y -= box.min.y;
-      g.add(body);
-      mixer = new THREE.AnimationMixer(body);
-    } else {
-      var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
-      stub.position.y = 0.7; g.add(stub);
-    }
+    var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
+    stub.position.y = 0.7; g.add(stub);
     if(typeof sitShadow === 'function') g.add(sitShadow(0.45));
-    g.userData.mixer = mixer;
-    g.userData.actions = actions;
     return g;
   }
 
@@ -267,18 +270,33 @@
     farmers.length = 0;
   }
 
-  function spawnFarmerAt(kind, x, z){
-    var g = buildAnimatedFarmer(kind);
-    g.position.set(x, 0, z);
-    scene.add(g);
+  function spawnFarmerAt(kind, x, z, slots){
+    var stub = buildStubFarmer();
+    stub.position.set(x, 0, z);
+    scene.add(stub);
     var rec = {
-      group: g, kind: kind, state: 'idle', timer: 1 + Math.random(),
-      target: null, job: null, slots: [], time: Math.random()*8,
-      mixer: g.userData.mixer, actions: g.userData.actions || {},
+      group: stub, kind: kind, state: 'idle', timer: 1 + Math.random(),
+      target: null, job: null, slots: slots || [], time: Math.random()*8,
+      mixer: null, actions: {}, clips: null,
       currentAction: null, animName: ''
     };
     farmers.push(rec);
-    playClip(rec, 'Idle', {fade: 0.05});
+    parseFarmerInstance(kind, function(inst){
+      if(!inst) return;
+      // Swap stub for real skinned instance
+      var px = rec.group.position.x, pz = rec.group.position.z, ry = rec.group.rotation.y;
+      if(rec.group.parent) scene.remove(rec.group);
+      inst.group.position.set(px, 0, pz);
+      inst.group.rotation.y = ry;
+      if(typeof sitShadow === 'function') inst.group.add(sitShadow(0.45));
+      scene.add(inst.group);
+      rec.group = inst.group;
+      rec.mixer = inst.mixer;
+      rec.clips = inst.clips;
+      rec.actions = {};
+      rec.currentAction = null;
+      playClip(rec, 'Idle', {fade: 0.05});
+    });
     return rec;
   }
 
@@ -291,24 +309,17 @@
   function refreshFarmers(){
     if(!houseRec){ clearFarmers(); return; }
     whenRigReady(function(){
-      // Rebuild so stub placeholders become real animated rigs.
       var need = farmerCount();
       var home = homeAnchor();
-      var keepSlots = farmers.map(function(f){ return f.slots.slice(); });
+      var keepSlots = farmers.map(function(f){ return (f.slots || []).slice(); });
       clearFarmers();
       for(var i=0;i<need;i++){
         var kind = i === 0 ? 'male' : 'female';
-        var ang = i === 0 ? -0.9 : 0.9;
-        var rec = spawnFarmerAt(kind, home.x + Math.cos(ang)*1.8, home.z + Math.sin(ang)*1.8 + 1.6);
-        if(keepSlots[i]) rec.slots = keepSlots[i];
-      }
-      for(var j=0;j<farmers.length;j++){
-        var f = farmers[j];
-        var a = j === 0 ? -0.85 : 0.85;
-        f.group.position.x = home.x + Math.cos(a)*1.9;
-        f.group.position.z = home.z + 1.7 + Math.sin(a)*0.3;
-        f.group.rotation.y = Math.atan2(home.x - f.group.position.x, home.z + 1.2 - f.group.position.z);
-        playClip(f, 'Idle');
+        var a = i === 0 ? -0.85 : 0.85;
+        var x = home.x + Math.cos(a)*1.9;
+        var z = home.z + 1.7 + Math.sin(a)*0.3;
+        var rec = spawnFarmerAt(kind, x, z, keepSlots[i] || []);
+        rec.group.rotation.y = Math.atan2(home.x - x, home.z + 1.2 - z);
       }
     });
   }
