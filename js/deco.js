@@ -765,6 +765,7 @@ function mkPackProp(type, x, z, ang){
   g.position.set(x, 0, z);
   if(ang != null) g.rotation.y = ang;
   else if(def.spin) g.rotation.y = Math.random() * Math.PI * 2;
+  g.userData.baseRotZ = 0;
   if(def.shadow && typeof sitShadow === 'function') g.add(sitShadow(def.shadow));
   var extra = null;
   if(def.light){

@@ -498,4 +498,9 @@ function load(){
     // Restore pets
     var sP=data.petCount||[];
     sP.forEach(function(p){if(p.type==='cat')mkCat(p.x,p.z);else mkDog(p.x,p.z);});
-    isLoading=false;save(true);}
+    isLoading=false;
+    if(elapsed >= 90 && typeof window.showWelcomeSummary === 'function'){
+      setTimeout(function(){ window.showWelcomeSummary(elapsed); }, 800);
+    }
+    save(true);
+}

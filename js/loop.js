@@ -268,10 +268,24 @@ function animate(){
     try{ window.stepFarmers(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepFarmers', e); }
   }
+  if(typeof window.stepVisualFX==='function'){
+    try{ window.stepVisualFX(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
+  }
   // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
   decos.forEach(function(d){
     if(!d||!d.group||d.group.visible===false) return;
-    if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
+    if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);
+    else if(d.type==='pine'||d.type==='birch'||d.type==='willow'||d.type==='apple_tree'||d.type==='bamboo'||d.type==='palm'){
+      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+      var swayAmp = (d.type==='bamboo'||d.type==='willow') ? 0.045 : 0.022;
+      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.35 + d.group.position.x * 0.7 + d.group.position.z * 0.5) * swayAmp;
+    }
+    else if(d.type==='plant'||d.type==='pumpkin'||d.type==='watermelon'){
+      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.8 + d.group.position.x) * 0.025;
+    }
+    else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
       if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
       if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;

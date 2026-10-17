@@ -240,6 +240,10 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <!-- MORE ACTIONS DRAWER -->
 <div id="moreDrawer">
   <div class="more-grid">
+    <div class="more-item" id="btnCodex" onclick="window.togglePanel('codex');window.closeAllPanelsAndDrawers()">
+      <span class="mi-icon">📖</span>
+      <span>Rehber</span>
+    </div>
     <div class="more-item" id="btnStats" onclick="window.togglePanel('stats');window.closeAllPanelsAndDrawers()">
       <span class="mi-icon">📊</span>
       <span>İstatistik</span>
@@ -455,6 +459,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <script src="js/cozyLife.js"></script>
 <script src="js/farmers.js"></script>
 <script src="js/visualFX.js"></script>
+<script src="js/codex.js"></script>
 <script src="js/gameUI.js"></script>
 <script src="js/loop.js"></script>
 </body>
