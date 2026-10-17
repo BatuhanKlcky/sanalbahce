@@ -215,6 +215,61 @@
       }
     }
 
+    // 1.5) Çiftçiler Kontrolü
+    if(typeof farmers !== 'undefined' && farmers.length){
+      var fMeshes = [];
+      farmers.forEach(function(fm, idx){
+        if(!fm || !fm.group) return;
+        fm.group.traverse(function(ch){
+          if(ch.isMesh){
+            ch.userData.farmerRef = fm;
+            ch.userData.farmerIdx = idx;
+            fMeshes.push(ch);
+          }
+        });
+      });
+      var fHits = _ray.intersectObjects(fMeshes, true);
+      if(fHits.length > 0){
+        var fObj = fHits[0].object.userData.farmerRef;
+        if(fObj){
+          var fStateText = fObj.state === 'walk' ? 'Tarlada Yürüyor 🚶' : (fObj.state === 'work' ? 'Bitkilerle İlgileniyor 💧' : 'Dinleniyor 🌾');
+          var jobCount = (fObj.slots ? fObj.slots.length : 0);
+          inspectObject({
+            icon: '🧑‍🌾',
+            title: (fObj.kind === 'female' ? 'Çiftçi Elif' : 'Çiftçi Ahmet'),
+            sub: fStateText + ' (' + jobCount + '/3 iş)',
+            pos: fObj.group.position,
+            heightOffset: 1.6,
+            ringScale: 0.9,
+            actions: [
+              {
+                label: 'El Salla',
+                icon: '👋',
+                primary: true,
+                onClick: function(){
+                  if(fObj.mixer && fObj.clips){
+                    var waveClip = fObj.clips['Wave'] || fObj.clips['Punch'];
+                    if(waveClip){
+                      var act = fObj.mixer.clipAction(waveClip);
+                      act.reset();
+                      act.setLoop(THREE.LoopOnce, 1);
+                      act.clampWhenFinished = true;
+                      act.play();
+                    }
+                  }
+                  if(typeof sndPet === 'function') sndPet();
+                  showToast('🧑‍🌾 Çiftçi sana selam verdi!');
+                  window.triggerHaptic('medium');
+                  closeInspector();
+                }
+              }
+            ]
+          });
+          return;
+        }
+      }
+    }
+
     // 2) Çiçekler Kontrolü
     if(typeof flowers !== 'undefined' && flowers.length){
       var flMeshes = [];
@@ -298,50 +353,66 @@
         var dObj = dHits[0].object.userData.decoRef;
         var dIndex = dHits[0].object.userData.decoIdx;
         if(dObj){
-          var dName = (dObj.type || 'Dekor').replace('_', ' ').toUpperCase();
-          inspectObject({
-            icon: '🏡',
-            title: dName,
-            sub: 'Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z),
-            pos: dObj.group.position,
-            heightOffset: 1.5,
-            ringScale: Math.max(1.0, (dObj.group.scale.x || 1) * 1.3),
-            actions: [
-              {
-                label: 'Döndür',
-                icon: '↺',
-                onClick: function(){
-                  dObj.group.rotation.y += Math.PI / 4;
-                  markDirty(); save(true);
-                  window.triggerHaptic('light');
-                }
-              },
-              {
-                label: 'Taşı',
-                icon: '📍',
-                onClick: function(){
-                  selectedDeco = dObj;
-                  if(typeof window.armMoveSelected === 'function') window.armMoveSelected();
-                  closeInspector();
-                }
-              },
-              {
-                label: 'Kaldır',
-                icon: '🗑️',
-                danger: true,
-                onClick: function(){
-                  dObj.group.traverse(function(c){
-                    if(c.geometry) c.geometry.dispose();
-                    if(c.material) c.material.dispose();
-                  });
-                  scene.remove(dObj.group);
-                  decos.splice(dIndex, 1);
-                  save(true);
-                  showToast('Obje kaldırıldı.');
-                  closeInspector();
-                }
+          var isHouse = dObj.type === 'farmer_house';
+          var dName = isHouse ? ('ÇİFTÇİ EVİ (Lv.' + (dObj.level||1) + ')') : (dObj.type || 'Dekor').replace('_', ' ').toUpperCase();
+          var subTitle = isHouse 
+            ? 'Kapasite: ' + (dObj.level || 1) + ' Çiftçi (' + ((dObj.level || 1) * 3) + ' iş)'
+            : 'Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z);
+          var decoActs = [];
+          if(isHouse && (dObj.level || 1) < 2){
+            decoActs.push({
+              label: 'Yükselt (100💰)',
+              icon: '⬆️',
+              primary: true,
+              onClick: function(){
+                if(typeof window.upgradeFarmerHouse === 'function') window.upgradeFarmerHouse();
+                closeInspector();
               }
-            ]
+            });
+          }
+          decoActs.push({
+            label: 'Döndür',
+            icon: '↺',
+            onClick: function(){
+              dObj.group.rotation.y += Math.PI / 4;
+              markDirty(); save(true);
+              window.triggerHaptic('light');
+            }
+          });
+          decoActs.push({
+            label: 'Taşı',
+            icon: '📍',
+            onClick: function(){
+              selectedDeco = dObj;
+              if(typeof window.armMoveSelected === 'function') window.armMoveSelected();
+              closeInspector();
+            }
+          });
+          decoActs.push({
+            label: 'Kaldır',
+            icon: '🗑️',
+            danger: true,
+            onClick: function(){
+              dObj.group.traverse(function(c){
+                if(c.geometry) c.geometry.dispose();
+                if(c.material) c.material.dispose();
+              });
+              scene.remove(dObj.group);
+              decos.splice(dIndex, 1);
+              if(isHouse && typeof window.bindFarmerHouseFromDecos === 'function') window.bindFarmerHouseFromDecos();
+              save(true);
+              showToast('Obje kaldırıldı.');
+              closeInspector();
+            }
+          });
+          inspectObject({
+            icon: isHouse ? '🏠' : '🏡',
+            title: dName,
+            sub: subTitle,
+            pos: dObj.group.position,
+            heightOffset: isHouse ? 2.2 : 1.5,
+            ringScale: Math.max(1.0, (dObj.group.scale.x || 1) * 1.3),
+            actions: decoActs
           });
           return;
         }
