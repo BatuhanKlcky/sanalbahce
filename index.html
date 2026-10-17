@@ -18,136 +18,267 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="js/lib/GLTFLoader.js"></script>
 <style>
-*{padding:0;margin:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{margin:0;overflow:hidden;background:#010103;touch-action:manipulation}
+*{padding:0;margin:0;box-sizing:border-box;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif}
+body{margin:0;overflow:hidden;background:#0d1310;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 canvas{touch-action:none}
 #dayOverlay{position:fixed;inset:0;pointer-events:none;z-index:5;transition:background 3s ease}
 .wfx{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity 1s}
-#sidebar{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));bottom:calc(208px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));z-index:1100;display:flex;flex-direction:column;justify-content:safe center;gap:8px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
-#sidebar::-webkit-scrollbar{width:0;height:0}
-.sbb{background:rgba(6,10,20,.88);border:1px solid rgba(255,255,255,.12);border-radius:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;backdrop-filter:blur(16px);transition:transform .2s,background .2s;-webkit-tap-highlight-color:transparent}
-.sbb:active{transform:scale(.88)}.sbb.on{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)}
-.spanel{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:calc(66px + env(safe-area-inset-left,0px));transform:translateX(-8px);z-index:1100;background:rgba(6,10,20,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:14px;width:min(236px, calc(100vw - 90px - env(safe-area-inset-left,0px)));backdrop-filter:blur(24px);color:#fff;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-height:calc(100vh - 220px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto}
-.spanel.open{opacity:1;pointer-events:auto;z-index:1200;transform:translateX(0)}
-.spanel h3{font-size:11px;letter-spacing:.12em;color:rgba(255,255,255,.4);margin:10px 0 7px;text-transform:uppercase}
+
+/* ── MODERN COZY MOBİL TOP HUD ── */
+#topHud{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;z-index:1100;display:flex;align-items:center;justify-content:space-between;pointer-events:none;gap:8px}
+.hud-pill{pointer-events:auto;background:rgba(20,26,24,.85);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:6px 14px;color:#fff;backdrop-filter:blur(20px);box-shadow:0 4px 18px rgba(0,0,0,.35);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;transition:transform .18s,background .2s}
+.hud-pill:active{transform:scale(.95)}
+
+#timePill{gap:8px}
+#wIcon{font-size:18px;line-height:1}
+#clock{font-size:13px;font-weight:800;letter-spacing:-.3px;color:#e8f4ec}
+#dayLabel{font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+
+#coinBadge{position:static!important;background:linear-gradient(135deg,rgba(245,185,66,.22),rgba(212,148,27,.35));border:1px solid rgba(251,191,36,.45);color:#fce282;font-size:13px;font-weight:800;padding:6px 14px;border-radius:24px;box-shadow:0 4px 16px rgba(212,148,27,.25);backdrop-filter:blur(16px)}
+#coinBadge.bounce-up{animation:coinPop .35s cubic-bezier(.17,.89,.32,1.28)}
+@keyframes coinPop{0%{transform:scale(1)}50%{transform:scale(1.22);color:#fff7ba}100%{transform:scale(1)}}
+
+#lvBadge{position:static!important;background:rgba(20,26,24,.85);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:6px 12px;color:#fbbf24;font-size:12px;font-weight:800;backdrop-filter:blur(16px)}
+#hpBadge{background:rgba(14,35,50,.85);border:1px solid rgba(56,189,248,.3);color:#38bdf8;border-radius:20px;padding:5px 10px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:4px}
+
+.hud-actions{display:flex;align-items:center;gap:6px;pointer-events:auto}
+.hud-btn{width:36px;height:36px;border-radius:50%;background:rgba(20,26,24,.85);border:1px solid rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;backdrop-filter:blur(16px);transition:transform .15s,background .15s;-webkit-tap-highlight-color:transparent}
+.hud-btn:active{transform:scale(.88)}
+.hud-btn.on{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35)}
+
+/* ── FLOATING BOTTOM DOCK ── */
+#bottomDock{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:1100;display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(18,24,22,.9);border:1px solid rgba(255,255,255,.12);border-radius:32px;backdrop-filter:blur(24px);box-shadow:0 8px 36px rgba(0,0,0,.6);max-width:calc(100vw - 20px);overflow-x:auto;-webkit-overflow-scrolling:touch}
+#bottomDock::-webkit-scrollbar{display:none}
+
+.dock-btn{flex:0 0 auto;border:none;background:transparent;color:#d1e0d8;padding:6px 10px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:9px;font-weight:700;letter-spacing:.02em;transition:all .18s;-webkit-tap-highlight-color:transparent;min-width:48px}
+.dock-btn .dock-icon{font-size:20px;line-height:1}
+.dock-btn:active{transform:scale(.9);filter:brightness(1.2)}
+.dock-btn.primary{background:linear-gradient(135deg,#1f7a46,#2db867);color:#fff;box-shadow:0 4px 14px rgba(45,184,103,.35)}
+.dock-btn.water{background:linear-gradient(135deg,#0d568a,#0284c7);color:#fff;box-shadow:0 4px 14px rgba(2,132,199,.35)}
+.dock-btn.on{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+
+/* ── MORE ACTIONS DRAWER ── */
+#moreDrawer{position:fixed;bottom:calc(78px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) scale(.92);opacity:0;pointer-events:none;z-index:1200;background:rgba(18,24,22,.95);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.7);backdrop-filter:blur(24px);transition:all .22s cubic-bezier(.16,1,.3,1);max-width:340px;width:calc(100vw - 32px)}
+#moreDrawer.open{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+.more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.more-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 4px;text-align:center;cursor:pointer;color:#e8f4ec;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s,background .15s}
+.more-item:active{transform:scale(.92);background:rgba(255,255,255,.12)}
+.more-item .mi-icon{font-size:22px}
+
+/* ── FLOATING OBJECT INSPECTOR (Akıllı Nesne Kartı) ── */
+#objInspector{position:fixed;top:0;left:0;z-index:1300;background:rgba(18,24,22,.94);border:1px solid rgba(255,210,140,.35);border-radius:20px;padding:12px 14px;color:#fff;backdrop-filter:blur(24px);box-shadow:0 10px 30px rgba(0,0,0,.65);min-width:180px;max-width:240px;pointer-events:none;opacity:0;transform:scale(.9);transition:opacity .18s,transform .18s}
+#objInspector.active{opacity:1;pointer-events:auto;transform:scale(1)}
+.oi-header{display:flex;align-items:center;gap:8px;position:relative}
+.oi-icon{font-size:24px;line-height:1}
+.oi-text{flex:1;overflow:hidden}
+.oi-title{font-size:12px;font-weight:800;color:#fce282;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oi-sub{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;margin-top:1px}
+.oi-close{border:none;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);width:22px;height:22px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.oi-close:active{transform:scale(.85);background:rgba(255,255,255,.2)}
+.oi-progress-wrap{margin-top:8px}
+.oi-progress-bar{background:rgba(255,255,255,.1);border-radius:8px;height:5px;overflow:hidden}
+.oi-progress-fill{background:linear-gradient(90deg,#22c55e,#84cc16);height:100%;border-radius:8px;width:0%;transition:width .4s}
+.oi-actions{display:flex;gap:6px;margin-top:10px}
+.oi-btn{flex:1;border:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;padding:7px 8px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:transform .12s,background .12s}
+.oi-btn:active{transform:scale(.92)}
+.oi-btn.oi-primary{background:linear-gradient(135deg,#1f7a46,#2db867);border-color:rgba(45,184,103,.5);color:#fff}
+.oi-btn.oi-danger{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#fca5a5}
+
+/* ── MODERLEŞTİRİLMİŞ YAN PANELLER (BOTTOM-SHEET / MODAL) ── */
+.spanel{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);z-index:1200;background:rgba(18,24,22,.96);border:1px solid rgba(255,255,255,.15);border-radius:28px;padding:18px;width:min(440px, calc(100vw - 24px));backdrop-filter:blur(30px);color:#fff;opacity:0;pointer-events:none;transition:opacity .25s cubic-bezier(.16,1,.3,1),transform .25s cubic-bezier(.16,1,.3,1);max-height:min(70vh, 520px);overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.75)}
+.spanel.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.spanel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+.spanel-title{font-size:14px;font-weight:800;color:#fce282;display:flex;align-items:center;gap:6px}
+.spanel-close{border:none;background:rgba(255,255,255,.1);color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.spanel h3{font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.5);margin:12px 0 8px;text-transform:uppercase}
 .spanel h3:first-child{margin-top:0}
-.dg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-.db{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:7px 3px;text-align:center;cursor:pointer;font-size:19px;transition:all .18s;line-height:1;-webkit-tap-highlight-color:transparent}
-.db span{display:block;font-size:8px;color:rgba(255,255,255,.45);margin-top:2px;font-weight:700}
-.db:active{transform:scale(.88);background:rgba(255,255,255,.15)}
-.ti{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px;font-weight:600}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.db{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:9px 4px;text-align:center;cursor:pointer;font-size:22px;transition:all .15s;line-height:1}
+.db span{display:block;font-size:9px;color:rgba(255,255,255,.6);margin-top:4px;font-weight:700}
+.db:active{transform:scale(.9);background:rgba(255,255,255,.14)}
+
+.ti{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;font-weight:600}
 .ti:last-of-type{border-bottom:none}
-.tc{width:20px;height:20px;border-radius:6px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
+.tc{width:22px;height:22px;border-radius:8px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
 .tc.done{background:#22c55e;border-color:#22c55e}
 .tl.done{text-decoration:line-through;color:rgba(255,255,255,.4)}
-.tx{font-size:10px;color:#fbbf24;font-weight:800;margin-left:auto}
-#xpLabel{font-size:10px;color:rgba(255,255,255,.5);margin:10px 0 4px;display:flex;justify-content:space-between}
-#xpTrack{background:rgba(255,255,255,.08);border-radius:10px;height:6px}
-#xpFill{height:6px;border-radius:10px;background:linear-gradient(90deg,#fbbf24,#f97316);width:0%;transition:width .6s}
-#pBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(6,10,20,.95);border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:10px 20px;color:#fbbf24;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:16px;max-width:calc(100vw - 150px)}
+.tx{font-size:11px;color:#fbbf24;font-weight:800;margin-left:auto}
+#xpLabel{font-size:11px;color:rgba(255,255,255,.6);margin:12px 0 6px;display:flex;justify-content:space-between;font-weight:700}
+#xpTrack{background:rgba(255,255,255,.08);border-radius:10px;height:8px}
+#xpFill{height:8px;border-radius:10px;background:linear-gradient(90deg,#fbbf24,#f97316);width:0%;transition:width .6s}
+
+#pBar{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(18,24,22,.95);border:1px solid rgba(251,191,36,.4);border-radius:20px;padding:10px 20px;color:#fbbf24;font-size:13px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(20px);align-items:center;gap:16px;max-width:calc(100vw - 32px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
 #pBar.show{display:flex}
-#pBar button{background:rgba(255,80,80,.2);border:1px solid rgba(255,80,80,.4);color:#ff6666;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer}
-#wIcon{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;font-size:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
-#lvBadge{position:fixed;top:calc(50px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)}
-.ui-container{position:fixed;bottom:0;left:0;right:0;padding:0 12px 12px;z-index:1000}
-@supports (padding:env(safe-area-inset-bottom)){.ui-container{padding-bottom:calc(env(safe-area-inset-bottom) + 12px)}}
-.ui-panel{max-width:440px;margin:0 auto;background:rgba(6,10,20,.92);padding:14px;border-radius:24px;color:#fff;text-align:center;border:1px solid rgba(0,180,255,.12);backdrop-filter:blur(24px);box-shadow:0 -4px 40px rgba(0,0,0,.8)}
-#clock{font-size:clamp(26px,7vw,38px);color:#fff;font-weight:900;letter-spacing:-2px;line-height:1;text-shadow:0 0 28px rgba(100,180,255,.5)}
-#dayLabel{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-top:2px}
-#stats{display:flex;justify-content:center;gap:6px;margin-top:8px;flex-wrap:wrap}
-.sp{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px}
-.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:5px;margin-top:12px}
-button.act{border:none;padding:0;border-radius:16px;color:#fff;font-weight:800;cursor:pointer;font-size:9px;letter-spacing:.05em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:58px;transition:transform .15s,filter .15s;-webkit-tap-highlight-color:transparent}
-button.act:active{transform:scale(.93);filter:brightness(.88)}
-.bi{font-size:18px;line-height:1}
-.bw{background:linear-gradient(145deg,#003660,#005db8)}
-.bs{background:linear-gradient(145deg,#0a2800,#2d7a00)}
-.bb{background:linear-gradient(145deg,#2a0040,#9424b8)}
-.br{background:linear-gradient(145deg,#1a1028,#5a3a78)}
-.bk{background:linear-gradient(145deg,#3a0000,#cc1100)}
-#toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.88);background:rgba(8,14,26,.95);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 20px;font-size:13px;font-weight:600;color:#fff;z-index:9999;pointer-events:none;opacity:0;transition:opacity .22s,transform .22s;backdrop-filter:blur(20px);white-space:nowrap}
+#pBar button{background:rgba(255,80,80,.2);border:1px solid rgba(255,80,80,.4);color:#ff6666;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+
+#delBar{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(36,18,18,.95);border:1px solid rgba(255,80,80,.4);border-radius:20px;padding:10px 20px;color:#ff6666;font-size:13px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(20px);align-items:center;gap:12px;max-width:calc(100vw - 32px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#delBar.show{display:flex}
+#delBar button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+
+#editBar{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(32,24,18,.95);border:1px solid rgba(255,210,160,.4);border-radius:20px;padding:8px 14px;color:#ffe2b8;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(20px);align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#editBar.show{display:flex}
+#editBar button{background:rgba(255,220,170,.12);border:1px solid rgba(255,210,160,.3);color:#ffe6c4;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer}
+
+#toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(.88);background:rgba(18,24,22,.96);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:12px 22px;font-size:13px;font-weight:700;color:#fff;z-index:9999;pointer-events:none;opacity:0;transition:opacity .22s cubic-bezier(.16,1,.3,1),transform .22s cubic-bezier(.16,1,.3,1);backdrop-filter:blur(24px);box-shadow:0 12px 36px rgba(0,0,0,.6);white-space:nowrap}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#saveInd{position:fixed;top:14px;right:76px;font-size:11px;color:rgba(0,255,150,.8);font-weight:700;opacity:0;transition:opacity .4s;z-index:999}
+#saveInd{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));right:18px;font-size:11px;color:#4ade80;font-weight:800;opacity:0;transition:opacity .4s;z-index:999;background:rgba(18,24,22,.8);padding:3px 8px;border-radius:10px;border:1px solid rgba(74,222,128,.3)}
 #saveInd.show{opacity:1}
 
 /* ── MAĞAZA PANELİ ── */
-#shopPanel .shop-tabs{display:flex;gap:6px;margin-bottom:12px}
-.shop-tab{flex:1;padding:6px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-size:10px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;text-align:center;transition:all .2s}
-.shop-tab.active{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.3);color:#f0c96a}
-.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.shop-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.shop-item:active{transform:scale(.94);background:rgba(255,255,255,.1)}
-.shop-item.owned{border-color:rgba(76,175,101,.3);background:rgba(76,175,101,.08)}
+#shopPanel .shop-tabs{display:flex;gap:8px;margin-bottom:14px}
+.shop-tab{flex:1;padding:8px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-size:11px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;text-align:center;transition:all .18s}
+.shop-tab.active{background:rgba(245,185,66,.2);border-color:rgba(245,185,66,.45);color:#fce282}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shop-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px;text-align:center;cursor:pointer;transition:all .18s;position:relative}
+.shop-item:active{transform:scale(.95);background:rgba(255,255,255,.1)}
+.shop-item.owned{border-color:rgba(76,175,101,.4);background:rgba(76,175,101,.1)}
 .shop-item.cant-afford{opacity:.5;cursor:not-allowed}
-.shop-emoji{font-size:24px;margin-bottom:4px}
-.shop-name{font-size:10px;font-weight:700;color:#fff;margin-bottom:2px}
-.shop-desc{font-size:9px;color:rgba(255,255,255,.4);margin-bottom:6px;line-height:1.4}
-.shop-price{display:inline-flex;align-items:center;gap:3px;background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:800;color:#f0c96a}
-.shop-owned-badge{position:absolute;top:6px;right:6px;font-size:9px;background:rgba(76,175,101,.3);border-radius:6px;padding:1px 5px;color:#4caf65;font-weight:700}
-#coinBar{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:12px;margin-bottom:12px}
-#coinBarAmt{font-size:14px;font-weight:800;color:#f0c96a}
-
+.shop-emoji{font-size:28px;margin-bottom:4px}
+.shop-name{font-size:11px;font-weight:700;color:#fff;margin-bottom:2px}
+.shop-desc{font-size:9px;color:rgba(255,255,255,.5);margin-bottom:8px;line-height:1.3}
+.shop-price{display:inline-flex;align-items:center;gap:4px;background:rgba(245,185,66,.18);border:1px solid rgba(245,185,66,.3);border-radius:12px;padding:3px 10px;font-size:11px;font-weight:800;color:#fce282}
+.shop-owned-badge{position:absolute;top:8px;right:8px;font-size:9px;background:rgba(76,175,101,.35);border-radius:8px;padding:2px 6px;color:#4ade80;font-weight:800}
+#coinBar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(245,185,66,.1);border:1px solid rgba(245,185,66,.25);border-radius:16px;margin-bottom:14px}
+#coinBarAmt{font-size:15px;font-weight:800;color:#fce282}
 
 /* ── İSTATİSTİKLER PANELİ ── */
-#statsPanel .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px}
+#statsPanel .stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
 #statsPanel .stat-row:last-child{border-bottom:none}
 #statsPanel .stat-val{font-weight:800;color:#fbbf24}
 #statsPanel .streak-fire{font-size:18px}
 .streak-active{color:#ff6b35!important}
-.acct-in{width:100%;margin:6px 0;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:700}
-#acctName{font-size:16px}
+.acct-in{width:100%;margin:6px 0;padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:700}
+#acctName{font-size:15px}
 .acct-row{display:flex;gap:6px;align-items:center}
 .acct-row .acct-in{flex:1;margin:6px 0}
-.acct-btn{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.12);color:#fbbf24;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;width:100%;margin:4px 0;-webkit-tap-highlight-color:transparent}
+.acct-btn{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.14);color:#fbbf24;border-radius:12px;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer;width:100%;margin:4px 0;-webkit-tap-highlight-color:transparent}
 .acct-row .acct-btn{width:auto;margin:6px 0;flex-shrink:0}
-.acct-hint{font-size:10px;color:rgba(255,255,255,.35);line-height:1.4;margin:4px 0 8px}
-.acct-legal{display:block;margin:10px 0 2px;font-size:11px;font-weight:700;color:#7dca8a;text-decoration:none}
+.acct-hint{font-size:10px;color:rgba(255,255,255,.4);line-height:1.4;margin:6px 0 10px}
+.acct-legal{display:block;margin:12px 0 2px;font-size:11px;font-weight:700;color:#7dca8a;text-decoration:none}
 .acct-legal:active{opacity:.75}
 #acctWho{font-size:13px;font-weight:800;color:#fff}
 
-
-
-#loveTag{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1100;background:rgba(30,0,40,.88);border:1px solid rgba(255,105,180,.25);border-radius:50px;padding:5px 16px;font-size:11px;font-weight:700;color:rgba(255,150,210,.8);letter-spacing:.1em;backdrop-filter:blur(16px);white-space:nowrap}
-
-
-@keyframes floatUp{0%{opacity:.8;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-180px) scale(.4)}}
-
-#delBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(30,0,0,.95);border:1px solid rgba(255,80,80,.4);border-radius:16px;padding:10px 20px;color:#ff6666;font-size:12px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:12px;max-width:calc(100vw - 150px)}
-#delBar.show{display:flex}
-.del-highlight{outline:2px solid #ff4444;outline-offset:2px}
-body.cozy-mode{background:#1a1410}
+body.cozy-mode{background:#16120e}
 body.cozy-mode #btnTask,body.cozy-mode #taskPanel,body.cozy-mode #lvBadge{display:none!important}
-body.cozy-mode #stats .sp:last-child{display:none}
-body.cozy-mode .ui-panel{background:rgba(40,28,22,.82);border-color:rgba(255,210,160,.14)}
-body.cozy-mode #clock{text-shadow:0 0 24px rgba(255,180,120,.45)}
-body.cozy-mode .sbb{background:rgba(48,34,26,.9);border-color:rgba(255,210,160,.16)}
-#editBar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:rgba(36,26,20,.95);border:1px solid rgba(255,210,160,.35);border-radius:16px;padding:8px 12px;color:#ffe2b8;font-size:11px;font-weight:800;z-index:2000;display:none;backdrop-filter:blur(16px);align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px)}
-#editBar.show{display:flex}
-#editBar button{background:rgba(255,220,170,.12);border:1px solid rgba(255,210,160,.28);color:#ffe6c4;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer}
-body.photo-mode #sidebar,body.photo-mode .ui-container,body.photo-mode #lvBadge,body.photo-mode #coinBadge,body.photo-mode #btnSnd,body.photo-mode #wIcon,body.photo-mode .spanel,body.photo-mode #pBar,body.photo-mode #delBar,body.photo-mode #editBar,body.photo-mode #toast,body.photo-mode #saveInd{opacity:0!important;pointer-events:none!important}
-#modelLoad{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;background:rgba(8,14,10,.72);backdrop-filter:blur(8px);color:#ffe6c4;font-weight:800;font-size:14px}
+body.photo-mode #topHud,body.photo-mode #bottomDock,body.photo-mode #moreDrawer,body.photo-mode .spanel,body.photo-mode #pBar,body.photo-mode #delBar,body.photo-mode #editBar,body.photo-mode #toast,body.photo-mode #saveInd,body.photo-mode #objInspector{opacity:0!important;pointer-events:none!important}
+#modelLoad{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;background:rgba(8,14,10,.75);backdrop-filter:blur(10px);color:#ffe6c4;font-weight:800;font-size:14px}
 #modelLoad.show{display:flex}
-#modelLoad span{background:rgba(30,22,16,.95);border:1px solid rgba(255,210,160,.3);padding:14px 22px;border-radius:16px}
-/* Biyom seçici: sağ kenar, emoji-only — alt/sol buton karmaşasından ayrı */
-#biomeBar{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:1200;display:none;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;max-height:min(56vh,420px);overflow-y:auto;background:rgba(28,20,16,.82);border:1px solid rgba(255,210,160,.2);border-radius:18px;backdrop-filter:blur(14px);-webkit-overflow-scrolling:touch;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#modelLoad span{background:rgba(26,20,16,.96);border:1px solid rgba(255,210,160,.35);padding:14px 24px;border-radius:20px;box-shadow:0 12px 36px rgba(0,0,0,.6)}
+#biomeBar{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:1200;display:none;flex-direction:column;align-items:center;gap:6px;padding:8px 6px;max-height:min(56vh,420px);overflow-y:auto;background:rgba(24,18,14,.88);border:1px solid rgba(255,210,160,.2);border-radius:20px;backdrop-filter:blur(16px);-webkit-overflow-scrolling:touch;box-shadow:0 8px 28px rgba(0,0,0,.4)}
 #biomeBar.show{display:flex}
 .biomeChip{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:14px;border:1px solid rgba(255,210,160,.16);background:rgba(255,220,170,.06);color:#ffe8c8;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .biomeChip .be{font-size:20px;line-height:1}
 .biomeChip .bn{display:none}
 .biomeChip.on{background:rgba(255,200,120,.28);border-color:rgba(255,210,160,.5);box-shadow:0 0 0 1px rgba(255,200,140,.25) inset}
-body.cozy-mode #btnStats{display:none!important}
 body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 </style>
 </head>
 <body>
-
-
 
 <div id="modelLoad"><span>Modeller yükleniyor… 0%</span></div>
 <div id="biomeBar" aria-label="Biyomlar"></div>
 <div id="dayOverlay"></div>
 <canvas id="rainCvs" class="wfx"></canvas>
 <canvas id="wxCvs" class="wfx"></canvas>
+
+<!-- MODERN TOP HUD -->
+<div id="topHud">
+  <div class="hud-pill" id="timePill">
+    <span id="wIcon">☀️</span>
+    <div>
+      <div id="clock">00:00</div>
+      <div id="dayLabel">GÜNDÜZ</div>
+    </div>
+  </div>
+  
+  <div class="hud-pill" id="coinBadge">💰 0</div>
+
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="hud-pill" id="lvBadge">⭐ Lv.1</div>
+    <div class="hud-pill" id="hpBadge">💧 %<span id="hp">0</span></div>
+  </div>
+
+  <div class="hud-actions">
+    <button type="button" class="hud-btn on" id="btnSnd" onclick="window.toggleSound()" title="Ses">🔊</button>
+    <button type="button" class="hud-btn" id="btnPerf" onclick="window.togglePerf()" title="Pil/Performans Modu">⚡</button>
+    <button type="button" class="hud-btn" id="btnCam" onclick="window.resetCamera()" title="Kamerayı Sıfırla">🏠</button>
+  </div>
+</div>
+
+<!-- FLOATING BOTTOM DOCK -->
+<div id="bottomDock">
+  <button type="button" class="dock-btn water" onclick="window.waterAll();window.triggerHaptic('medium')">
+    <span class="dock-icon">💧</span>
+    <span>Sula</span>
+  </button>
+  <button type="button" class="dock-btn primary" onclick="window.startFlowerPlace();window.triggerHaptic('light')">
+    <span class="dock-icon">🌿</span>
+    <span>Ek</span>
+  </button>
+  <button type="button" class="dock-btn" id="btnDeco" onclick="window.togglePanel('deco');window.triggerHaptic('light')">
+    <span class="dock-icon">🏡</span>
+    <span>İnşa</span>
+  </button>
+  <button type="button" class="dock-btn" id="btnShop" onclick="window.togglePanel('shop');window.triggerHaptic('light')">
+    <span class="dock-icon">🏪</span>
+    <span>Mağaza</span>
+  </button>
+  <button type="button" class="dock-btn" id="btnTask" onclick="window.togglePanel('task');window.triggerHaptic('light')">
+    <span class="dock-icon">📋</span>
+    <span>Görev</span>
+  </button>
+  <button type="button" class="dock-btn on" id="btnCozy" onclick="window.toggleCozy();window.triggerHaptic('light')" title="Rahat Diorama">
+    <span class="dock-icon">☁️</span>
+    <span>Cozy</span>
+  </button>
+  <button type="button" class="dock-btn" onclick="window.toggleMoreDrawer();window.triggerHaptic('light')" title="Daha Fazla">
+    <span class="dock-icon">⋯</span>
+    <span>Daha</span>
+  </button>
+</div>
+
+<!-- MORE ACTIONS DRAWER -->
+<div id="moreDrawer">
+  <div class="more-grid">
+    <div class="more-item" id="btnStats" onclick="window.togglePanel('stats');window.closeAllPanelsAndDrawers()">
+      <span class="mi-icon">📊</span>
+      <span>İstatistik</span>
+    </div>
+    <div class="more-item" onclick="window.addPet('cat');window.triggerHaptic('light')">
+      <span class="mi-icon">🐱</span>
+      <span>Kedi Ekle</span>
+    </div>
+    <div class="more-item" onclick="window.addPet('dog');window.triggerHaptic('light')">
+      <span class="mi-icon">🐶</span>
+      <span>Köpek Ekle</span>
+    </div>
+    <div class="more-item" onclick="window.addBug();window.triggerHaptic('light')">
+      <span class="mi-icon">🦋</span>
+      <span>Dost Böcek</span>
+    </div>
+    <div class="more-item" onclick="window.killAllBadBugs();window.triggerHaptic('medium')">
+      <span class="mi-icon">🐛</span>
+      <span>Zararlı Sil</span>
+    </div>
+    <div class="more-item" id="btnEdit" onclick="window.toggleEditMode()">
+      <span class="mi-icon">✋</span>
+      <span>Düzenle</span>
+    </div>
+    <div class="more-item" id="btnDel" onclick="window.toggleDeleteMode()">
+      <span class="mi-icon">🗑️</span>
+      <span>Silme Modu</span>
+    </div>
+    <div class="more-item" onclick="window.photoMode()">
+      <span class="mi-icon">📷</span>
+      <span>Fotoğraf</span>
+    </div>
+    <div class="more-item" onclick="window.shareBahce()">
+      <span class="mi-icon">📤</span>
+      <span>Paylaş</span>
+    </div>
+  </div>
+</div>
+
 <div id="pBar"><span>👆 Sahneye dokun</span><button onclick="window.cancelPlace()">✕ İptal</button></div>
 <div id="delBar"><span>🗑️ Silmek istediğin objeye dokun</span><button onclick="window.toggleDeleteMode()">✕ İptal</button></div>
 <div id="editBar">
@@ -159,21 +290,8 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
   <button type="button" onclick="window.armMoveSelected()">📍</button>
   <button type="button" onclick="window.deselectDeco()">✕</button>
 </div>
-<div id="sidebar">
-  <div class="sbb on" id="btnCozy" onclick="window.toggleCozy()" title="Rahat diorama">☁️</div>
-  <div class="sbb" id="btnDeco" onclick="window.togglePanel('deco')">🏡</div>
-  <div class="sbb" id="btnEdit" onclick="window.toggleEditMode()" title="Düzenle">✋</div>
-  <div class="sbb" id="btnTask" onclick="window.togglePanel('task')">📋</div>
-  <div class="sbb" id="btnDel" onclick="window.toggleDeleteMode()">🗑️</div>
-  <div class="sbb" onclick="window.addPet('cat')">🐱</div>
-  <div class="sbb" onclick="window.addPet('dog')">🐶</div>
-  <div class="sbb" id="btnShop" onclick="window.togglePanel('shop')">🏪</div>
-  <div class="sbb" id="btnStats" onclick="window.togglePanel('stats')">📊</div>
-  <div class="sbb" onclick="window.photoMode()" title="Foto">📷</div>
-  <div class="sbb" onclick="window.shareBahce()" title="Paylaş">📤</div>
-  <div class="sbb" id="btnPerf" onclick="window.togglePerf()">⚡</div>
-  <div class="sbb" onclick="window.resetCamera()">🏠</div>
-</div>
+
+<div id="sidebar" style="display:none"></div>
 <div class="spanel" id="decoPanel">
   <h3>🧑‍🌾 Çiftlik</h3>
   <div class="dg">
@@ -314,30 +432,12 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
   <div class="stat-row"><span>🏆 Skor</span><span class="stat-val" id="st-score">0</span></div>
   <a class="acct-legal" href="./gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
 </div>
-<div id="wIcon">☀️</div>
-<div id="lvBadge">⭐ Lv.1</div>
-<div id="coinBadge" style="position:fixed;top:calc(86px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100;background:rgba(6,10,20,.88);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:800;color:#fbbf24;backdrop-filter:blur(16px)">💰 0</div>
-<div class="sbb on" id="btnSnd" onclick="window.toggleSound()" style="position:fixed;top:calc(126px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));z-index:1100">🔊</div>
 <div id="saveInd">OK</div>
 <div id="toast"></div>
-<div class="ui-container">
-  <div class="ui-panel">
-    <div id="clock">00:00</div>
-    <div id="dayLabel"> GÜNDÜZ</div>
-    <div id="stats">
-      <div class="sp" style="color:#4fc3f7">💧 %<span id="hp">0</span></div>
-      <div class="sp" style="color:#81c784">🌸 <span id="fC">0</span></div>
-      <div class="sp" style="color:#ce93d8">🦋 <span id="bC">0</span></div>
-      <div class="sp" style="color:#ef9a9a">🐛 <span id="bdC">0</span></div>
-    </div>
-    <div class="controls">
-      <button class="act bw" onclick="window.waterAll()"><span class="bi">💧</span>SULA</button>
-      <button class="act bs" onclick="window.startFlowerPlace()"><span class="bi">🌿</span>EK</button>
-      <button class="act bb" onclick="window.addBug()"><span class="bi">🦋</span>DOST</button>
-      <button class="act br" onclick="window.removeBug()"><span class="bi">🦋−</span>AZALT</button>
-      <button class="act bk" onclick="window.killAllBadBugs()"><span class="bi">🐛</span>TEMİZLE</button>
-    </div>
-  </div>
+<div style="display:none">
+  <span id="fC">0</span>
+  <span id="bC">0</span>
+  <span id="bdC">0</span>
 </div>
 <script src="js/groundArt.js"></script>
 <script src="js/scene.js"></script>
@@ -355,6 +455,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <script src="js/cozyLife.js"></script>
 <script src="js/farmers.js"></script>
 <script src="js/visualFX.js"></script>
+<script src="js/gameUI.js"></script>
 <script src="js/loop.js"></script>
 </body>
 </html>

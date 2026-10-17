@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-18';
+var CACHE = 'sanalbahce-shell-20';
 var LOCAL = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ var LOCAL = [
   './js/flower.js',
   './js/flowerArt.js',
   './js/deco.js',
+  './js/gameUI.js',
   './js/loop.js'
 ];
 var CDN = [
@@ -56,7 +57,12 @@ self.addEventListener('fetch', function(event){
       return res;
     }).catch(function(){
       return caches.match(event.request).then(function(hit){
-        return hit || caches.match('./index.html');
+        if(hit) return hit;
+        var accept = event.request.headers.get('accept') || '';
+        if(event.request.mode === 'navigate' || accept.includes('text/html')){
+          return caches.match('./index.html');
+        }
+        return new Response('', { status: 404, statusText: 'Not Found' });
       });
     })
   );
