@@ -172,6 +172,54 @@ body.photo-mode #topHud,body.photo-mode #bottomDock,body.photo-mode #moreDrawer,
 .biomeChip .bn{display:none}
 .biomeChip.on{background:rgba(255,200,120,.28);border-color:rgba(255,210,160,.5);box-shadow:0 0 0 1px rgba(255,200,140,.25) inset}
 body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
+
+/* ── A-KALİTE PAZAR, AMBAR, SİPARİŞ & FOTOĞRAF STÜDYOSU ── */
+#marketReadyBadge{position:absolute;top:2px;right:4px;background:#22c55e;color:#052e16;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:10px;padding:0 4px;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(34,197,94,.5)}
+.dock-btn{position:relative}
+.aq-chip-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.aq-chip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.aq-chip.craft{grid-column:span 1}
+.aq-chip.has{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3)}
+.aq-chip-em{font-size:18px;line-height:1}
+.aq-chip-nm{font-size:8px;color:rgba(255,255,255,.6);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.aq-chip-ct{font-size:10px;font-weight:800;color:#fce282}
+.aq-orders-list,.aq-recipes-list{display:flex;flex-direction:column;gap:8px}
+.aq-order-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;transition:all .18s}
+.aq-order-card.ready{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4)}
+.aq-ord-top{display:flex;align-items:center;gap:8px}
+.aq-ord-av{font-size:24px;line-height:1}
+.aq-ord-who{flex:1}
+.aq-ord-nm{font-size:12px;font-weight:800;color:#fce282}
+.aq-ord-ln{font-size:10px;color:rgba(255,255,255,.6);font-style:italic}
+.aq-reroll{border:none;background:rgba(255,255,255,.08);color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:11px}
+.aq-ord-reqs{display:flex;flex-wrap:wrap;gap:6px}
+.aq-req-tag{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:4px 8px;font-size:10px;color:rgba(255,255,255,.75)}
+.aq-req-tag.ok{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45);color:#bbf7d0}
+.aq-ord-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:4px;border-top:1px solid rgba(255,255,255,.07)}
+.aq-ord-rew{font-size:11px;color:#e8f4ec}
+.aq-recipe-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.aq-rc-left{display:flex;align-items:center;gap:8px}
+.aq-rc-em{font-size:22px}
+.aq-rc-title{font-size:12px;font-weight:800;color:#fff}
+.aq-rc-sub{font-size:10px;color:rgba(255,255,255,.55)}
+.aq-btn{border:none;border-radius:12px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:transform .12s}
+.aq-btn:active{transform:scale(.93)}
+.aq-btn.primary{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff}
+.aq-btn.deliver{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 3px 10px rgba(34,197,94,.35)}
+.aq-btn.disabled{background:rgba(255,255,255,.08);color:rgba(255,255,255,.35)}
+.db.on{background:rgba(251,191,36,.22);border-color:rgba(251,191,36,.55)}
+
+#photoStudioBar{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(30px);z-index:2500;background:rgba(16,22,20,.92);border:1px solid rgba(255,220,160,.3);border-radius:26px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(24px);box-shadow:0 12px 40px rgba(0,0,0,.75);opacity:0;pointer-events:none;transition:all .22s;width:min(420px,calc(100vw - 24px))}
+#photoStudioBar.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.ps-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ps-filters::-webkit-scrollbar{display:none}
+.ps-filter-btn{flex:0 0 auto;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e8f4ec;border-radius:16px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer}
+.ps-filter-btn.active{background:rgba(251,191,36,.25);border-color:rgba(251,191,36,.6);color:#fce282}
+.ps-actions{display:flex;gap:8px}
+.ps-snap-btn{flex:1;border:none;background:linear-gradient(135deg,#1f7a46,#2db867);color:#fff;border-radius:16px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(45,184,103,.4)}
+.ps-exit-btn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:16px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer}
+#photoFlash{position:fixed;inset:0;background:#fff;z-index:4000;pointer-events:none;opacity:0;transition:opacity .22s}
+#photoFlash.on{opacity:.85;transition:none}
 </style>
 </head>
 <body>
@@ -223,6 +271,11 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
   <button type="button" class="dock-btn" id="btnShop" onclick="window.togglePanel('shop');window.triggerHaptic('light')">
     <span class="dock-icon">🏪</span>
     <span>Mağaza</span>
+  </button>
+  <button type="button" class="dock-btn" id="btnMarket" onclick="window.togglePanel('market');window.triggerHaptic('light')">
+    <span class="dock-icon">📦</span>
+    <span>Pazar</span>
+    <span id="marketReadyBadge">0</span>
   </button>
   <button type="button" class="dock-btn" id="btnTask" onclick="window.togglePanel('task');window.triggerHaptic('light')">
     <span class="dock-icon">📋</span>
@@ -372,12 +425,22 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
     <div class="db" onclick="window.startPlace('bonfire')">🔥<span>ATEŞ</span></div>
     <div class="db" onclick="window.startPlace('bell')">🔔<span>ÇAN</span></div>
   </div>
-  <h3>🌤️ Hava</h3>
+  <h3>🌤️ Hava & Mevsim</h3>
   <div class="dg">
-    <div class="db" onclick="window.setWeather('clear')">☀️<span>AÇIK</span></div>
-    <div class="db" onclick="window.setWeather('snow')">❄️<span>KAR</span></div>
-    <div class="db" onclick="window.setWeather('leaves')">🍂<span>YAPRAK</span></div>
+    <div class="db" data-season="spring" onclick="window.setSeason('spring')">🌸<span>İLKBAHAR</span></div>
+    <div class="db" data-season="summer" onclick="window.setSeason('summer')">☀️<span>YAZ</span></div>
+    <div class="db" data-season="autumn" onclick="window.setSeason('autumn')">🍂<span>SONBAHAR</span></div>
+    <div class="db" data-season="winter" onclick="window.setSeason('winter')">❄️<span>KIŞ</span></div>
+    <div class="db" onclick="window.setWeather('clear')">🌤️<span>AÇIK</span></div>
+    <div class="db" onclick="window.startRain()">🌧️<span>YAĞMUR</span></div>
   </div>
+</div>
+<div class="spanel" id="marketPanel">
+  <div class="spanel-header">
+    <div class="spanel-title">📦 Çiftlik Pazarı, Ambar & Üretim</div>
+    <button type="button" class="spanel-close" onclick="window.togglePanel('market')">✕</button>
+  </div>
+  <div id="marketPanelBody"></div>
 </div>
 <div class="spanel" id="taskPanel">
   <h3>Günlük Görevler</h3>
@@ -462,6 +525,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <script src="js/visualFX.js"></script>
 <script src="js/codex.js"></script>
 <script src="js/gameUI.js"></script>
+<script src="js/aQuality.js"></script>
 <script src="js/loop.js"></script>
 </body>
 </html>

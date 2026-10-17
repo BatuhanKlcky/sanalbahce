@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-25';
+var CACHE = 'sanalbahce-shell-26';
 var LOCAL = [
   './',
   './index.html',
@@ -26,6 +26,7 @@ var LOCAL = [
   './js/visualFX.js',
   './js/codex.js',
   './js/gameUI.js',
+  './js/aQuality.js',
   './js/loop.js'
 ];
 var CDN = [

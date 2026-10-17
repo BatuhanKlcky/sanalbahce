@@ -159,10 +159,12 @@ function harvestPlant(idx, opts) {
     if(!opts.silent) showToast('Henüz hazır değil! ⏳');
     return false;
   }
+  var hType = item.type;
   var cfg = item.cfg;
   stats[cfg.statKey]++;
   var pay=cfg.coin+Math.max(0,(level||1)-1);
   addCoin(pay, true);
+  if(typeof window.onCropHarvested==='function') window.onCropHarvested(hType);
   // Sahne temizle
   item.group.traverse(function(c){if(c.geometry)c.geometry.dispose();if(c.material)c.material.dispose();});
   scene.remove(item.group);
@@ -170,7 +172,7 @@ function harvestPlant(idx, opts) {
   // Re-index hitboxes
   harvestItems.forEach(function(it, i){ it.group.children.forEach(function(ch){ if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i; }); });
   updStats(); saveStats();
-  if(!opts.silent) showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰');
+  if(!opts.silent) showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰 (Ambara +1 eklendi)');
   if(typeof sndCoin==='function') sndCoin();
   markDirty();
   return true;

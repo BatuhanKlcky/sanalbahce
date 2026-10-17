@@ -163,7 +163,7 @@
        e.target.closest('.ui-container') || e.target.closest('.spanel') || 
        e.target.closest('#sidebar') || e.target.closest('#topBar') ||
        e.target.closest('#moreDrawer') || e.target.closest('#biomeBar') ||
-       e.target.closest('#editBar')) return;
+       e.target.closest('#editBar') || e.target.closest('#photoStudioBar')) return;
 
     if(window.placementMode || window.flowerPlaceMode || window.deleteMode || window.editMode) return;
 
@@ -271,18 +271,80 @@
                 onClick: function(){
                   if(typeof window.greetFarmer === 'function'){
                     window.greetFarmer(fObj);
-                  } else if(fObj.mixer && fObj.clips){
-                    var waveClip = fObj.clips['Wave'] || fObj.clips['Punch'];
-                    if(waveClip){
-                      var act = fObj.mixer.clipAction(waveClip);
-                      act.reset();
-                      act.setLoop(THREE.LoopOnce, 1);
-                      act.play();
-                    }
                   }
                   if(typeof sndPet === 'function') sndPet();
                   showToast('🧑‍🌾 Çiftçi sana selam verdi!');
                   window.triggerHaptic('medium');
+                  closeInspector();
+                }
+              },
+              {
+                label: 'Siparişler',
+                icon: '📦',
+                onClick: function(){
+                  closeInspector();
+                  if(typeof window.togglePanel === 'function') window.togglePanel('market');
+                }
+              }
+            ]
+          });
+          return;
+        }
+      }
+    }
+
+    // 1.75) Evcil Dostlar (Kedi & Köpek) Kontrolü
+    if(typeof pets !== 'undefined' && pets.length){
+      var pMeshes = [];
+      pets.forEach(function(pt, idx){
+        if(!pt || !pt.mesh || pt.mesh.visible === false) return;
+        pt.mesh.traverse(function(ch){
+          if(ch.isMesh){
+            ch.userData.petRef = pt;
+            ch.userData.petIdx = idx;
+            pMeshes.push(ch);
+          }
+        });
+      });
+      var pHits = _ray.intersectObjects(pMeshes, true);
+      if(pHits.length > 0){
+        var pObj = pHits[0].object.userData.petRef;
+        var pIdx = pHits[0].object.userData.petIdx;
+        if(pObj){
+          var pInfo = (typeof window.getPetInfo === 'function') ? window.getPetInfo(pObj, pIdx) : { name: (pObj.type === 'cat' ? 'Pamuk' : 'Karabaş'), happy: 85 };
+          var roleTxt = pObj.type === 'cat' ? '🐱 Şanslı Kaşif' : '🐶 Bahçe Muhafızı';
+          inspectObject({
+            icon: pObj.type === 'cat' ? '🐱' : '🐶',
+            title: pInfo.name + ' (' + roleTxt + ')',
+            sub: '❤️ Mutluluk: %' + (pInfo.happy || 85),
+            progress: pInfo.happy || 85,
+            pos: pObj.mesh.position,
+            getPos: function(){ return (pObj && pObj.mesh) ? pObj.mesh.position : null; },
+            heightOffset: 1.15,
+            ringScale: 0.85,
+            actions: [
+              {
+                label: 'Sev',
+                icon: '❤️',
+                primary: true,
+                onClick: function(){
+                  if(typeof window.petActionLove === 'function') window.petActionLove(pIdx);
+                  closeInspector();
+                }
+              },
+              {
+                label: 'Besle (5💰)',
+                icon: '🍖',
+                onClick: function(){
+                  if(typeof window.petActionFeed === 'function') window.petActionFeed(pIdx);
+                  closeInspector();
+                }
+              },
+              {
+                label: 'İsim',
+                icon: '✏️',
+                onClick: function(){
+                  if(typeof window.petActionRename === 'function') window.petActionRename(pIdx);
                   closeInspector();
                 }
               }

@@ -275,6 +275,10 @@ function animate(){
     try{ window.stepVisualFX(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
   }
+  if(typeof window.stepAQuality==='function'){
+    try{ window.stepAQuality(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepAQuality', e); }
+  }
   // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
   decos.forEach(function(d){
     if(!d||!d.group||d.group.visible===false) return;
