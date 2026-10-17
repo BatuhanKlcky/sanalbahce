@@ -293,7 +293,7 @@
       }
     }
 
-    // 1.75) Evcil Dostlar (Kedi & Köpek) Kontrolü
+    // 1.75) Evcil Dostlar & Çiftlik Hayvanları Kontrolü
     if(typeof pets !== 'undefined' && pets.length){
       var pMeshes = [];
       pets.forEach(function(pt, idx){
@@ -311,40 +311,131 @@
         var pObj = pHits[0].object.userData.petRef;
         var pIdx = pHits[0].object.userData.petIdx;
         if(pObj){
-          var pInfo = (typeof window.getPetInfo === 'function') ? window.getPetInfo(pObj, pIdx) : { name: (pObj.type === 'cat' ? 'Pamuk' : 'Karabaş'), happy: 85 };
+          var pInfo = (typeof window.getPetInfo === 'function') ? window.getPetInfo(pObj, pIdx) : { name: (pObj.breedName || 'Dost'), happy: 85 };
+          var spec = pObj.spec || {};
           var roleTxt = pObj.breedName || (pObj.type === 'cat' ? 'Şanslı Kaşif' : 'Bahçe Muhafızı');
+          var petIcon = spec.emoji || pObj.emoji || (pObj.type === 'cat' ? '🐱' : '🐶');
+          var subLine = '❤️ Mutluluk: %' + (pInfo.happy || 85);
+          var progVal = pInfo.happy || 85;
+          if(pObj.prodItem){
+            if(pObj.prodReady){
+              subLine = (spec.prodEmoji || '✨') + ' ' + (spec.prodName || 'Ürün') + ' Hazır! · ❤️ %' + (pInfo.happy || 85);
+              progVal = 100;
+            } else {
+              var totalT = spec.prodTime || 45;
+              var remT = Math.max(0, pObj.prodTimer || 0);
+              var pctProd = Math.min(99, Math.max(5, Math.round(((totalT - remT) / totalT) * 100)));
+              subLine = (spec.prodEmoji || '⏳') + ' Üretim: %' + pctProd + ' (' + Math.ceil(remT) + 'sn)';
+              progVal = pctProd;
+            }
+          } else {
+            subLine += ' · ' + (pObj.type === 'cat' ? 'Hazine Kaşifi' : (pObj.type === 'dog' ? 'Böcek Avcısı' : 'Sadık Dost'));
+          }
+
+          var petActions = [];
+          if(pObj.prodItem && pObj.prodReady){
+            petActions.push({
+              label: spec.prodVerb || 'Topla',
+              icon: spec.prodEmoji || '🧺',
+              primary: true,
+              onClick: function(){
+                if(typeof window.collectAnimalProduct === 'function') window.collectAnimalProduct(pIdx);
+                closeInspector();
+              }
+            });
+          }
+          petActions.push({
+            label: 'Sev',
+            icon: '❤️',
+            primary: !(pObj.prodItem && pObj.prodReady),
+            onClick: function(){
+              if(typeof window.petActionLove === 'function') window.petActionLove(pIdx);
+              closeInspector();
+            }
+          });
+          petActions.push({
+            label: pObj.prodItem ? 'Yem Ver (5💰)' : 'Besle (5💰)',
+            icon: pObj.prodItem ? '🌾' : '🍖',
+            onClick: function(){
+              if(typeof window.petActionFeed === 'function') window.petActionFeed(pIdx);
+              closeInspector();
+            }
+          });
+          petActions.push({
+            label: 'İsim',
+            icon: '✏️',
+            onClick: function(){
+              if(typeof window.petActionRename === 'function') window.petActionRename(pIdx);
+              closeInspector();
+            }
+          });
+
           inspectObject({
-            icon: pObj.type === 'cat' ? '🐱' : '🐶',
+            icon: petIcon,
             title: pInfo.name + ' (' + roleTxt + ')',
-            sub: '❤️ Mutluluk: %' + (pInfo.happy || 85) + ' · ' + (pObj.type === 'cat' ? 'Şanslı Kaşif' : 'Böcek Avcısı'),
-            progress: pInfo.happy || 85,
+            sub: subLine,
+            progress: progVal,
             pos: pObj.mesh.position,
             getPos: function(){ return (pObj && pObj.mesh) ? pObj.mesh.position : null; },
-            heightOffset: 1.15,
-            ringScale: 0.85,
+            heightOffset: (spec.targetH || 0.75) + 0.5,
+            ringScale: Math.max(0.75, (spec.targetH || 0.75) * 0.85),
+            actions: petActions
+          });
+          return;
+        }
+      }
+    }
+
+    // 1.85) Cozy Biyom Hayvanları Kontrolü (Çiftlik, Orman, Göl, Köy)
+    if(typeof window._biomeAnimals !== 'undefined' && window._biomeAnimals.length){
+      var bMeshes = [];
+      window._biomeAnimals.forEach(function(ba, idx){
+        if(!ba || !ba.mesh || ba.mesh.visible === false) return;
+        ba.mesh.traverse(function(ch){
+          if(ch.isMesh){
+            ch.userData.baRef = ba;
+            ch.userData.baIdx = idx;
+            bMeshes.push(ch);
+          }
+        });
+      });
+      var bHits = _ray.intersectObjects(bMeshes, true);
+      if(bHits.length > 0){
+        var baObj = bHits[0].object.userData.baRef;
+        var baIdx = bHits[0].object.userData.baIdx;
+        if(baObj){
+          var bSpec = baObj.spec || {};
+          var wPos = new THREE.Vector3();
+          baObj.mesh.getWorldPosition(wPos);
+          inspectObject({
+            icon: bSpec.emoji || baObj.emoji || '🐾',
+            title: baObj.breedName || 'Biyom Dostu',
+            sub: bSpec.prodItem ? ('🌿 Biyom sakini · Beslersen ' + bSpec.prodEmoji + ' ' + bSpec.prodName + ' hediye eder!') : '🌿 Doğal Biyom Sakini',
+            progress: 100,
+            pos: wPos,
+            getPos: function(){
+              if(!baObj || !baObj.mesh) return null;
+              var wp = new THREE.Vector3();
+              baObj.mesh.getWorldPosition(wp);
+              return wp;
+            },
+            heightOffset: (bSpec.targetH || 0.8) + 0.5,
+            ringScale: Math.max(0.8, (bSpec.targetH || 0.8) * 0.85),
             actions: [
               {
                 label: 'Sev',
                 icon: '❤️',
                 primary: true,
                 onClick: function(){
-                  if(typeof window.petActionLove === 'function') window.petActionLove(pIdx);
+                  if(typeof window.biomeAnimalLove === 'function') window.biomeAnimalLove(baIdx);
                   closeInspector();
                 }
               },
               {
-                label: 'Besle (5💰)',
-                icon: '🍖',
+                label: bSpec.prodItem ? ('Besle (+1 ' + bSpec.prodEmoji + ')') : 'Besle',
+                icon: '🌾',
                 onClick: function(){
-                  if(typeof window.petActionFeed === 'function') window.petActionFeed(pIdx);
-                  closeInspector();
-                }
-              },
-              {
-                label: 'İsim',
-                icon: '✏️',
-                onClick: function(){
-                  if(typeof window.petActionRename === 'function') window.petActionRename(pIdx);
+                  if(typeof window.biomeAnimalFeed === 'function') window.biomeAnimalFeed(baIdx);
                   closeInspector();
                 }
               }
@@ -439,11 +530,23 @@
         var dIndex = dHits[0].object.userData.decoIdx;
         if(dObj){
           var isHouse = dObj.type === 'farmer_house';
+          var isPond = dObj.type === 'pond' || dObj.type === 'crystal_pond' || dObj.type === 'fountain';
           var dName = isHouse ? ('ÇİFTÇİ EVİ (Lv.' + (dObj.level||1) + ')') : (dObj.type || 'Dekor').replace('_', ' ').toUpperCase();
           var subTitle = isHouse 
             ? 'Kapasite: ' + (dObj.level || 1) + ' Çiftçi (' + ((dObj.level || 1) * 3) + ' iş)'
-            : 'Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z);
+            : (isPond ? '🐟 Taze Göl Balığı tutulabilir!' : ('Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z)));
           var decoActs = [];
+          if(isPond){
+            decoActs.push({
+              label: 'Balık Tut',
+              icon: '🎣',
+              primary: true,
+              onClick: function(){
+                if(typeof window.startFishingGame === 'function') window.startFishingGame(dObj.group.position);
+                closeInspector();
+              }
+            });
+          }
           if(isHouse && (dObj.level || 1) < 2){
             decoActs.push({
               label: 'Yükselt (100💰)',
@@ -491,7 +594,7 @@
             }
           });
           inspectObject({
-            icon: isHouse ? '🏠' : '🏡',
+            icon: isHouse ? '🏠' : (isPond ? '🎣' : '🏡'),
             title: dName,
             sub: subTitle,
             pos: dObj.group.position,

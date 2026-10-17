@@ -12,7 +12,7 @@
   var SEASON_KEY = 'gdn_season_v1';
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PAKET 1: ÇİFTLİK AMBARI, MUTFAK ÜRETİMİ VE KÖYLÜ SİPARİŞ TAHTASI
+  // PAKET 1 & 5: ÇİFTLİK AMBARI, HAYVANCILIK ÜRÜNLERİ, GURME MUTFAK & SİPARİŞLER
   // ═══════════════════════════════════════════════════════════════════════════
   var ITEMS_META = {
     tomato:     { emoji: '🍅', name: 'Domates',        kind: 'raw' },
@@ -20,10 +20,18 @@
     cucumber:   { emoji: '🥒', name: 'Kabak',          kind: 'raw' },
     pepper:     { emoji: '🌶️', name: 'Biber',          kind: 'raw' },
     carrot:     { emoji: '🥕', name: 'Havuç',          kind: 'raw' },
+    milk:       { emoji: '🥛', name: 'Taze Süt',       kind: 'raw' },
+    egg:        { emoji: '🥚', name: 'Köy Yumurtası',  kind: 'raw' },
+    wool:       { emoji: '🧶', name: 'Alpaka Yünü',    kind: 'raw' },
+    fish:       { emoji: '🐟', name: 'Göl Balığı',     kind: 'raw' },
     jam:        { emoji: '🍯', name: 'Çilek Reçeli',   kind: 'craft' },
     soup:       { emoji: '🥣', name: 'Bahçe Çorbası',  kind: 'craft' },
     salad:      { emoji: '🥗', name: 'Köy Salatası',   kind: 'craft' },
-    sauce:      { emoji: '🔥', name: 'Acı Çiftlik Sosu',kind: 'craft' }
+    sauce:      { emoji: '🔥', name: 'Acı Çiftlik Sosu',kind: 'craft' },
+    cheese:     { emoji: '🧀', name: 'Köy Peyniri',    kind: 'craft' },
+    cake:       { emoji: '🍰', name: 'Çilekli Pasta',  kind: 'craft' },
+    scarf:      { emoji: '🧣', name: 'Yün Kaşkol',     kind: 'craft' },
+    fish_dish:  { emoji: '🍣', name: 'Izgara Balık',   kind: 'craft' }
   };
 
   var RECIPES = [
@@ -58,6 +66,38 @@
       desc: '2x 🌶️ Biber + 1x 🍅 Domates',
       cost: { pepper: 2, tomato: 1 },
       xp: 25
+    },
+    {
+      id: 'cheese',
+      emoji: '🧀',
+      name: 'Köy Peyniri',
+      desc: '2x 🥛 Taze Süt',
+      cost: { milk: 2 },
+      xp: 28
+    },
+    {
+      id: 'cake',
+      emoji: '🍰',
+      name: 'Çilekli Pasta',
+      desc: '1x 🥛 Süt + 1x 🥚 Yumurta + 1x 🍓 Çilek',
+      cost: { milk: 1, egg: 1, strawberry: 1 },
+      xp: 42
+    },
+    {
+      id: 'scarf',
+      emoji: '🧣',
+      name: 'Yün Kaşkol',
+      desc: '2x 🧶 Alpaka Yünü',
+      cost: { wool: 2 },
+      xp: 35
+    },
+    {
+      id: 'fish_dish',
+      emoji: '🍣',
+      name: 'Izgara Balık',
+      desc: '1x 🐟 Göl Balığı + 1x 🌶️ Biber',
+      cost: { fish: 1, pepper: 1 },
+      xp: 32
     }
   ];
 
@@ -66,7 +106,8 @@
     { name: 'Çiçekçi Zehra',   avatar: '👩‍🌾', line: 'Pazar tezgâhım için organik ürün lazım.' },
     { name: 'Hanımeli Teyze',  avatar: '👵',   line: 'Torunlara akşam yemeği hazırlıyorum.' },
     { name: 'Gezgin Tüccar',   avatar: '🧔',   line: 'Başkent kervanı için en iyi ürünleri alırım!' },
-    { name: 'Değirmenci Kemal',avatar: '🧓',   line: 'Değirmen molasında sıcak bir şeyler iyi gider.' }
+    { name: 'Değirmenci Kemal',avatar: '🧓',   line: 'Değirmen molasında sıcak bir şeyler iyi gider.' },
+    { name: 'Balıkçı Kaptan',  avatar: '🎣',   line: 'Göletin balıkları ve çiftlik peyniri gibisi yok!' }
   ];
 
   var ORDER_TEMPLATES = [
@@ -74,17 +115,26 @@
     { req: { strawberry: 2 },              coin: 42,  xp: 22 },
     { req: { carrot: 2, cucumber: 1 },     coin: 65,  xp: 30 },
     { req: { pepper: 2 },                  coin: 52,  xp: 25 },
+    { req: { milk: 1, egg: 1 },            coin: 72,  xp: 34 },
+    { req: { wool: 1, strawberry: 1 },     coin: 68,  xp: 32 },
+    { req: { fish: 1, tomato: 1 },         coin: 74,  xp: 35 },
     { req: { jam: 1 },                     coin: 68,  xp: 35 },
     { req: { soup: 1 },                    coin: 78,  xp: 40 },
     { req: { salad: 1 },                   coin: 82,  xp: 40 },
     { req: { sauce: 1 },                   coin: 95,  xp: 48 },
+    { req: { cheese: 1 },                  coin: 110, xp: 52 },
+    { req: { cake: 1 },                    coin: 155, xp: 70 },
+    { req: { scarf: 1 },                   coin: 125, xp: 58 },
+    { req: { fish_dish: 1 },               coin: 118, xp: 55 },
     { req: { strawberry: 1, carrot: 2 },   coin: 60,  xp: 28 },
     { req: { jam: 1, soup: 1 },            coin: 145, xp: 65 }
   ];
 
   var barn = {
     tomato: 1, strawberry: 1, cucumber: 1, pepper: 1, carrot: 1,
-    jam: 0, soup: 0, salad: 0, sauce: 0
+    milk: 1, egg: 1, wool: 0, fish: 0,
+    jam: 0, soup: 0, salad: 0, sauce: 0,
+    cheese: 0, cake: 0, scarf: 0, fish_dish: 0
   };
   var activeOrders = [];
 
@@ -238,8 +288,8 @@
     var body = document.getElementById('marketPanelBody');
     if(!body) return;
 
-    var rawKeys = ['tomato','strawberry','cucumber','pepper','carrot'];
-    var craftKeys = ['jam','soup','salad','sauce'];
+    var rawKeys = ['tomato','strawberry','cucumber','pepper','carrot','milk','egg','wool','fish'];
+    var craftKeys = ['jam','soup','salad','sauce','cheese','cake','scarf','fish_dish'];
 
     var rawHtml = rawKeys.map(function(k){
       var m = ITEMS_META[k];
@@ -310,18 +360,18 @@
     }).join('');
 
     body.innerHTML =
-      '<h3>🧺 Çiftlik Ambarı (Hasat Edilenler)</h3>' +
+      '<h3>🧺 Çiftlik Ambarı (Hasat, Hayvancılık & Balık)</h3>' +
       '<div class="aq-chip-grid">' + rawHtml + '</div>' +
       '<div class="aq-chip-grid" style="margin-top:6px">' + craftInvHtml + '</div>' +
       '<h3>📋 Köylü Sipariş Tahtası</h3>' +
       '<div class="aq-orders-list">' + ordersHtml + '</div>' +
-      '<h3>🍳 Çiftlik Mutfağı (Üretim)</h3>' +
+      '<h3>🍳 Gurme Çiftlik Mutfağı (Üretim)</h3>' +
       '<div class="aq-recipes-list">' + recipesHtml + '</div>';
   }
   window.renderMarketPanel = renderMarketPanel;
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PAKET 2: AKILLI EVCİL DOST ETKİLEŞİMİ (KEDİ & KÖPEK) VE 3D KALP EFEKTLERİ
+  // PAKET 2 & 5: AKILLI HAYVAN ETKİLEŞİMİ, SÜT/YÜN/YUMURTA HASADI VE KALP EFEKTLERİ
   // ═══════════════════════════════════════════════════════════════════════════
   var petMeta = {}; // { 'cat_0': { name: 'Pamuk', happy: 85 }, ... }
   var floatingHearts = []; // { mesh, vy, life, maxLife }
@@ -339,18 +389,28 @@
   }
 
   function getPetKey(pet, idx){
-    return (pet.type || 'pet') + '_' + (idx || 0);
+    return (pet.breed || pet.type || 'pet') + '_' + (idx || 0);
   }
+
+  var ANIMAL_DEFAULT_NAMES = {
+    cat:    ['Pamuk', 'Tarçın', 'Mırmır', 'Boncuk'],
+    dog:    ['Karabaş', 'Paşa', 'Dost', 'Fındık'],
+    cow:    ['Sarıkız', 'Benekli', 'Papatya', 'Nazlı'],
+    alpaca: ['Pufuduk', 'Bulut', 'Yumak', 'Ponpon'],
+    chick:  ['Cikcik', 'Limon', 'Sarıcık', 'Minik'],
+    duck:   ['Vakvak', 'Badem', 'Dalgıç', 'Gölcük'],
+    horse:  ['Rüzgar', 'Yıldırım', 'Doruk', 'Atılgan'],
+    deer:   ['Ceylan', 'Bambi', 'Yaprak', 'Orman'],
+    fox:    ['Kızıl', 'Kurnaz', 'Kıvılcım', 'Tarçın']
+  };
 
   function getPetInfo(pet, idx){
     var key = getPetKey(pet, idx);
     if(!petMeta[key]){
-      var defCats = ['Pamuk', 'Tarçın', 'Mırmır', 'Boncuk'];
-      var defDogs = ['Karabaş', 'Paşa', 'Dost', 'Fındık'];
-      var pool = pet.type === 'cat' ? defCats : defDogs;
+      var pool = ANIMAL_DEFAULT_NAMES[pet.type] || ANIMAL_DEFAULT_NAMES.cat;
       petMeta[key] = {
-        name: pool[idx % pool.length],
-        happy: 80
+        name: pool[(idx || 0) % pool.length],
+        happy: 85
       };
       savePetMeta();
     }
@@ -393,6 +453,35 @@
     }
   };
 
+  window.collectAnimalProduct = function(petIdx){
+    if(typeof pets === 'undefined' || !pets[petIdx]) return;
+    var pet = pets[petIdx];
+    var spec = pet.spec || {};
+    var itemKey = pet.prodItem || spec.prodItem;
+    if(!itemKey) return;
+    if(!pet.prodReady){
+      var rem = Math.max(1, Math.ceil(pet.prodTimer || 15));
+      showToast((spec.prodEmoji || '⏳') + ' Üretim devam ediyor (' + rem + ' sn kaldı)');
+      return;
+    }
+    pet.prodReady = false;
+    pet.prodTimer = spec.prodTime || 45;
+    if(pet.prodBadge) pet.prodBadge.visible = false;
+
+    window.addBarnItem(itemKey, 1);
+    window.spawnPetLoveFX(pet.mesh.position, spec.prodEmoji || '🥛');
+    pet._reactTimer = 2.0;
+    if(typeof window.playAnimalClip === 'function'){
+      window.playAnimalClip(pet, [spec.loveClip, spec.feedClip, 'AnimalArmature|Idle_Headlow', 'Idle'], { fade: 0.18, force: true });
+    }
+    if(typeof addCoin === 'function') addCoin(12, true);
+    if(typeof addXP === 'function') addXP(18);
+    if(typeof sndHarvest === 'function') sndHarvest();
+    if(typeof window.triggerHaptic === 'function') window.triggerHaptic('harvest');
+    var info = getPetInfo(pet, petIdx);
+    showToast((spec.prodEmoji || '🥛') + ' ' + info.name + ': +1 ' + (spec.prodName || 'Ürün') + ' ambara eklendi! (+12💰 +18 XP)');
+  };
+
   window.petActionLove = function(petIdx){
     if(typeof pets === 'undefined' || !pets[petIdx]) return;
     var pet = pets[petIdx];
@@ -404,14 +493,17 @@
     if(typeof window.playAnimalClip === 'function'){
       var loveCandidates = pet.type === 'cat'
         ? [pet.spec && pet.spec.loveClip, 'knead', 'wiggle', 'arch', 'head_tilt', 'jump']
-        : [pet.spec && pet.spec.loveClip, 'get_pet', 'excited_bounce', 'play_bow', 'happy', 'tail_wag'];
+        : (pet.type === 'dog'
+          ? [pet.spec && pet.spec.loveClip, 'get_pet', 'excited_bounce', 'play_bow', 'happy', 'tail_wag']
+          : [pet.spec && pet.spec.loveClip, 'AnimalArmature|Eating', 'AnimalArmature|Idle_2', 'Idle_Peck', 'Idle']);
       window.playAnimalClip(pet, loveCandidates, { fade: 0.16, force: true });
     }
     if(typeof sndPet === 'function') sndPet();
     if(typeof addXP === 'function') addXP(8);
     if(typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
+    var em = (pet.spec && pet.spec.emoji) || (pet.type === 'cat' ? '🐱' : '🐶');
     var breedTag = pet.breedName ? (' (' + pet.breedName + ')') : '';
-    showToast((pet.type === 'cat' ? '🐱 ' : '🐶 ') + info.name + breedTag + ' çok mutlu oldu! ❤️ (+8 XP)');
+    showToast(em + ' ' + info.name + breedTag + ' çok mutlu oldu! ❤️ (+8 XP)');
   };
 
   window.petActionFeed = function(petIdx){
@@ -419,7 +511,7 @@
     var pet = pets[petIdx];
     var info = getPetInfo(pet, petIdx);
     if(typeof stats !== 'undefined' && stats.coin < 5){
-      showToast('Mama için 5 💰 gerekli');
+      showToast('Yem / Mama için 5 💰 gerekli');
       return;
     }
     if(typeof stats !== 'undefined'){
@@ -429,12 +521,22 @@
     }
     info.happy = 100;
     savePetMeta();
-    window.spawnPetLoveFX(pet.mesh.position, '🍖');
+    // Çiftlik hayvanı beslenince üretim süresini %50 hızlandır!
+    if(pet.prodItem && !pet.prodReady){
+      pet.prodTimer = Math.max(0, (pet.prodTimer || 20) - ((pet.spec && pet.spec.prodTime) || 40) * 0.55);
+      if(pet.prodTimer <= 0){
+        pet.prodReady = true;
+        if(pet.prodBadge) pet.prodBadge.visible = true;
+      }
+    }
+    window.spawnPetLoveFX(pet.mesh.position, pet.prodItem ? '🌾' : '🍖');
     pet._reactTimer = 2.4;
     if(typeof window.playAnimalClip === 'function'){
       var feedCandidates = pet.type === 'cat'
         ? [pet.spec && pet.spec.feedClip, 'stretch', 'groom', 'jump', 'wiggle']
-        : [pet.spec && pet.spec.feedClip, 'eat', 'receive_treat', 'chew', 'happy'];
+        : (pet.type === 'dog'
+          ? [pet.spec && pet.spec.feedClip, 'eat', 'receive_treat', 'chew', 'happy']
+          : [pet.spec && pet.spec.feedClip, 'AnimalArmature|Eating', 'Idle_Peck', 'Idle']);
       window.playAnimalClip(pet, feedCandidates, { fade: 0.16, force: true });
     }
     if(typeof sndPet === 'function') sndPet();
@@ -445,8 +547,49 @@
       triggerDogChaseBug(pet, info);
     } else if(pet.type === 'cat'){
       triggerCatGift(pet, info, true);
+    } else if(pet.prodItem){
+      showToast('🌾 ' + info.name + ' taze yem yedi! Üretim hızlandı (+15 XP)');
     } else {
       showToast('🍖 ' + info.name + ' karnını doyurdu! Enerjisi %100 (+15 XP)');
+    }
+  };
+
+  window.biomeAnimalLove = function(bIdx){
+    if(!window._biomeAnimals || !window._biomeAnimals[bIdx]) return;
+    var ba = window._biomeAnimals[bIdx];
+    var wPos = new THREE.Vector3();
+    ba.mesh.getWorldPosition(wPos);
+    window.spawnPetLoveFX(wPos, '❤️');
+    ba.state = 'idle';
+    ba.stateTimer = 3.0;
+    if(typeof window.playAnimalClip === 'function' && ba.spec){
+      window.playAnimalClip(ba, [ba.spec.loveClip, ba.spec.feedClip, 'AnimalArmature|Eating', 'Idle_Peck', 'Idle'], { fade: 0.18, force: true });
+    }
+    if(typeof sndPet === 'function') sndPet();
+    if(typeof addXP === 'function') addXP(8);
+    if(typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
+    showToast((ba.emoji || '🐾') + ' ' + (ba.breedName || 'Hayvan') + ' sevildi! ❤️ (+8 XP)');
+  };
+
+  window.biomeAnimalFeed = function(bIdx){
+    if(!window._biomeAnimals || !window._biomeAnimals[bIdx]) return;
+    var ba = window._biomeAnimals[bIdx];
+    var wPos = new THREE.Vector3();
+    ba.mesh.getWorldPosition(wPos);
+    window.spawnPetLoveFX(wPos, '🌾');
+    ba.state = 'idle';
+    ba.stateTimer = 3.2;
+    if(typeof window.playAnimalClip === 'function' && ba.spec){
+      window.playAnimalClip(ba, [ba.spec.feedClip, 'AnimalArmature|Eating', 'Idle_Peck', 'Idle'], { fade: 0.18, force: true });
+    }
+    if(typeof sndPet === 'function') sndPet();
+    if(typeof addXP === 'function') addXP(12);
+    // Biyomdaki üretim hayvanını besleyince de ambara 1 taze ürün hediye etsin!
+    if(ba.spec && ba.spec.prodItem){
+      window.addBarnItem(ba.spec.prodItem, 1);
+      showToast((ba.spec.prodEmoji || '🎁') + ' ' + ba.breedName + ' sana +1 ' + ba.spec.prodName + ' hediye etti! (+12 XP)');
+    } else {
+      showToast('🌾 ' + (ba.breedName || 'Hayvan') + ' keyifle beslendi! (+12 XP)');
     }
   };
 
@@ -454,7 +597,7 @@
     if(typeof pets === 'undefined' || !pets[petIdx]) return;
     var pet = pets[petIdx];
     var info = getPetInfo(pet, petIdx);
-    var nextName = window.prompt('Evcil dostunun yeni adı (2-14 karakter):', info.name || '');
+    var nextName = window.prompt('Dostunun yeni adı (2-14 karakter):', info.name || '');
     if(!nextName) return;
     nextName = nextName.trim().slice(0, 14);
     if(nextName.length < 2){
@@ -780,11 +923,197 @@
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // PAKET 5: 🎣 3D GÖLET BALIK TUTMA MİNİ-OYUNU
+  // ═══════════════════════════════════════════════════════════════════════════
+  var _fishingState = {
+    active: false,
+    bite: false,
+    timer: 0,
+    biteWindow: 0,
+    bobber: null,
+    pos: new THREE.Vector3(0, 0.08, 0.2),
+    rippleAcc: 0
+  };
+
+  function ensureFishingDOM(){
+    var hud = document.getElementById('fishingHud');
+    if(hud) return hud;
+    hud = document.createElement('div');
+    hud.id = 'fishingHud';
+    hud.innerHTML =
+      '<span id="fishingHudTxt" style="font-size:.82rem;font-weight:700;color:#e0f2fe">🎣 Olta suda... Balık bekleniyor</span>' +
+      '<button type="button" id="fishingPullBtn" class="ps-snap-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)" onclick="window.pullFishingRod()">🎣 Çek!</button>' +
+      '<button type="button" class="ps-exit-btn" onclick="window.stopFishingGame()">✕</button>';
+    document.body.appendChild(hud);
+    return hud;
+  }
+
+  function create3DBobber(x, z){
+    if(typeof THREE === 'undefined' || typeof scene === 'undefined') return null;
+    var g = new THREE.Group();
+    var redMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.35, emissive: 0x991b1b, emissiveIntensity: 0.25 });
+    var whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+    var topHalf = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), redMat);
+    var botHalf = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), whiteMat);
+    var tip = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.14, 6), redMat);
+    tip.position.y = 0.14;
+    var glow = new THREE.PointLight(0x38bdf8, 0.85, 2.6);
+    glow.position.y = 0.25;
+    g.add(topHalf);
+    g.add(botHalf);
+    g.add(tip);
+    g.add(glow);
+    g.position.set(x, 0.10, z);
+    scene.add(g);
+    return g;
+  }
+
+  function findFishingSpot(customPos){
+    if(customPos && typeof customPos.x === 'number'){
+      return new THREE.Vector3(customPos.x, 0.08, customPos.z);
+    }
+    if(typeof isCozy === 'function' && isCozy() && typeof BIOMES !== 'undefined'){
+      // Göl Kıyısı veya Çiftlik göleti
+      var lake = BIOMES.find(function(b){ return b.id === 'lake'; });
+      if(lake && typeof activeBiomeId !== 'undefined' && activeBiomeId === 'lake'){
+        return new THREE.Vector3(lake.cx, 0.08, lake.cz);
+      }
+    }
+    if(typeof decos !== 'undefined' && decos.length){
+      for(var i = 0; i < decos.length; i++){
+        var d = decos[i];
+        if(d && d.group && d.group.visible !== false && (d.type === 'pond' || d.type === 'crystal_pond' || d.type === 'fountain')){
+          return new THREE.Vector3(d.group.position.x, 0.08, d.group.position.z);
+        }
+      }
+    }
+    return new THREE.Vector3(0, 0.08, 0.2);
+  }
+
+  window.startFishingGame = function(pondPos){
+    if(typeof window.closeAllPanelsAndDrawers === 'function') window.closeAllPanelsAndDrawers();
+    ensureFishingDOM();
+    if(_fishingState.bobber && _fishingState.bobber.parent){
+      _fishingState.bobber.parent.remove(_fishingState.bobber);
+    }
+    var spot = findFishingSpot(pondPos);
+    _fishingState.pos.copy(spot);
+    _fishingState.bobber = create3DBobber(spot.x, spot.z);
+    _fishingState.active = true;
+    _fishingState.bite = false;
+    _fishingState.timer = 2.0 + Math.random() * 2.2;
+    _fishingState.biteWindow = 0;
+    _fishingState.rippleAcc = 0;
+
+    var hud = document.getElementById('fishingHud');
+    var txt = document.getElementById('fishingHudTxt');
+    var btn = document.getElementById('fishingPullBtn');
+    if(hud){
+      hud.classList.add('open');
+      hud.classList.remove('bite');
+    }
+    if(txt) txt.textContent = '🎣 Olta suya atıldı... Şamandırayı izle!';
+    if(btn) btn.textContent = '⏳ Bekle...';
+    if(typeof sndWater === 'function') sndWater();
+    if(typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+    spawnWaterRippleAt(spot.x, spot.z);
+  };
+
+  function spawnWaterRippleAt(rx, rz){
+    if(typeof scene === 'undefined') return;
+    var geo = new THREE.RingGeometry(0.08, 0.14, 22);
+    var mat = new THREE.MeshBasicMaterial({
+      color: 0x7dd3fc,
+      transparent: true,
+      opacity: 0.72,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    var ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(rx, 0.06, rz);
+    scene.add(ring);
+    waterRipples.push({ mesh: ring, mat: mat, geo: geo, age: 0, maxAge: 1.5 });
+  }
+
+  window.pullFishingRod = function(){
+    if(!_fishingState.active) return;
+    if(!_fishingState.bite){
+      showToast('🐟 Çok erken çektin! Balık ürktü, tekrar oltayı salla.');
+      window.startFishingGame(_fishingState.pos);
+      return;
+    }
+    // Başarılı balık yakalama!
+    var pos = _fishingState.pos.clone();
+    window.stopFishingGame();
+    window.addBarnItem('fish', 1);
+    window.spawnPetLoveFX(pos, '🐟');
+    var bonusCoin = 18 + Math.floor(Math.random() * 12);
+    if(typeof addCoin === 'function') addCoin(bonusCoin, true);
+    if(typeof addXP === 'function') addXP(24);
+    if(typeof sndHarvest === 'function') sndHarvest();
+    if(typeof window.triggerHaptic === 'function') window.triggerHaptic('harvest');
+    showToast('🐟 Harika! Taze Göl Balığı yakaladın! Ambara eklendi (+' + bonusCoin + '💰 +24 XP)');
+  };
+
+  window.stopFishingGame = function(){
+    _fishingState.active = false;
+    _fishingState.bite = false;
+    if(_fishingState.bobber && _fishingState.bobber.parent){
+      _fishingState.bobber.parent.remove(_fishingState.bobber);
+    }
+    _fishingState.bobber = null;
+    var hud = document.getElementById('fishingHud');
+    if(hud){
+      hud.classList.remove('open');
+      hud.classList.remove('bite');
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // ANA DÖNGÜ ENTEGRASYONU (stepAQuality)
   // ═══════════════════════════════════════════════════════════════════════════
   var _winLightTick = 0;
   window.stepAQuality = function(dt, now){
     if(!(dt > 0)) return;
+
+    // 0) 3D Balık Tutma Mini-Oyunu Güncellemesi
+    if(_fishingState.active && _fishingState.bobber){
+      _fishingState.rippleAcc += dt;
+      if(!_fishingState.bite){
+        _fishingState.bobber.position.y = 0.09 + Math.sin((now || 0) * 3.5) * 0.025;
+        if(_fishingState.rippleAcc >= 0.85){
+          _fishingState.rippleAcc = 0;
+          spawnWaterRippleAt(_fishingState.pos.x, _fishingState.pos.z);
+        }
+        _fishingState.timer -= dt;
+        if(_fishingState.timer <= 0){
+          _fishingState.bite = true;
+          _fishingState.biteWindow = 3.2;
+          var hud = document.getElementById('fishingHud');
+          var txt = document.getElementById('fishingHudTxt');
+          var btn = document.getElementById('fishingPullBtn');
+          if(hud) hud.classList.add('bite');
+          if(txt) txt.textContent = '💦 BALIK VURDU! Hemen Çek!';
+          if(btn) btn.textContent = '🐟 ŞİMDİ ÇEK!';
+          if(typeof sndWater === 'function') sndWater();
+          if(typeof window.triggerHaptic === 'function') window.triggerHaptic('heavy');
+          spawnWaterRippleAt(_fishingState.pos.x, _fishingState.pos.z);
+        }
+      } else {
+        // Balık oltaya vururken şamandıra hızlıca suya batıp çıkar
+        _fishingState.bobber.position.y = 0.04 + Math.sin((now || 0) * 18.0) * 0.075;
+        if(_fishingState.rippleAcc >= 0.28){
+          _fishingState.rippleAcc = 0;
+          spawnWaterRippleAt(_fishingState.pos.x, _fishingState.pos.z);
+        }
+        _fishingState.biteWindow -= dt;
+        if(_fishingState.biteWindow <= 0){
+          showToast('🐟 Balık yemi alıp kaçtı! Yeniden dene.');
+          window.startFishingGame(_fishingState.pos);
+        }
+      }
+    }
 
     // 1) 3D Uçuşan Kalp / Yıldız Efektleri
     for(var i = floatingHearts.length - 1; i >= 0; i--){
@@ -880,6 +1209,7 @@
     loadOrders();
     loadPetMeta();
     ensurePhotoStudioDOM();
+    ensureFishingDOM();
     renderMarketPanel();
     updateOrderBadge();
     setTimeout(function(){

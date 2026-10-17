@@ -220,6 +220,19 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 .ps-exit-btn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:16px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer}
 #photoFlash{position:fixed;inset:0;background:#fff;z-index:4000;pointer-events:none;opacity:0;transition:opacity .22s}
 #photoFlash.on{opacity:.85;transition:none}
+
+#fishingHud{position:fixed;top:calc(68px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%) scale(.92);z-index:2200;background:rgba(14,24,28,.94);border:1px solid rgba(96,210,255,.38);border-radius:22px;padding:10px 16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(20px);box-shadow:0 12px 36px rgba(0,0,0,.65);opacity:0;pointer-events:none;transition:all .2s;min-width:270px;max-width:calc(100vw - 24px)}
+#fishingHud.open{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+#fishingHud.bite{border-color:#fbbf24;box-shadow:0 0 24px rgba(251,191,36,.55),0 12px 36px rgba(0,0,0,.7);animation:fishPulse .36s infinite alternate}
+@keyframes fishPulse{0%{transform:translateX(-50%) scale(1)}100%{transform:translateX(-50%) scale(1.04)}}
+.fh-icon{font-size:26px}
+.fh-info{flex:1;min-width:0}
+.fh-title{font-size:12px;font-weight:800;color:#fff}
+.fh-sub{font-size:10px;color:#93c5fd;margin-top:2px}
+#fishingHud.bite .fh-sub{color:#fde047;font-weight:800}
+.fh-pull-btn{border:none;border-radius:14px;padding:8px 14px;font-size:11px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#0284c7,#38bdf8);color:#fff;box-shadow:0 4px 12px rgba(56,189,248,.35)}
+#fishingHud.bite .fh-pull-btn{background:linear-gradient(135deg,#d97706,#f59e0b);box-shadow:0 4px 14px rgba(245,158,11,.55)}
+.fh-close-btn{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#cbd5e1;border-radius:12px;padding:6px 9px;font-size:11px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -325,6 +338,10 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
     <div class="more-item" id="btnDel" onclick="window.closeMoreDrawer();window.toggleDeleteMode();window.triggerHaptic('light')">
       <span class="mi-icon">🗑️</span>
       <span>Silme Modu</span>
+    </div>
+    <div class="more-item" onclick="window.closeMoreDrawer();window.startFishingGame();window.triggerHaptic('light')">
+      <span class="mi-icon">🎣</span>
+      <span>Balık Tut</span>
     </div>
     <div class="more-item" onclick="window.closeMoreDrawer();window.photoMode();window.triggerHaptic('light')">
       <span class="mi-icon">📷</span>
@@ -462,6 +479,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
   </div>
   <div class="shop-tabs">
     <div class="shop-tab active" onclick="window.shopTab('seeds')">🌱 Tohum</div>
+    <div class="shop-tab" onclick="window.shopTab('animals')">🐾 Hayvan</div>
     <div class="shop-tab" onclick="window.shopTab('items')">🏡 Eşya</div>
     <div class="shop-tab" onclick="window.shopTab('special')">✨ Nadir</div>
   </div>

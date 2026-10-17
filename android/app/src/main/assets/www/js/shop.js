@@ -5,21 +5,21 @@ var PET_TYPES = ['cat','dog'];
 
 var ANIMAL_SPECS = {
   // Evcil Kediler (37 gerçek iskelet animasyonu: idle, walk, trot, run, jump, sit_idle, groom, scratch_ear, stretch, loaf_idle, sleep_idle, knead, pounce, wiggle, head_tilt, tail_swish...)
-  cat_toyger: { url: 'models/animals/Cat.glb?v=2',      targetH: 0.60, rotY: -Math.PI / 2, label: 'Tekir Kedi',      idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'stretch' },
-  cat_van:    { url: 'models/animals/Cat_Van.glb?v=2',  targetH: 0.60, rotY: -Math.PI / 2, label: 'Van Kedisi',      idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'wiggle',   feedClip: 'jump'    },
-  cat_fold:   { url: 'models/animals/Cat_Fold.glb?v=2', targetH: 0.56, rotY: -Math.PI / 2, label: 'Scottish Fold',   idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'wiggle'  },
+  cat_toyger: { url: 'models/animals/Cat.glb?v=2',      targetH: 0.60, rotY: -Math.PI / 2, emoji: '🐱', label: 'Tekir Kedi',       idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'stretch' },
+  cat_van:    { url: 'models/animals/Cat_Van.glb?v=2',  targetH: 0.60, rotY: -Math.PI / 2, emoji: '🐱', label: 'Van Kedisi',       idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'wiggle',   feedClip: 'jump'    },
+  cat_fold:   { url: 'models/animals/Cat_Fold.glb?v=2', targetH: 0.56, rotY: -Math.PI / 2, emoji: '🐱', label: 'Scottish Fold',    idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'wiggle'  },
   // Evcil Köpekler (65 gerçek iskelet animasyonu: idle, idle_happy, walk, trot, run, sit_idle, play_bow, excited_bounce, get_pet, eat, sniff, scratch_ear, head_tilt, shake_off, happy...)
-  dog_golden: { url: 'models/animals/Dog.glb?v=2',       targetH: 0.76, rotY: -Math.PI / 2, label: 'Golden Retriever', idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','yawn','shake_off'], walkClip: 'walk', runClip: 'trot', loveClip: 'get_pet',        feedClip: 'eat' },
-  dog_shiba:  { url: 'models/animals/Dog_Shiba.glb?v=2', targetH: 0.68, rotY: -Math.PI / 2, label: 'Shiba Inu',        idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'excited_bounce', feedClip: 'eat' },
-  dog_corgi:  { url: 'models/animals/Dog_Corgi.glb?v=2', targetH: 0.58, rotY: -Math.PI / 2, label: 'Welsh Corgi',      idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'play_bow',       feedClip: 'eat' },
-  // Çiftlik, Orman ve Göl Biyomu Hayvanları (Quaternius / PolyPizza / Gobkit İskelet Animasyonlu)
-  cow:        { url: 'models/animals/Cow.glb?v=2',    targetH: 1.32, rotY: 0, lift: true, label: 'İnek',   idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
-  horse:      { url: 'models/animals/Horse.glb?v=2',  targetH: 1.52, rotY: 0, lift: true, label: 'At',     idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
-  alpaca:     { url: 'models/animals/Alpaca.glb?v=2', targetH: 1.24, rotY: 0, lift: true, label: 'Alpaka', idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
-  deer:       { url: 'models/animals/Deer.glb?v=2',   targetH: 1.35, rotY: 0, lift: true, label: 'Geyik',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
-  fox:        { url: 'models/animals/Fox.glb?v=2',    targetH: 0.68, rotY: 0, lift: true, label: 'Tilki',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_2_HeadLow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_ToIdle', feedClip: 'AnimalArmature|Eating' },
-  chick:      { url: 'models/animals/Chick.glb?v=2',  targetH: 0.36, rotY: 0, lift: false, label: 'Civciv', idleClips: ['Idle','Idle_Peck'], walkClip: 'Run', runClip: 'Run', loveClip: 'Idle_Peck', feedClip: 'Idle_Peck' },
-  duck:       { url: 'models/animals/Duck.glb?v=2',   targetH: 0.44, rotY: 0, lift: false, label: 'Ördek',  idleClips: ['idle'], walkClip: 'walk', runClip: 'walk', loveClip: 'idle', feedClip: 'idle' }
+  dog_golden: { url: 'models/animals/Dog.glb?v=2',       targetH: 0.76, rotY: -Math.PI / 2, emoji: '🐶', label: 'Golden Retriever', idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','yawn','shake_off'], walkClip: 'walk', runClip: 'trot', loveClip: 'get_pet',        feedClip: 'eat' },
+  dog_shiba:  { url: 'models/animals/Dog_Shiba.glb?v=2', targetH: 0.68, rotY: -Math.PI / 2, emoji: '🐕', label: 'Shiba Inu',        idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'excited_bounce', feedClip: 'eat' },
+  dog_corgi:  { url: 'models/animals/Dog_Corgi.glb?v=2', targetH: 0.58, rotY: -Math.PI / 2, emoji: '🐕', label: 'Welsh Corgi',      idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'play_bow',       feedClip: 'eat' },
+  // Çiftlik, Orman ve Göl Hayvanları (Quaternius / PolyPizza / Gobkit İskelet Animasyonlu + Üretim)
+  cow:        { url: 'models/animals/Cow.glb?v=2',    targetH: 1.32, rotY: 0, lift: true,  emoji: '🐮', label: 'Süt İneği',     prodItem: 'milk', prodEmoji: '🥛', prodName: 'Taze Süt',      prodVerb: 'Sütü Sağ',     prodTime: 38, idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  horse:      { url: 'models/animals/Horse.glb?v=2',  targetH: 1.52, rotY: 0, lift: true,  emoji: '🐴', label: 'Doru At',       idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  alpaca:     { url: 'models/animals/Alpaca.glb?v=2', targetH: 1.24, rotY: 0, lift: true,  emoji: '🦙', label: 'Alpaka',        prodItem: 'wool', prodEmoji: '🧶', prodName: 'Alpaka Yünü',   prodVerb: 'Yünü Kırk',    prodTime: 42, idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  deer:       { url: 'models/animals/Deer.glb?v=2',   targetH: 1.35, rotY: 0, lift: true,  emoji: '🦌', label: 'Orman Geyiği',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  fox:        { url: 'models/animals/Fox.glb?v=2',    targetH: 0.68, rotY: 0, lift: true,  emoji: '🦊', label: 'Kızıl Tilki',   idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_2_HeadLow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_ToIdle', feedClip: 'AnimalArmature|Eating' },
+  chick:      { url: 'models/animals/Chick.glb?v=2',  targetH: 0.36, rotY: 0, lift: false, emoji: '🐥', label: 'Köy Civcivi',   prodItem: 'egg',  prodEmoji: '🥚', prodName: 'Köy Yumurtası', prodVerb: 'Yumurtayı Al', prodTime: 30, idleClips: ['Idle','Idle_Peck'], walkClip: 'Run', runClip: 'Run', loveClip: 'Idle_Peck', feedClip: 'Idle_Peck' },
+  duck:       { url: 'models/animals/Duck.glb?v=2',   targetH: 0.44, rotY: 0, lift: false, emoji: '🦆', label: 'Gölet Ördeği',  prodItem: 'egg',  prodEmoji: '🥚', prodName: 'Köy Yumurtası', prodVerb: 'Yumurtayı Al', prodTime: 34, idleClips: ['idle'], walkClip: 'walk', runClip: 'walk', loveClip: 'idle', feedClip: 'idle' }
 };
 
 var CAT_BREED_KEYS = ['cat_toyger', 'cat_van', 'cat_fold'];
@@ -264,17 +264,63 @@ function createShadowDisc(radius){
   return sh;
 }
 
+function createProdBadgeSprite(emoji, heightY){
+  var c = document.createElement('canvas');
+  c.width = 96; c.height = 96;
+  var g = c.getContext('2d');
+  g.fillStyle = 'rgba(20, 28, 22, 0.85)';
+  g.strokeStyle = '#fbbf24';
+  g.lineWidth = 5;
+  g.beginPath();
+  g.arc(48, 48, 38, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.font = '44px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(emoji || '🥛', 48, 50);
+  var tex = new THREE.CanvasTexture(c);
+  var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+  mat.userData.keep = true;
+  var sp = new THREE.Sprite(mat);
+  sp.scale.set(0.46, 0.46, 0.46);
+  sp.position.set(0, (heightY || 0.9) + 0.38, 0);
+  sp.visible = false;
+  return sp;
+}
+
+function enforceMaxGardenAnimals(maxCount){
+  var limit = maxCount || 10;
+  while(pets.length >= limit){
+    var old = pets.shift();
+    if(old && old.mesh){
+      if(old.mesh.parent) old.mesh.parent.remove(old.mesh);
+      else scene.remove(old.mesh);
+    }
+  }
+}
+
 function spawnPetWithSpec(type, specKey, x, z, toastMsg){
   var spec = ANIMAL_SPECS[specKey] || ANIMAL_SPECS.cat_toyger;
+  var hTarget = spec.targetH || 0.65;
   var g = new THREE.Group();
   g.name = 'pet_' + type + '_' + specKey;
-  g.add(createShadowDisc(type === 'dog' ? 0.38 : 0.32));
+  g.add(createShadowDisc(Math.max(0.28, hTarget * 0.34)));
   // SkinnedMesh üzerinde mobil/masaüstü tıklamayı %100 kolaylaştıran görünmez hit silindiri
   var hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
   hitMat.userData.keep = true;
-  var hitCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.78, 8), hitMat);
-  hitCyl.position.y = 0.39;
+  var hitR = Math.max(0.38, hTarget * 0.42);
+  var hitH = Math.max(0.68, hTarget * 1.05);
+  var hitCyl = new THREE.Mesh(new THREE.CylinderGeometry(hitR, hitR, hitH, 8), hitMat);
+  hitCyl.position.y = hitH * 0.5;
   g.add(hitCyl);
+
+  var prodBadge = null;
+  if(spec.prodItem){
+    prodBadge = createProdBadgeSprite(spec.prodEmoji, hTarget);
+    g.add(prodBadge);
+  }
+
   g.position.set(x, 0, z);
   scene.add(g);
 
@@ -283,6 +329,7 @@ function spawnPetWithSpec(type, specKey, x, z, toastMsg){
     type: type,
     breed: specKey,
     breedName: spec.label,
+    emoji: spec.emoji || (type === 'cat' ? '🐱' : '🐶'),
     target: null,
     time: Math.random() * 20,
     wander: 0,
@@ -293,39 +340,72 @@ function spawnPetWithSpec(type, specKey, x, z, toastMsg){
     animName: '',
     spec: spec,
     _idleTimer: 2.5 + Math.random() * 3.5,
-    _reactTimer: 0
+    _reactTimer: 0,
+    prodItem: spec.prodItem || null,
+    prodTimer: spec.prodTime ? (spec.prodTime * (0.45 + Math.random() * 0.4)) : 0,
+    prodReady: false,
+    prodBadge: prodBadge
   };
   pets.push(rec);
   mountAnimalIntoRecord(rec, specKey);
 
   if(isLoading) return rec;
-  showToast(toastMsg || ((type === 'cat' ? '🐱 ' : '🐶 ') + spec.label + ' bahçeye katıldı!'));
+  showToast(toastMsg || ((spec.emoji || '🐾') + ' ' + spec.label + ' bahçeye katıldı!'));
   sndPet();
   markDirty(); save(true);
   return rec;
 }
 
-function mkCat(x, z) {
-  var specKey = CAT_BREED_KEYS[_catSpawnCount % CAT_BREED_KEYS.length];
+function mkCat(x, z, explicitBreed) {
+  var specKey = (explicitBreed && ANIMAL_SPECS[explicitBreed]) ? explicitBreed : CAT_BREED_KEYS[_catSpawnCount % CAT_BREED_KEYS.length];
   _catSpawnCount++;
   var spec = ANIMAL_SPECS[specKey];
   return spawnPetWithSpec('cat', specKey, x, z, '🐱 ' + spec.label + ' bahçeye katıldı!');
 }
 
-function mkDog(x, z) {
-  var specKey = DOG_BREED_KEYS[_dogSpawnCount % DOG_BREED_KEYS.length];
+function mkDog(x, z, explicitBreed) {
+  var specKey = (explicitBreed && ANIMAL_SPECS[explicitBreed]) ? explicitBreed : DOG_BREED_KEYS[_dogSpawnCount % DOG_BREED_KEYS.length];
   _dogSpawnCount++;
   var spec = ANIMAL_SPECS[specKey];
   return spawnPetWithSpec('dog', specKey, x, z, '🐶 ' + spec.label + ' bahçeye katıldı!');
 }
 
+window.spawnFarmAnimalAt = function(specKey, x, z){
+  if(!ANIMAL_SPECS[specKey]) specKey = 'cow';
+  enforceMaxGardenAnimals(10);
+  var spec = ANIMAL_SPECS[specKey];
+  var baseType = /^cat_/.test(specKey) ? 'cat' : (/^dog_/.test(specKey) ? 'dog' : specKey);
+  return spawnPetWithSpec(baseType, specKey, x, z, (spec.emoji || '🐾') + ' ' + spec.label + ' bahçeye yerleşti!');
+};
+
+window.restoreSavedPet = function(p){
+  if(!p) return null;
+  var x = p.x || 0, z = p.z || 0;
+  if(p.breed && ANIMAL_SPECS[p.breed]){
+    var bt = /^cat_/.test(p.breed) ? 'cat' : (/^dog_/.test(p.breed) ? 'dog' : p.breed);
+    return spawnPetWithSpec(bt, p.breed, x, z);
+  }
+  if(p.type === 'cat') return mkCat(x, z);
+  if(p.type === 'dog') return mkDog(x, z);
+  if(p.type && ANIMAL_SPECS[p.type]) return spawnPetWithSpec(p.type, p.type, x, z);
+  return mkCat(x, z);
+};
+
 // Cozy Biyomlar (Çiftlik, Orman, Göl, Köy) için gerçek iskelet animasyonlu hayvan üretici
 window.spawnBiomeAnimal = function(specKey, parentGroup, x, z, rotY, scaleMult){
   var spec = ANIMAL_SPECS[specKey];
   if(!spec || !parentGroup) return null;
+  var hTarget = spec.targetH || 0.65;
   var g = new THREE.Group();
   g.name = 'biomeAnimal_' + specKey;
-  g.add(createShadowDisc(spec.targetH * 0.32));
+  g.add(createShadowDisc(hTarget * 0.32));
+  var hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+  hitMat.userData.keep = true;
+  var hitR = Math.max(0.38, hTarget * 0.42);
+  var hitH = Math.max(0.68, hTarget * 1.05);
+  var hitCyl = new THREE.Mesh(new THREE.CylinderGeometry(hitR, hitR, hitH, 8), hitMat);
+  hitCyl.position.y = hitH * 0.5;
+  g.add(hitCyl);
   g.position.set(x || 0, 0, z || 0);
   if(rotY != null) g.rotation.y = rotY;
   if(scaleMult != null && scaleMult !== 1) g.scale.setScalar(scaleMult);
@@ -336,6 +416,8 @@ window.spawnBiomeAnimal = function(specKey, parentGroup, x, z, rotY, scaleMult){
     type: specKey,
     breed: specKey,
     breedName: spec.label,
+    emoji: spec.emoji || '🐾',
+    isBiomeAnimal: true,
     homeX: x || 0,
     homeZ: z || 0,
     wanderR: specKey === 'chick' || specKey === 'duck' ? 1.8 : 2.6,
@@ -364,14 +446,7 @@ setTimeout(function(){
 }, 120);
 
 window.addPet = function(type) {
-  var maxPets = 4;
-  if (pets.length >= maxPets) {
-    var old = pets.shift();
-    if(old && old.mesh){
-      if(old.mesh.parent) old.mesh.parent.remove(old.mesh);
-      else scene.remove(old.mesh);
-    }
-  }
+  enforceMaxGardenAnimals(10);
   var cx = 0, cz = 0;
   if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
     var b = window.getActiveBiome();
@@ -379,7 +454,8 @@ window.addPet = function(type) {
   }
   var a = Math.random()*Math.PI*2, r = 2.5 + Math.random()*4.5;
   if(type==='cat') mkCat(cx + Math.cos(a)*r, cz + Math.sin(a)*r);
-  else mkDog(cx + Math.cos(a)*r, cz + Math.sin(a)*r);
+  else if(type==='dog') mkDog(cx + Math.cos(a)*r, cz + Math.sin(a)*r);
+  else window.spawnFarmAnimalAt(type, cx + Math.cos(a)*r, cz + Math.sin(a)*r);
 };
 
 
@@ -393,6 +469,17 @@ var SHOP_ITEMS = {
     {id:'tulip',     emoji:'🌷', name:'Lale Tohumu',    desc:'Klasik Türk lalesi',           price:35,  color:0xff3366, type:'flower'},
     {id:'bluebell',  emoji:'💙', name:'Çan Çiçeği',    desc:'Mavi sallanan çan çiçeği',     price:45,  color:0x4488ff, type:'flower'},
     {id:'cherry',    emoji:'🌸', name:'Kiraz Çiçeği',  desc:'Japon kiraz çiçeği',           price:60,  color:0xffb7c5, type:'flower'},
+  ],
+  animals: [
+    {id:'animal_cow',       emoji:'🐮', name:'Süt İneği',      desc:'Otlar ve 🥛 Taze Süt üretir',       price:120, type:'animal', specKey:'cow'},
+    {id:'animal_alpaca',    emoji:'🦙', name:'Alpaka',         desc:'Gezinir ve 🧶 Yumuşak Yün üretir',  price:140, type:'animal', specKey:'alpaca'},
+    {id:'animal_chick',     emoji:'🐥', name:'Köy Civcivi',    desc:'Yemlenir ve 🥚 Yumurta üretir',     price:65,  type:'animal', specKey:'chick'},
+    {id:'animal_duck',      emoji:'🦆', name:'Gölet Ördeği',   desc:'Badi badi yürür, 🥚 Yumurta verir', price:85,  type:'animal', specKey:'duck'},
+    {id:'animal_horse',     emoji:'🐴', name:'Doru At',        desc:'Bahçede dörtnala koşan asil at',    price:220, type:'animal', specKey:'horse'},
+    {id:'animal_deer',      emoji:'🦌', name:'Orman Geyiği',   desc:'Zarif boynuzlu uysal geyik',        price:180, type:'animal', specKey:'deer'},
+    {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',       price:150, type:'animal', specKey:'fox'},
+    {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',        price:95,  type:'animal', specKey:'cat_van'},
+    {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',    price:110, type:'animal', specKey:'dog_shiba'},
   ],
   items: [
     {id:'golden_pot',   emoji:'🏆', name:'Altın Saksı',   desc:'Özel altın renkli saksı',    price:80,  deco:'golden_pot'},
@@ -484,8 +571,9 @@ function saveShop(){
 
 window.shopTab = function(tab) {
   currentShopTab = tab;
+  var tabOrder = ['seeds','animals','items','special'];
   document.querySelectorAll('.shop-tab').forEach(function(el,i){
-    el.classList.toggle('active', ['seeds','items','special'][i]===tab);
+    el.classList.toggle('active', tabOrder[i]===tab);
   });
   renderShop();
 };
@@ -500,13 +588,14 @@ function renderShop() {
   if(bag){
     var parts = [];
     SHOP_ITEMS.seeds.forEach(function(s){ var n=seedCount(s.id); if(n>0) parts.push(s.emoji+' '+n); });
-    bag.textContent = parts.length ? ('Çanta: '+parts.join(' · ')) : '';
+    bag.textContent = parts.length ? ('Çanta: '+parts.join(' · ')) : (currentShopTab==='animals' ? '🐾 Bahçeye koyduğun çiftlik hayvanları süt, yün ve yumurta üretir!' : '');
   }
   var items = SHOP_ITEMS[currentShopTab] || [];
   
   grid.innerHTML = items.map(function(item) {
+    var isAnimal = item.type === 'animal';
     var count = item.type==='flower' ? seedCount(item.id) : 0;
-    var owned = item.type!=='flower' && !!purchasedItems[item.id];
+    var owned = item.type!=='flower' && !isAnimal && !!purchasedItems[item.id];
     var canAfford = stats.coin >= item.price;
     var cls = 'shop-item' + (owned ? ' owned' : '') + (!canAfford && !owned ? ' cant-afford' : '');
     var badge = count ? '<div class="shop-owned-badge">x'+count+'</div>' : (owned ? '<div class="shop-owned-badge">Koy</div>' : '');
@@ -536,6 +625,14 @@ window.beginShopPlace = function(item){
 };
 
 window.placeShopDeco = function(tp, x, z, ang){
+  if(tp && tp.indexOf('animal_') === 0){
+    var aItem = null;
+    (SHOP_ITEMS.animals || []).forEach(function(a){ if(a.id === tp) aItem = a; });
+    if(aItem && aItem.specKey){
+      window.spawnFarmAnimalAt(aItem.specKey, x, z);
+      return true;
+    }
+  }
   if(tp==='golden_pot') mkGoldenPot(x,z);
   else if(tp==='crystal_pond') mkCrystalPond(x,z);
   else if(tp==='magic_lamp') mkMagicLamp(x,z);
@@ -557,7 +654,8 @@ window.buyItem = function(id) {
   Object.values(SHOP_ITEMS).forEach(function(arr){ arr.forEach(function(i){ if(i.id===id) item=i; }); });
   if(!item) return;
   var seed = item.type==='flower';
-  if(stats.coin < item.price && (seed || !purchasedItems[id])) { showToast('Yeterli coin yok! 💰'); return; }
+  var isAnimal = item.type==='animal';
+  if(stats.coin < item.price && (seed || isAnimal || !purchasedItems[id])) { showToast('Yeterli coin yok! 💰'); return; }
   if(seed){
     stats.coin -= item.price;
     purchasedItems[id] = seedCount(id) + 1;
@@ -566,6 +664,13 @@ window.buyItem = function(id) {
     saveShop(); saveStats(); updStats(); renderShop();
     showToast(item.emoji+' çantada: '+purchasedItems[id]);
     sndCoin();
+    return;
+  }
+  if(isAnimal){
+    stats.coin -= item.price;
+    saveStats(); updStats(); renderShop();
+    sndCoin();
+    window.beginShopPlace(item);
     return;
   }
   if(!purchasedItems[id]){

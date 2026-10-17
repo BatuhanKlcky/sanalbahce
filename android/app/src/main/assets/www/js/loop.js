@@ -50,6 +50,22 @@ function stepPets(dt){
       pet.mixer.update(dt);
     }
 
+    // 1.5) Çiftlik Hayvanları Üretim Zamanlayıcısı (Süt 🥛, Yün 🧶, Yumurta 🥚)
+    if(pet.prodItem){
+      if(!pet.prodReady){
+        pet.prodTimer = (pet.prodTimer != null ? pet.prodTimer : 45) - dt;
+        if(pet.prodTimer <= 0){
+          pet.prodTimer = 0;
+          pet.prodReady = true;
+          if(pet.prodBadge) pet.prodBadge.visible = true;
+        }
+      } else if(pet.prodBadge){
+        pet.prodBadge.visible = true;
+        var baseH = ((pet.spec && pet.spec.targetH) || 0.9) + 0.36;
+        pet.prodBadge.position.y = baseH + Math.sin(pet.time * 3.4) * 0.08;
+      }
+    }
+
     // 2) Sevme / Besleme / Yetenek tepki animasyonu aktifse olduğu yerde gerçek klibi oynat
     if(pet._reactTimer && pet._reactTimer > 0){
       pet._reactTimer -= dt;

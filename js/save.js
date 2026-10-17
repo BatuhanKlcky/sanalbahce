@@ -430,7 +430,7 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       }),
       weather:curWeather,
       harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
-      petCount:pets.map(function(p){return{type:p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
+      petCount:pets.map(function(p){return{type:p.type,breed:p.breed||p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
     }));lastSave=now;isDirty=false;showSave();updateWidgetData();}catch(e){}}
 window.addEventListener('pagehide',function(){flushProgress();save(true);},{capture:true});
 window.addEventListener('beforeunload',function(){flushProgress();save(true);});
@@ -522,9 +522,13 @@ function load(){
       if(harvestItems.length>0) harvestItems[harvestItems.length-1].growTimer=h.growTimer||0;
     });
     if(elapsed>0) advanceHarvest(elapsed);
-    // Restore pets
+    // Restore pets & farm animals
     var sP=data.petCount||[];
-    sP.forEach(function(p){if(p.type==='cat')mkCat(p.x,p.z);else mkDog(p.x,p.z);});
+    sP.forEach(function(p){
+      if(typeof window.restoreSavedPet==='function') window.restoreSavedPet(p);
+      else if(p.type==='cat')mkCat(p.x,p.z);
+      else mkDog(p.x,p.z);
+    });
     isLoading=false;
     if(elapsed >= 90 && typeof window.showWelcomeSummary === 'function'){
       setTimeout(function(){ window.showWelcomeSummary(elapsed); }, 800);
