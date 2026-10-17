@@ -143,28 +143,32 @@
       clips.Idle = new THREE.AnimationClip('Idle', 2.5, tracks);
     })();
 
-    // Walk — opposite arm/leg swing from standing rest
+    // Walk — thigh swing = local Z (X was sideways kick). Knee = local +X.
+    // Forward leg stays extended; trailing/passing leg bends more.
     (function(){
-      var times = [0, 0.28, 0.56, 0.84, 1.12];
+      var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('UpperLegL', [[0,0,0],[16,0,0],[0,0,0],[-16,0,0],[0,0,0]]);
-      add('UpperLegR', [[0,0,0],[-16,0,0],[0,0,0],[16,0,0],[0,0,0]]);
-      add('LowerLegL', [[0,0,0],[-14,0,0],[0,0,0],[6,0,0],[0,0,0]]);
-      add('LowerLegR', [[0,0,0],[6,0,0],[0,0,0],[-14,0,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[0,0,-28],[0,0,0],[0,0,28],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[0,0,28],[0,0,0],[0,0,-28],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-10],[0,0,0],[0,0,4],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,-4],[0,0,0],[0,0,10],[0,0,0]]);
-      add('Abdomen', [[0,0,0],[0,5,0],[0,0,0],[0,-5,0],[0,0,0]]);
-      add('Head', [[0,0,0],[0,3,0],[0,0,0],[0,-3,0],[0,0,0]]);
-      clips.Walk = new THREE.AnimationClip('Walk', 1.12, tracks);
+      //          L-fwd           L-pass          R-fwd           R-pass          L-fwd
+      add('UpperLegL', [[0,0,24],[0,0,2],[0,0,-22],[0,0,2],[0,0,24]]);
+      add('UpperLegR', [[0,0,-22],[0,0,2],[0,0,24],[0,0,2],[0,0,-22]]);
+      add('LowerLegL', [[4,0,0],[38,0,0],[34,0,0],[10,0,0],[4,0,0]]);
+      add('LowerLegR', [[34,0,0],[10,0,0],[4,0,0],[38,0,0],[34,0,0]]);
+      // Arms opposite legs; modest Z so hands stay near hips
+      add('UpperArmL', [[0,0,12],[0,0,0],[0,0,-14],[0,0,0],[0,0,12]]);
+      add('UpperArmR', [[0,0,-14],[0,0,0],[0,0,12],[0,0,0],[0,0,-14]]);
+      add('LowerArmL', [[0,0,0],[0,0,0],[0,0,-3],[0,0,0],[0,0,0]]);
+      add('LowerArmR', [[0,0,-3],[0,0,0],[0,0,0],[0,0,0],[0,0,-3]]);
+      add('Abdomen', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      add('Torso', [[0,2,0],[0,0,0],[0,-2,0],[0,0,0],[0,2,0]]);
+      add('Head', [[0,2,0],[0,0,0],[0,-2,0],[0,0,0],[0,2,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 0.95, tracks);
     })();
 
-    // Duck — kneel/tend from standing rest
+    // Duck — kneel/tend: thighs forward (Z), knees bend (+X)
     (function(){
       var times = [0, 0.35, 1.0, 1.35];
       var tracks = [];
@@ -172,18 +176,18 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('Abdomen', [[0,0,0],[22,0,0],[24,0,0],[0,0,0]]);
-      add('Torso', [[0,0,0],[12,0,0],[14,0,0],[0,0,0]]);
-      add('Chest', [[0,0,0],[8,0,0],[8,0,0],[0,0,0]]);
-      add('Head', [[0,0,0],[-8,0,0],[-10,0,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[40,8,25],[45,10,28],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[40,-8,-25],[45,-10,-28],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-30],[0,0,-35],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,30],[0,0,35],[0,0,0]]);
-      add('UpperLegL', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
-      add('UpperLegR', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
-      add('LowerLegL', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
-      add('LowerLegR', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
+      add('Abdomen', [[0,0,0],[18,0,0],[20,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[10,0,0],[12,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[6,0,0],[6,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-6,0,0],[-8,0,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[30,0,20],[34,0,24],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[30,0,-20],[34,0,-24],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-28],[0,0,-32],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,28],[0,0,32],[0,0,0]]);
+      add('UpperLegL', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
+      add('UpperLegR', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
+      add('LowerLegL', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
+      add('LowerLegR', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
       clips.Duck = new THREE.AnimationClip('Duck', 1.35, tracks);
     })();
 
@@ -260,6 +264,8 @@
     next.setLoop(opts.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, opts.loop === false ? 1 : Infinity);
     if(opts.loop === false) next.clampWhenFinished = true;
     next.setEffectiveWeight(1);
+    // Walk cycle authored ~1s; keep cadence calm vs move speed
+    next.timeScale = clipName === 'Walk' ? 0.85 : 1;
     if(f.currentAction){
       f.currentAction.crossFadeTo(next, opts.fade != null ? opts.fade : 0.18, false);
     } else {
