@@ -218,6 +218,12 @@
         addAt(root, spawnBloom(kinds[Math.floor(s.r()*kinds.length)], cols[Math.floor(s.r()*cols.length)], 0.9), s.x, s.z, 1, s.a);
       }
     });
+    if(typeof window.spawnBiomeAnimal === 'function'){
+      window.spawnBiomeAnimal('duck', root, -1.6, 1.4, 0.8, 1);
+      window.spawnBiomeAnimal('duck', root, 1.8, -1.2, -1.1, 0.92);
+      window.spawnBiomeAnimal('chick', root, 3.8, 2.2, 0.4, 1);
+      if(!isMobile) window.spawnBiomeAnimal('chick', root, -3.6, 2.8, -0.6, 0.95);
+    }
   }
 
   function fillForest(root, b){
@@ -247,6 +253,13 @@
     ringSlots(isMobile ? 5 : 8, R * 0.25, R * 0.75, 104).forEach(function(s, i){
       addAt(root, spawn(['bush_2','bush_berry_2','plant_1','plant_3','bamboo'][i % 5], 0.85 + (i % 3)*0.2), s.x, s.z, 1, s.a);
     });
+    // Orman biyomuna yakışır canlı Geyik ve Tilki modelleri (.glb + AnimationMixer)
+    if(typeof window.spawnBiomeAnimal === 'function'){
+      window.spawnBiomeAnimal('deer', root, 3.2, 2.6, -0.7, 1);
+      window.spawnBiomeAnimal('deer', root, -4.4, 3.4, 0.9, 0.88);
+      window.spawnBiomeAnimal('fox', root, 1.4, -3.6, 0.3, 1);
+      if(!isMobile) window.spawnBiomeAnimal('fox', root, -2.6, 4.2, -1.2, 0.92);
+    }
   }
 
   function fillFarm(root, b){
@@ -281,6 +294,18 @@
     ringSlots(isMobile ? 6 : 8, R * 0.76, R * 0.92, 202).forEach(function(s){
       addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
     });
+    // Çiftlik biyomuna yakışır canlı İnek, At, Alpaka ve Civciv modelleri (.glb + AnimationMixer)
+    if(typeof window.spawnBiomeAnimal === 'function'){
+      window.spawnBiomeAnimal('cow', root, -2.2, 2.8, 0.6, 1);
+      window.spawnBiomeAnimal('cow', root, 2.4, 4.0, -0.8, 0.92);
+      window.spawnBiomeAnimal('horse', root, -1.6, -1.2, 0.4, 1);
+      window.spawnBiomeAnimal('alpaca', root, 2.8, -2.2, -0.5, 1);
+      window.spawnBiomeAnimal('chick', root, 0.4, 2.4, 1.1, 1);
+      if(!isMobile){
+        window.spawnBiomeAnimal('alpaca', root, -4.2, 4.0, 1.2, 0.9);
+        window.spawnBiomeAnimal('chick', root, 1.2, 3.1, -0.4, 0.95);
+      }
+    }
   }
 
   function fillLake(root, b){
@@ -316,6 +341,13 @@
         addAt(root, spawn(['plant_2','grass_2','bamboo'][Math.floor(s.r()*3)], 0.65), s.x, s.z, 1, s.a);
       }
     });
+    // Göl biyomuna yakışır canlı Ördekler ve Geyik (.glb + AnimationMixer)
+    if(typeof window.spawnBiomeAnimal === 'function'){
+      window.spawnBiomeAnimal('duck', root, 2.6, 2.2, -0.7, 1.05);
+      window.spawnBiomeAnimal('duck', root, -2.8, 2.4, 0.8, 1);
+      window.spawnBiomeAnimal('duck', root, 1.4, -3.2, 0.2, 0.92);
+      window.spawnBiomeAnimal('deer', root, -4.2, -3.5, 0.6, 0.95);
+    }
   }
 
   function fillVillage(root, b){
@@ -353,6 +385,15 @@
         if(lan && lan.group) root.add(lan.group);
       });
     }
+    // Köy meydanına yakışır canlı Shiba, Corgi ve Kediler (.glb + AnimationMixer)
+    if(typeof window.spawnBiomeAnimal === 'function'){
+      window.spawnBiomeAnimal('dog_shiba', root, -0.8, 2.2, 0.5, 1);
+      window.spawnBiomeAnimal('cat_van', root, 2.6, 0.8, -0.9, 1);
+      if(!isMobile){
+        window.spawnBiomeAnimal('dog_corgi', root, 1.8, -2.6, -0.3, 1);
+        window.spawnBiomeAnimal('cat_fold', root, -3.2, 1.4, 0.7, 1);
+      }
+    }
   }
 
   var FILLERS = {
@@ -369,6 +410,7 @@
     }
     window._biomeRoot = null;
     window._biomes = [];
+    window._biomeAnimals = [];
     _built = false;
   }
 

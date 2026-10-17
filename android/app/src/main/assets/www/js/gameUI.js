@@ -312,11 +312,11 @@
         var pIdx = pHits[0].object.userData.petIdx;
         if(pObj){
           var pInfo = (typeof window.getPetInfo === 'function') ? window.getPetInfo(pObj, pIdx) : { name: (pObj.type === 'cat' ? 'Pamuk' : 'Karabaş'), happy: 85 };
-          var roleTxt = pObj.type === 'cat' ? '🐱 Şanslı Kaşif' : '🐶 Bahçe Muhafızı';
+          var roleTxt = pObj.breedName || (pObj.type === 'cat' ? 'Şanslı Kaşif' : 'Bahçe Muhafızı');
           inspectObject({
             icon: pObj.type === 'cat' ? '🐱' : '🐶',
             title: pInfo.name + ' (' + roleTxt + ')',
-            sub: '❤️ Mutluluk: %' + (pInfo.happy || 85),
+            sub: '❤️ Mutluluk: %' + (pInfo.happy || 85) + ' · ' + (pObj.type === 'cat' ? 'Şanslı Kaşif' : 'Böcek Avcısı'),
             progress: pInfo.happy || 85,
             pos: pObj.mesh.position,
             getPos: function(){ return (pObj && pObj.mesh) ? pObj.mesh.position : null; },

@@ -400,11 +400,18 @@
     info.happy = Math.min(100, (info.happy || 75) + 15);
     savePetMeta();
     window.spawnPetLoveFX(pet.mesh.position, '❤️');
-    pet._jumpTimer = 0.75;
+    pet._reactTimer = 2.1;
+    if(typeof window.playAnimalClip === 'function'){
+      var loveCandidates = pet.type === 'cat'
+        ? [pet.spec && pet.spec.loveClip, 'knead', 'wiggle', 'arch', 'head_tilt', 'jump']
+        : [pet.spec && pet.spec.loveClip, 'get_pet', 'excited_bounce', 'play_bow', 'happy', 'tail_wag'];
+      window.playAnimalClip(pet, loveCandidates, { fade: 0.16, force: true });
+    }
     if(typeof sndPet === 'function') sndPet();
     if(typeof addXP === 'function') addXP(8);
     if(typeof window.triggerHaptic === 'function') window.triggerHaptic('medium');
-    showToast((pet.type === 'cat' ? '🐱 ' : '🐶 ') + info.name + ' çok mutlu oldu! ❤️ (+8 XP)');
+    var breedTag = pet.breedName ? (' (' + pet.breedName + ')') : '';
+    showToast((pet.type === 'cat' ? '🐱 ' : '🐶 ') + info.name + breedTag + ' çok mutlu oldu! ❤️ (+8 XP)');
   };
 
   window.petActionFeed = function(petIdx){
@@ -423,7 +430,13 @@
     info.happy = 100;
     savePetMeta();
     window.spawnPetLoveFX(pet.mesh.position, '🍖');
-    pet._jumpTimer = 1.1;
+    pet._reactTimer = 2.4;
+    if(typeof window.playAnimalClip === 'function'){
+      var feedCandidates = pet.type === 'cat'
+        ? [pet.spec && pet.spec.feedClip, 'stretch', 'groom', 'jump', 'wiggle']
+        : [pet.spec && pet.spec.feedClip, 'eat', 'receive_treat', 'chew', 'happy'];
+      window.playAnimalClip(pet, feedCandidates, { fade: 0.16, force: true });
+    }
     if(typeof sndPet === 'function') sndPet();
     if(typeof addXP === 'function') addXP(15);
     if(typeof window.triggerHaptic === 'function') window.triggerHaptic('success');
@@ -459,6 +472,12 @@
     if(bg && bg.group){
       window.spawnPetLoveFX(bg.group.position, '🐾');
       dog.target = bg.group.position.clone();
+      dog._restTimer = 0;
+      dog._reactTimer = 0;
+      dog._chasing = true;
+      if(typeof window.playAnimalClip === 'function'){
+        window.playAnimalClip(dog, ['run', 'trot', 'zoomies', 'walk'], { fade: 0.14, timeScale: 1.2, force: true });
+      }
       bg.group.traverse(function(c){
         if(c.geometry) c.geometry.dispose();
         if(c.material) c.material.dispose();
@@ -480,6 +499,10 @@
 
   function triggerCatGift(cat, info, forced){
     window.spawnPetLoveFX(cat.mesh.position, '🎁');
+    cat._reactTimer = 1.9;
+    if(typeof window.playAnimalClip === 'function'){
+      window.playAnimalClip(cat, ['pounce', 'jump', 'wiggle', 'arch'], { fade: 0.15, force: true });
+    }
     var bonusCoin = 10 + Math.floor(Math.random() * 8);
     if(typeof addCoin === 'function') addCoin(bonusCoin, true);
     if(typeof sndCoin === 'function') sndCoin();
@@ -782,17 +805,8 @@
       fh.mesh.scale.set(sc, sc, sc);
     }
 
-    // 2) Evcil Dost Sevinç Zıplaması ve Aktif Yetenekler (Köpek & Kedi)
+    // 2) Evcil Dost Aktif Yetenekler (Köpek & Kedi — İskelet Animasyonlu)
     if(typeof pets !== 'undefined' && pets.length){
-      for(var pi = 0; pi < pets.length; pi++){
-        var p = pets[pi];
-        if(p && p._jumpTimer > 0 && p.mesh){
-          p._jumpTimer = Math.max(0, p._jumpTimer - dt);
-          p.mesh.position.y += Math.abs(Math.sin(p._jumpTimer * 14)) * 0.28;
-          p.mesh.rotation.y += dt * 5.5;
-        }
-      }
-
       // Köpek: Zararlı Böcek Avcısı
       _dogSkillTimer -= dt;
       if(_dogSkillTimer <= 0){

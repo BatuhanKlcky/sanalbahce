@@ -42,72 +42,99 @@ function stepPets(dt){
   if(!(dt>0)||!pets.length) return;
   for(var pi=0;pi<pets.length;pi++){
     var pet=pets[pi];
-    pet.time+=dt;
+    if(!pet || !pet.mesh) continue;
+    pet.time=(pet.time||0)+dt;
+
+    // 1) İskelet animasyon mikserini güncelle (gerçek .glb kemik animasyonları)
+    if(pet.mixer){
+      pet.mixer.update(dt);
+    }
+
+    // 2) Sevme / Besleme / Yetenek tepki animasyonu aktifse olduğu yerde gerçek klibi oynat
+    if(pet._reactTimer && pet._reactTimer > 0){
+      pet._reactTimer -= dt;
+      pet.mesh.position.y = 0;
+      if(pet._reactTimer <= 0){
+        pet._reactTimer = 0;
+        pet._reactClip = null;
+        if(typeof window.playAnimalClip === 'function' && pet.spec){
+          window.playAnimalClip(pet, pet.spec.idleClips || ['idle','Idle'], { fade: 0.25 });
+        }
+      }
+      continue;
+    }
+
+    // 3) Doğal dinlenme (idle/sit/groom/sniff) ve gezinme (walk/trot) durum makinesi
+    if(pet._restTimer && pet._restTimer > 0){
+      pet._restTimer -= dt;
+      pet.mesh.position.y = 0;
+      pet._idleSwitchAcc = (pet._idleSwitchAcc || 0) + dt;
+      if(pet._idleSwitchAcc > 3.6 && typeof window.playAnimalClip === 'function' && pet.spec){
+        pet._idleSwitchAcc = 0;
+        var idles = pet.spec.idleClips || ['idle'];
+        var pickIdle = idles[Math.floor(Math.random() * idles.length)];
+        window.playAnimalClip(pet, [pickIdle, 'idle', 'Idle'], { fade: 0.35 });
+      }
+      if(pet._restTimer <= 0){
+        pet._restTimer = 0;
+        pickPetTarget(pet);
+      }
+      continue;
+    }
+
     pet.wander=(pet.wander||0)+dt;
-    var arrived=pet.target&&pet.mesh.position.distanceTo(pet.target)<.5;
-    if(!pet.target||arrived||pet.wander>6){ pet.wander=0; pickPetTarget(pet); }
+    var arrived=pet.target&&pet.mesh.position.distanceTo(pet.target)<0.42;
+    if(!pet.target||arrived||pet.wander>7.5){
+      pet.wander=0;
+      // Hedefe varınca 2.2 - 5.2 sn boyunca gerçek Idle / Sit / Groom / Sniff iskelet animasyonu oynat
+      if(arrived && Math.random() < 0.72){
+        pet._restTimer = 2.2 + Math.random() * 3.0;
+        pet._idleSwitchAcc = 0;
+        if(typeof window.playAnimalClip === 'function' && pet.spec){
+          var idlePool = pet.spec.idleClips || ['idle'];
+          var chosenIdle = idlePool[Math.floor(Math.random() * idlePool.length)];
+          window.playAnimalClip(pet, [chosenIdle, 'idle', 'Idle'], { fade: 0.28 });
+        }
+        continue;
+      }
+      pickPetTarget(pet);
+    }
+
     _petDir.copy(pet.target).sub(pet.mesh.position); _petDir.y=0;
-    var moving=false;
-    if(_petDir.length()>.05){
-      var step=Math.min(_petDir.length(), PET_SPEED*dt);
-      moving=step>.004;
-      _petDir.normalize().multiplyScalar(step);
-      pet.mesh.position.add(_petDir);
+    var dist = _petDir.length();
+    var moving = false;
+    var running = dist > 4.2 || !!pet._chasing;
+    var moveSpd = PET_SPEED * (running ? 1.45 : 0.95);
+    if(dist > 0.05){
+      var step = Math.min(dist, moveSpd * dt);
+      moving = step > 0.003;
+      _petDir.normalize();
+      // Yumuşak dönüş açısı (aniden dönmek yerine doğal yönelme)
+      var targetYaw = Math.atan2(_petDir.x, _petDir.z);
+      var diffYaw = targetYaw - pet.mesh.rotation.y;
+      while(diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+      while(diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+      pet.mesh.rotation.y += diffYaw * Math.min(1, dt * 8.5);
+      pet.mesh.position.x += _petDir.x * step;
+      pet.mesh.position.z += _petDir.z * step;
+      pet.mesh.position.y = 0;
+    } else {
+      pet._chasing = false;
     }
-    var gait=pet.time*(pet.type==='dog'?11:9);
-    pet.mesh.position.y=moving?Math.abs(Math.sin(gait))*.03:Math.sin(pet.time*2)*.008;
-    pet.mesh.lookAt(pet.target.x, pet.mesh.position.y, pet.target.z);
-    if(pet.legs){
-      for(var li=0;li<pet.legs.length;li++){
-        var phase=(li===0||li===3)?0:Math.PI;
-        pet.legs[li].rotation.x=Math.sin((moving?gait:pet.time*1.5)+phase)*(moving?0.32:0.05);
-      }
-    }
-    if(pet.tail){
-      if(pet.type==='dog'){pet.tail.rotation.x=.12;pet.tail.rotation.y=Math.sin(pet.time*(moving?8:5))*(moving?0.5:0.28);}
-      else{pet.tail.rotation.x=Math.sin(pet.time*2)*.06;pet.tail.rotation.y=.15+Math.sin(pet.time*2.2)*.4;}
-    }
-    var breath=Math.sin(pet.time*(pet.type==='cat'?1.7:2.4));
-    if(pet.body){
-      var baseS=pet.body.userData.base, br=1+breath*(pet.type==='cat'?0.028:0.045);
-      if(baseS) pet.body.scale.set(baseS.x, baseS.y*br, baseS.z);
-      else pet.body.scale.set(1, br, 1);
-    }
-    if(pet.head){
-      var nod=Math.sin(pet.time*1.15)*.05;
-      if(pet.type==='dog'&&moving) nod+=Math.sin(gait)*.07;
-      pet.head.rotation.x=nod;
-      pet.head.rotation.y=Math.sin(pet.time*.65+pi)*.1;
-    }
-    if(pet.ears){
-      for(var ei=0;ei<pet.ears.length;ei++){
-        var ear=pet.ears[ei];
-        var tw=Math.sin(pet.time*(pet.type==='cat'?4.4:1.5)+ei*1.8);
-        ear.rotation.z=(ear.userData.rz||0)+tw*(pet.type==='cat'?0.14:0.06);
-        if(pet.type==='dog') ear.rotation.x=(ear.userData.rx||0)+Math.sin((moving?gait*.5:pet.time*2)+ei)*(moving?0.22:0.08);
-      }
-    }
-    if(pet.lids){
-      var win=pet.type==='cat'?3.4:2.5;
-      var bph=pet.time%win;
-      var shut=bph>win-.2?Math.sin((bph-(win-.2))/.2*Math.PI):0;
-      for(var ld=0;ld<pet.lids.length;ld++){
-        var restS=pet.lids[ld].userData.restS||.12, restY=pet.lids[ld].userData.restY||.02;
-        pet.lids[ld].scale.y=restS+shut*1.15;
-        pet.lids[ld].position.y=restY-shut*restY;
-      }
-    }
-    if(pet.jaw){
-      var pant=Math.max(0, Math.sin(pet.time*(moving?9:3.2)));
-      var jx=pet.jaw.userData.rx; if(jx==null) jx=Math.PI/2;
-      pet.jaw.rotation.x=jx+pant*(moving?0.2:0.06);
-    }
-    if(pet.tailSegs){
-      for(var ti=0;ti<pet.tailSegs.length;ti++){
-        var seg=pet.tailSegs[ti];
-        var wag=Math.sin(pet.time*(pet.type==='dog'?(moving?10:5.5):2.4)+ti*.8);
-        seg.rotation.z=wag*(pet.type==='dog'?(moving?0.4:0.62):0.2);
-        seg.rotation.x=(seg.userData.rx||0)+wag*(pet.type==='cat'?0.16:0.08);
+
+    // 4) Hareket durumuna göre gerçek .glb yürüme / koşma / durma klibine geçiş
+    if(typeof window.playAnimalClip === 'function' && pet.spec){
+      if(moving){
+        var moveClip = running ? (pet.spec.runClip || 'trot') : (pet.spec.walkClip || 'walk');
+        window.playAnimalClip(pet, [moveClip, 'walk', 'Walk', 'AnimalArmature|Walk'], {
+          fade: 0.20,
+          timeScale: running ? 1.15 : 1.0
+        });
+      } else {
+        window.playAnimalClip(pet, [pet.spec.idleClips ? pet.spec.idleClips[0] : 'idle', 'idle', 'Idle'], {
+          fade: 0.25,
+          timeScale: 1.0
+        });
       }
     }
   }

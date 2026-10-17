@@ -204,6 +204,68 @@
 
     if(window._meadow) window._meadow.forEach(function(m){ m.visible = true; });
 
+    // Cozy Biyom Hayvanları (.glb + THREE.AnimationMixer iskelet animasyon döngüsü)
+    if(window._biomeAnimals && window._biomeAnimals.length){
+      for(var ai = 0; ai < window._biomeAnimals.length; ai++){
+        var ba = window._biomeAnimals[ai];
+        if(!ba || !ba.mesh) continue;
+        if(ba.mixer) ba.mixer.update(dt);
+
+        ba.stateTimer = (ba.stateTimer || 0) - dt;
+        if(ba.state === 'walk' && ba.target){
+          var dx = ba.target.x - ba.mesh.position.x;
+          var dz = ba.target.z - ba.mesh.position.z;
+          var dist = Math.sqrt(dx * dx + dz * dz);
+          if(dist > 0.08 && ba.stateTimer > 0){
+            var step = Math.min(dist, (ba.speed || 0.65) * dt);
+            var nx = dx / dist, nz = dz / dist;
+            var targetYaw = Math.atan2(nx, nz);
+            var diffYaw = targetYaw - ba.mesh.rotation.y;
+            while(diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+            while(diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+            ba.mesh.rotation.y += diffYaw * Math.min(1, dt * 6.5);
+            ba.mesh.position.x += nx * step;
+            ba.mesh.position.z += nz * step;
+          } else {
+            ba.state = 'idle';
+            ba.stateTimer = 3.0 + Math.random() * 5.0;
+            if(typeof window.playAnimalClip === 'function' && ba.spec){
+              var idles = ba.spec.idleClips || ['idle', 'Idle'];
+              var pick = idles[Math.floor(Math.random() * idles.length)];
+              window.playAnimalClip(ba, [pick, 'idle', 'Idle'], { fade: 0.35 });
+            }
+          }
+        } else if(ba.stateTimer <= 0){
+          if(Math.random() < 0.55){
+            // Yeni bir noktaya doğru gerçek Walk iskelet animasyonuyla yürü
+            var ang2 = Math.random() * Math.PI * 2;
+            var rad2 = 0.6 + Math.random() * (ba.wanderR || 2.2);
+            ba.target = {
+              x: (ba.homeX || 0) + Math.cos(ang2) * rad2,
+              z: (ba.homeZ || 0) + Math.sin(ang2) * rad2
+            };
+            ba.state = 'walk';
+            ba.stateTimer = 2.5 + Math.random() * 4.0;
+            if(typeof window.playAnimalClip === 'function' && ba.spec){
+              window.playAnimalClip(ba, [ba.spec.walkClip || 'walk', 'walk', 'Walk', 'AnimalArmature|Walk'], {
+                fade: 0.28,
+                timeScale: 0.92
+              });
+            }
+          } else {
+            // Olduğu yerde farklı bir Idle / Eating / Groom iskelet animasyonuna geç
+            ba.state = 'idle';
+            ba.stateTimer = 3.2 + Math.random() * 4.5;
+            if(typeof window.playAnimalClip === 'function' && ba.spec){
+              var idles2 = ba.spec.idleClips || ['idle', 'Idle'];
+              var pick2 = idles2[Math.floor(Math.random() * idles2.length)];
+              window.playAnimalClip(ba, [pick2, 'idle', 'Idle'], { fade: 0.35 });
+            }
+          }
+        }
+      }
+    }
+
     // Extra canopy bob for cozy trees
     if(typeof decos !== 'undefined'){
       for(var di = 0; di < decos.length; di++){

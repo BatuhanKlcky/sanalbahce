@@ -1,202 +1,367 @@
 // Magaza, nadir esyalar ve evcil hayvanlar.
-// ── EVCİL HAYVAN ──────────────────────────────────────────────────────────
-var pets = []; // {mesh, type, target, time, bobPhase}
+// ── EVCİL HAYVAN & 3D İSKELET ANİMASYONLU HAYVAN SİSTEMİ (.GLB + AnimationMixer) ──
+var pets = []; // {mesh, type, breed, breedName, target, time, wander, mixer, clips, actions, currentAction, animName, _idleTimer, _reactTimer}
 var PET_TYPES = ['cat','dog'];
 
-function petMat(hex){
-  if(!petMat.cache) petMat.cache={};
-  var key=''+hex;
-  if(!petMat.cache[key]){
-    // Soft toy-like fur — slight emissive lift so pets stay readable against foliage.
-    var m=new THREE.MeshStandardMaterial({
-      color:hex, roughness:.68, metalness:0, flatShading:false,
-      emissive:hex, emissiveIntensity:.08
-    });
-    m.userData.keep=true;
-    petMat.cache[key]=m;
+var ANIMAL_SPECS = {
+  // Evcil Kediler (37 gerçek iskelet animasyonu: idle, walk, trot, run, jump, sit_idle, groom, scratch_ear, stretch, loaf_idle, sleep_idle, knead, pounce, wiggle, head_tilt, tail_swish...)
+  cat_toyger: { url: 'models/animals/Cat.glb?v=2',      targetH: 0.60, rotY: -Math.PI / 2, label: 'Tekir Kedi',      idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'stretch' },
+  cat_van:    { url: 'models/animals/Cat_Van.glb?v=2',  targetH: 0.60, rotY: -Math.PI / 2, label: 'Van Kedisi',      idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'wiggle',   feedClip: 'jump'    },
+  cat_fold:   { url: 'models/animals/Cat_Fold.glb?v=2', targetH: 0.56, rotY: -Math.PI / 2, label: 'Scottish Fold',   idleClips: ['idle','sit_idle','groom','scratch_ear','loaf_idle','tail_swish','head_tilt','stretch'], walkClip: 'walk', runClip: 'trot', loveClip: 'knead',    feedClip: 'wiggle'  },
+  // Evcil Köpekler (65 gerçek iskelet animasyonu: idle, idle_happy, walk, trot, run, sit_idle, play_bow, excited_bounce, get_pet, eat, sniff, scratch_ear, head_tilt, shake_off, happy...)
+  dog_golden: { url: 'models/animals/Dog.glb?v=2',       targetH: 0.76, rotY: -Math.PI / 2, label: 'Golden Retriever', idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','yawn','shake_off'], walkClip: 'walk', runClip: 'trot', loveClip: 'get_pet',        feedClip: 'eat' },
+  dog_shiba:  { url: 'models/animals/Dog_Shiba.glb?v=2', targetH: 0.68, rotY: -Math.PI / 2, label: 'Shiba Inu',        idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'excited_bounce', feedClip: 'eat' },
+  dog_corgi:  { url: 'models/animals/Dog_Corgi.glb?v=2', targetH: 0.58, rotY: -Math.PI / 2, label: 'Welsh Corgi',      idleClips: ['idle','idle_happy','sit_idle','sniff','scratch_ear','head_tilt','play_bow','happy'], walkClip: 'walk', runClip: 'trot', loveClip: 'play_bow',       feedClip: 'eat' },
+  // Çiftlik, Orman ve Göl Biyomu Hayvanları (Quaternius / PolyPizza / Gobkit İskelet Animasyonlu)
+  cow:        { url: 'models/animals/Cow.glb?v=2',    targetH: 1.32, rotY: 0, lift: true, label: 'İnek',   idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  horse:      { url: 'models/animals/Horse.glb?v=2',  targetH: 1.52, rotY: 0, lift: true, label: 'At',     idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  alpaca:     { url: 'models/animals/Alpaca.glb?v=2', targetH: 1.24, rotY: 0, lift: true, label: 'Alpaka', idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  deer:       { url: 'models/animals/Deer.glb?v=2',   targetH: 1.35, rotY: 0, lift: true, label: 'Geyik',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
+  fox:        { url: 'models/animals/Fox.glb?v=2',    targetH: 0.68, rotY: 0, lift: true, label: 'Tilki',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_2_HeadLow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_ToIdle', feedClip: 'AnimalArmature|Eating' },
+  chick:      { url: 'models/animals/Chick.glb?v=2',  targetH: 0.36, rotY: 0, lift: false, label: 'Civciv', idleClips: ['Idle','Idle_Peck'], walkClip: 'Run', runClip: 'Run', loveClip: 'Idle_Peck', feedClip: 'Idle_Peck' },
+  duck:       { url: 'models/animals/Duck.glb?v=2',   targetH: 0.44, rotY: 0, lift: false, label: 'Ördek',  idleClips: ['idle'], walkClip: 'walk', runClip: 'walk', loveClip: 'idle', feedClip: 'idle' }
+};
+
+var CAT_BREED_KEYS = ['cat_toyger', 'cat_van', 'cat_fold'];
+var DOG_BREED_KEYS = ['dog_golden', 'dog_shiba', 'dog_corgi'];
+var _catSpawnCount = 0;
+var _dogSpawnCount = 0;
+var _animalBufCache = {};   // key -> ArrayBuffer
+var _animalWaitQueue = {};  // key -> [cb, ...]
+
+function isValidAnimalGLB(buf){
+  if(!buf || !(buf.byteLength > 2000)) return false;
+  var u8 = new Uint8Array(buf, 0, 4);
+  return u8[0] === 0x67 && u8[1] === 0x6C && u8[2] === 0x54 && u8[3] === 0x46;
+}
+
+function fetchAnimalArrayBuffer(url, cb){
+  var cleanRel = String(url || '').replace(/\?.*$/, '');
+  var candidates = [];
+  if(typeof location === 'undefined' || (location.protocol !== 'file:' && String(location.hostname || '').indexOf('htmlpreview') < 0)){
+    candidates.push(url);
+    candidates.push(cleanRel + '?cb=' + Date.now());
   }
-  return petMat.cache[key];
+  candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/' + cleanRel);
+  var idx = 0;
+  function tryNext(lastErr){
+    if(idx >= candidates.length){
+      cb(lastErr || new Error('animal-glb-failed'), null);
+      return;
+    }
+    var target = candidates[idx++];
+    var isBurst = target.indexOf('?cb=') >= 0 || target.indexOf('raw.githubusercontent.com') >= 0;
+    if(isBurst && typeof fetch === 'function'){
+      fetch(target, { cache: 'reload', mode: 'cors' }).then(function(r){
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      }).then(function(buf){
+        if(isValidAnimalGLB(buf)) cb(null, buf);
+        else tryNext(new Error('invalid-glb'));
+      }).catch(function(e){ tryNext(e); });
+      return;
+    }
+    try {
+      var req = new XMLHttpRequest();
+      req.open('GET', target, true);
+      req.responseType = 'arraybuffer';
+      req.onload = function(){
+        if(((req.status >= 200 && req.status < 300) || req.status === 0) && isValidAnimalGLB(req.response)){
+          cb(null, req.response);
+        } else {
+          tryNext(new Error('HTTP ' + req.status));
+        }
+      };
+      req.onerror = function(){ tryNext(new Error('xhr-error')); };
+      req.send(null);
+    } catch(e){
+      tryNext(e);
+    }
+  }
+  tryNext(null);
 }
-function petTail(mat, fat, side, lift, len){
-  var L=len||.28;
-  var curve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0,0,0),
-    new THREE.Vector3(side*.3, lift*.4, -L*.34),
-    new THREE.Vector3(side, lift, -L*.68),
-    new THREE.Vector3(side*.4, lift*.85, -L)
-  ]);
-  return new THREE.Mesh(new THREE.TubeGeometry(curve, 20, fat, 8, false), mat);
-}
-function petLimb(mat, x, y, z, len){
-  var hip=new THREE.Group();
-  hip.position.set(x, y, z);
-  var leg=new THREE.Mesh(new THREE.CylinderGeometry(len*.58, len*.4, len, 12), mat);
-  leg.position.y=-len*.36;
-  hip.add(leg);
-  var paw=new THREE.Mesh(new THREE.SphereGeometry(len*.5, 10, 8), mat);
-  paw.scale.set(1.15, .48, 1.3);
-  paw.position.y=-len*.82;
-  hip.add(paw);
-  return hip;
-}
-function petEye(fur, r){
-  var eye=new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), petMat(0xfff8f2, -2));
-  eye.scale.set(1, .86, .7);
-  var pupil=new THREE.Mesh(new THREE.SphereGeometry(r*.52, 8, 6), petMat(0x102016, -4));
-  pupil.position.z=r*.5;
-  eye.add(pupil);
-  if(!petEye.glint){ petEye.glint=new THREE.MeshBasicMaterial({color:0xffffff}); petEye.glint.userData.keep=true; }
-  var glint=new THREE.Mesh(new THREE.SphereGeometry(r*.26, 6, 4), petEye.glint);
-  glint.position.set(r*.18, r*.2, r*.62);
-  eye.add(glint);
-  var lid=new THREE.Mesh(new THREE.SphereGeometry(r*1.05, 8, 6), fur);
-  lid.scale.set(1.05, .12, .9);
-  lid.position.set(0, r*1.05, r*.05);
-  lid.userData.restY=lid.position.y;
-  lid.userData.restS=.12;
-  eye.add(lid);
-  eye.userData.lid=lid;
-  return eye;
-}
-function mkCat(x, z) {
-  var g=new THREE.Group();
-  var mat=petMat(0xf0a35a);
-  var body=new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), mat);
-  body.scale.set(.18, .145, .24);
-  body.position.set(0, .26, -.04);
-  body.userData.base=body.scale.clone();
-  g.add(body);
-  var belly=new THREE.Mesh(new THREE.SphereGeometry(1, 18, 14), petMat(0xfff1e4));
-  belly.scale.set(.11, .1, .14);
-  belly.position.set(0, .2, .02);
-  g.add(belly);
-  var skull=new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), mat);
-  skull.scale.set(.125, .118, .12);
-  skull.position.set(0, .36, .16);
-  g.add(skull);
-  var snout=new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), petMat(0xfff1e4));
-  snout.scale.set(.05, .038, .072);
-  snout.position.set(0, .275, .23);
-  g.add(snout);
-  var head=new THREE.Group();
-  head.position.copy(skull.position);
-  g.add(head);
-  var nose=new THREE.Mesh(new THREE.SphereGeometry(.016, 8, 6), petMat(0xc45a62));
-  nose.scale.set(1.1, .7, .85);
-  nose.position.set(0, -.02, .1);
-  head.add(nose);
-  [-1, 1].forEach(function(s){
-    for(var w=0;w<2;w++){
-      var whisk=new THREE.Mesh(new THREE.CylinderGeometry(.0022, .0022, .08, 4), petMat(0x3a2a22));
-      whisk.rotation.z=s*(1.05+w*.28);
-      whisk.position.set(s*.03, -.02, .08);
-      head.add(whisk);
+
+function getAnimalBuffer(specKey, cb){
+  var spec = ANIMAL_SPECS[specKey];
+  if(!spec){ cb(new Error('unknown-spec'), null); return; }
+  if(_animalBufCache[specKey]){
+    cb(null, _animalBufCache[specKey]);
+    return;
+  }
+  if(_animalWaitQueue[specKey]){
+    _animalWaitQueue[specKey].push(cb);
+    return;
+  }
+  _animalWaitQueue[specKey] = [cb];
+  fetchAnimalArrayBuffer(spec.url, function(err, buf){
+    if(!err && buf) _animalBufCache[specKey] = buf;
+    var q = _animalWaitQueue[specKey] || [];
+    delete _animalWaitQueue[specKey];
+    for(var i = 0; i < q.length; i++){
+      try { q[i](err, buf); } catch(e){}
     }
   });
-  var ears=[], lids=[];
-  [-1, 1].forEach(function(s){
-    var pivot=new THREE.Group();
-    var ear=new THREE.Mesh(new THREE.ConeGeometry(.05, .16, 6), mat);
-    ear.geometry.translate(0, .08, 0);
-    var inner=new THREE.Mesh(new THREE.ConeGeometry(.024, .08, 5), petMat(0xf0a0b4));
-    inner.geometry.translate(0, .09, 0);
-    inner.position.z=.01;
-    ear.add(inner);
-    pivot.add(ear);
-    pivot.position.set(s*.072, .07, -.02);
-    pivot.rotation.z=s>0?-.35:.35;
-    pivot.userData.rz=pivot.rotation.z;
-    head.add(pivot); ears.push(pivot);
-    var eye=petEye(mat, .022);
-    eye.position.set(s*.042, .03, .078);
-    eye.rotation.x=-.7;
-    head.add(eye); lids.push(eye.userData.lid);
+}
+
+function prepareAnimalMaterials(root, spec){
+  root.traverse(function(c){
+    if(!c.isMesh) return;
+    if(c.isSkinnedMesh){
+      c.frustumCulled = false;
+      c.matrixAutoUpdate = true;
+    }
+    if(c.geometry && c.geometry.attributes && c.geometry.attributes.color){
+      c.geometry.deleteAttribute('color');
+    }
+    var mats = Array.isArray(c.material) ? c.material : [c.material];
+    mats.forEach(function(m){
+      if(!m) return;
+      m.vertexColors = false;
+      m.metalness = 0;
+      if(m.map){
+        if(m.color) m.color.setHex(0xffffff);
+        m.roughness = 0.72;
+        if(m.emissive){
+          m.emissive.setHex(0x241a10);
+          m.emissiveIntensity = 0.08;
+        }
+      } else if(spec && spec.lift && m.color){
+        var nm = String(m.name || '');
+        if(!/eye_black|eyes_black|^eyes$|^black$/i.test(nm)){
+          var hsl = { h: 0, s: 0, l: 0 };
+          m.color.getHSL(hsl);
+          hsl.l = Math.min(0.76, hsl.l * 1.55 + 0.12);
+          hsl.s = Math.min(0.85, hsl.s * 1.22 + 0.05);
+          m.color.setHSL(hsl.h, hsl.s, hsl.l);
+          if(m.emissive){
+            m.emissive.copy(m.color);
+            m.emissiveIntensity = 0.06;
+          }
+        }
+        m.roughness = 0.80;
+      }
+      m.userData = m.userData || {};
+      m.userData.keep = true;
+      m.needsUpdate = true;
+    });
   });
-  var tail=petTail(mat, .016, .16, .05, .3);
-  tail.position.set(.02, .28, -.24);
-  g.add(tail);
-  var legs=[];
-  [[-.075, .05], [.075, .05], [-.08, -.15], [.08, -.15]].forEach(function(p){
-    var hip=petLimb(mat, p[0], .13, p[1], .14);
-    g.add(hip); legs.push(hip);
+}
+
+function findAnimalClip(rec, candidates){
+  if(!rec || !rec.clips) return null;
+  var list = Array.isArray(candidates) ? candidates : [candidates];
+  var keys = Object.keys(rec.clips);
+  for(var i = 0; i < list.length; i++){
+    var want = list[i];
+    if(!want) continue;
+    if(rec.clips[want]) return rec.clips[want];
+    var wantLow = want.toLowerCase();
+    for(var k = 0; k < keys.length; k++){
+      var ck = keys[k];
+      var ckLow = ck.toLowerCase();
+      if(ckLow === wantLow || ckLow.endsWith('|' + wantLow)) return rec.clips[ck];
+    }
+  }
+  for(var j = 0; j < list.length; j++){
+    var w2 = String(list[j] || '').toLowerCase();
+    if(!w2) continue;
+    for(var m = 0; m < keys.length; m++){
+      if(keys[m].toLowerCase().indexOf(w2) >= 0) return rec.clips[keys[m]];
+    }
+  }
+  return keys.length ? rec.clips[keys[0]] : null;
+}
+
+window.playAnimalClip = function(rec, candidates, opts){
+  opts = opts || {};
+  if(!rec || !rec.mixer || !rec.clips) return false;
+  var clip = findAnimalClip(rec, candidates);
+  if(!clip) return false;
+  if(!rec.actions) rec.actions = {};
+  var key = clip.name;
+  if(!rec.actions[key]) rec.actions[key] = rec.mixer.clipAction(clip);
+  var next = rec.actions[key];
+  if(rec.currentAction === next && next.isRunning() && !opts.force){
+    if(opts.timeScale != null) next.timeScale = opts.timeScale;
+    return true;
+  }
+  next.reset();
+  var once = opts.loop === false;
+  next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, once ? 1 : Infinity);
+  next.clampWhenFinished = !!once;
+  next.setEffectiveWeight(1);
+  next.timeScale = opts.timeScale != null ? opts.timeScale : 1;
+  var fade = opts.fade != null ? opts.fade : 0.22;
+  if(rec.currentAction && rec.currentAction !== next){
+    rec.currentAction.crossFadeTo(next, fade, false);
+  } else {
+    next.fadeIn(fade);
+  }
+  next.play();
+  rec.currentAction = next;
+  rec.animName = key;
+  return true;
+};
+
+function mountAnimalIntoRecord(rec, specKey){
+  var spec = ANIMAL_SPECS[specKey];
+  if(!spec || !rec || !rec.mesh) return;
+  getAnimalBuffer(specKey, function(err, buf){
+    if(err || !buf || typeof THREE === 'undefined' || !THREE.GLTFLoader) return;
+    try {
+      var loader = new THREE.GLTFLoader();
+      loader.parse(buf, '', function(gltf){
+        if(!gltf || !gltf.scene || !rec.mesh) return;
+        var root = gltf.scene;
+        prepareAnimalMaterials(root, spec);
+
+        var clipsMap = {};
+        var anims = gltf.animations || [];
+        for(var i = 0; i < anims.length; i++){
+          clipsMap[anims[i].name] = anims[i];
+        }
+        var mixer = new THREE.AnimationMixer(root);
+        rec.mixer = mixer;
+        rec.clips = clipsMap;
+        rec.actions = {};
+        rec.spec = spec;
+
+        // İlk Idle karesini uygula ki bounding-box gerçek duruşa göre hesaplansın
+        window.playAnimalClip(rec, spec.idleClips || ['idle', 'Idle'], { fade: 0.01 });
+        mixer.update(0.016);
+        root.updateMatrixWorld(true);
+
+        var box = new THREE.Box3().setFromObject(root);
+        var h = Math.max(1e-4, box.max.y - box.min.y);
+        var cx = (box.min.x + box.max.x) * 0.5;
+        var cz = (box.min.z + box.max.z) * 0.5;
+        if(isFinite(box.min.y)) root.position.y -= box.min.y;
+        if(isFinite(cx)) root.position.x -= cx;
+        if(isFinite(cz)) root.position.z -= cz;
+
+        var pivot = new THREE.Group();
+        pivot.rotation.y = spec.rotY || 0;
+        pivot.scale.setScalar((spec.targetH || 0.65) / h);
+        pivot.add(root);
+
+        rec.mesh.add(pivot);
+        rec.modelPivot = pivot;
+        // Farklı hayvanların animasyon fazları senkron görünmesin
+        mixer.update((Math.random() * 1.7) % 1.2);
+      }, function(){});
+    } catch(e){}
   });
-  g.scale.setScalar(2.35);
-  placePet(g, 'cat', x, z, tail, '🐱 Kedi bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids});
+}
+
+function createShadowDisc(radius){
+  var sh = new THREE.Mesh(
+    new THREE.CircleGeometry(radius || 0.34, 14),
+    new THREE.MeshBasicMaterial({ color: 0x1a2a14, transparent: true, opacity: 0.28, depthWrite: false })
+  );
+  sh.rotation.x = -Math.PI / 2;
+  sh.position.y = 0.02;
+  sh.material.userData.keep = true;
+  return sh;
+}
+
+function spawnPetWithSpec(type, specKey, x, z, toastMsg){
+  var spec = ANIMAL_SPECS[specKey] || ANIMAL_SPECS.cat_toyger;
+  var g = new THREE.Group();
+  g.name = 'pet_' + type + '_' + specKey;
+  g.add(createShadowDisc(type === 'dog' ? 0.38 : 0.32));
+  // SkinnedMesh üzerinde mobil/masaüstü tıklamayı %100 kolaylaştıran görünmez hit silindiri
+  var hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+  hitMat.userData.keep = true;
+  var hitCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.78, 8), hitMat);
+  hitCyl.position.y = 0.39;
+  g.add(hitCyl);
+  g.position.set(x, 0, z);
+  scene.add(g);
+
+  var rec = {
+    mesh: g,
+    type: type,
+    breed: specKey,
+    breedName: spec.label,
+    target: null,
+    time: Math.random() * 20,
+    wander: 0,
+    mixer: null,
+    clips: null,
+    actions: {},
+    currentAction: null,
+    animName: '',
+    spec: spec,
+    _idleTimer: 2.5 + Math.random() * 3.5,
+    _reactTimer: 0
+  };
+  pets.push(rec);
+  mountAnimalIntoRecord(rec, specKey);
+
+  if(isLoading) return rec;
+  showToast(toastMsg || ((type === 'cat' ? '🐱 ' : '🐶 ') + spec.label + ' bahçeye katıldı!'));
+  sndPet();
+  markDirty(); save(true);
+  return rec;
+}
+
+function mkCat(x, z) {
+  var specKey = CAT_BREED_KEYS[_catSpawnCount % CAT_BREED_KEYS.length];
+  _catSpawnCount++;
+  var spec = ANIMAL_SPECS[specKey];
+  return spawnPetWithSpec('cat', specKey, x, z, '🐱 ' + spec.label + ' bahçeye katıldı!');
 }
 
 function mkDog(x, z) {
-  var g=new THREE.Group();
-  var mat=petMat(0xc4895a);
-  var dMat=petMat(0x8a5a34);
-  var body=new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), mat);
-  body.scale.set(.185, .15, .3);
-  body.position.set(0, .28, -.06);
-  body.userData.base=body.scale.clone();
-  g.add(body);
-  var belly=new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), petMat(0xfff4e8));
-  belly.scale.set(.12, .1, .16);
-  belly.position.set(0, .22, .02);
-  g.add(belly);
-  var skull=new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), mat);
-  skull.scale.set(.13, .12, .13);
-  skull.position.set(0, .38, .2);
-  g.add(skull);
-  var snout=new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), mat);
-  snout.scale.set(.055, .045, .12);
-  snout.position.set(0, .3, .31);
-  g.add(snout);
-  var head=new THREE.Group();
-  head.position.copy(skull.position);
-  g.add(head);
-  var jaw=new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), dMat);
-  jaw.scale.set(1.1, .4, 1.5);
-  jaw.position.set(0, -.05, .12);
-  jaw.userData.rx=0;
-  head.add(jaw);
-  var nose=new THREE.Mesh(new THREE.SphereGeometry(.02, 8, 6), petMat(0x1a120e));
-  nose.position.set(0, -.02, .2);
-  head.add(nose);
-  var ears=[], lids=[];
-  [-1, 1].forEach(function(s){
-    var pivot=new THREE.Group();
-    var ear=new THREE.Mesh(new THREE.ConeGeometry(.055, .18, 6), dMat);
-    ear.geometry.translate(0, -.09, 0);
-    ear.rotation.z=s*.55;
-    ear.rotation.x=.35;
-    pivot.add(ear);
-    pivot.position.set(s*.1, .02, .02);
-    pivot.userData.rz=0;
-    pivot.userData.rx=0;
-    head.add(pivot); ears.push(pivot);
-    var eye=petEye(mat, .02);
-    eye.position.set(s*.045, .03, .08);
-    eye.rotation.x=-.65;
-    head.add(eye); lids.push(eye.userData.lid);
-  });
-  var tail=petTail(mat, .024, .05, .12, .22);
-  tail.position.set(0, .32, -.32);
-  g.add(tail);
-  var legs=[];
-  [[-.09, .08], [.09, .08], [-.095, -.18], [.095, -.18]].forEach(function(p){
-    var hip=petLimb(mat, p[0], .14, p[1], .15);
-    g.add(hip); legs.push(hip);
-  });
-  g.scale.setScalar(2.3);
-  placePet(g, 'dog', x, z, tail, '🐶 Köpek bahçeye katıldı!', legs, {body:body, head:head, ears:ears, lids:lids, jaw:jaw});
+  var specKey = DOG_BREED_KEYS[_dogSpawnCount % DOG_BREED_KEYS.length];
+  _dogSpawnCount++;
+  var spec = ANIMAL_SPECS[specKey];
+  return spawnPetWithSpec('dog', specKey, x, z, '🐶 ' + spec.label + ' bahçeye katıldı!');
 }
-function placePet(g, type, x, z, tail, msg, legs, rig){
-  var sh=new THREE.Mesh(new THREE.CircleGeometry(.32,10), new THREE.MeshBasicMaterial({color:0x1a2a14,transparent:true,opacity:.28,depthWrite:false}));
-  sh.rotation.x=-Math.PI/2; sh.position.y=.02; g.add(sh);
-  g.position.set(x, 0, z);
-  scene.add(g);
-  var rec={mesh:g, type:type, target:null, time:Math.random()*20, wander:0, tail:tail, legs:legs||null};
-  if(rig){ for(var k in rig) rec[k]=rig[k]; }
-  pets.push(rec);
-  if(isLoading) return;
-  showToast(msg);
-  sndPet();
-  markDirty(); save(true);
-}
+
+// Cozy Biyomlar (Çiftlik, Orman, Göl, Köy) için gerçek iskelet animasyonlu hayvan üretici
+window.spawnBiomeAnimal = function(specKey, parentGroup, x, z, rotY, scaleMult){
+  var spec = ANIMAL_SPECS[specKey];
+  if(!spec || !parentGroup) return null;
+  var g = new THREE.Group();
+  g.name = 'biomeAnimal_' + specKey;
+  g.add(createShadowDisc(spec.targetH * 0.32));
+  g.position.set(x || 0, 0, z || 0);
+  if(rotY != null) g.rotation.y = rotY;
+  if(scaleMult != null && scaleMult !== 1) g.scale.setScalar(scaleMult);
+  parentGroup.add(g);
+
+  var rec = {
+    mesh: g,
+    type: specKey,
+    breed: specKey,
+    breedName: spec.label,
+    homeX: x || 0,
+    homeZ: z || 0,
+    wanderR: specKey === 'chick' || specKey === 'duck' ? 1.8 : 2.6,
+    speed: specKey === 'chick' || specKey === 'duck' ? 0.55 : 0.72,
+    target: null,
+    state: 'idle',
+    stateTimer: 1.5 + Math.random() * 4.0,
+    mixer: null,
+    clips: null,
+    actions: {},
+    currentAction: null,
+    animName: '',
+    spec: spec
+  };
+  mountAnimalIntoRecord(rec, specKey);
+  if(!window._biomeAnimals) window._biomeAnimals = [];
+  window._biomeAnimals.push(rec);
+  return rec;
+};
+
+// Sayfa açılır açılmaz kedi ve köpek .glb modellerini arka planda önbelleğe al
+setTimeout(function(){
+  ['cat_toyger', 'dog_golden', 'cat_van', 'dog_shiba'].forEach(function(k){
+    getAnimalBuffer(k, function(){});
+  });
+}, 120);
 
 window.addPet = function(type) {
   var maxPets = 4;
