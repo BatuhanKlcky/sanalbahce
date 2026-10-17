@@ -1,7 +1,7 @@
 3D models from Quaternius (https://quaternius.com)
 License: Creative Commons CC0 1.0 Universal
 Packs used: Nature Pack, Medieval Village Pack, Crops Pack,
-Modular Men Pack, Survival Pack (Shovel),
-Platformer Game Pack Character (FarmerRig — Idle/Walk/Duck/Punch clips)
+Modular Men/Women Pack (Farmer meshes), Survival Pack (Shovel),
+Platformer Game Pack Character (animation clips retargeted onto farmers)
 Mirrored via https://quaternius.trebeljahr.com
 Support Quaternius: https://quaternius.com
