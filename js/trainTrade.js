@@ -379,11 +379,18 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 3) BUHAR DUMANI PARÇACIK SİSTEMİ
+  // 3) BUHAR DUMANI PARÇACIK SİSTEMİ (Optimizasyon: Object Pool & Zero-GC)
   // ═══════════════════════════════════════════════════════════════════════════
-  function spawnSmokePuff(pos, isHeavy){
-    if(typeof scene === 'undefined' || !pos) return;
-    var puffGeo = new THREE.SphereGeometry(isHeavy ? 0.22 : 0.15, 6, 6);
+  var _sharedSmokeGeo = new THREE.SphereGeometry(0.18, 6, 6);
+  var _smokeMeshPool = [];
+  function getPooledSmokeMesh(){
+    if(_smokeMeshPool.length > 0){
+      var m = _smokeMeshPool.pop();
+      m.visible = true;
+      m.material.opacity = 0.78;
+      m.scale.set(1, 1, 1);
+      return m;
+    }
     var puffMat = new THREE.MeshStandardMaterial({
       color: 0xefefef,
       roughness: 0.9,
@@ -391,12 +398,21 @@
       opacity: 0.78,
       depthWrite: false
     });
-    var mesh = new THREE.Mesh(puffGeo, puffMat);
-    mesh.position.copy(pos);
+    var mesh = new THREE.Mesh(_sharedSmokeGeo, puffMat);
     scene.add(mesh);
+    return mesh;
+  }
+
+  function spawnSmokePuff(pos, isHeavy){
+    if(typeof scene === 'undefined' || !pos) return;
+    var mesh = getPooledSmokeMesh();
+    mesh.position.copy(pos);
+    var initScale = isHeavy ? 1.25 : 0.85;
+    mesh.scale.set(initScale, initScale, initScale);
 
     smokeParticles.push({
       mesh: mesh,
+      initScale: initScale,
       life: 0,
       maxLife: 1.4 + Math.random() * 0.4,
       vy: 1.1 + Math.random() * 0.4,
@@ -943,14 +959,13 @@
       }
     }
 
-    // 2) Buhar Dumanı Parçacıkları Fiziği
+    // 2) Buhar Dumanı Parçacıkları Fiziği (Geri dönüşümlü havuz - Zero GC)
     for(var pi = smokeParticles.length - 1; pi >= 0; pi--){
       var sp = smokeParticles[pi];
       sp.life += dt;
       if(sp.life >= sp.maxLife){
-        if(sp.mesh.parent) sp.mesh.parent.remove(sp.mesh);
-        sp.mesh.geometry.dispose();
-        sp.mesh.material.dispose();
+        sp.mesh.visible = false;
+        _smokeMeshPool.push(sp.mesh);
         smokeParticles.splice(pi, 1);
         continue;
       }
@@ -958,7 +973,7 @@
       sp.mesh.position.y += sp.vy * dt;
       sp.mesh.position.x += sp.vx * dt;
       sp.mesh.position.z += sp.vz * dt;
-      var curScale = 1.0 + prog * sp.scaleSpd;
+      var curScale = (sp.initScale || 1.0) * (1.0 + prog * sp.scaleSpd);
       sp.mesh.scale.set(curScale, curScale, curScale);
       sp.mesh.material.opacity = (1 - prog) * 0.7;
     }

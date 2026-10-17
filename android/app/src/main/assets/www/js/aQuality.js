@@ -429,15 +429,21 @@
   }
   window.getPetInfo = getPetInfo;
 
+  var _emojiTexCache = {};
   function makeHeartSprite(emoji){
-    var c = document.createElement('canvas');
-    c.width = 64; c.height = 64;
-    var g = c.getContext('2d');
-    g.font = '44px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.fillText(emoji || '❤️', 32, 34);
-    var tex = new THREE.CanvasTexture(c);
+    var em = emoji || '❤️';
+    var tex = _emojiTexCache[em];
+    if(!tex){
+      var c = document.createElement('canvas');
+      c.width = 64; c.height = 64;
+      var g = c.getContext('2d');
+      g.font = '44px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(em, 32, 34);
+      tex = new THREE.CanvasTexture(c);
+      _emojiTexCache[em] = tex;
+    }
     var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
     var sp = new THREE.Sprite(mat);
     sp.scale.set(0.45, 0.45, 0.45);
@@ -757,10 +763,33 @@
     wCvs.style.opacity = '1';
   }
 
+  var _sharedRippleGeo = new THREE.RingGeometry(0.08, 0.14, 20);
+  var _ripplePool = [];
+  function getPooledRippleMesh(col, initOpacity){
+    if(_ripplePool.length > 0){
+      var r = _ripplePool.pop();
+      r.mesh.visible = true;
+      r.mat.color.setHex(col || 0xd8f6ff);
+      r.mat.opacity = initOpacity || 0.65;
+      r.mesh.scale.set(1, 1, 1);
+      return r;
+    }
+    var mat = new THREE.MeshBasicMaterial({
+      color: col || 0xd8f6ff,
+      transparent: true,
+      opacity: initOpacity || 0.65,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    var ring = new THREE.Mesh(_sharedRippleGeo, mat);
+    ring.rotation.x = -Math.PI / 2;
+    scene.add(ring);
+    return { mesh: ring, mat: mat };
+  }
+
   function spawnWaterRipple(){
     if(typeof scene === 'undefined') return;
-    // Gölet veya merkez havuz konumu bul
-    var rx = 0, rz = 0.2;
+    var rx = 10.8, rz = -6.5;
     if(typeof decos !== 'undefined' && decos.length){
       var ponds = decos.filter(function(d){
         return d && d.group && d.group.visible !== false && (d.type === 'pond' || d.type === 'crystal_pond');
@@ -771,19 +800,9 @@
         rz = p.group.position.z + (Math.random() - 0.5) * 0.8;
       }
     }
-    var geo = new THREE.RingGeometry(0.08, 0.13, 20);
-    var mat = new THREE.MeshBasicMaterial({
-      color: 0xd8f6ff,
-      transparent: true,
-      opacity: 0.55,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    var ring = new THREE.Mesh(geo, mat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(rx, 0.055, rz);
-    scene.add(ring);
-    waterRipples.push({ mesh: ring, mat: mat, geo: geo, age: 0, maxAge: 1.8 });
+    var item = getPooledRippleMesh(0xd8f6ff, 0.55);
+    item.mesh.position.set(rx, 0.055, rz);
+    waterRipples.push({ mesh: item.mesh, mat: item.mat, age: 0, maxAge: 1.8 });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1050,19 +1069,9 @@
 
   function spawnWaterRippleAt(rx, rz){
     if(typeof scene === 'undefined') return;
-    var geo = new THREE.RingGeometry(0.08, 0.14, 22);
-    var mat = new THREE.MeshBasicMaterial({
-      color: 0x7dd3fc,
-      transparent: true,
-      opacity: 0.72,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    var ring = new THREE.Mesh(geo, mat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(rx, 0.06, rz);
-    scene.add(ring);
-    waterRipples.push({ mesh: ring, mat: mat, geo: geo, age: 0, maxAge: 1.5 });
+    var item = getPooledRippleMesh(0x7dd3fc, 0.72);
+    item.mesh.position.set(rx, 0.06, rz);
+    waterRipples.push({ mesh: item.mesh, mat: item.mat, age: 0, maxAge: 1.5 });
   }
 
   window.pullFishingRod = function(){
@@ -1212,9 +1221,8 @@
       var rp = waterRipples[ri];
       rp.age += dt;
       if(rp.age >= rp.maxAge){
-        if(rp.mesh.parent) rp.mesh.parent.remove(rp.mesh);
-        rp.geo.dispose();
-        rp.mat.dispose();
+        rp.mesh.visible = false;
+        _ripplePool.push({ mesh: rp.mesh, mat: rp.mat });
         waterRipples.splice(ri, 1);
         continue;
       }

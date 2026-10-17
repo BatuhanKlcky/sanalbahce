@@ -30,12 +30,13 @@ function pickPetTarget(pet){
     var b = window.getActiveBiome();
     if(b){ cx = b.cx || 0; cz = b.cz || 0; }
   }
+  if(!pet.target) pet.target = new THREE.Vector3();
   if(flowers.length>0&&Math.random()>.3){
     var rf2=flowers[Math.floor(Math.random()*flowers.length)];
-    pet.target=new THREE.Vector3(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
+    pet.target.set(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
   }else{
     var a=Math.random()*Math.PI*2, r=Math.random()*PET_R;
-    pet.target=new THREE.Vector3(cx + Math.cos(a)*r,0,cz + Math.sin(a)*r);
+    pet.target.set(cx + Math.cos(a)*r,0,cz + Math.sin(a)*r);
   }
 }
 function stepPets(dt){
@@ -201,11 +202,12 @@ function stepButterflies(dt){
     bug.time+=dt;
     if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.9||bug.time>(bug.until||0)){
       bug.until=bug.time+2.6+Math.random()*3.4;
+      if(!bug.target) bug.target = new THREE.Vector3();
       if(flowers.length&&Math.random()>.2){
         var rf=flowers[Math.floor(Math.random()*flowers.length)];
-        bug.target=new THREE.Vector3(rf.mesh.position.x+(Math.random()-.5)*.9, rf.h*rf.mesh.scale.y+.62+Math.random()*.55, rf.mesh.position.z+(Math.random()-.5)*.9);
+        bug.target.set(rf.mesh.position.x+(Math.random()-.5)*.9, rf.h*rf.mesh.scale.y+.62+Math.random()*.55, rf.mesh.position.z+(Math.random()-.5)*.9);
       }else{
-        bug.target=new THREE.Vector3((Math.random()-.5)*18, 1.15+Math.random()*1.7, (Math.random()-.5)*18);
+        bug.target.set((Math.random()-.5)*18, 1.15+Math.random()*1.7, (Math.random()-.5)*18);
       }
     }
     bug.mesh.position.y-=bug.bob||0;
@@ -294,16 +296,55 @@ function animate(){
   for(var bi=0;bi<badBugs.length;bi++){var bg=badBugs[bi],pl=flowers[bg.ti];if(pl){_tv.set(pl.mesh.position.x,pl.h*.7+.15,pl.mesh.position.z);bg.group.position.lerp(_tv,.025);if(_fc%2===0){bg.lp+=.36;var ch=bg.group.children;for(var li=1;li<=6&&li<ch.length;li++)ch[li].rotation.x=.3+Math.sin(bg.lp+li)*.15;}}}
   if(dt>0) advancePlants(dt);
   // Flowers
-  for(var fi=0;fi<flowers.length;fi++){var f=flowers[fi];
-    var wind=Math.sin(now*1.15+f.mesh.position.x*.65+f.mesh.position.z*.4);
-    var gust=.65+.35*Math.sin(now*.33+f.mesh.position.z);
-    if(f.w<.25){if(_fc%3===0){var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){if(ch2[ci].material&&ch2[ci].material.color)ch2[ci].material.color.lerp(_cd,.015);}f.grass.material.color.lerp(_cd2,.015);}f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,.55+wind*.04,.12);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,.22,.12);}
-    else{if(_fc%3===0){_tc.set(f.c);var ch2=f.head.children;for(var ci=0;ci<ch2.length;ci++){var mat=ch2[ci].material;if(mat&&mat.color&&mat.emissiveIntensity===undefined)mat.color.lerp(_tc,.04);}f.grass.material.color.lerp(_soil,.04);}var amp=(.04+gust*.028)*(.55+Math.min(f.w,1.2)*.4);f.mesh.rotation.z=THREE.MathUtils.lerp(f.mesh.rotation.z,wind*amp,.08);f.mesh.rotation.x=THREE.MathUtils.lerp(f.mesh.rotation.x,Math.sin(now*.9+f.mesh.position.z)*amp*.35,.08);}
-    if(f.leaves){for(var li2=0;li2<f.leaves.length;li2++){var lf=f.leaves[li2];lf.rotation.z=lf.userData.bz+wind*(.12+li2*.05);}}
-    if(f.h>.5)f.b=Math.min(1,f.b+.72*dt);f.head.scale.setScalar(f.b);
-    if(f.head)f.head.rotation.z=wind*(f.w<.25?.02:.07);
-    stepBloom(f, now, wind);
-    var fsc=f.h*(.6+f.w*.4);f.mesh.scale.set(fsc,fsc,fsc);
+  var flen = flowers.length;
+  if(flen > 0){
+    var baseNowWind = now * 1.15;
+    for(var fi = 0; fi < flen; fi++){
+      var f = flowers[fi];
+      var fpos = f.mesh.position;
+      var fx = fpos.x, fz = fpos.z;
+      var wind = Math.sin(baseNowWind + fx * 0.65 + fz * 0.4);
+      var gust = 0.65 + 0.35 * Math.sin(now * 0.33 + fz);
+
+      var isDry = f.w < 0.25;
+      if(isDry){
+        if(_fc % 6 === 0){
+          var ch2 = f.head.children;
+          for(var ci = 0; ci < ch2.length; ci++){
+            if(ch2[ci].material && ch2[ci].material.color) ch2[ci].material.color.lerp(_cd, 0.04);
+          }
+          f.grass.material.color.lerp(_cd2, 0.04);
+        }
+        f.mesh.rotation.z = THREE.MathUtils.lerp(f.mesh.rotation.z, 0.55 + wind * 0.04, 0.12);
+        f.mesh.rotation.x = THREE.MathUtils.lerp(f.mesh.rotation.x, 0.22, 0.12);
+      } else {
+        if(_fc % 6 === 0){
+          _tc.set(f.c);
+          var ch2 = f.head.children;
+          for(var ci = 0; ci < ch2.length; ci++){
+            var mat = ch2[ci].material;
+            if(mat && mat.color && mat.emissiveIntensity === undefined) mat.color.lerp(_tc, 0.08);
+          }
+          f.grass.material.color.lerp(_soil, 0.08);
+        }
+        var amp = (0.04 + gust * 0.028) * (0.55 + Math.min(f.w, 1.2) * 0.4);
+        f.mesh.rotation.z = THREE.MathUtils.lerp(f.mesh.rotation.z, wind * amp, 0.08);
+        f.mesh.rotation.x = THREE.MathUtils.lerp(f.mesh.rotation.x, Math.sin(now * 0.9 + fz) * amp * 0.35, 0.08);
+      }
+
+      if(f.leaves){
+        for(var li2 = 0; li2 < f.leaves.length; li2++){
+          var lf = f.leaves[li2];
+          lf.rotation.z = lf.userData.bz + wind * (0.12 + li2 * 0.05);
+        }
+      }
+      if(f.h > 0.5) f.b = Math.min(1, f.b + 0.72 * dt);
+      f.head.scale.setScalar(f.b);
+      if(f.head) f.head.rotation.z = wind * (isDry ? 0.02 : 0.07);
+      stepBloom(f, now, wind);
+      var fsc = f.h * (0.6 + f.w * 0.4);
+      f.mesh.scale.set(fsc, fsc, fsc);
+    }
   }
   // Butterflies
   if(dt>0) stepButterflies(dt);
@@ -327,38 +368,92 @@ function animate(){
     try{ window.stepTrainTrade(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepTrainTrade', e); }
   }
-  // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
-  decos.forEach(function(d){
-    if(!d||!d.group||d.group.visible===false) return;
-    if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);
-    else if(d.type==='pine'||d.type==='birch'||d.type==='willow'||d.type==='apple_tree'||d.type==='bamboo'||d.type==='palm'){
-      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
-      var swayAmp = (d.type==='bamboo'||d.type==='willow') ? 0.045 : 0.022;
-      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.35 + d.group.position.x * 0.7 + d.group.position.z * 0.5) * swayAmp;
+  // Decos — fast indexed loop, skip invisible, precalculate night mode once
+  var dlen = decos.length;
+  if(dlen > 0){
+    var isNightTime = (dayPhase < 0.229 || dayPhase >= 0.896);
+    for(var di = 0; di < dlen; di++){
+      var d = decos[di];
+      if(!d || !d.group || d.group.visible === false) continue;
+      var dpos = d.group.position;
+      var dx = dpos.x, dz = dpos.z;
+
+      if(d.type === 'tree' || d.type === 'bush'){
+        rustle(d.group, now, d.type === 'bush' ? 1.35 : 1);
+      }
+      else if(d.type === 'pine' || d.type === 'birch' || d.type === 'willow' || d.type === 'apple_tree' || d.type === 'bamboo' || d.type === 'palm'){
+        if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+        var swayAmp = (d.type === 'bamboo' || d.type === 'willow') ? 0.045 : 0.022;
+        d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.35 + dx * 0.7 + dz * 0.5) * swayAmp;
+      }
+      else if(d.type === 'plant' || d.type === 'pumpkin' || d.type === 'watermelon'){
+        if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+        d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.8 + dx) * 0.025;
+      }
+      else if(d.type === 'flower_wild'){
+        d.group.rotation.z = Math.sin(now * 1.4 + dx) * 0.05;
+      }
+      else if(d.type === 'mushroom' && d.group.userData.caps){
+        var caps = d.group.userData.caps;
+        for(var ci = 0; ci < caps.length; ci++){
+          caps[ci].position.y = caps[ci].userData.by + Math.sin(now * 1.6 + ci) * 0.02;
+        }
+      }
+      if(d.group.userData.arm){
+        d.group.userData.arm.rotation.z = Math.sin(now * 1.35 + dx) * 0.08;
+      }
+      if(d.flame){
+        d.flame.scale.y = 0.92 + Math.sin(now * 7 + dx) * 0.08;
+        if(d.light && _fc % 2 === 0) d.light.intensity = 1.15 + Math.sin(now * 6) * 0.25;
+      }
+      if(d.type === 'windmill' && d.blades){
+        d.blades.rotation.z += Math.min(dt, 0.05) * 0.9;
+      }
+      if(d.type === 'angel_wing' && _fc % 3 === 0){
+        if(d.light) d.light.intensity = 1.2 + Math.sin(_fc * 0.15) * 0.3;
+        if(d.light2) d.light2.intensity = 0.5 + Math.sin(_fc * 0.22 + 1) * 0.2;
+        if(d.halo) d.halo.rotation.z = _fc * 0.008;
+      }
+      if((d.type === 'dragon_egg' || d.type === 'moonflower' || d.type === 'golden_tree' || d.type === 'firefly_jar') && d.light && _fc % 3 === 0){
+        d.light.intensity = 0.6 + Math.sin(_fc * 0.2 + dx * 2) * 0.4;
+      }
+      if(d.type === 'golden_pot' && d.light && _fc % 4 === 0) d.light.intensity = 0.6 + Math.sin(_fc * 0.25) * 0.3;
+      if(d.type === 'crystal_pond' && d.light && _fc % 4 === 0) d.light.intensity = 0.6 + Math.sin(_fc * 0.15) * 0.3;
+      if(d.type === 'magic_lamp' && d.light && _fc % 3 === 0) d.light.intensity = 1.5 + Math.sin(_fc * 0.4) * 0.6;
+      if(d.type === 'fountain' && d.light && _fc % 4 === 0) d.light.intensity = 0.5 + Math.sin(_fc * 0.1) * 0.2;
+      if(d.type === 'lantern' && d.light && _fc % 4 === 0){
+        d.light.intensity = 4.2 + Math.sin(_fc * 0.3 + dx) * 0.75;
+        if(d.group && d.group.userData && d.group.userData.fillLight){
+          d.group.userData.fillLight.intensity = 1.95 + Math.sin(_fc * 0.22 + dz) * 0.4;
+        }
+      }
+      if(d.type === 'pond' && d.light && _fc % 4 === 0){
+        d.light.intensity = 0.4 + Math.sin(now * 0.5) * 0.15;
+      }
+      if(d.type === 'house' && d.light && _fc % 3 === 0){
+        d.light.intensity = isNightTime ? (0.8 + Math.sin(_fc * 0.08) * 0.1) : 0;
+      }
     }
-    else if(d.type==='plant'||d.type==='pumpkin'||d.type==='watermelon'){
-      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
-      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.8 + d.group.position.x) * 0.025;
+  }
+
+  // Skip rustling hidden classic dress while diorama is on
+  if(window._dress && !(typeof isCozy === 'function' && isCozy())){
+    if(!isMobile || _fc % 2 === 0){
+      for(var si = 0; si < window._dress.length; si++) rustle(window._dress[si], now, 0.85);
     }
-    else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
-    if(d.type==='angel_wing'&&_fc%2===0){
-      if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
-      if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;
-      if(d.halo) d.halo.rotation.z=_fc*.008;
+  }
+  if(window._mills && !(typeof isCozy === 'function' && isCozy())){
+    for(var mi = 0; mi < window._mills.length; mi++) window._mills[mi].rotation.z += Math.min(dt, 0.05) * 0.7;
+  }
+  if(window._blooms && !(typeof isCozy === 'function' && isCozy()) && _fc % 2 === 0){
+    for(var bl = 0; bl < window._blooms.length; bl++){
+      var bloom = window._blooms[bl];
+      if(!bloom || !bloom.rotation || bloom.visible === false) continue;
+      if(bloom.parent && bloom.parent.visible === false) continue;
+      bloom.rotation.z = Math.sin(now * 1.25 + (bloom.userData.spin || 0)) * 0.1;
+      bloom.rotation.x = Math.sin(now * 0.8 + (bloom.userData.spin || 0)) * 0.06;
     }
-    if((d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar')&&d.light&&_fc%2===0){
-      d.light.intensity=.6+Math.sin(_fc*.2+d.group.position.x*2)*.4;
-    }
-    if(d.type==='golden_pot'&&d.light&&_fc%3===0)d.light.intensity=.6+Math.sin(_fc*.25)*.3;
-    if(d.type==='crystal_pond'&&d.light&&_fc%3===0)d.light.intensity=.6+Math.sin(_fc*.15)*.3;
-    if(d.type==='magic_lamp'&&d.light&&_fc%2===0)d.light.intensity=1.5+Math.sin(_fc*.4)*.6;
-    if(d.type==='fountain'&&d.light&&_fc%4===0)d.light.intensity=.5+Math.sin(_fc*.1)*.2;if(d.type==='lantern'&&d.light&&_fc%3===0){d.light.intensity=4.2+Math.sin(_fc*.3+d.group.position.x)*.75;if(d.group&&d.group.userData&&d.group.userData.fillLight)d.group.userData.fillLight.intensity=1.95+Math.sin(_fc*.22+d.group.position.z)*.4;}if(d.type==='pond'&&d.light&&_fc%4===0)d.light.intensity=.4+Math.sin(now*.5)*.15;
-    if(d.type==='house'&&d.light){var ph=getPN(dayPhase);d.light.intensity=ph==='GECE'||ph==='AKŞAM'?0.8+Math.sin(_fc*.08)*.1:0;}
-  });
-  // Skip rustling hidden classic dress while diorama is on (saves CPU).
-  if(window._dress && !(typeof isCozy==='function'&&isCozy())){for(var si=0;si<window._dress.length;si++)rustle(window._dress[si],now,.85);}
-  if(window._mills && !(typeof isCozy==='function'&&isCozy())){for(var mi=0;mi<window._mills.length;mi++)window._mills[mi].rotation.z+=Math.min(dt,.05)*.7;}
-  if(window._blooms && _fc%2===0){for(var bl=0;bl<window._blooms.length;bl++){var bloom=window._blooms[bl];if(!bloom||!bloom.rotation||bloom.visible===false)continue;if(bloom.parent&&bloom.parent.visible===false)continue;bloom.rotation.z=Math.sin(now*1.25+(bloom.userData.spin||0))*.1;bloom.rotation.x=Math.sin(now*.8+(bloom.userData.spin||0))*.06;}}
+  }
   if(dt>0) advanceHarvest(dt);
   for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){var spd=hv.type==='strawberry'?2.5:hv.type==='carrot'?1.05:hv.type==='cucumber'?.85:hv.type==='pepper'?1.7:1.15;var amp=hv.type==='strawberry'?.07:hv.type==='carrot'?.045:hv.type==='cucumber'?.09:hv.type==='pepper'?.06:.035;hv.sway.rotation.z=Math.sin(now*spd+hv.x)*amp;hv.sway.rotation.x=Math.sin(now*spd*.8+hv.z)*amp*.65;if(hv.type==='cucumber')hv.sway.rotation.y=Math.sin(now*.6+hv.z)*.12;}}
 

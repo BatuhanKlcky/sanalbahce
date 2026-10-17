@@ -153,15 +153,21 @@
     seedMeadowPatches();
   };
 
+  var _cozyLifeHidden = false;
   window.stepCozyLife = function(dt, now){
     if(typeof isCozy === 'function' && !isCozy()){
-      // Hide ambient life outside cozy mode
-      window._birds.forEach(function(b){ b.mesh.visible = false; });
-      window._fireflies.forEach(function(f){ f.mesh.visible = false; });
-      window._sparkles.forEach(function(s){ s.mesh.visible = false; });
-      if(window._meadow) window._meadow.forEach(function(m){ m.visible = false; });
+      if(!_cozyLifeHidden){
+        _cozyLifeHidden = true;
+        for(var bi = 0; bi < window._birds.length; bi++) window._birds[bi].mesh.visible = false;
+        for(var fi = 0; fi < window._fireflies.length; fi++) window._fireflies[fi].mesh.visible = false;
+        for(var si = 0; si < window._sparkles.length; si++) window._sparkles[si].mesh.visible = false;
+        if(window._meadow){
+          for(var mi = 0; mi < window._meadow.length; mi++) window._meadow[mi].visible = false;
+        }
+      }
       return;
     }
+    _cozyLifeHidden = false;
     if(!_lifeReady) window.ensureCozyLife();
 
     var lifeCx = 0, lifeCz = 0;

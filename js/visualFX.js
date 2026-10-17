@@ -155,21 +155,28 @@
     };
   }
 
+  var _fxTick = 0;
   window.stepVisualFX = function(dt, now){
     if(!fxParticles){
       if(window.scene) initAmbientParticles();
       return;
     }
+    _fxTick++;
+    if(window.isMobile && (_fxTick % 2 !== 0)) return;
+
     var p = fxParticles;
     var isNight = (typeof window.dayPhase === 'number') ? (window.dayPhase < 0.229 || window.dayPhase >= 0.896) : false;
 
-    // Day: warm golden pollen, Night: bioluminescent emerald-gold firefly
-    if(isNight){
-      p.mat.color.setHex(0xa8ff60);
-      p.mat.opacity = 0.85;
-    } else {
-      p.mat.color.setHex(0xffea90);
-      p.mat.opacity = 0.45;
+    // Sadece gece/gündüz değiştiğinde materyali güncelle
+    if(p._lastNight !== isNight){
+      p._lastNight = isNight;
+      if(isNight){
+        p.mat.color.setHex(0xa8ff60);
+        p.mat.opacity = 0.85;
+      } else {
+        p.mat.color.setHex(0xffea90);
+        p.mat.opacity = 0.45;
+      }
     }
 
     var pos = p.pos;
