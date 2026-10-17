@@ -103,7 +103,11 @@
     'stairs': 'village/Stairs.glb',
     'blacksmith': 'village/Blacksmith.glb',
     'bell': 'village/Bell.glb',
-    'sawmill': 'village/Sawmill.glb'
+    'sawmill': 'village/Sawmill.glb',
+    // characters (farmers / workers)
+    'farmer': 'characters/Farmer.glb',
+    'worker': 'characters/Worker.glb',
+    'shovel': 'characters/Shovel.glb'
   };
 
   function box3(){
@@ -182,11 +186,47 @@
     return obj;
   }
 
+  function cloneSkinned(source){
+    // Minimal SkeletonUtils.clone — keeps Quaternius character skins bound after clone().
+    var sourceLookup = {};
+    var cloneLookup = {};
+    var clone = source.clone(true);
+    function parallelTraverse(a, b, cb){
+      cb(a, b);
+      for(var i=0;i<a.children.length;i++) parallelTraverse(a.children[i], b.children[i], cb);
+    }
+    parallelTraverse(source, clone, function(s, c){
+      sourceLookup[s.uuid] = s;
+      cloneLookup[s.uuid] = c;
+    });
+    clone.traverse(function(node){
+      if(!node.isSkinnedMesh) return;
+      var src = sourceLookup[node.uuid] || null;
+      // uuid of clone node differs — find by matching through lookup values
+      var matched = null;
+      for(var id in cloneLookup){
+        if(cloneLookup[id] === node){ matched = sourceLookup[id]; break; }
+      }
+      src = matched;
+      if(!src || !src.skeleton) return;
+      var srcBones = src.skeleton.bones;
+      var bones = [];
+      for(var i=0;i<srcBones.length;i++){
+        var mapped = cloneLookup[srcBones[i].uuid];
+        bones.push(mapped || srcBones[i]);
+      }
+      node.bind(new THREE.Skeleton(bones, src.skeleton.boneInverses), src.bindMatrix);
+    });
+    return clone;
+  }
+
   function cloneKey(key, height){
     var path = CATALOG[key];
     if(!path || !templates[path]) return null;
     var tmpl = templates[path];
-    var o = tmpl.clone(true);
+    var skinned = false;
+    tmpl.traverse(function(c){ if(c.isSkinnedMesh) skinned = true; });
+    var o = skinned ? cloneSkinned(tmpl) : tmpl.clone(true);
     // Re-share materials with the prepared template (clone() duplicates mats).
     var srcMeshes = [];
     tmpl.traverse(function(c){ if(c.isMesh) srcMeshes.push(c); });
@@ -200,16 +240,20 @@
         c.receiveShadow = src.receiveShadow;
       }
       c.frustumCulled = true;
-      // Static props: skip per-frame matrix work until something moves them.
-      c.matrixAutoUpdate = false;
-      c.updateMatrix();
+      // Characters need live matrices; static props freeze after place.
+      if(!skinned){
+        c.matrixAutoUpdate = false;
+        c.updateMatrix();
+      }
     });
     o.matrixAutoUpdate = true; // groups still place/rotate at spawn
     if(height != null) fitHeight(o, height);
     else groundAlign(o);
-    o.traverse(function(c){
-      if(c.isMesh){ c.updateMatrix(); c.matrixAutoUpdate = false; }
-    });
+    if(!skinned){
+      o.traverse(function(c){
+        if(c.isMesh){ c.updateMatrix(); c.matrixAutoUpdate = false; }
+      });
+    }
     return o;
   }
 
@@ -695,51 +739,65 @@
       return !/\/Flower[_s]|\bFlowers\.glb$/i.test(p);
     });
     var left = paths.length;
+    var failed = [];
     var bar = document.getElementById('modelLoad');
     if(bar) bar.classList.add('show');
-    paths.forEach(function(path){
+    function finishPack(){
+      ready = true;
+      installBuilders();
+      // Defer heavy clone/Box3 work so the first frames stay responsive.
+      setTimeout(function(){
+        if(typeof window.redressGardenModels === 'function'){
+          try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
+        }
+        if(typeof window.reseedMeadowPatches === 'function'){
+          try{ window.reseedMeadowPatches(); }catch(e){}
+        }
+        if(typeof window.ensureFarmers === 'function'){
+          try{ window.ensureFarmers(); }catch(e){ console.warn('farmers', e); }
+        }
+      }, 0);
+      if(bar) bar.classList.remove('show');
+      waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
+      if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
+    }
+    function loadOne(path, isRetry){
       loader.load(BASE + path, function(gltf){
         templates[path] = gltf.scene;
         fixMats(gltf.scene);
         left--;
         if(bar) bar.querySelector('span').textContent = 'Modeller ' + Math.round((1-left/paths.length)*100) + '%';
-        if(left<=0){
-          ready = true;
-          installBuilders();
-          // Defer heavy clone/Box3 work so the first frames stay responsive.
-          setTimeout(function(){
-            if(typeof window.redressGardenModels === 'function'){
-              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-            }
-            if(typeof window.reseedMeadowPatches === 'function'){
-              try{ window.reseedMeadowPatches(); }catch(e){}
-            }
-          }, 0);
-          if(bar) bar.classList.remove('show');
-          waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
-          if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
-        }
+        if(left<=0) finishPack();
       }, undefined, function(err){
         console.warn('Model load fail', path, err);
-        left--;
-        if(left<=0){
-          ready = true;
-          installBuilders();
-          setTimeout(function(){
-            if(typeof window.redressGardenModels === 'function'){
-              try{ window.redressGardenModels(); }catch(e){ console.warn('redress', e); }
-            }
-          }, 0);
-          if(bar) bar.classList.remove('show');
-          waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
+        if(!isRetry){
+          // One delayed retry — Android WebView / flaky asset reads.
+          setTimeout(function(){ loadOne(path, true); }, 400);
+          return;
         }
+        failed.push(path);
+        left--;
+        if(left<=0) finishPack();
       });
-    });
+    }
+    paths.forEach(function(path){ loadOne(path, false); });
   }
 
   window.modelPackReady = function(){ return ready; };
   window.whenModelsReady = whenReady;
   window.spawnModel = function(key, height){ return cloneKey(key, height); };
+  window.hasModel = function(key){
+    var path = CATALOG[key];
+    return !!(path && templates[path]);
+  };
+  window.hasPackPropModel = function(type){
+    var def = typeof PACK_PROPS !== 'undefined' ? PACK_PROPS[type] : null;
+    if(!def || !def.keys) return false;
+    for(var i=0;i<def.keys.length;i++){
+      if(window.hasModel(def.keys[i])) return true;
+    }
+    return false;
+  };
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(startLoad, 0); });
   else setTimeout(startLoad, 0);

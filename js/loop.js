@@ -264,6 +264,10 @@ function animate(){
     try{ window.stepCozyLife(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepCozyLife', e); }
   }
+  if(typeof window.stepFarmers==='function'){
+    try{ window.stepFarmers(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepFarmers', e); }
+  }
   // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
   decos.forEach(function(d){
     if(!d||!d.group||d.group.visible===false) return;
@@ -303,6 +307,7 @@ window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight
 function bootGame(){
   loadProg();loadStats();loadShop();load();placeOwnedWing();
   if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
+  if(typeof window.ensureFarmers==='function') window.ensureFarmers();
 }
 animate();
 if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);

@@ -152,9 +152,13 @@ function mkHarvestPlant(x, z, type, stage) {
   return item;
 }
 
-function harvestPlant(idx) {
+function harvestPlant(idx, opts) {
+  opts = opts || {};
   var item = harvestItems[idx];
-  if (!item || item.stage < 2) { showToast('Henüz hazır değil! ⏳'); return; }
+  if (!item || item.stage < 2) {
+    if(!opts.silent) showToast('Henüz hazır değil! ⏳');
+    return false;
+  }
   var cfg = item.cfg;
   stats[cfg.statKey]++;
   var pay=cfg.coin+Math.max(0,(level||1)-1);
@@ -166,10 +170,12 @@ function harvestPlant(idx) {
   // Re-index hitboxes
   harvestItems.forEach(function(it, i){ it.group.children.forEach(function(ch){ if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i; }); });
   updStats(); saveStats();
-  showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰');
-  sndCoin();
+  if(!opts.silent) showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰');
+  if(typeof sndCoin==='function') sndCoin();
   markDirty();
+  return true;
 }
+window.harvestPlant = harvestPlant;
 
 // growTime saniye cinsinden. Kare hızından bağımsız; sekme kapalıyken biriken süre de uygulanır.
 function advanceHarvest(seconds){

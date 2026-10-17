@@ -170,6 +170,7 @@ function applyCozyScenery(){
   if(typeof window.setBiomesVisible === 'function') window.setBiomesVisible(!!cozyMode);
   // User props placed in diorama must not leak into classic garden (and vice versa).
   if(typeof window.syncDecoWorldVisibility === 'function') window.syncDecoWorldVisibility();
+  if(typeof window.ensureFarmers === 'function') window.ensureFarmers();
 }
 
 function applyCozyHUD(){

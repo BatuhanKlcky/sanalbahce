@@ -218,7 +218,7 @@
       addAt(root, spawn('wheat', 1.1), 1.5, 0.5, 1.2, 0);
     }
     ringSlots(isMobile ? 8 : 12, 2.5, R * 0.75, 201).forEach(function(s, i){
-      var keys = ['wheat','corn','carrot','tomato','lettuce','pumpkin','flower_4'];
+      var keys = ['wheat','corn','carrot','tomato','lettuce','pumpkin','plant_5'];
       addAt(root, spawn(keys[i % keys.length], 0.55 + s.r() * 0.35), s.x, s.z, 1, s.a);
     });
     ringSlots(4, R * 0.7, R * 0.9, 202).forEach(function(s){

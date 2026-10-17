@@ -1257,7 +1257,23 @@ window.addEventListener('pointerup',function(e){
   else if(tp==='cucumber')mkHarvestPlant(pt.x,pt.z,'cucumber');
   else if(tp==='pepper')mkHarvestPlant(pt.x,pt.z,'pepper');
   else if(tp==='carrot')mkHarvestPlant(pt.x,pt.z,'carrot');
-  else if(PACK_PROPS[tp]){ if(!mkPackProp(tp, pt.x, pt.z, ang)){ showToast('Model henüz yüklenmedi ⏳'); return; } }
+  else if(PACK_PROPS[tp]){
+    if(mkPackProp(tp, pt.x, pt.z, ang)){
+      /* placed */
+    } else if(typeof window.modelPackReady==='function' && !window.modelPackReady() && typeof window.whenModelsReady==='function'){
+      var qx=pt.x, qz=pt.z, qa=ang, qtp=tp;
+      showToast('Modeller yükleniyor… bir saniye ⏳');
+      window.whenModelsReady(function(){
+        if(mkPackProp(qtp, qx, qz, qa)){ sndPlant(); showToast('✅ Yerleştirildi!'); save(true); }
+        else showToast('Bu model yüklenemedi 😕');
+      });
+      window.cancelPlace();
+      return;
+    } else {
+      showToast('Bu model yüklenemedi 😕');
+      return;
+    }
+  }
   else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
   sndPlant();showToast('✅ Yerleştirildi!');save(true);
 });
