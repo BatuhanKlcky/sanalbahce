@@ -448,6 +448,12 @@ function load(){
   });
   var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var data;try{data=JSON.parse(raw);}catch(e){localStorage.removeItem(SAVE_KEY);return;}isLoading=true;var elapsed=Math.max(0,(Date.now()-data.lastUpdate)/1000);var sB=data.badBugs||[];(data.plants||[]).forEach(function(p){mkFlower(p.x,p.z,p);});if(!(typeof isCozy==='function'&&isCozy())){sB.forEach(function(b){if(b.ti<flowers.length)mkBadBug(b.ti);});}if(elapsed>0)advancePlants(elapsed);if(!(typeof isCozy==='function'&&isCozy())&&typeof BUG_EVERY!=='undefined'&&elapsed>=BUG_EVERY&&flowers.length)mkBadBug(Math.floor(Math.random()*flowers.length));var bc=data.bugCount||0;for(var i=0;i<bc;i++)window.addBug();// Restore decos
     var savedDecos=data.decos||[];
+    if(!localStorage.getItem('gdn_rm_autohouse_v1')){
+      savedDecos=savedDecos.filter(function(d){
+        return !(d && d.type==='farmer_house' && Math.abs((d.x||0)-(-4.8))<0.15 && Math.abs((d.z||0)-(-5.2))<0.15);
+      });
+      localStorage.setItem('gdn_rm_autohouse_v1','1');
+    }
     function _applyXform(d){
       var last=decos[decos.length-1];if(!last)return;
       if(d.ry!=null)last.group.rotation.y=d.ry;

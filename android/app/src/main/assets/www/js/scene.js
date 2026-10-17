@@ -125,7 +125,7 @@ function unlockAudio(){if(_muted)return;ac();startAmb();}
 window.toggleSound=function(){_muted=!_muted;localStorage.setItem('gdn_mute',_muted?'1':'0');if(_master)_master.gain.value=_muted?0:1;paintSound();if(!_muted){ac();startAmb();}showToast(_muted?'Ses kapalı 🔇':'Ses açık 🔊');};
 document.addEventListener('pointerdown',unlockAudio);
 document.addEventListener('touchstart',unlockAudio);
-if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){if(k!=='sanalbahce-shell-24')caches.delete(k);});}).catch(function(){});}
+if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){if(k!=='sanalbahce-shell-25')caches.delete(k);});}).catch(function(){});}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){try{r.update();}catch(e){}}).catch(function(){});});}
 paintSound();
 window.ambTick=ambTick;

@@ -291,44 +291,64 @@
   }
 
   function loadArrayBuffer(url, cb){
-    var done = false;
-    function finish(err, buf){
-      if(done) return;
-      done = true;
-      cb(err, buf);
+    var cleanRel = url.replace(/\?.*$/, '');
+    var candidates = [];
+    if(typeof location === 'undefined' || (location.protocol !== 'file:' && String(location.hostname || '').indexOf('htmlpreview') < 0)){
+      candidates.push(url);
+      candidates.push(cleanRel + '?cb=' + Date.now());
     }
-    function tryFetchReload(){
-      if(typeof fetch !== 'function'){ finish(new Error('no-fetch')); return; }
-      var bustUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'cb=' + Date.now();
-      fetch(bustUrl, { cache: 'reload' }).then(function(r){
-        if(!r.ok) throw new Error('HTTP ' + r.status);
-        return r.arrayBuffer();
-      }).then(function(buf){
-        if(isValidGLB(buf)) finish(null, buf);
-        else finish(new Error('invalid-glb-magic'));
-      }).catch(function(e){ finish(e); });
+    candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/' + cleanRel);
+    var idx = 0;
+    function tryNext(lastErr){
+      if(idx >= candidates.length){
+        cb(lastErr || new Error('glb-load-failed'), null);
+        return;
+      }
+      var target = candidates[idx++];
+      var isBurst = target.indexOf('?cb=') >= 0 || target.indexOf('raw.githubusercontent.com') >= 0;
+      if(isBurst && typeof fetch === 'function'){
+        fetch(target, { cache: 'reload', mode: 'cors' }).then(function(r){
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return r.arrayBuffer();
+        }).then(function(buf){
+          if(isValidGLB(buf)) cb(null, buf);
+          else tryNext(new Error('invalid-glb-magic'));
+        }).catch(function(e){ tryNext(e); });
+        return;
+      }
+      try {
+        var req = new XMLHttpRequest();
+        req.open('GET', target, true);
+        req.responseType = 'arraybuffer';
+        req.onload = function(){
+          if(((req.status >= 200 && req.status < 300) || req.status === 0) && isValidGLB(req.response)){
+            cb(null, req.response);
+          } else {
+            tryNext(new Error('HTTP ' + req.status));
+          }
+        };
+        req.onerror = function(){ tryNext(new Error('xhr-error')); };
+        req.send(null);
+      } catch(e){
+        tryNext(e);
+      }
     }
-    try {
-      var req = new XMLHttpRequest();
-      req.open('GET', url, true);
-      req.responseType = 'arraybuffer';
-      req.onload = function(){
-        if(((req.status >= 200 && req.status < 300) || req.status === 0) && isValidGLB(req.response)){
-          finish(null, req.response);
-        } else {
-          tryFetchReload();
-        }
-      };
-      req.onerror = function(){ tryFetchReload(); };
-      req.send(null);
-    } catch(e){
-      tryFetchReload();
-    }
+    tryNext(null);
   }
 
   function loadFarmerRig(){
-    if(typeof THREE === 'undefined' || !THREE.GLTFLoader){
+    if(typeof THREE === 'undefined'){
       _rigReady = true; _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+      return;
+    }
+    if(!THREE.GLTFLoader && typeof document !== 'undefined'){
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+      s.onload = function(){ loadFarmerRig(); };
+      s.onerror = function(){
+        _rigReady = true; _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+      };
+      document.head.appendChild(s);
       return;
     }
     var left = 2;
@@ -853,7 +873,7 @@
 
   function ensureFarmers(){
     // no auto-hire without house
-    if(houseRec) refreshFarmers();
+    if(houseRec && farmers.length !== farmerCount()) refreshFarmers();
   }
 
   function adoptOrphanCrops(){
@@ -876,30 +896,34 @@
     }
   }
 
-  // Find existing house after load (or auto-place starter farmer house so farmers are always present)
+  // Find existing house after load — never auto-place without player action
   window.bindFarmerHouseFromDecos = function(){
-    houseRec = null;
-    clearFarmers();
-    if(typeof decos === 'undefined') return;
-    for(var i=decos.length - 1; i>=0; i--){
-      if(decos[i] && decos[i].type === 'farmer_house'){
-        if(!houseRec){
-          houseRec = decos[i];
-          if(!houseRec.level) houseRec.level = 1;
-        } else {
-          // Remove any accidental duplicate farmer_house
-          if(decos[i].group && decos[i].group.parent) scene.remove(decos[i].group);
-          decos.splice(i, 1);
+    var found = null;
+    if(typeof decos !== 'undefined'){
+      for(var i=decos.length - 1; i>=0; i--){
+        if(decos[i] && decos[i].type === 'farmer_house'){
+          if(!found){
+            found = decos[i];
+            if(!found.level) found.level = 1;
+          } else {
+            // Remove any accidental duplicate farmer_house
+            if(decos[i].group && decos[i].group.parent) scene.remove(decos[i].group);
+            decos.splice(i, 1);
+          }
         }
       }
     }
-    if(!houseRec && window._bootGameDone){
-      placeFarmerHouse(-4.8, -5.2, 1, 'both');
-      if(typeof save === 'function' && !isLoading) save(false);
-    } else if(houseRec){
-      refreshFarmers();
-      adoptOrphanCrops();
+    if(!found){
+      houseRec = null;
+      clearFarmers();
+      return;
     }
+    var sameHouse = (houseRec === found);
+    houseRec = found;
+    if(!sameHouse || farmers.length !== farmerCount()){
+      refreshFarmers();
+    }
+    adoptOrphanCrops();
   };
 
   window.ensureFarmers = ensureFarmers;

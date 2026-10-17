@@ -1284,6 +1284,9 @@ window.addEventListener('pointerup',function(e){
     }
     if(typeof window.mkFarmerHouse==='function'){
       if(!window.mkFarmerHouse(pt.x,pt.z,1)) return;
+      window.cancelPlace();
+      sndPlant();showToast('🏠 Çiftçi evi kuruldu! Çiftçi hazır 🧑‍🌾');save(true);
+      return;
     } else { showToast('Çiftçi sistemi yok'); return; }
   }
   else if(PACK_PROPS[tp]){

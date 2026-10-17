@@ -761,8 +761,17 @@
       waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
       if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
     }
-    function loadOne(path, isRetry){
-      var url = BASE + path + (isRetry ? ('?v=4&r=' + Date.now()) : '?v=4');
+    function loadOne(path, attempt){
+      attempt = attempt || 0;
+      var isFileOrPreview = typeof location !== 'undefined' && (location.protocol === 'file:' || String(location.hostname || '').indexOf('htmlpreview') >= 0);
+      var url;
+      if(attempt === 0 && !isFileOrPreview){
+        url = BASE + path + '?v=4';
+      } else if(attempt === 1 && !isFileOrPreview){
+        url = BASE + path + '?v=4&r=' + Date.now();
+      } else {
+        url = 'https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/models/' + path;
+      }
       loader.load(url, function(gltf){
         templates[path] = gltf.scene;
         fixMats(gltf.scene);
@@ -770,18 +779,17 @@
         if(bar) bar.querySelector('span').textContent = 'Modeller ' + Math.round((1-left/paths.length)*100) + '%';
         if(left<=0) finishPack();
       }, undefined, function(err){
-        console.warn('Model load fail', path, err);
-        if(!isRetry){
-          // One delayed retry — Android WebView / flaky asset reads.
-          setTimeout(function(){ loadOne(path, true); }, 400);
+        if(attempt < 2){
+          setTimeout(function(){ loadOne(path, attempt + 1); }, attempt === 0 ? 250 : 100);
           return;
         }
+        console.warn('Model load fail', path, err);
         failed.push(path);
         left--;
         if(left<=0) finishPack();
       });
     }
-    paths.forEach(function(path){ loadOne(path, false); });
+    paths.forEach(function(path){ loadOne(path, 0); });
   }
 
   window.modelPackReady = function(){ return ready; };
