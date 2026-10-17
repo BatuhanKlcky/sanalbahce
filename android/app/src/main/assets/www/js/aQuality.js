@@ -983,14 +983,15 @@
     if(customPos && typeof customPos.x === 'number'){
       return new THREE.Vector3(customPos.x, 0.08, customPos.z);
     }
+    // 1) Eğer Cozy Göl (Lake) biyomundaysa göl merkezine at
     if(typeof isCozy === 'function' && isCozy() && typeof BIOMES !== 'undefined'){
-      // Göl Kıyısı veya Çiftlik göleti
       var lake = BIOMES.find(function(b){ return b.id === 'lake'; });
       if(lake && typeof activeBiomeId !== 'undefined' && activeBiomeId === 'lake'){
         return new THREE.Vector3(lake.cx, 0.08, lake.cz);
       }
     }
-    if(typeof decos !== 'undefined' && decos.length){
+    // 2) Sahnedeki herhangi bir gölet / çeşme / gölü bul
+    if(typeof decos !== 'undefined' && decos && decos.length){
       for(var i = 0; i < decos.length; i++){
         var d = decos[i];
         if(d && d.group && d.group.visible !== false && (d.type === 'pond' || d.type === 'crystal_pond' || d.type === 'fountain')){
@@ -998,7 +999,14 @@
         }
       }
     }
-    return new THREE.Vector3(0, 0.08, 0.2);
+    // 3) Eğer hiç su/gölet yoksa bahçenin kenarında doğal taşlı bir gölet oluştur ve oltayı oraya at!
+    if(typeof mkPond === 'function'){
+      var defaultPondX = 8.5, defaultPondZ = -7.5;
+      mkPond(defaultPondX, defaultPondZ);
+      if(typeof showToast === 'function') showToast('🌊 Balık tutmak için kıyıya doğal bir gölet hazırlandı!');
+      return new THREE.Vector3(defaultPondX, 0.08, defaultPondZ);
+    }
+    return null;
   }
 
   window.startFishingGame = function(pondPos){
@@ -1008,6 +1016,10 @@
       _fishingState.bobber.parent.remove(_fishingState.bobber);
     }
     var spot = findFishingSpot(pondPos);
+    if(!spot){
+      if(typeof showToast === 'function') showToast('🐟 Balık tutmak için önce bir Gölet (💧) inşa edin!');
+      return;
+    }
     _fishingState.pos.copy(spot);
     _fishingState.bobber = create3DBobber(spot.x, spot.z);
     _fishingState.active = true;

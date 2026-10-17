@@ -276,6 +276,7 @@ function animate(){
   if(_fc%60===0){
     dayPhase=getRDP();
     updDN(dayPhase);
+    if(typeof window.applyCozyLights==='function') window.applyCozyLights();
   }
   if(skyMat&&_fc%2===0)skyMat.uniforms.uTime.value=now;
   if(window._waterMat)window._waterMat.uniforms.uTime.value=now;

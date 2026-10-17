@@ -482,6 +482,56 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // 5) TREN HAREKETİ, YANAŞMA VE GÜNCELLEME DÖNGÜSÜ (stepTrainTrade)
   // ═══════════════════════════════════════════════════════════════════════════
+  var scenicTracks = null;
+  function ensureScenicTracks(){
+    if(scenicTracks || typeof scene === 'undefined') return;
+    scenicTracks = new THREE.Group();
+    var gravelMat = new THREE.MeshStandardMaterial({ color: 0x4a4742, roughness: 0.95 });
+    var steelMat = new THREE.MeshStandardMaterial({ color: 0x32363b, roughness: 0.4, metalness: 0.75 });
+    var woodDark = new THREE.MeshStandardMaterial({ color: 0x3d2716, roughness: 0.85 });
+
+    // Balast çakıl yatağı
+    var ballast = new THREE.Mesh(new THREE.BoxGeometry(68, 0.08, 1.9), gravelMat);
+    ballast.position.set(0, 0.04, -21.0);
+    scenicTracks.add(ballast);
+
+    // Ahşap traversler
+    for(var tx = -32; tx <= 32; tx += 0.8){
+      var tie = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.09, 1.55), woodDark);
+      tie.position.set(tx, 0.07, -21.0);
+      scenicTracks.add(tie);
+    }
+
+    // Çift çelik ray
+    [-21.45, -20.55].forEach(function(rz){
+      var rail = new THREE.Mesh(new THREE.BoxGeometry(68, 0.11, 0.07), steelMat);
+      rail.position.set(0, 0.15, rz);
+      scenicTracks.add(rail);
+    });
+
+    // İstasyon yolcu & kargo platformu
+    var plat = new THREE.Mesh(new THREE.BoxGeometry(9.0, 0.32, 2.2), new THREE.MeshStandardMaterial({ color: 0x614022, roughness: 0.8 }));
+    plat.position.set(0, 0.16, -19.0);
+    scenicTracks.add(plat);
+
+    var lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.9, 6), steelMat);
+    lanternPost.position.set(4.0, 0.95, -19.0);
+    scenicTracks.add(lanternPost);
+
+    var lanternGlass = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18, 0.24, 0.18),
+      new THREE.MeshStandardMaterial({ color: 0xffea78, emissive: 0xf59e0b, emissiveIntensity: 0.95 })
+    );
+    lanternGlass.position.set(4.0, 1.8, -19.0);
+    scenicTracks.add(lanternGlass);
+
+    var stLight = new THREE.PointLight(0xffdf78, 2.8, 9);
+    stLight.position.set(4.0, 1.8, -19.0);
+    scenicTracks.add(stLight);
+
+    scene.add(scenicTracks);
+  }
+
   function findStationTargetPos(){
     // Oyuncunun bahçesinde yerleştirdiği 'train_station' varsa ona yanaşır!
     if(typeof decos !== 'undefined' && decos && decos.length){
@@ -490,25 +540,30 @@
         if(d && d.type === 'train_station' && d.group){
           var wp = new THREE.Vector3();
           d.group.getWorldPosition(wp);
+          var ang = d.group.rotation.y;
+          var offsetZ = -0.85;
+          var ox = Math.cos(ang) * offsetZ;
+          var oz = -Math.sin(ang) * offsetZ;
           return {
-            x: wp.x,
-            y: wp.y,
-            z: wp.z,
-            rotY: d.group.rotation.y
+            x: wp.x + ox,
+            y: wp.y + 0.12,
+            z: wp.z + oz,
+            rotY: ang + Math.PI / 2
           };
         }
       }
     }
-    // Varsayılan diorama dış çevre yanaşma koordinatı
+    // Varsayılan özel demiryolu koridoru: Çitlerin ve bahçenin tamamen dışında, kuzey manzara hattında
     return {
-      x: -4.5,
-      y: 0.1,
-      z: -12.5,
-      rotY: 0
+      x: 0,
+      y: 0.12,
+      z: -21.0,
+      rotY: Math.PI / 2
     };
   }
 
   function ensureTrainMeshInScene(){
+    ensureScenicTracks();
     if(!trainGroup && typeof scene !== 'undefined'){
       trainGroup = createTrainModel();
       var target = findStationTargetPos();
@@ -575,7 +630,7 @@
         if(typeof showToast === 'function') showToast('🟢 Çiftlik Treni yanaştı! Toptan ihracat siparişleri hazır.');
       }
       // Dışarıdan istasyona doğru yaklaşma enterpolasyonu
-      var startX = stationTarget.x - 22;
+      var startX = stationTarget.x - 32;
       var curX = startX + (stationTarget.x - startX) * Math.sin(trainMoveProgress * Math.PI * 0.5);
       trainGroup.position.set(curX, stationTarget.y, stationTarget.z);
       trainGroup.rotation.y = stationTarget.rotY;
@@ -613,7 +668,7 @@
     else if(trainState === 'departing'){
       trainGroup.visible = true;
       trainMoveProgress += dt * 0.32;
-      var departX = stationTarget.x + trainMoveProgress * 28;
+      var departX = stationTarget.x + trainMoveProgress * 36;
       trainGroup.position.set(departX, stationTarget.y, stationTarget.z);
 
       var rollSpd = dt * 18;

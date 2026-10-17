@@ -1498,10 +1498,41 @@ window.addEventListener('pointerup',function(e){
   if(uiHit)return;
   plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;
   plRay.setFromCamera(plM,camera);
-  var hits=plRay.intersectObject(planeR);
-  if(!hits.length)return;
-  var pt=hits[0].point;
-  var tp=placementType,spot=tidyPlace(tp,pt.x,pt.z);
+
+  // Üst üste koyma (Stacking): Sahnedeki objeleri de raycast'e dahil et
+  var dMeshes = [];
+  var isCrop = (tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot');
+  if(!isCrop && typeof decos !== 'undefined' && decos && decos.length){
+    for(var di = 0; di < decos.length; di++){
+      var dd = decos[di];
+      if(dd && dd.group && dd.group.visible !== false){
+        dd.group.traverse(function(ch){
+          if(ch.isMesh && ch.visible !== false && ch.geometry && ch.geometry.type !== 'CircleGeometry' && ch.geometry.type !== 'RingGeometry'){
+            dMeshes.push(ch);
+          }
+        });
+      }
+    }
+  }
+
+  var decoHits = dMeshes.length ? plRay.intersectObjects(dMeshes, true) : [];
+  var groundHits = plRay.intersectObject(planeR);
+  var pt = null;
+  var isStacked = false;
+  var targetY = 0;
+
+  if(decoHits.length > 0){
+    pt = decoHits[0].point;
+    targetY = Math.round(pt.y * 100) / 100;
+    isStacked = targetY > 0.05;
+  } else if(groundHits.length > 0){
+    pt = groundHits[0].point;
+    targetY = 0;
+  } else {
+    return;
+  }
+
+  var spot=tidyPlace(tp,pt.x,pt.z);
   if(typeof window.tooFar==='function' ? window.tooFar(spot.x,spot.z)
       : Math.sqrt(spot.x*spot.x+spot.z*spot.z)>GARDEN_R){showToast('Çok uzak! 🚫');return;}
   pt.x=spot.x; pt.z=spot.z;
@@ -1564,6 +1595,12 @@ window.addEventListener('pointerup',function(e){
     }
   }
   else if(!(window.placeShopDeco && window.placeShopDeco(tp, pt.x, pt.z, ang))){ showToast('Bu eşya konamıyor'); return; }
-  sndPlant();showToast('✅ Yerleştirildi!');save(true);
+  var lastDeco = decos[decos.length - 1];
+  if(lastDeco && lastDeco.group && isStacked){
+    lastDeco.group.position.y = targetY;
+  }
+  sndPlant();
+  showToast(isStacked ? ('✅ Üste yerleştirildi! (Yükseklik: ' + targetY + 'm) 🧱') : '✅ Yerleştirildi!');
+  save(true);
 });
 window.addEventListener('keydown',function(e){if(e.key==='Escape'){window.cancelPlace();if(typeof window.deselectDeco==='function')window.deselectDeco();}});

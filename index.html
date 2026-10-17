@@ -362,12 +362,14 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <div id="delBar"><span>🗑️ Silmek istediğin objeye dokun</span><button onclick="window.toggleDeleteMode()">✕ İptal</button></div>
 <div id="editBar">
   <span>✨ Düzenle</span>
-  <button type="button" onclick="window.rotateSelected(-1)">↺</button>
-  <button type="button" onclick="window.rotateSelected(1)">↻</button>
-  <button type="button" onclick="window.scaleSelected(-1)">−</button>
-  <button type="button" onclick="window.scaleSelected(1)">+</button>
-  <button type="button" onclick="window.armMoveSelected()">📍</button>
-  <button type="button" onclick="window.deselectDeco()">✕</button>
+  <button type="button" onclick="window.rotateSelected(-1)" title="Sola Döndür">↺</button>
+  <button type="button" onclick="window.rotateSelected(1)" title="Sağa Döndür">↻</button>
+  <button type="button" onclick="window.scaleSelected(-1)" title="Küçült">−</button>
+  <button type="button" onclick="window.scaleSelected(1)" title="Büyüt">+</button>
+  <button type="button" onclick="window.elevateSelected(1)" title="Yukarı Kaldır / Üste Koy">▲</button>
+  <button type="button" onclick="window.elevateSelected(-1)" title="Aşağı İndir">▼</button>
+  <button type="button" onclick="window.armMoveSelected()" title="Taşı">📍</button>
+  <button type="button" onclick="window.deselectDeco()" title="Kapat">✕</button>
 </div>
 
 <div id="sidebar" style="display:none"></div>

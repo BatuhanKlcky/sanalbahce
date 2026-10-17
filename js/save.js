@@ -435,7 +435,7 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       badBugs:badBugs.map(function(b){return{ti:b.ti};}),
       bugCount:bugs.length,
       decos:decos.map(function(d){
-        var o={type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};
+        var o={type:d.type,x:d.group.position.x,y:Math.round((d.group.position.y||0)*100)/100,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};
         if(d.type==='farmer_house') o.level=d.level||1;
         return o;
       }),
@@ -467,6 +467,7 @@ function load(){
     }
     function _applyXform(d){
       var last=decos[decos.length-1];if(!last)return;
+      if(d.y!=null&&!isNaN(d.y))last.group.position.y=d.y;
       if(d.ry!=null)last.group.rotation.y=d.ry;
       if(d.sc&&d.sc!==1)last.group.scale.setScalar(d.sc);
       // Restore mode ownership (diorama vs classic).

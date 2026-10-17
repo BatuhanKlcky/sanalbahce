@@ -342,7 +342,7 @@ window.advancePlants=function(seconds){
   if(!live&&!isLoading&&crossed) showToast(crossed+' bitki büyüdü');
   return crossed;
 };
-var GARDEN_R=36, PLANT_GAP=1.5;
+var GARDEN_R=75, PLANT_GAP=1.5;
 /** Active placeable disk: biome pad center+R in cozy multi-biome, else classic garden. */
 window.placeZone=function(){
   if(typeof isCozy==='function'&&isCozy()&&typeof window.getActiveBiome==='function'){

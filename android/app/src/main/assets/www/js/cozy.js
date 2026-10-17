@@ -104,6 +104,17 @@ window.scaleSelected = function(dir){
   markDirty(); save(true);
 };
 
+window.elevateSelected = function(dir){
+  if(!selectedDeco){ showToast('Önce sahnedeki bir objeye dokun 👆'); return; }
+  var curY = selectedDeco.group.position.y || 0;
+  var step = (dir || 1) * 0.35;
+  var newY = Math.max(0, Math.round((curY + step) * 100) / 100);
+  selectedDeco.group.position.y = newY;
+  if(_selRing) _selRing.position.y = newY + 0.04;
+  markDirty(); save(true);
+  showToast('📐 Yükseklik: ' + newY + 'm');
+};
+
 window.armMoveSelected = function(){
   if(!selectedDeco){ showToast('Önce sahnedeki bir objeye dokun 👆'); return; }
   _moveArmed = true;
@@ -160,11 +171,32 @@ function applyCozyLights(){
   if(!window.mLight) return;
   var hemi = scene.children.filter(function(c){ return c.isHemisphereLight; })[0];
   var amb = scene.children.filter(function(c){ return c.isAmbientLight; })[0];
+  var p = (typeof dayPhase === 'number') ? dayPhase : 0.5;
+  var ph = (typeof getPN === 'function') ? getPN(p) : 'GÜNDÜZ';
+
   if(cozyMode){
-    if(amb){ amb.color.setHex(0xfff0e0); amb.intensity = .95; }
-    if(hemi){ hemi.color.setHex(0xffe8d6); hemi.groundColor.setHex(0x6a8f52); hemi.intensity = .55; }
-    mLight.color.setHex(0xffe2c4); mLight.intensity = 1.25;
-    if(scene.fog){ scene.fog.color.setHex(0xd9c4b0); scene.fog.density = .0045; }
+    if(ph === 'GÜNDÜZ'){
+      if(amb){ amb.color.setHex(0xfff0e0); amb.intensity = 0.95; }
+      if(hemi){ hemi.color.setHex(0xffe8d6); hemi.groundColor.setHex(0x6a8f52); hemi.intensity = 0.55; }
+      mLight.color.setHex(0xffe2c4); mLight.intensity = 1.25;
+      if(scene.fog){ scene.fog.color.setHex(0xd9c4b0); scene.fog.density = 0.0045; }
+    } else if(ph === 'ŞAFAK'){
+      if(amb){ amb.color.setHex(0xffd5b5); amb.intensity = 0.75; }
+      if(hemi){ hemi.color.setHex(0xffc599); hemi.groundColor.setHex(0x5a6f42); hemi.intensity = 0.45; }
+      mLight.color.setHex(0xffaa66); mLight.intensity = 0.85;
+      if(scene.fog){ scene.fog.color.setHex(0xc48862); scene.fog.density = 0.006; }
+    } else if(ph === 'AKŞAM'){
+      if(amb){ amb.color.setHex(0xffa578); amb.intensity = 0.70; }
+      if(hemi){ hemi.color.setHex(0xff8855); hemi.groundColor.setHex(0x4a4f32); hemi.intensity = 0.40; }
+      mLight.color.setHex(0xff6633); mLight.intensity = 0.75;
+      if(scene.fog){ scene.fog.color.setHex(0x8a4030); scene.fog.density = 0.007; }
+    } else {
+      // GECE — Rahat diorama gecesi, ay ışığı ve pencere ışıltıları
+      if(amb){ amb.color.setHex(0x1a263c); amb.intensity = 0.55; }
+      if(hemi){ hemi.color.setHex(0x283a5e); hemi.groundColor.setHex(0x101824); hemi.intensity = 0.35; }
+      mLight.color.setHex(0x88a4e8); mLight.intensity = 0.45;
+      if(scene.fog){ scene.fog.color.setHex(0x0c1424); scene.fog.density = 0.008; }
+    }
   } else {
     if(amb){ amb.color.setHex(0x1a2a4a); amb.intensity = .72; }
     if(hemi){ hemi.color.setHex(0xd7ecff); hemi.groundColor.setHex(0x3a5c2a); hemi.intensity = .28; }
@@ -215,16 +247,9 @@ function applyCozyMode(toastCam){
   }
 }
 
-// Soft golden-hour freeze while cozy (still animates gently via uTime).
-var _cozyPhase = 0.62; // warm afternoon
-var _origGetRDP = null;
+// Hem klasik hem cozy modunda gerçek yerel saatle uyumlu dinamik gece/gündüz döngüsü
 function wrapDayClock(){
-  if(_origGetRDP) return;
-  _origGetRDP = getRDP;
-  getRDP = function(){
-    if(cozyMode) return (window._biomePhase != null ? window._biomePhase : _cozyPhase);
-    return _origGetRDP();
-  };
+  // Dinamik akış: getRDP() artık cozy modunda da gerçek saate uygun çalışır
 }
 
 window.addEventListener('pointerup', function(e){
@@ -236,17 +261,44 @@ window.addEventListener('pointerup', function(e){
     plM.x = (e.clientX / innerWidth) * 2 - 1;
     plM.y = -(e.clientY / innerHeight) * 2 + 1;
     plRay.setFromCamera(plM, camera);
-    var hits = plRay.intersectObject(planeR);
-    if(!hits.length) return;
-    var pt = hits[0].point;
-    if(typeof window.tooFar === 'function' ? window.tooFar(pt.x, pt.z)
-        : Math.hypot(pt.x, pt.z) > GARDEN_R){ showToast('Ada dışına çıkamaz 🚫'); return; }
-    selectedDeco.group.position.x = pt.x;
-    selectedDeco.group.position.z = pt.z;
-    if(_selRing){ _selRing.position.x = pt.x; _selRing.position.z = pt.z; }
+
+    // Üst üste taşıma desteği (Stacking raycast)
+    var otherMeshes = [];
+    decos.forEach(function(d){
+      if(d !== selectedDeco && d.group && d.group.visible !== false){
+        d.group.traverse(function(ch){
+          if(ch.isMesh && ch.visible !== false && ch.geometry.type !== 'CircleGeometry' && ch.geometry.type !== 'RingGeometry'){
+            otherMeshes.push(ch);
+          }
+        });
+      }
+    });
+
+    var decoHits = otherMeshes.length ? plRay.intersectObjects(otherMeshes, true) : [];
+    var groundHits = plRay.intersectObject(planeR);
+    var pt = null;
+    var targetY = 0;
+
+    if(decoHits.length > 0){
+      pt = decoHits[0].point;
+      targetY = Math.round(pt.y * 100) / 100;
+    } else if(groundHits.length > 0){
+      pt = groundHits[0].point;
+      targetY = 0;
+    } else {
+      return;
+    }
+
+    if(typeof window.tooFar === 'function' ? window.tooFar(pt.x, pt.z) : Math.hypot(pt.x, pt.z) > GARDEN_R){
+      showToast('Sınır dışına çıkamaz 🚫');
+      return;
+    }
+
+    selectedDeco.group.position.set(pt.x, targetY, pt.z);
+    if(_selRing){ _selRing.position.set(pt.x, targetY + 0.04, pt.z); }
     _moveArmed = false;
     markDirty(); save(true);
-    showToast('Taşındı ✨');
+    showToast(targetY > 0.05 ? 'Üste yerleştirildi (Yükseklik: ' + targetY + 'm) 🧱' : 'Taşındı ✨');
     return;
   }
 
