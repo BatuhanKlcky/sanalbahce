@@ -1,4 +1,6 @@
-// Cozy farmer house + Quaternius rig with REAL AnimationMixer clips (Idle/Walk/Duck/Punch).
+// Cozy farmer house + Quaternius Modular Farmer meshes.
+// AnimationMixer clips are built from the Farmer BIND pose (Character pack
+// clips use incompatible binds — Idle Head ~80° / arms break). Real mixer, not script bob.
 // Players plant; farmers tend & harvest. Capacity = farmers × 3 jobs.
 (function(){
   var JOBS_PER_FARMER = 3;
@@ -13,6 +15,7 @@
   var _rigWait = [];
   var RIG_MALE = 'models/characters/FarmerAnim.glb';
   var RIG_FEMALE = 'models/characters/FarmerAnim_F.glb';
+  var DEG = Math.PI / 180;
 
   function M(hex, rough){
     var k = hex + ':' + (rough||.8);
@@ -40,6 +43,185 @@
       if(keys[i] === name || keys[i].indexOf('|'+name) >= 0 || keys[i].endsWith(name)) return pack[keys[i]];
     }
     return null;
+  }
+
+  /** Snapshot bind quaternions after skeleton.pose(). */
+  function snapshotBindQuats(root){
+    var bind = {};
+    root.traverse(function(o){
+      if(!o.isBone) return;
+      bind[o.name] = o.quaternion.clone();
+    });
+    if(Object.keys(bind).length < 8){
+      root.traverse(function(o){
+        if(!o.name || bind[o.name]) return;
+        if(/^(Root|Hips|Abdomen|Torso|Chest|Neck|Head|Shoulder|UpperArm|LowerArm|Hand|UpperLeg|LowerLeg|Foot)/.test(o.name)){
+          bind[o.name] = o.quaternion.clone();
+        }
+      });
+    }
+    return bind;
+  }
+
+  /** bind * localEuler(x,y,z deg) — delta in bone local space. */
+  function bindDelta(bindQ, xDeg, yDeg, zDeg){
+    var q = bindQ.clone();
+    var d = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+      (xDeg || 0) * DEG, (yDeg || 0) * DEG, (zDeg || 0) * DEG, 'XYZ'
+    ));
+    return q.multiply(d);
+  }
+
+  function quatTrack(boneName, times, quats){
+    var values = [];
+    for(var i=0;i<quats.length;i++){
+      var q = quats[i];
+      values.push(q.x, q.y, q.z, q.w);
+    }
+    return new THREE.QuaternionKeyframeTrack(boneName + '.quaternion', times, values);
+  }
+
+  /**
+   * Farmer-bind-relative clips. Modular Farmer bind is a T-pose; Character pack
+   * Idle cannot be retargeted (Head bind −90° vs 0°, arms break). We author
+   * standing rest + walk/work as local euler deltas from Farmer bind.
+   * Bone names use GLTFLoader sanitization: UpperArm.L → UpperArmL.
+   */
+  function buildFarmerClips(root){
+    var bind = snapshotBindQuats(root);
+    function B(name){ return bind[name] || new THREE.Quaternion(); }
+    function has(name){ return !!bind[name]; }
+    // Natural standing rest (arms down, soft elbows) — bind alone is T-pose.
+    var REST = {
+      UpperArmL: [-78, 8, 22],
+      UpperArmR: [-78, -8, -22],
+      LowerArmL: [0, 0, -32],
+      LowerArmR: [0, 0, 32],
+      ShoulderL: [0, 0, 4],
+      ShoulderR: [0, 0, -4],
+      UpperLegL: [0, 0, 0],
+      UpperLegR: [0, 0, 0],
+      LowerLegL: [0, 0, 0],
+      LowerLegR: [0, 0, 0],
+      Hips: [0, 0, 0],
+      Abdomen: [2, 0, 0],
+      Torso: [0, 0, 0],
+      Chest: [0, 0, 0],
+      Neck: [0, 0, 0],
+      Head: [0, 0, 0]
+    };
+    function R(name, dx, dy, dz){
+      var r = REST[name] || [0, 0, 0];
+      return bindDelta(B(name), r[0] + (dx || 0), r[1] + (dy || 0), r[2] + (dz || 0));
+    }
+    function restTrack(name, times, frames){
+      if(!has(name)) return null;
+      var qs = frames.map(function(f){ return R(name, f[0], f[1], f[2]); });
+      return quatTrack(name, times, qs);
+    }
+
+    var clips = {};
+
+    // Idle — arms-down rest + tiny breath (not T-pose, not Character Head tilt)
+    (function(){
+      var times = [0, 1.25, 2.5];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('Abdomen', [[0,0,0],[2.2,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[1.4,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[1.5,4,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[1,0,0],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[1,0,0],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-3],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,3],[0,0,0]]);
+      ['ShoulderL','ShoulderR','UpperLegL','UpperLegR','LowerLegL','LowerLegR','Hips','Torso','Neck'].forEach(function(n){
+        add(n, [[0,0,0],[0,0,0],[0,0,0]]);
+      });
+      clips.Idle = new THREE.AnimationClip('Idle', 2.5, tracks);
+    })();
+
+    // Walk — opposite arm/leg swing from standing rest
+    (function(){
+      var times = [0, 0.28, 0.56, 0.84, 1.12];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('UpperLegL', [[0,0,0],[16,0,0],[0,0,0],[-16,0,0],[0,0,0]]);
+      add('UpperLegR', [[0,0,0],[-16,0,0],[0,0,0],[16,0,0],[0,0,0]]);
+      add('LowerLegL', [[0,0,0],[-14,0,0],[0,0,0],[6,0,0],[0,0,0]]);
+      add('LowerLegR', [[0,0,0],[6,0,0],[0,0,0],[-14,0,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[0,0,-28],[0,0,0],[0,0,28],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[0,0,28],[0,0,0],[0,0,-28],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-10],[0,0,0],[0,0,4],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,-4],[0,0,0],[0,0,10],[0,0,0]]);
+      add('Abdomen', [[0,0,0],[0,5,0],[0,0,0],[0,-5,0],[0,0,0]]);
+      add('Head', [[0,0,0],[0,3,0],[0,0,0],[0,-3,0],[0,0,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 1.12, tracks);
+    })();
+
+    // Duck — kneel/tend from standing rest
+    (function(){
+      var times = [0, 0.35, 1.0, 1.35];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('Abdomen', [[0,0,0],[22,0,0],[24,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[12,0,0],[14,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[8,0,0],[8,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-8,0,0],[-10,0,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[40,8,25],[45,10,28],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[40,-8,-25],[45,-10,-28],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-30],[0,0,-35],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,30],[0,0,35],[0,0,0]]);
+      add('UpperLegL', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
+      add('UpperLegR', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
+      add('LowerLegL', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
+      add('LowerLegR', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
+      clips.Duck = new THREE.AnimationClip('Duck', 1.35, tracks);
+    })();
+
+    // Punch — harvest reach from standing rest
+    (function(){
+      var times = [0, 0.2, 0.45, 0.75, 1.05];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('Abdomen', [[0,0,0],[8,0,0],[16,5,0],[6,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[6,0,0],[10,4,0],[4,0,0],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[25,-15,40],[35,-20,55],[10,-5,15],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,35],[0,0,50],[0,0,10],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[8,0,-8],[12,0,-12],[4,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[6,0,0],[10,-8,0],[4,0,0],[0,0,0]]);
+      clips.Punch = new THREE.AnimationClip('Punch', 1.05, tracks);
+    })();
+
+    // Wave — soft watering / greeting from standing rest
+    (function(){
+      var times = [0, 0.25, 0.5, 0.75, 1.2];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('UpperArmL', [[0,0,0],[50,25,55],[55,15,65],[50,30,55],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-15],[0,20,-8],[0,-20,-15],[0,0,0]]);
+      add('ShoulderL', [[0,0,0],[0,0,10],[0,0,14],[0,0,10],[0,0,0]]);
+      add('Head', [[0,0,0],[0,8,0],[0,10,0],[0,6,0],[0,0,0]]);
+      add('Abdomen', [[0,0,0],[0,3,0],[0,4,0],[0,2,0],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]);
+      clips.Wave = new THREE.AnimationClip('Wave', 1.2, tracks);
+    })();
+
+    return clips;
   }
 
   function cozyLift(root){
@@ -140,13 +322,14 @@
       var g = new THREE.Group();
       g.add(body);
       g.scale.setScalar(1.62 / h);
-      // Reset skeletons to bind pose before first clip
+      // Reset skeletons to Farmer bind, then build clips from that pose.
+      // Discard gltf.animations — Character retargets break Modular Farmer Idle.
       body.traverse(function(c){
         if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
       });
+      body.updateMatrixWorld(true);
+      var clips = buildFarmerClips(body);
       var mixer = new THREE.AnimationMixer(body);
-      var clips = {};
-      (gltf.animations || []).forEach(function(c){ clips[c.name] = c; });
       onDone({ group: g, mixer: mixer, clips: clips, body: body });
     }, function(err){
       console.warn('parse farmer', err);
@@ -253,7 +436,7 @@
     return g;
   }
 
-  // ── Real Quaternius farmer meshes + rotation-only retargeted clips ─────────────
+  // ── Quaternius Modular Farmer meshes + bind-relative mixer clips ───────────
   function buildStubFarmer(){
     var g = new THREE.Group();
     var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
