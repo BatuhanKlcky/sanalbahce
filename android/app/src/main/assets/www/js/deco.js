@@ -765,6 +765,7 @@ function mkPackProp(type, x, z, ang){
   g.position.set(x, 0, z);
   if(ang != null) g.rotation.y = ang;
   else if(def.spin) g.rotation.y = Math.random() * Math.PI * 2;
+  g.userData.baseRotZ = 0;
   if(def.shadow && typeof sitShadow === 'function') g.add(sitShadow(def.shadow));
   var extra = null;
   if(def.light){
@@ -1148,21 +1149,24 @@ var allDecoMeshes = []; // tüm deco mesh'leri raycast için
 window.toggleDeleteMode = function() {
     if (placementMode) { window.cancelPlace(); return; }
     if (flowerPlaceMode) { window.cancelFlowerPlace(); return; }
+    if (typeof editMode !== 'undefined' && editMode && typeof window.deselectDeco === 'function') { window.deselectDeco(); }
+    if (typeof window.closeMoreDrawer === 'function') window.closeMoreDrawer();
+    if (typeof window.closeInspector === 'function') window.closeInspector();
     deleteMode = !deleteMode;
     var bar = document.getElementById('delBar');
     var btn = document.getElementById('btnDel');
     if (deleteMode) {
-        bar.classList.add('show');
-        btn.classList.add('on');
-        controls.enabled = false;
+        if(bar) bar.classList.add('show');
+        if(btn) btn.classList.add('on');
+        controls.enabled = true;
         // Close panels
         openP = null;
         document.getElementById('decoPanel').classList.remove('open');
         document.getElementById('btnDeco').classList.remove('on');
         showToast('Silmek için objeye dokun 🗑️');
     } else {
-        bar.classList.remove('show');
-        btn.classList.remove('on');
+        if(bar) bar.classList.remove('show');
+        if(btn) btn.classList.remove('on');
         controls.enabled = true;
     }
 };
@@ -1198,7 +1202,7 @@ window.cancelPlace=function(){placementMode=false;placementType=null;controls.en
 window.cancelFlowerPlace=window.cancelFlowerPlace||function(){flowerPlaceMode=false;controls.enabled=true;document.getElementById('pBar').classList.remove('show');};
 window.addEventListener('pointermove',function(e){if(!placementMode)return;plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;plRay.setFromCamera(plM,camera);var hits=plRay.intersectObject(planeR);if(!hits.length)return;var pt=hits[0].point;if(!prevGhost){prevGhost=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.05,16),ghostMat.clone());scene.add(prevGhost);}prevGhost.position.set(pt.x,.03,pt.z);});
 window.addEventListener('pointerup',function(e){
-  var uiHit = e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||e.target.closest('#pBar')||e.target.closest('#delBar');
+  var uiHit = e.target.closest('#topHud')||e.target.closest('#bottomDock')||e.target.closest('#moreDrawer')||e.target.closest('#objInspector')||e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||e.target.closest('#pBar')||e.target.closest('#delBar')||e.target.closest('#editBar');
 
   // DELETE MODE
   if(deleteMode && !uiHit){
@@ -1256,6 +1260,13 @@ window.addEventListener('pointerup',function(e){
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
   else if(tp==='house')mkHouse(pt.x,pt.z,ang);
   else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'){
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab = window.getActiveBiome();
+      if(ab && ab.id !== 'meadow'){
+        showToast('⚠️ ' + ab.emoji + ' ' + ab.name + ' biyomu sadece süs içindir! Hasat için 🌸 Çayır (Ana Bahçe) adasına geçin.');
+        return;
+      }
+    }
     if(typeof window.canPlantHarvest==='function'){
       var farmWhy=window.canPlantHarvest();
       if(farmWhy){ showToast(farmWhy); return; }
@@ -1264,6 +1275,13 @@ window.addEventListener('pointerup',function(e){
     if(planted && typeof window.onPlayerPlantedHarvest==='function') window.onPlayerPlantedHarvest(planted);
   }
   else if(tp==='farmer_house'){
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab2 = window.getActiveBiome();
+      if(ab2 && ab2.id !== 'meadow'){
+        showToast('⚠️ Çiftçi evi sadece 🌸 Çayır (Ana Bahçe) adasına kurulabilir!');
+        return;
+      }
+    }
     if(typeof window.mkFarmerHouse==='function'){
       if(!window.mkFarmerHouse(pt.x,pt.z,1)) return;
     } else { showToast('Çiftçi sistemi yok'); return; }

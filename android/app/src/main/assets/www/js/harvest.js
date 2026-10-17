@@ -220,7 +220,7 @@ function advanceHarvest(seconds){
 
 // Hasat tıklama
 window.addEventListener('pointerdown', function(e){
-  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar'))return;
+  if(e.target.closest('#topHud')||e.target.closest('#bottomDock')||e.target.closest('#moreDrawer')||e.target.closest('#objInspector')||e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar'))return;
   if(placementMode||deleteMode||flowerPlaceMode)return;
   var m2 = new THREE.Vector2((e.clientX/innerWidth)*2-1, -(e.clientY/innerHeight)*2+1);
   var r2 = new THREE.Raycaster(); r2.setFromCamera(m2, camera);
@@ -235,7 +235,14 @@ window.addEventListener('pointerdown', function(e){
 // startPlace için hasat ekle
 var _origStartPlace = window.startPlace;
 window.startPlace = function(tp) {
-  if(tp==='tomato'||tp==='strawberry'||tp==='cucumber') {
+  if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot') {
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab = window.getActiveBiome();
+      if(ab && ab.id !== 'meadow'){
+        if(typeof window.focusBiome === 'function') window.focusBiome('meadow');
+        showToast('🌸 Hasat için Ana Bahçe (Çayır) adasına geçildi — dikmek için dokun!');
+      }
+    }
     placementType = tp; placementMode = true; controls.enabled = false;
     document.getElementById('pBar').classList.add('show');
     document.getElementById('pBar').querySelector('span').textContent = '🌱 Nereye dikelim?';

@@ -118,7 +118,39 @@
   }
 
   function spawn(key, h){
-    if(typeof window.spawnModel === 'function') return window.spawnModel(key, h);
+    if(typeof window.spawnModel === 'function'){
+      var m = window.spawnModel(key, h);
+      if(m) return m;
+    }
+    // Procedural fallback if GLB model is still loading or unavailable
+    if(/^tree_|^pine_|^birch_|^willow_|^apple_tree|^palm|^bamboo|^dead_tree/.test(key)){
+      if(typeof buildTree === 'function') return buildTree(0, 0);
+    }
+    if(/^bush_|^berry_bush|^plant_|^grass/.test(key)){
+      if(typeof buildBush === 'function') return buildBush(0, 0);
+    }
+    if(/^rock_|^stump|^log/.test(key)){
+      if(typeof buildStone === 'function') return buildStone(0, 0);
+    }
+    if(/^shroom_/.test(key)){
+      if(typeof buildMushroom === 'function') return buildMushroom(0, 0);
+    }
+    if(/^house_|^inn|^stable|^blacksmith|^sawmill/.test(key)){
+      if(typeof buildHouse === 'function'){
+        var ho = buildHouse(0, 0, 0);
+        return ho && ho.group ? ho.group : ho;
+      }
+    }
+    if(key === 'mill' && typeof buildWindmill === 'function'){
+      var ml = buildWindmill(0, 0);
+      return ml && ml.group ? ml.group : ml;
+    }
+    if(key === 'well' && typeof buildWell === 'function') return buildWell(0, 0);
+    if(key === 'gazebo' && typeof buildPergola === 'function') return buildPergola(0, 0, 0);
+    if(/^bench_/.test(key) && typeof buildBench === 'function') return buildBench(0, 0, 0);
+    if(key === 'fence' && typeof buildFence === 'function') return buildFence(0, 0, 0);
+    if(/^stand/.test(key) && typeof buildTable === 'function') return buildTable(0, 0, 0);
+    if(/^barrel|^crate|^hay|^cauldron|^bags|^bag|^package_/.test(key) && typeof buildPot === 'function') return buildPot(0, 0);
     return null;
   }
 
@@ -147,19 +179,22 @@
 
   function fillMeadow(root, b){
     var R = b.R - 2.2;
-    var nTree = isMobile ? 5 : 8;
-    ringSlots(nTree, R * 0.55, R * 0.88, 11).forEach(function(s, i){
-      addAt(root, spawn(['tree_1','tree_2','tree_3','birch_1'][i % 4], 2.6 + (i % 3) * 0.25), s.x, s.z, 1, s.a);
+    var nTree = isMobile ? 6 : 10;
+    ringSlots(nTree, R * 0.58, R * 0.9, 11).forEach(function(s, i){
+      addAt(root, spawn(['tree_1','tree_2','tree_3','birch_1','apple_tree'][i % 5], 2.7 + (i % 3) * 0.25), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 4 : 6, R * 0.45, R * 0.75, 22).forEach(function(s){
-      addAt(root, spawn(s.r() > 0.5 ? 'bush_1' : 'bush_berry_1', 0.9), s.x, s.z, 1, s.a);
+    ringSlots(isMobile ? 5 : 8, R * 0.45, R * 0.78, 22).forEach(function(s, i){
+      addAt(root, spawn(['bush_1','bush_berry_1','bush_2','berry_bush'][i % 4], 0.9), s.x, s.z, 1, s.a);
     });
-    addAt(root, spawn('house_2', 3.3), -5.2, -3.8, 1, 0.4);
-    addAt(root, spawn('house_1', 3.0), 6.5, -2.2, 0.9, -0.5);
-    addAt(root, spawn('mill', 4.2), 1.0, -10.5, 0.95, 0.1);
+    addAt(root, spawn('house_2', 3.3), -6.2, -4.2, 1, 0.4);
+    addAt(root, spawn('house_1', 3.0), 6.8, -2.5, 0.9, -0.5);
+    addAt(root, spawn('mill', 4.3), 1.2, -11.0, 0.95, 0.1);
     addAt(root, spawn('well', 1.8), 5.2, 3.0, 1, 0);
-    addAt(root, spawn('gazebo', 2.5), -7.0, 3.2, 0.9, 0.2);
-    addAt(root, spawn('bench_1', 0.7), 2.0, 4.2, 1, -0.3);
+    addAt(root, spawn('gazebo', 2.6), -7.2, 3.2, 0.92, 0.2);
+    addAt(root, spawn('bench_1', 0.75), 2.2, 4.4, 1, -0.3);
+    addAt(root, spawn('bench_2', 0.75), -2.5, 5.2, 1, 0.3);
+    addAt(root, spawn('cart', 1.25), 8.2, 1.5, 0.9, -0.8);
+    addAt(root, spawn('barrel', 0.65), 6.2, 4.0, 1, 0);
     if(typeof buildLantern === 'function'){
       [[-8.5, 5.5],[8.2, 4.8],[-3.5, -8.8]].forEach(function(p, i){
         if(isMobile && i > 1) return;
@@ -172,7 +207,7 @@
       var pond = buildPond(0, 0.2);
       if(pond && pond.group){ pond.group.scale.setScalar(0.85); root.add(pond.group); }
     }
-    ringSlots(isMobile ? 6 : 10, 3, R * 0.5, 33).forEach(function(s){
+    ringSlots(isMobile ? 7 : 12, 3, R * 0.52, 33).forEach(function(s){
       var kinds = ['daisy','rose','tulip','cherry','peony','lotus'];
       var cols = [0xff5a9a,0xffd056,0xffffff,0xffb7c5,0x9b7efa,0xff3366];
       var patch = spawnWildPatch(s.x, s.z);
@@ -186,91 +221,125 @@
   }
 
   function fillForest(root, b){
-    var R = b.R - 1.8;
-    ringSlots(isMobile ? 8 : 12, R * 0.35, R * 0.9, 101).forEach(function(s, i){
-      addAt(root, spawn(['pine_1','pine_2','pine_3','tree_4'][i % 4], 2.8 + (i % 4) * 0.35), s.x, s.z, 1, s.a);
+    var R = b.R - 1.6;
+    // Dense pine, birch, oak, and deadwood forest
+    ringSlots(isMobile ? 10 : 16, R * 0.35, R * 0.92, 101).forEach(function(s, i){
+      var treeKeys = ['pine_1','pine_2','pine_3','pine_4','pine_5','birch_1','birch_2','tree_4','tree_5','dead_tree'];
+      addAt(root, spawn(treeKeys[i % treeKeys.length], 2.9 + (i % 4) * 0.35), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 5 : 8, R * 0.2, R * 0.55, 102).forEach(function(s){
-      addAt(root, spawn(['rock_m1','rock_m2','rock_1','stump'][Math.floor(s.r()*4)], 0.5 + s.r() * 0.4), s.x, s.z, 1, s.a);
+    // Sawmill & lumberjack camp in the forest clearing
+    addAt(root, spawn('sawmill', 3.1), -2.8, -3.2, 0.95, 0.45);
+    addAt(root, spawn('cauldron', 0.8), 1.8, 0.8, 1, 0);
+    addAt(root, spawn('bonfire', 1.0), 0.2, 0.3, 1.15, 0);
+    addAt(root, spawn('log_moss', 0.6), 2.4, -1.4, 1, 1.1);
+    addAt(root, spawn('log', 0.55), -1.8, 2.2, 1, 0.4);
+    addAt(root, spawn('stump', 0.55), -3.8, 0.5, 1, 0.2);
+    addAt(root, spawn('stump_plain', 0.5), 3.6, -2.5, 1, 0.9);
+    // Mossy boulders & rocks
+    ringSlots(isMobile ? 6 : 10, R * 0.22, R * 0.68, 102).forEach(function(s, i){
+      var rockKeys = ['rock_m1','rock_m2','rock_m3','rock_m4','rock_1','rock_3','stump'];
+      addAt(root, spawn(rockKeys[i % rockKeys.length], 0.55 + s.r() * 0.45), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 4 : 7, R * 0.15, R * 0.45, 103).forEach(function(s){
-      addAt(root, spawn(['shroom_1','shroom_2','shroom_3','shroom_4'][Math.floor(s.r()*4)], 0.35), s.x, s.z, 1, s.a);
+    // Forest mushroom rings & ferns
+    ringSlots(isMobile ? 6 : 10, R * 0.15, R * 0.55, 103).forEach(function(s, i){
+      addAt(root, spawn(['shroom_1','shroom_2','shroom_3','shroom_4'][i % 4], 0.38 + (i % 2)*0.1), s.x, s.z, 1, s.a);
     });
-    addAt(root, spawn('log_moss', 0.55), 2.2, -1.5, 1, 1.1);
-    addAt(root, spawn('log', 0.5), -3.0, 2.0, 1, 0.4);
-    addAt(root, spawn('bonfire', 0.9), 0.2, 0.4, 1.1, 0);
-    addAt(root, spawn('plant_1', 0.8), -1.5, -2.5, 1, 0);
-    addAt(root, spawn('bush_2', 1.0), 4.5, 3.2, 1, 0);
+    ringSlots(isMobile ? 5 : 8, R * 0.25, R * 0.75, 104).forEach(function(s, i){
+      addAt(root, spawn(['bush_2','bush_berry_2','plant_1','plant_3','bamboo'][i % 5], 0.85 + (i % 3)*0.2), s.x, s.z, 1, s.a);
+    });
   }
 
   function fillFarm(root, b){
-    var R = b.R - 1.8;
-    addAt(root, spawn('stable', 2.8), -3.5, -4.0, 0.95, 0.3);
-    addAt(root, spawn('cart', 1.4), 3.8, -2.5, 1, -0.6);
-    addAt(root, spawn('hay', 1.0), 5.0, 1.5, 1.1, 0.2);
-    addAt(root, spawn('hay', 0.9), 4.0, 2.8, 1, 0.8);
-    addAt(root, spawn('barrel', 0.7), -5.0, 1.0, 1, 0);
-    addAt(root, spawn('crate', 0.55), -4.2, 2.0, 1, 0.4);
+    var R = b.R - 1.6;
+    // Grand Windmill, Stable, Apple Orchard & Farmstead (Decorative Showcase)
+    addAt(root, spawn('stable', 3.0), -3.6, -4.2, 0.95, 0.3);
+    addAt(root, spawn('mill', 4.1), 4.2, -4.5, 0.92, -0.35);
+    addAt(root, spawn('cart', 1.4), 3.8, -0.8, 1, -0.6);
+    addAt(root, spawn('hay', 1.05), 5.2, 1.6, 1.1, 0.2);
+    addAt(root, spawn('hay', 0.92), 4.1, 2.9, 1, 0.8);
+    addAt(root, spawn('hay', 0.88), -5.2, -1.2, 1, 1.4);
+    addAt(root, spawn('barrel', 0.72), -5.0, 1.2, 1, 0);
+    addAt(root, spawn('crate', 0.58), -4.2, 2.2, 1, 0.4);
+    addAt(root, spawn('bags', 0.55), -3.3, 2.5, 1, -0.2);
+    addAt(root, spawn('well', 1.65), -0.8, -1.8, 0.95, 0);
     if(typeof buildScarecrow === 'function'){
-      var sc = buildScarecrow(1.5, 0.5);
+      var sc = buildScarecrow(1.2, 0.8);
       if(sc) root.add(sc);
     } else {
-      addAt(root, spawn('wheat', 1.1), 1.5, 0.5, 1.2, 0);
+      addAt(root, spawn('wheat', 1.1), 1.2, 0.8, 1.2, 0);
     }
-    ringSlots(isMobile ? 8 : 12, 2.5, R * 0.75, 201).forEach(function(s, i){
-      var keys = ['wheat','corn','carrot','tomato','lettuce','pumpkin','plant_5'];
-      addAt(root, spawn(keys[i % keys.length], 0.55 + s.r() * 0.35), s.x, s.z, 1, s.a);
+    // Apple trees & fruit trees around the farm perimeter
+    [[-6.5, -2.5],[6.8, -1.5],[-5.8, 4.5],[5.5, 5.2],[0.0, -6.8]].forEach(function(p, i){
+      if(isMobile && i > 3) return;
+      addAt(root, spawn(i % 2 === 0 ? 'apple_tree' : 'tree_3', 2.5), p[0], p[1], 1, i * 1.1);
     });
-    ringSlots(4, R * 0.7, R * 0.9, 202).forEach(function(s){
+    // Decorative crop rows (wheat, corn, pumpkin, watermelon, carrot, tomato, lettuce)
+    ringSlots(isMobile ? 10 : 16, 2.2, R * 0.72, 201).forEach(function(s, i){
+      var keys = ['wheat','corn','pumpkin','watermelon','carrot','tomato','lettuce','plant_5'];
+      addAt(root, spawn(keys[i % keys.length], 0.6 + s.r() * 0.35), s.x, s.z, 1, s.a);
+    });
+    ringSlots(isMobile ? 6 : 8, R * 0.76, R * 0.92, 202).forEach(function(s){
       addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
     });
-    addAt(root, spawn('tree_3', 2.4), -6.0, -1.0, 1, 0);
   }
 
   function fillLake(root, b){
-    var R = b.R - 1.8;
+    var R = b.R - 1.6;
     if(typeof buildPond === 'function'){
       var pond = buildPond(0, 0);
-      if(pond && pond.group){ pond.group.scale.setScalar(1.15); root.add(pond.group); }
+      if(pond && pond.group){ pond.group.scale.setScalar(1.25); root.add(pond.group); }
     }
-    ringSlots(isMobile ? 5 : 7, R * 0.55, R * 0.9, 301).forEach(function(s, i){
-      addAt(root, spawn(['willow_1','willow_2','birch_1','tree_2'][i % 4], 2.7), s.x, s.z, 1, s.a);
+    if(typeof buildBridge === 'function'){
+      var br = buildBridge(0, 0.2, 0.35);
+      if(br){ br.scale.setScalar(1.1); root.add(br); }
+    }
+    // Weeping willows, palms, bamboo, and birches around the water
+    ringSlots(isMobile ? 7 : 11, R * 0.55, R * 0.92, 301).forEach(function(s, i){
+      var lakeTrees = ['willow_1','willow_2','bamboo','palm','birch_1','birch_3','tree_2'];
+      addAt(root, spawn(lakeTrees[i % lakeTrees.length], 2.75), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 5 : 8, 2.2, 4.5, 302).forEach(function(s){
-      addAt(root, spawn('lilypad', 0.4), s.x * 0.55, s.z * 0.55, 1, s.a);
+    ringSlots(isMobile ? 6 : 10, 1.8, 4.6, 302).forEach(function(s){
+      addAt(root, spawn('lilypad', 0.42), s.x * 0.55, s.z * 0.55, 1, s.a);
     });
-    addAt(root, spawn('bench_2', 0.7), 5.5, 1.2, 1, -1.2);
-    addAt(root, spawn('bench_1', 0.7), -5.2, -0.8, 1, 1.0);
-    addAt(root, spawn('gazebo', 2.4), 0.5, -6.5, 0.85, 0);
-    ringSlots(isMobile ? 4 : 6, R * 0.4, R * 0.7, 303).forEach(function(s){
-      addAt(root, spawn(['rock_1','rock_2','rock_m3'][Math.floor(s.r()*3)], 0.45), s.x, s.z, 1, s.a);
+    addAt(root, spawn('gazebo', 2.55), 0.5, -6.5, 0.9, 0);
+    addAt(root, spawn('bench_2', 0.75), 5.5, 1.2, 1, -1.2);
+    addAt(root, spawn('bench_1', 0.75), -5.2, -0.8, 1, 1.0);
+    ringSlots(isMobile ? 5 : 8, R * 0.4, R * 0.72, 303).forEach(function(s, i){
+      addAt(root, spawn(['rock_m1','rock_m2','rock_m3','rock_2','rock_4'][i % 5], 0.5), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 5 : 8, 5, R * 0.8, 304).forEach(function(s){
-      if(s.r() > 0.45){
+    ringSlots(isMobile ? 6 : 10, 4.8, R * 0.82, 304).forEach(function(s){
+      if(s.r() > 0.4){
         var patch = spawnWildPatch(s.x, s.z);
         if(patch){ patch.rotation.y = s.a; root.add(patch); }
         else addAt(root, spawnBloom('lotus', 0xff69b4, 0.95), s.x, s.z, 1, s.a);
       } else {
-        addAt(root, spawn(['plant_2','grass_2'][Math.floor(s.r()*2)], 0.5), s.x, s.z, 1, s.a);
+        addAt(root, spawn(['plant_2','grass_2','bamboo'][Math.floor(s.r()*3)], 0.65), s.x, s.z, 1, s.a);
       }
     });
   }
 
   function fillVillage(root, b){
-    var R = b.R - 1.8;
-    addAt(root, spawn('inn', 3.4), -1.0, -4.5, 0.95, 0.15);
-    addAt(root, spawn('house_3', 3.1), 5.0, -2.0, 0.9, -0.55);
-    addAt(root, spawn('house_4', 2.9), -5.5, 1.5, 0.88, 0.7);
-    addAt(root, spawn('well', 1.7), 1.2, 1.0, 1, 0);
-    addAt(root, spawn('stand', 1.4), 3.5, 3.5, 1, -0.4);
-    addAt(root, spawn('stand', 1.3), -3.0, 4.0, 1, 0.5);
-    addAt(root, spawn('barrel', 0.65), 4.5, 4.5, 1, 0);
-    addAt(root, spawn('crate', 0.5), -4.2, 4.8, 1, 0.3);
-    addAt(root, spawn('cart', 1.3), 0.0, 5.5, 0.95, Math.PI);
-    ringSlots(isMobile ? 4 : 6, R * 0.65, R * 0.9, 401).forEach(function(s, i){
-      addAt(root, spawn(['tree_1','birch_2','bush_1','plant_4'][i % 4], 2.2), s.x, s.z, 1, s.a);
+    var R = b.R - 1.6;
+    // Bustling cozy village square: Inn, Blacksmith, Houses, Market Stands, Bell Tower, Well
+    addAt(root, spawn('inn', 3.5), -1.2, -5.0, 0.95, 0.15);
+    addAt(root, spawn('blacksmith', 3.2), -5.8, -1.8, 0.92, 0.65);
+    addAt(root, spawn('house_3', 3.1), 5.4, -2.2, 0.9, -0.55);
+    addAt(root, spawn('house_4', 2.95), -5.2, 3.2, 0.88, 0.7);
+    addAt(root, spawn('house_1', 2.85), 5.2, 2.8, 0.86, -0.85);
+    addAt(root, spawn('bell', 1.65), -2.6, -1.2, 1, 0.2);
+    addAt(root, spawn('well', 1.75), 0.8, 0.6, 1, 0);
+    addAt(root, spawn('stand', 1.5), 3.2, 3.6, 1, -0.4);
+    addAt(root, spawn('stand_2', 1.5), -2.5, 4.2, 1, 0.5);
+    addAt(root, spawn('barrel', 0.68), 4.4, 4.5, 1, 0);
+    addAt(root, spawn('crate', 0.55), -3.8, 4.8, 1, 0.3);
+    addAt(root, spawn('package_1', 0.45), -3.2, 5.1, 1, 0.1);
+    addAt(root, spawn('bags', 0.5), 2.4, 4.4, 1, -0.3);
+    addAt(root, spawn('cart', 1.3), 0.2, 5.8, 0.95, Math.PI);
+    addAt(root, spawn('bench_1', 0.72), 2.2, -1.2, 1, -0.5);
+    ringSlots(isMobile ? 5 : 8, R * 0.68, R * 0.92, 401).forEach(function(s, i){
+      addAt(root, spawn(['tree_1','birch_2','bush_1','plant_4','apple_tree'][i % 5], 2.3), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 4 : 6, R * 0.75, R * 0.95, 402).forEach(function(s){
+    ringSlots(isMobile ? 5 : 8, R * 0.78, R * 0.95, 402).forEach(function(s){
       addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
     });
     addAt(root, spawnBloom('rose', 0xcc0022, 1.05), 2.0, 2.5, 1, 0);
@@ -377,7 +446,10 @@
     var amb = scene.children.filter(function(c){ return c.isAmbientLight; })[0];
     if(amb) amb.color.setHex(b.sun);
     paintBiomeBar();
-    if(toast && typeof showToast === 'function') showToast(b.emoji + ' ' + b.name + ' biyomu');
+    if(toast && typeof showToast === 'function'){
+      if(b.id === 'meadow') showToast(b.emoji + ' ' + b.name + ' (Ana Bahçe · Ekim & Hasat)');
+      else showToast(b.emoji + ' ' + b.name + ' Biyomu · Sadece Süs & Dekor (Hasat Yok)');
+    }
   }
 
   function focusBiome(id, animate){
@@ -435,11 +507,15 @@
     var cozy = typeof isCozy === 'function' && isCozy();
     bar.classList.toggle('show', !!cozy);
     bar.innerHTML = '';
+    var tag = document.createElement('div');
+    tag.style.cssText = 'font-size:8px;font-weight:800;color:#fce282;text-align:center;line-height:1.15;padding:2px 2px 4px;border-bottom:1px solid rgba(255,210,160,0.18);width:100%';
+    tag.innerHTML = _focus === 'meadow' ? 'ANA<br>ADA' : 'SADECE<br>SÜS';
+    bar.appendChild(tag);
     BIOMES.forEach(function(b){
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'biomeChip' + (_focus === b.id ? ' on' : '');
-      btn.title = b.name;
+      btn.title = b.id === 'meadow' ? (b.name + ' (Ana Bahçe)') : (b.name + ' (Sadece Süs - Hasat Yok)');
       btn.setAttribute('aria-label', b.name);
       btn.innerHTML = '<span class="be">' + b.emoji + '</span><span class="bn">' + b.name + '</span>';
       btn.onclick = function(){ window.focusBiome(b.id); };
@@ -466,10 +542,11 @@
   window.getActiveBiome = function(){ return findBiome(_focus); };
   window.paintBiomeBar = paintBiomeBar;
 
-  // Rebuild after models ready (redressGardenModels will also call)
+  // Build immediately so biomes are never empty while GLBs download, then rebuild with GLBs when ready
+  setTimeout(function(){ if(!_built) buildAllBiomes(); }, 0);
   if(typeof window.whenModelsReady === 'function'){
     window.whenModelsReady(function(){
-      setTimeout(function(){ if(!_built) buildAllBiomes(); }, 40);
+      setTimeout(function(){ buildAllBiomes(); }, 40);
     });
   }
 })();

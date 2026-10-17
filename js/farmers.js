@@ -13,8 +13,10 @@
   var _bufFemale = null;
   var _rigReady = false;
   var _rigWait = [];
-  var RIG_MALE = 'models/characters/FarmerAnim.glb';
-  var RIG_FEMALE = 'models/characters/FarmerAnim_F.glb';
+  var RIG_MALE = 'models/characters/FarmerAnim.glb?v=4';
+  var RIG_FEMALE = 'models/characters/FarmerAnim_F.glb?v=4';
+  var FALLBACK_MALE = 'models/characters/Farmer.glb?v=4';
+  var FALLBACK_FEMALE = 'models/characters/Farmer_F.glb?v=4';
   var DEG = Math.PI / 180;
 
   function M(hex, rough){
@@ -143,28 +145,37 @@
       clips.Idle = new THREE.AnimationClip('Idle', 2.5, tracks);
     })();
 
-    // Walk — opposite arm/leg swing from standing rest
+    // Walk — Farmer L/R thigh forward uses the SAME local Z sign (not mirrored).
+    // Old opposite-sign keys put BOTH feet forward → "spastic" double-step.
+    // Arms open (abducted) + swing opposite the legs.
     (function(){
-      var times = [0, 0.28, 0.56, 0.84, 1.12];
+      var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('UpperLegL', [[0,0,0],[16,0,0],[0,0,0],[-16,0,0],[0,0,0]]);
-      add('UpperLegR', [[0,0,0],[-16,0,0],[0,0,0],[16,0,0],[0,0,0]]);
-      add('LowerLegL', [[0,0,0],[-14,0,0],[0,0,0],[6,0,0],[0,0,0]]);
-      add('LowerLegR', [[0,0,0],[6,0,0],[0,0,0],[-14,0,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[0,0,-28],[0,0,0],[0,0,28],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[0,0,28],[0,0,0],[0,0,-28],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-10],[0,0,0],[0,0,4],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,-4],[0,0,0],[0,0,10],[0,0,0]]);
-      add('Abdomen', [[0,0,0],[0,5,0],[0,0,0],[0,-5,0],[0,0,0]]);
-      add('Head', [[0,0,0],[0,3,0],[0,0,0],[0,-3,0],[0,0,0]]);
-      clips.Walk = new THREE.AnimationClip('Walk', 1.12, tracks);
+      // Thigh Z: + = L forward AND R back; − = L back AND R forward
+      //          L-fwd            mid             R-fwd            mid             L-fwd
+      add('UpperLegL', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('UpperLegR', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('LowerLegL', [[5,0,0],[16,0,0],[34,0,0],[24,0,0],[5,0,0]]);
+      add('LowerLegR', [[34,0,0],[24,0,0],[5,0,0],[16,0,0],[34,0,0]]);
+      // Open arms (abducted) vs idle REST, then ±Z swing (same sign L/R = opposite world)
+      // REST [-78,8,22] → walk open ≈ +28 X / +14 Z / shoulders out
+      add('ShoulderL', [[0,0,20],[0,0,20],[0,0,20],[0,0,20],[0,0,20]]);
+      add('ShoulderR', [[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20]]);
+      add('UpperArmL', [[28,-2,48],[28,-2,32],[28,-2,-4],[28,-2,12],[28,-2,48]]);
+      add('UpperArmR', [[28,2,20],[28,2,4],[28,2,-32],[28,2,-16],[28,2,20]]);
+      add('LowerArmL', [[0,0,6],[0,0,3],[0,0,8],[0,0,3],[0,0,6]]);
+      add('LowerArmR', [[0,0,-6],[0,0,-3],[0,0,-8],[0,0,-3],[0,0,-6]]);
+      add('Abdomen', [[0,4,0],[0,0,0],[0,-4,0],[0,0,0],[0,4,0]]);
+      add('Torso', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      add('Head', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
     })();
 
-    // Duck — kneel/tend from standing rest
+    // Duck — kneel/tend: thighs forward (Z), knees bend (+X)
     (function(){
       var times = [0, 0.35, 1.0, 1.35];
       var tracks = [];
@@ -172,18 +183,18 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('Abdomen', [[0,0,0],[22,0,0],[24,0,0],[0,0,0]]);
-      add('Torso', [[0,0,0],[12,0,0],[14,0,0],[0,0,0]]);
-      add('Chest', [[0,0,0],[8,0,0],[8,0,0],[0,0,0]]);
-      add('Head', [[0,0,0],[-8,0,0],[-10,0,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[40,8,25],[45,10,28],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[40,-8,-25],[45,-10,-28],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-30],[0,0,-35],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,30],[0,0,35],[0,0,0]]);
-      add('UpperLegL', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
-      add('UpperLegR', [[0,0,0],[28,0,0],[30,0,0],[0,0,0]]);
-      add('LowerLegL', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
-      add('LowerLegR', [[0,0,0],[-40,0,0],[-42,0,0],[0,0,0]]);
+      add('Abdomen', [[0,0,0],[18,0,0],[20,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[10,0,0],[12,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[6,0,0],[6,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-6,0,0],[-8,0,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[30,0,20],[34,0,24],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[30,0,-20],[34,0,-24],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-28],[0,0,-32],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,28],[0,0,32],[0,0,0]]);
+      add('UpperLegL', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
+      add('UpperLegR', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
+      add('LowerLegL', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
+      add('LowerLegR', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
       clips.Duck = new THREE.AnimationClip('Duck', 1.35, tracks);
     })();
 
@@ -260,6 +271,8 @@
     next.setLoop(opts.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, opts.loop === false ? 1 : Infinity);
     if(opts.loop === false) next.clampWhenFinished = true;
     next.setEffectiveWeight(1);
+    // Walk cycle authored ~1s; keep cadence calm vs move speed
+    next.timeScale = clipName === 'Walk' ? 0.85 : 1;
     if(f.currentAction){
       f.currentAction.crossFadeTo(next, opts.fade != null ? opts.fade : 0.18, false);
     } else {
@@ -270,16 +283,47 @@
     f.animName = clipName;
   }
 
+  function isValidGLB(buf){
+    if(!buf || !(buf.byteLength > 10000)) return false;
+    var u8 = new Uint8Array(buf, 0, 4);
+    // 'glTF' in ASCII = 0x67, 0x6C, 0x54, 0x46
+    return u8[0] === 0x67 && u8[1] === 0x6C && u8[2] === 0x54 && u8[3] === 0x46;
+  }
+
   function loadArrayBuffer(url, cb){
-    var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.responseType = 'arraybuffer';
-    req.onload = function(){
-      if(req.status >= 200 && req.status < 300) cb(null, req.response);
-      else cb(new Error('HTTP '+req.status));
-    };
-    req.onerror = function(){ cb(new Error('network')); };
-    req.send(null);
+    var done = false;
+    function finish(err, buf){
+      if(done) return;
+      done = true;
+      cb(err, buf);
+    }
+    function tryFetchReload(){
+      if(typeof fetch !== 'function'){ finish(new Error('no-fetch')); return; }
+      var bustUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'cb=' + Date.now();
+      fetch(bustUrl, { cache: 'reload' }).then(function(r){
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      }).then(function(buf){
+        if(isValidGLB(buf)) finish(null, buf);
+        else finish(new Error('invalid-glb-magic'));
+      }).catch(function(e){ finish(e); });
+    }
+    try {
+      var req = new XMLHttpRequest();
+      req.open('GET', url, true);
+      req.responseType = 'arraybuffer';
+      req.onload = function(){
+        if(((req.status >= 200 && req.status < 300) || req.status === 0) && isValidGLB(req.response)){
+          finish(null, req.response);
+        } else {
+          tryFetchReload();
+        }
+      };
+      req.onerror = function(){ tryFetchReload(); };
+      req.send(null);
+    } catch(e){
+      tryFetchReload();
+    }
   }
 
   function loadFarmerRig(){
@@ -295,46 +339,85 @@
       _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
     }
     loadArrayBuffer(RIG_MALE, function(err, buf){
-      if(err) console.warn('FarmerAnim buf', err);
-      else _bufMale = buf;
-      doneOne();
+      if(!err && isValidGLB(buf)){
+        _bufMale = buf;
+        doneOne();
+      } else {
+        loadArrayBuffer(FALLBACK_MALE, function(err2, buf2){
+          if(!err2 && isValidGLB(buf2)) _bufMale = buf2;
+          else console.warn('FarmerAnim buf failed', err, err2);
+          doneOne();
+        });
+      }
     });
     loadArrayBuffer(RIG_FEMALE, function(err, buf){
-      if(err) console.warn('FarmerAnim_F buf', err);
-      else _bufFemale = buf;
-      doneOne();
+      if(!err && isValidGLB(buf)){
+        _bufFemale = buf;
+        doneOne();
+      } else {
+        loadArrayBuffer(FALLBACK_FEMALE, function(err2, buf2){
+          if(!err2 && isValidGLB(buf2)) _bufFemale = buf2;
+          else console.warn('FarmerAnim_F buf failed', err, err2);
+          doneOne();
+        });
+      }
     });
+  }
+
+  function buildFromScene(body, onDone){
+    if(!body){ onDone(null); return; }
+    cozyLift(body);
+    body.updateMatrixWorld(true);
+    var box = new THREE.Box3().setFromObject(body);
+    var h = Math.max(1e-4, box.max.y - box.min.y);
+    if(isFinite(box.min.y)) body.position.y -= box.min.y;
+    // Scale OUTER group only — never scale skinned root (avoids bind explode).
+    var g = new THREE.Group();
+    g.add(body);
+    g.scale.setScalar(1.62 / h);
+    // Reset skeletons to Farmer bind, then build clips from that pose.
+    // Discard gltf.animations — Character retargets break Modular Farmer Idle.
+    body.traverse(function(c){
+      if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+    });
+    body.updateMatrixWorld(true);
+    var clips = buildFarmerClips(body);
+    var mixer = new THREE.AnimationMixer(body);
+    onDone({ group: g, mixer: mixer, clips: clips, body: body });
   }
 
   /** Fresh parse per farmer — keeps skin binds intact (unlike scene.clone). */
   function parseFarmerInstance(kind, onDone){
     var buf = kind === 'female' ? _bufFemale : _bufMale;
-    if(!buf){ onDone(null); return; }
-    var loader = new THREE.GLTFLoader();
-    loader.parse(buf, '', function(gltf){
-      var body = gltf.scene;
-      cozyLift(body);
-      body.updateMatrixWorld(true);
-      var box = new THREE.Box3().setFromObject(body);
-      var h = Math.max(1e-4, box.max.y - box.min.y);
-      if(isFinite(box.min.y)) body.position.y -= box.min.y;
-      // Scale OUTER group only — never scale skinned root (avoids bind explode).
-      var g = new THREE.Group();
-      g.add(body);
-      g.scale.setScalar(1.62 / h);
-      // Reset skeletons to Farmer bind, then build clips from that pose.
-      // Discard gltf.animations — Character retargets break Modular Farmer Idle.
-      body.traverse(function(c){
-        if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+    if(!buf || !isValidGLB(buf)){
+      var url = kind === 'female' ? RIG_FEMALE : RIG_MALE;
+      loadArrayBuffer(url, function(err, freshBuf){
+        if(!err && isValidGLB(freshBuf)){
+          if(kind === 'female') _bufFemale = freshBuf;
+          else _bufMale = freshBuf;
+          try {
+            new THREE.GLTFLoader().parse(freshBuf, '', function(gltf){
+              buildFromScene(gltf.scene, onDone);
+            }, function(){ onDone(null); });
+          } catch(e){ onDone(null); }
+        } else {
+          onDone(null);
+        }
       });
-      body.updateMatrixWorld(true);
-      var clips = buildFarmerClips(body);
-      var mixer = new THREE.AnimationMixer(body);
-      onDone({ group: g, mixer: mixer, clips: clips, body: body });
-    }, function(err){
-      console.warn('parse farmer', err);
+      return;
+    }
+    var loader = new THREE.GLTFLoader();
+    try {
+      loader.parse(buf, '', function(gltf){
+        buildFromScene(gltf.scene, onDone);
+      }, function(err){
+        console.warn('parse farmer', err);
+        onDone(null);
+      });
+    } catch(e){
+      console.warn('parse farmer exception', e);
       onDone(null);
-    });
+    }
   }
 
   function cozyNow(){ return typeof isCozy === 'function' && isCozy(); }
@@ -440,7 +523,9 @@
   function buildStubFarmer(){
     var g = new THREE.Group();
     var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
-    stub.position.y = 0.7; g.add(stub);
+    stub.position.y = 0.7;
+    stub.visible = false; // Never show raw cylinder stub while GLB is parsing
+    g.add(stub);
     if(typeof sitShadow === 'function') g.add(sitShadow(0.45));
     return g;
   }
@@ -448,6 +533,7 @@
   // ── House lifecycle ────────────────────────────────────────────────────────
   function clearFarmers(){
     for(var i=0;i<farmers.length;i++){
+      farmers[i]._dead = true;
       if(farmers[i].group && farmers[i].group.parent) scene.remove(farmers[i].group);
     }
     farmers.length = 0;
@@ -461,11 +547,11 @@
       group: stub, kind: kind, state: 'idle', timer: 1 + Math.random(),
       target: null, job: null, slots: slots || [], time: Math.random()*8,
       mixer: null, actions: {}, clips: null,
-      currentAction: null, animName: ''
+      currentAction: null, animName: '', _dead: false
     };
     farmers.push(rec);
     parseFarmerInstance(kind, function(inst){
-      if(!inst) return;
+      if(!inst || rec._dead) return;
       // Swap stub for real skinned instance
       var px = rec.group.position.x, pz = rec.group.position.z, ry = rec.group.rotation.y;
       if(rec.group.parent) scene.remove(rec.group);
@@ -492,6 +578,7 @@
   function refreshFarmers(){
     if(!houseRec){ clearFarmers(); return; }
     whenRigReady(function(){
+      if(!houseRec){ clearFarmers(); return; }
       var need = farmerCount();
       var home = homeAnchor();
       var keepSlots = farmers.map(function(f){ return (f.slots || []).slice(); });
@@ -736,12 +823,13 @@
         f.timer -= dt;
         f.group.position.y = 0;
         if(f.timer <= 0){
+          var wasGreet = f.job && f.job.type === 'greet';
           f.job = null;
           f.target = null;
           f.state = 'idle';
           f.timer = 0.8 + Math.random();
           playClip(f, 'Idle');
-          if(houseRec){
+          if(houseRec && !wasGreet){
             var home = homeAnchor();
             var side = f.kind === 'female' ? 0.9 : -0.9;
             f.target = {x: home.x + Math.cos(side)*1.9, z: home.z + 1.7};
@@ -753,6 +841,15 @@
       }
     }
   }
+
+  window.greetFarmer = function(f){
+    if(!f) return;
+    f.job = {type: 'greet'};
+    f.target = null;
+    f.state = 'work';
+    f.timer = 1.25;
+    playClip(f, 'Wave', {fade: 0.12});
+  };
 
   function ensureFarmers(){
     // no auto-hire without house
@@ -784,17 +881,22 @@
     houseRec = null;
     clearFarmers();
     if(typeof decos === 'undefined') return;
-    for(var i=0;i<decos.length;i++){
+    for(var i=decos.length - 1; i>=0; i--){
       if(decos[i] && decos[i].type === 'farmer_house'){
-        houseRec = decos[i];
-        if(!houseRec.level) houseRec.level = 1;
-        break;
+        if(!houseRec){
+          houseRec = decos[i];
+          if(!houseRec.level) houseRec.level = 1;
+        } else {
+          // Remove any accidental duplicate farmer_house
+          if(decos[i].group && decos[i].group.parent) scene.remove(decos[i].group);
+          decos.splice(i, 1);
+        }
       }
     }
-    if(!houseRec){
+    if(!houseRec && window._bootGameDone){
       placeFarmerHouse(-4.8, -5.2, 1, 'both');
       if(typeof save === 'function' && !isLoading) save(false);
-    } else {
+    } else if(houseRec){
       refreshFarmers();
       adoptOrphanCrops();
     }

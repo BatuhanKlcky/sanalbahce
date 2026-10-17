@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-18';
+var CACHE = 'sanalbahce-shell-24';
 var LOCAL = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ var LOCAL = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
+  './js/lib/GLTFLoader.js',
+  './js/groundArt.js',
   './js/scene.js',
   './js/save.js',
   './js/harvest.js',
@@ -14,6 +16,16 @@ var LOCAL = [
   './js/flower.js',
   './js/flowerArt.js',
   './js/deco.js',
+  './js/cozyArt.js',
+  './js/premiumArt.js',
+  './js/modelPack.js',
+  './js/biomes.js',
+  './js/cozy.js',
+  './js/cozyLife.js',
+  './js/farmers.js',
+  './js/visualFX.js',
+  './js/codex.js',
+  './js/gameUI.js',
   './js/loop.js'
 ];
 var CDN = [
@@ -47,6 +59,8 @@ self.addEventListener('activate', function(event){
 
 self.addEventListener('fetch', function(event){
   if(event.request.method !== 'GET') return;
+  // Let browser handle binary 3D models (.glb) directly without SW stream cloning
+  if(/\.glb(\?|$)/i.test(event.request.url)) return;
   event.respondWith(
     fetch(event.request).then(function(res){
       if(res && res.ok){
@@ -56,7 +70,12 @@ self.addEventListener('fetch', function(event){
       return res;
     }).catch(function(){
       return caches.match(event.request).then(function(hit){
-        return hit || caches.match('./index.html');
+        if(hit) return hit;
+        var accept = event.request.headers.get('accept') || '';
+        if(event.request.mode === 'navigate' || accept.includes('text/html')){
+          return caches.match('./index.html');
+        }
+        return new Response('', { status: 404, statusText: 'Not Found' });
       });
     })
   );

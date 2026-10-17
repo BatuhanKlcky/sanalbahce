@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-22';
+var CACHE = 'sanalbahce-shell-24';
 var LOCAL = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ var LOCAL = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
+  './js/lib/GLTFLoader.js',
   './js/groundArt.js',
   './js/scene.js',
   './js/save.js',
@@ -58,6 +59,8 @@ self.addEventListener('activate', function(event){
 
 self.addEventListener('fetch', function(event){
   if(event.request.method !== 'GET') return;
+  // Let browser handle binary 3D models (.glb) directly without SW stream cloning
+  if(/\.glb(\?|$)/i.test(event.request.url)) return;
   event.respondWith(
     fetch(event.request).then(function(res){
       if(res && res.ok){

@@ -40,10 +40,14 @@
     `;
     document.body.appendChild(inspectorEl);
 
-    document.getElementById('oiClose').addEventListener('click', function(e){
+    var closeBtn = document.getElementById('oiClose');
+    function onCloseTap(e){
+      e.preventDefault();
       e.stopPropagation();
       closeInspector();
-    });
+    }
+    closeBtn.addEventListener('click', onCloseTap);
+    closeBtn.addEventListener('pointerup', onCloseTap);
 
     return inspectorEl;
   }
@@ -51,6 +55,9 @@
   function closeInspector(){
     if(!inspectorEl) return;
     inspectorEl.classList.remove('active');
+    inspectorEl.style.opacity = '0';
+    inspectorEl.style.pointerEvents = 'none';
+    inspectorEl.style.display = 'none';
     currentInspected = null;
     if(window._selRing) window._selRing.visible = false;
   }
@@ -58,16 +65,27 @@
 
   function updateInspectorPosition(){
     if(!currentInspected || !inspectorEl || !inspectorEl.classList.contains('active')) return;
-    _vProj.copy(currentInspected.pos);
+    var livePos = (typeof currentInspected.getPos === 'function') ? currentInspected.getPos() : currentInspected.pos;
+    if(!livePos){
+      closeInspector();
+      return;
+    }
+    _vProj.copy(livePos);
     _vProj.y += (currentInspected.heightOffset || 1.2);
     _vProj.project(camera);
 
     // Kamera arkasındaysa gizle
     if(_vProj.z > 1){
       inspectorEl.style.opacity = '0';
+      inspectorEl.style.pointerEvents = 'none';
       return;
     }
     inspectorEl.style.opacity = '1';
+    inspectorEl.style.pointerEvents = 'auto';
+
+    if(window._selRing && window._selRing.visible){
+      window._selRing.position.set(livePos.x, 0.04, livePos.z);
+    }
 
     var sx = (_vProj.x * 0.5 + 0.5) * window.innerWidth;
     var sy = (-(_vProj.y * 0.5) + 0.5) * window.innerHeight;
@@ -127,6 +145,9 @@
       ring.scale.setScalar(data.ringScale || 1.1);
     }
 
+    inspectorEl.style.display = 'block';
+    inspectorEl.style.opacity = '1';
+    inspectorEl.style.pointerEvents = 'auto';
     inspectorEl.classList.add('active');
     updateInspectorPosition();
     window.triggerHaptic('light');
@@ -219,9 +240,9 @@
     if(typeof farmers !== 'undefined' && farmers.length){
       var fMeshes = [];
       farmers.forEach(function(fm, idx){
-        if(!fm || !fm.group) return;
+        if(!fm || !fm.group || fm._dead) return;
         fm.group.traverse(function(ch){
-          if(ch.isMesh){
+          if(ch.isMesh && ch.visible !== false){
             ch.userData.farmerRef = fm;
             ch.userData.farmerIdx = idx;
             fMeshes.push(ch);
@@ -239,6 +260,7 @@
             title: (fObj.kind === 'female' ? 'Çiftçi Elif' : 'Çiftçi Ahmet'),
             sub: fStateText + ' (' + jobCount + '/3 iş)',
             pos: fObj.group.position,
+            getPos: function(){ return (fObj && fObj.group && !fObj._dead) ? fObj.group.position : null; },
             heightOffset: 1.6,
             ringScale: 0.9,
             actions: [
@@ -247,13 +269,14 @@
                 icon: '👋',
                 primary: true,
                 onClick: function(){
-                  if(fObj.mixer && fObj.clips){
+                  if(typeof window.greetFarmer === 'function'){
+                    window.greetFarmer(fObj);
+                  } else if(fObj.mixer && fObj.clips){
                     var waveClip = fObj.clips['Wave'] || fObj.clips['Punch'];
                     if(waveClip){
                       var act = fObj.mixer.clipAction(waveClip);
                       act.reset();
                       act.setLoop(THREE.LoopOnce, 1);
-                      act.clampWhenFinished = true;
                       act.play();
                     }
                   }

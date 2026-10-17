@@ -2,7 +2,7 @@
 // ── RAYCASTER (bad bug tap) ──────────────────────────────────────────────────
 var ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
 window.addEventListener('pointerdown',function(e){
-  if(e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||placementMode)return;
+  if(e.target.closest('#topHud')||e.target.closest('#bottomDock')||e.target.closest('#moreDrawer')||e.target.closest('#objInspector')||e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||placementMode)return;
   mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(mouse,camera);
   var hits=ray.intersectObjects(badM);if(!hits.length)return;
@@ -282,12 +282,20 @@ window.addBug=function(kind){
   var wL2=mountWing(sp.hindGeo, sp.hind, -1, -.08);
   hinge.add(wR1,wL1,wR2,wL2);
   bg.scale.setScalar(1.5+Math.random()*.28);
-  bg.position.set((Math.random()-.5)*16, 1.4+Math.random()*1.4, (Math.random()-.5)*16);
+  var cx = 0, cz = 0;
+  if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
+    var b = window.getActiveBiome();
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; }
+  }
+  bg.position.set(cx + (Math.random()-.5)*14, 1.4+Math.random()*1.4, cz + (Math.random()-.5)*14);
   scene.add(bg);
   bugs.push({mesh:bg, wR1:wR1, wL1:wL1, wR2:wR2, wL2:wL2, ants:ants, target:null, time:Math.random()*20, until:0, bob:0, flight:sp.flight, hz:sp.hz, kind:kind});
   document.getElementById('bC').innerText=bugs.length;
   sndBug(); chkTask('b',15);
-  if(!isLoading){ markDirty(); save(true); }
+  if(!isLoading){
+    showToast('🦋 Bahçeye kelebek katıldı! ('+bugs.length+')');
+    markDirty(); save(true);
+  }
 };
 window.removeBug=function(){
   if(!bugs.length){ showToast('Kelebek yok 🦋'); return; }

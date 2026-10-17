@@ -25,12 +25,17 @@ function stepWeather(dt){
   if(curWeather!=='clear') drawWx(dt);
 }
 function pickPetTarget(pet){
+  var cx = 0, cz = 0;
+  if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
+    var b = window.getActiveBiome();
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; }
+  }
   if(flowers.length>0&&Math.random()>.3){
     var rf2=flowers[Math.floor(Math.random()*flowers.length)];
     pet.target=new THREE.Vector3(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
   }else{
     var a=Math.random()*Math.PI*2, r=Math.random()*PET_R;
-    pet.target=new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r);
+    pet.target=new THREE.Vector3(cx + Math.cos(a)*r,0,cz + Math.sin(a)*r);
   }
 }
 function stepPets(dt){
@@ -48,8 +53,6 @@ function stepPets(dt){
       moving=step>.004;
       _petDir.normalize().multiplyScalar(step);
       pet.mesh.position.add(_petDir);
-      var rad=Math.hypot(pet.mesh.position.x, pet.mesh.position.z);
-      if(rad>PET_R){ pet.mesh.position.x*=PET_R/rad; pet.mesh.position.z*=PET_R/rad; }
     }
     var gait=pet.time*(pet.type==='dog'?11:9);
     pet.mesh.position.y=moving?Math.abs(Math.sin(gait))*.03:Math.sin(pet.time*2)*.008;
@@ -268,10 +271,24 @@ function animate(){
     try{ window.stepFarmers(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepFarmers', e); }
   }
+  if(typeof window.stepVisualFX==='function'){
+    try{ window.stepVisualFX(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
+  }
   // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
   decos.forEach(function(d){
     if(!d||!d.group||d.group.visible===false) return;
-    if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
+    if(d.type==='tree'||d.type==='bush')rustle(d.group,now,d.type==='bush'?1.35:1);
+    else if(d.type==='pine'||d.type==='birch'||d.type==='willow'||d.type==='apple_tree'||d.type==='bamboo'||d.type==='palm'){
+      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+      var swayAmp = (d.type==='bamboo'||d.type==='willow') ? 0.045 : 0.022;
+      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.35 + d.group.position.x * 0.7 + d.group.position.z * 0.5) * swayAmp;
+    }
+    else if(d.type==='plant'||d.type==='pumpkin'||d.type==='watermelon'){
+      if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+      d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.8 + d.group.position.x) * 0.025;
+    }
+    else if(d.type==='flower_wild')d.group.rotation.z=Math.sin(now*1.4+d.group.position.x)*.05;if(d.type==='mushroom'&&d.group.userData.caps){var caps=d.group.userData.caps;for(var ci=0;ci<caps.length;ci++)caps[ci].position.y=caps[ci].userData.by+Math.sin(now*1.6+ci)*.02;}if(d.group.userData.arm)d.group.userData.arm.rotation.z=Math.sin(now*1.35+d.group.position.x)*.08;if(d.flame){var flick=.92+Math.sin(now*7+d.group.position.x)*.08;d.flame.scale.y=flick;if(d.light)d.light.intensity=1.15+Math.sin(now*6)*.25;}if(d.type==='windmill'&&d.blades)d.blades.rotation.z+=Math.min(dt,.05)*.9;
     if(d.type==='angel_wing'&&_fc%2===0){
       if(d.light) d.light.intensity=1.2+Math.sin(_fc*.15)*.3;
       if(d.light2) d.light2.intensity=.5+Math.sin(_fc*.22+1)*.2;
@@ -306,6 +323,7 @@ function animate(){
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
 function bootGame(){
   loadProg();loadStats();loadShop();load();placeOwnedWing();
+  window._bootGameDone = true;
   if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
   if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
   else if(typeof window.ensureFarmers==='function') window.ensureFarmers();

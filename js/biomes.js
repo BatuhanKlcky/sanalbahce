@@ -542,10 +542,11 @@
   window.getActiveBiome = function(){ return findBiome(_focus); };
   window.paintBiomeBar = paintBiomeBar;
 
-  // Rebuild after models ready (redressGardenModels will also call)
+  // Build immediately so biomes are never empty while GLBs download, then rebuild with GLBs when ready
+  setTimeout(function(){ if(!_built) buildAllBiomes(); }, 0);
   if(typeof window.whenModelsReady === 'function'){
     window.whenModelsReady(function(){
-      setTimeout(function(){ if(!_built) buildAllBiomes(); }, 40);
+      setTimeout(function(){ buildAllBiomes(); }, 40);
     });
   }
 })();

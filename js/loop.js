@@ -323,6 +323,7 @@ function animate(){
 window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);rCvs.width=wCvs.width=innerWidth;rCvs.height=wCvs.height=innerHeight;});
 function bootGame(){
   loadProg();loadStats();loadShop();load();placeOwnedWing();
+  window._bootGameDone = true;
   if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
   if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
   else if(typeof window.ensureFarmers==='function') window.ensureFarmers();

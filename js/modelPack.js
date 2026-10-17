@@ -762,7 +762,8 @@
       if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
     }
     function loadOne(path, isRetry){
-      loader.load(BASE + path, function(gltf){
+      var url = BASE + path + (isRetry ? ('?v=4&r=' + Date.now()) : '?v=4');
+      loader.load(url, function(gltf){
         templates[path] = gltf.scene;
         fixMats(gltf.scene);
         left--;
