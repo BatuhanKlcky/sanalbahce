@@ -45,22 +45,21 @@
     return null;
   }
 
-  /** Snapshot bind quaternions after skeleton.pose() with alias mapping. */
+  /** Snapshot bind quaternions after skeleton.pose(). */
   function snapshotBindQuats(root){
     var bind = {};
-    var realName = {};
     root.traverse(function(o){
       if(!o.isBone) return;
       bind[o.name] = o.quaternion.clone();
-      realName[o.name] = o.name;
-      var clean = o.name.replace(/[^a-zA-Z0-9]/g, '');
-      realName[clean] = o.name;
-      bind[clean] = bind[o.name];
-      var dotName = o.name.replace(/_?([LR])$/i, '.$1');
-      realName[dotName] = o.name;
-      bind[dotName] = bind[o.name];
     });
-    root._realBones = realName;
+    if(Object.keys(bind).length < 8){
+      root.traverse(function(o){
+        if(!o.name || bind[o.name]) return;
+        if(/^(Root|Hips|Abdomen|Torso|Chest|Neck|Head|Shoulder|UpperArm|LowerArm|Hand|UpperLeg|LowerLeg|Foot)/.test(o.name)){
+          bind[o.name] = o.quaternion.clone();
+        }
+      });
+    }
     return bind;
   }
 
@@ -86,17 +85,12 @@
    * Farmer-bind-relative clips. Modular Farmer bind is a T-pose; Character pack
    * Idle cannot be retargeted (Head bind −90° vs 0°, arms break). We author
    * standing rest + walk/work as local euler deltas from Farmer bind.
+   * Bone names use GLTFLoader sanitization: UpperArm.L → UpperArmL.
    */
   function buildFarmerClips(root){
     var bind = snapshotBindQuats(root);
-    function B(name){
-      var actual = (root._realBones && root._realBones[name]) || name;
-      return bind[actual] || new THREE.Quaternion();
-    }
-    function has(name){
-      var actual = (root._realBones && root._realBones[name]) || name;
-      return !!bind[actual];
-    }
+    function B(name){ return bind[name] || new THREE.Quaternion(); }
+    function has(name){ return !!bind[name]; }
     // Natural standing rest (arms down, soft elbows) — bind alone is T-pose.
     var REST = {
       UpperArmL: [-78, 8, 22],
@@ -121,10 +115,9 @@
       return bindDelta(B(name), r[0] + (dx || 0), r[1] + (dy || 0), r[2] + (dz || 0));
     }
     function restTrack(name, times, frames){
-      var actual = (root._realBones && root._realBones[name]) || name;
-      if(!bind[actual]) return null;
+      if(!has(name)) return null;
       var qs = frames.map(function(f){ return R(name, f[0], f[1], f[2]); });
-      return quatTrack(actual, times, qs);
+      return quatTrack(name, times, qs);
     }
 
     var clips = {};
@@ -278,43 +271,15 @@
   }
 
   function loadArrayBuffer(url, cb){
-    var done = false;
-    function safeCb(err, res){
-      if(done) return;
-      done = true;
-      cb(err, res);
-    }
-    try {
-      var req = new XMLHttpRequest();
-      req.open('GET', url, true);
-      req.responseType = 'arraybuffer';
-      req.onload = function(){
-        if(req.status >= 200 && req.status < 300 && req.response && req.response.byteLength > 1000){
-          safeCb(null, req.response);
-        } else {
-          tryFileLoader(url, safeCb);
-        }
-      };
-      req.onerror = function(){ tryFileLoader(url, safeCb); };
-      req.send(null);
-    } catch(e){
-      tryFileLoader(url, safeCb);
-    }
-  }
-
-  function tryFileLoader(url, cb){
-    if(typeof THREE !== 'undefined' && THREE.FileLoader){
-      var fl = new THREE.FileLoader();
-      fl.setResponseType('arraybuffer');
-      fl.load(url, function(data){
-        if(data && data.byteLength > 1000) cb(null, data);
-        else cb(new Error('empty-buffer'));
-      }, undefined, function(err){
-        cb(err || new Error('load-failed'));
-      });
-    } else {
-      cb(new Error('no-loader'));
-    }
+    var req = new XMLHttpRequest();
+    req.open('GET', url, true);
+    req.responseType = 'arraybuffer';
+    req.onload = function(){
+      if(req.status >= 200 && req.status < 300) cb(null, req.response);
+      else cb(new Error('HTTP '+req.status));
+    };
+    req.onerror = function(){ cb(new Error('network')); };
+    req.send(null);
   }
 
   function loadFarmerRig(){
@@ -330,83 +295,44 @@
       _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
     }
     loadArrayBuffer(RIG_MALE, function(err, buf){
-      if(err){
-        loadArrayBuffer('models/characters/Farmer.glb', function(err2, buf2){
-          if(!err2) _bufMale = buf2;
-          doneOne();
-        });
-      } else {
-        _bufMale = buf;
-        doneOne();
-      }
+      if(err) console.warn('FarmerAnim buf', err);
+      else _bufMale = buf;
+      doneOne();
     });
     loadArrayBuffer(RIG_FEMALE, function(err, buf){
-      if(err){
-        loadArrayBuffer('models/characters/Farmer_F.glb', function(err2, buf2){
-          if(!err2) _bufFemale = buf2;
-          doneOne();
-        });
-      } else {
-        _bufFemale = buf;
-        doneOne();
-      }
+      if(err) console.warn('FarmerAnim_F buf', err);
+      else _bufFemale = buf;
+      doneOne();
     });
   }
 
-  function setupFarmerInstance(body, onDone){
-    if(!body){ onDone(null); return; }
-    cozyLift(body);
-    body.updateMatrixWorld(true);
-    var box = new THREE.Box3().setFromObject(body);
-    var h = Math.max(1e-4, box.max.y - box.min.y);
-    if(isFinite(box.min.y)) body.position.y -= box.min.y;
-    var g = new THREE.Group();
-    g.add(body);
-    g.scale.setScalar(1.62 / h);
-    body.traverse(function(c){
-      if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
-    });
-    body.updateMatrixWorld(true);
-    var clips = buildFarmerClips(body);
-    var mixer = new THREE.AnimationMixer(body);
-    onDone({ group: g, mixer: mixer, clips: clips, body: body });
-  }
-
-  /** Fresh parse per farmer — keeps skin binds intact (unlike scene.clone) with fallbacks. */
+  /** Fresh parse per farmer — keeps skin binds intact (unlike scene.clone). */
   function parseFarmerInstance(kind, onDone){
     var buf = kind === 'female' ? _bufFemale : _bufMale;
-    if(!buf){
-      var mKey = kind === 'female' ? 'worker' : 'farmer';
-      if(typeof window.spawnModel === 'function' && window.hasModel && window.hasModel(mKey)){
-        var sp = window.spawnModel(mKey, 1.62);
-        if(sp){
-          setupFarmerInstance(sp, onDone);
-          return;
-        }
-      }
-      var directUrl = kind === 'female' ? 'models/characters/Farmer_F.glb' : 'models/characters/Farmer.glb';
-      if(typeof THREE !== 'undefined' && THREE.GLTFLoader){
-        var ldr = new THREE.GLTFLoader();
-        ldr.load(directUrl, function(gltf){
-          setupFarmerInstance(gltf.scene, onDone);
-        }, undefined, function(){
-          onDone(null);
-        });
-      } else {
-        onDone(null);
-      }
-      return;
-    }
+    if(!buf){ onDone(null); return; }
     var loader = new THREE.GLTFLoader();
     loader.parse(buf, '', function(gltf){
-      setupFarmerInstance(gltf.scene, onDone);
+      var body = gltf.scene;
+      cozyLift(body);
+      body.updateMatrixWorld(true);
+      var box = new THREE.Box3().setFromObject(body);
+      var h = Math.max(1e-4, box.max.y - box.min.y);
+      if(isFinite(box.min.y)) body.position.y -= box.min.y;
+      // Scale OUTER group only — never scale skinned root (avoids bind explode).
+      var g = new THREE.Group();
+      g.add(body);
+      g.scale.setScalar(1.62 / h);
+      // Reset skeletons to Farmer bind, then build clips from that pose.
+      // Discard gltf.animations — Character retargets break Modular Farmer Idle.
+      body.traverse(function(c){
+        if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+      });
+      body.updateMatrixWorld(true);
+      var clips = buildFarmerClips(body);
+      var mixer = new THREE.AnimationMixer(body);
+      onDone({ group: g, mixer: mixer, clips: clips, body: body });
     }, function(err){
-      console.warn('parse farmer fallback', err);
-      var mKey = kind === 'female' ? 'worker' : 'farmer';
-      if(typeof window.spawnModel === 'function'){
-        var sp = window.spawnModel(mKey, 1.62);
-        if(sp){ setupFarmerInstance(sp, onDone); return; }
-      }
+      console.warn('parse farmer', err);
       onDone(null);
     });
   }
@@ -513,30 +439,8 @@
   // ── Quaternius Modular Farmer meshes + bind-relative mixer clips ───────────
   function buildStubFarmer(){
     var g = new THREE.Group();
-    // Overalls (dark blue/grey)
-    var overalls = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.58, 0.26), M(0x28323e, 0.85));
-    overalls.position.y = 0.85; g.add(overalls);
-    // Shirt (warm brown)
-    var shirt = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.32, 0.24), M(0x824b2b, 0.8));
-    shirt.position.y = 1.18; g.add(shirt);
-    // Head (skin tone)
-    var head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), M(0xd99b70, 0.75));
-    head.position.y = 1.45; g.add(head);
-    // Cowboy Hat brim & top
-    var brim = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.04, 16), M(0x523924, 0.9));
-    brim.position.y = 1.58; g.add(brim);
-    var hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.16, 12), M(0x523924, 0.9));
-    hatTop.position.y = 1.67; g.add(hatTop);
-    // Arms
-    var armL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.48, 6), M(0x824b2b, 0.8));
-    armL.position.set(-0.24, 1.05, 0); armL.rotation.z = 0.15; g.add(armL);
-    var armR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.48, 6), M(0x824b2b, 0.8));
-    armR.position.set(0.24, 1.05, 0); armR.rotation.z = -0.15; g.add(armR);
-    // Legs & Boots
-    var legL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.16), M(0x181f28, 0.9));
-    legL.position.set(-0.11, 0.32, 0); g.add(legL);
-    var legR = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.16), M(0x181f28, 0.9));
-    legR.position.set(0.11, 0.32, 0); g.add(legR);
+    var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
+    stub.position.y = 0.7; g.add(stub);
     if(typeof sitShadow === 'function') g.add(sitShadow(0.45));
     return g;
   }
@@ -875,7 +779,7 @@
     }
   }
 
-  // Find existing house after load
+  // Find existing house after load (or auto-place starter farmer house so farmers are always present)
   window.bindFarmerHouseFromDecos = function(){
     houseRec = null;
     clearFarmers();
@@ -887,7 +791,10 @@
         break;
       }
     }
-    if(houseRec){
+    if(!houseRec){
+      placeFarmerHouse(-4.8, -5.2, 1, 'both');
+      if(typeof save === 'function' && !isLoading) save(false);
+    } else {
       refreshFarmers();
       adoptOrphanCrops();
     }

@@ -235,7 +235,14 @@ window.addEventListener('pointerdown', function(e){
 // startPlace için hasat ekle
 var _origStartPlace = window.startPlace;
 window.startPlace = function(tp) {
-  if(tp==='tomato'||tp==='strawberry'||tp==='cucumber') {
+  if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot') {
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab = window.getActiveBiome();
+      if(ab && ab.id !== 'meadow'){
+        if(typeof window.focusBiome === 'function') window.focusBiome('meadow');
+        showToast('🌸 Hasat için Ana Bahçe (Çayır) adasına geçildi — dikmek için dokun!');
+      }
+    }
     placementType = tp; placementMode = true; controls.enabled = false;
     document.getElementById('pBar').classList.add('show');
     document.getElementById('pBar').querySelector('span').textContent = '🌱 Nereye dikelim?';

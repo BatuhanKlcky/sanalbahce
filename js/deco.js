@@ -1260,6 +1260,13 @@ window.addEventListener('pointerup',function(e){
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
   else if(tp==='house')mkHouse(pt.x,pt.z,ang);
   else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'){
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab = window.getActiveBiome();
+      if(ab && ab.id !== 'meadow'){
+        showToast('⚠️ ' + ab.emoji + ' ' + ab.name + ' biyomu sadece süs içindir! Hasat için 🌸 Çayır (Ana Bahçe) adasına geçin.');
+        return;
+      }
+    }
     if(typeof window.canPlantHarvest==='function'){
       var farmWhy=window.canPlantHarvest();
       if(farmWhy){ showToast(farmWhy); return; }
@@ -1268,6 +1275,13 @@ window.addEventListener('pointerup',function(e){
     if(planted && typeof window.onPlayerPlantedHarvest==='function') window.onPlayerPlantedHarvest(planted);
   }
   else if(tp==='farmer_house'){
+    if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
+      var ab2 = window.getActiveBiome();
+      if(ab2 && ab2.id !== 'meadow'){
+        showToast('⚠️ Çiftçi evi sadece 🌸 Çayır (Ana Bahçe) adasına kurulabilir!');
+        return;
+      }
+    }
     if(typeof window.mkFarmerHouse==='function'){
       if(!window.mkFarmerHouse(pt.x,pt.z,1)) return;
     } else { showToast('Çiftçi sistemi yok'); return; }
