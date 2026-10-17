@@ -16,8 +16,8 @@ android {
         applicationId "com.batuhanklcky.sanalbahce"
         minSdk 24
         targetSdk 36
-        versionCode 14
-        versionName "2.1.8"
+        versionCode 15
+        versionName "2.2.0"
     }
 
     signingConfigs {
