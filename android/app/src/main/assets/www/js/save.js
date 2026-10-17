@@ -402,7 +402,11 @@ function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty
       plants:flowers.map(function(f){return{x:f.mesh.position.x,z:f.mesh.position.z,h:f.h,b:f.b,w:f.w,c:f.c,t:f.t,k:f.k||'',isStunted:f.isStunted};}),
       badBugs:badBugs.map(function(b){return{ti:b.ti};}),
       bugCount:bugs.length,
-      decos:decos.map(function(d){return{type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};}),
+      decos:decos.map(function(d){
+        var o={type:d.type,x:d.group.position.x,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};
+        if(d.type==='farmer_house') o.level=d.level||1;
+        return o;
+      }),
       weather:curWeather,
       harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
       petCount:pets.map(function(p){return{type:p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
@@ -454,6 +458,11 @@ function load(){
       else if(d.type==='scarecrow')mkScarecrow(x,z);
       else if(d.type==='flower_wild')mkWildFlower(x,z);
       else if(d.type==='house')mkHouse(x,z,a);
+      else if(d.type==='farmer_house' && typeof window.mkFarmerHouse==='function'){
+        window.mkFarmerHouse(x, z, d.level||1);
+        var fh=decos[decos.length-1];
+        if(fh && d.world) fh.world=d.world;
+      }
       else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[d.type] && typeof mkPackProp==='function'){
         if(!mkPackProp(d.type, x, z, a)) return;
       }
@@ -474,6 +483,7 @@ function load(){
       _applyXform(d);
     });
     if(typeof window.syncDecoWorldVisibility==='function') window.syncDecoWorldVisibility();
+    if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
     // Restore weather
     if(data.weather&&data.weather!=='clear')window.setWeather(data.weather);
     // Re-render shop with current coins

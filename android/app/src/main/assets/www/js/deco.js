@@ -1181,6 +1181,9 @@ function deleteDeco(group) {
     });
     scene.remove(group);
     decos.splice(idx, 1);
+    if(d.type==='farmer_house' && typeof window.bindFarmerHouseFromDecos==='function'){
+      window.bindFarmerHouseFromDecos();
+    }
     markDirty(); save(true);
     showToast('Silindi! 🗑️');
 }
@@ -1252,11 +1255,19 @@ window.addEventListener('pointerup',function(e){
   }
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
   else if(tp==='house')mkHouse(pt.x,pt.z,ang);
-  else if(tp==='tomato')mkHarvestPlant(pt.x,pt.z,'tomato');
-  else if(tp==='strawberry')mkHarvestPlant(pt.x,pt.z,'strawberry');
-  else if(tp==='cucumber')mkHarvestPlant(pt.x,pt.z,'cucumber');
-  else if(tp==='pepper')mkHarvestPlant(pt.x,pt.z,'pepper');
-  else if(tp==='carrot')mkHarvestPlant(pt.x,pt.z,'carrot');
+  else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'){
+    if(typeof window.canPlantHarvest==='function'){
+      var farmWhy=window.canPlantHarvest();
+      if(farmWhy){ showToast(farmWhy); return; }
+    }
+    var planted=mkHarvestPlant(pt.x,pt.z,tp);
+    if(planted && typeof window.onPlayerPlantedHarvest==='function') window.onPlayerPlantedHarvest(planted);
+  }
+  else if(tp==='farmer_house'){
+    if(typeof window.mkFarmerHouse==='function'){
+      if(!window.mkFarmerHouse(pt.x,pt.z,1)) return;
+    } else { showToast('Çiftçi sistemi yok'); return; }
+  }
   else if(PACK_PROPS[tp]){
     if(mkPackProp(tp, pt.x, pt.z, ang)){
       /* placed */

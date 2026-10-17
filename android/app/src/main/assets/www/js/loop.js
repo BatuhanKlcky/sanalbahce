@@ -307,7 +307,8 @@ window.addEventListener('resize',function(){camera.aspect=innerWidth/innerHeight
 function bootGame(){
   loadProg();loadStats();loadShop();load();placeOwnedWing();
   if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
-  if(typeof window.ensureFarmers==='function') window.ensureFarmers();
+  if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
+  else if(typeof window.ensureFarmers==='function') window.ensureFarmers();
 }
 animate();
 if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);
