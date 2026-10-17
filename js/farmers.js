@@ -6,11 +6,15 @@
   var farmers = [];
   var houseRec = null; // {group, level, world, beds:[]}
   var _mats = {};
-  var _rigScene = null;
-  var _rigClips = null; // name -> AnimationClip
+  var _rigMale = null;
+  var _rigFemale = null;
+  var _rigClips = null; // name -> AnimationClip (shared clip names from male pack)
+  var _clipsMale = null;
+  var _clipsFemale = null;
   var _rigReady = false;
   var _rigWait = [];
-  var RIG_URL = 'models/characters/FarmerRig.glb';
+  var RIG_MALE = 'models/characters/FarmerAnim.glb';
+  var RIG_FEMALE = 'models/characters/FarmerAnim_F.glb';
 
   function M(hex, rough){
     var k = hex + ':' + (rough||.8);
@@ -29,13 +33,13 @@
     else _rigWait.push(fn);
   }
 
-  function findClip(name){
-    if(!_rigClips) return null;
-    if(_rigClips[name]) return _rigClips[name];
-    // CharacterArmature|Idle style
-    var keys = Object.keys(_rigClips);
+  function findClip(name, kind){
+    var pack = (kind === 'female' ? _clipsFemale : _clipsMale) || _rigClips;
+    if(!pack) return null;
+    if(pack[name]) return pack[name];
+    var keys = Object.keys(pack);
     for(var i=0;i<keys.length;i++){
-      if(keys[i] === name || keys[i].indexOf('|'+name) >= 0 || keys[i].endsWith(name)) return _rigClips[keys[i]];
+      if(keys[i] === name || keys[i].indexOf('|'+name) >= 0 || keys[i].endsWith(name)) return pack[keys[i]];
     }
     return null;
   }
@@ -59,45 +63,28 @@
     return clone;
   }
 
-  function tintRig(root, kind){
-    var isFemale = kind === 'female';
+  function cozyLift(root){
     root.traverse(function(c){
       if(!c.isMesh || !c.material) return;
       var mats = Array.isArray(c.material) ? c.material : [c.material];
       mats.forEach(function(m){
         if(!m || !m.color) return;
-        // clone so male/female don't share
-        var nm = m.clone();
         var hsl = {h:0,s:0,l:0};
-        nm.color.getHSL(hsl);
-        if(isFemale){
-          hsl.h = (hsl.h * 0.15 + 0.05) % 1;
-          hsl.s = Math.min(0.75, hsl.s * 1.15 + 0.08);
-          hsl.l = Math.min(0.72, hsl.l * 1.08 + 0.04);
-        } else {
-          // cooler farmer blues / straw
-          if(hsl.s < 0.25){ hsl.h = 0.58; hsl.s = 0.45; hsl.l = Math.min(0.55, hsl.l); }
-          else { hsl.l = Math.min(0.62, hsl.l * 1.1 + 0.05); }
-        }
-        nm.color.setHSL(hsl.h, hsl.s, hsl.l);
-        nm.metalness = 0;
-        nm.roughness = 0.78;
-        nm.userData.keep = true;
-        if(Array.isArray(c.material)){
-          var idx = c.material.indexOf(m);
-          if(idx>=0) c.material[idx] = nm;
-        } else c.material = nm;
+        m.color.getHSL(hsl);
+        hsl.l = Math.min(0.64, hsl.l * 1.45 + 0.07);
+        hsl.s = Math.min(0.82, hsl.s * 1.25 + 0.06);
+        m.color.setHSL(hsl.h, hsl.s, hsl.l);
+        m.metalness = 0;
+        m.roughness = Math.min(0.92, (m.roughness != null ? m.roughness : 0.8) * 0.95 + 0.05);
+        m.userData.keep = true;
       });
-      // hide cute ears — keep humanoid farmer silhouette
-      if(c.name && /^Ear/i.test(c.name)) c.visible = false;
-      if(c.parent && c.parent.name && /^Ear/i.test(c.parent.name)) c.visible = false;
     });
   }
 
   function playClip(f, clipName, opts){
     opts = opts || {};
     if(!f.mixer || !f.actions) return;
-    var clip = findClip(clipName);
+    var clip = findClip(clipName, f.kind);
     if(!clip) return;
     var key = clip.name;
     if(!f.actions[key]) f.actions[key] = f.mixer.clipAction(clip);
@@ -123,30 +110,26 @@
       return;
     }
     var loader = new THREE.GLTFLoader();
-    loader.load(RIG_URL, function(gltf){
-      _rigScene = gltf.scene;
-      _rigClips = {};
-      (gltf.animations || []).forEach(function(c){ _rigClips[c.name] = c; });
-      // cozy material lift
-      _rigScene.traverse(function(c){
-        if(!c.isMesh || !c.material) return;
-        var mats = Array.isArray(c.material) ? c.material : [c.material];
-        mats.forEach(function(m){
-          if(m && m.color){
-            var hsl={h:0,s:0,l:0}; m.color.getHSL(hsl);
-            hsl.l = Math.min(0.65, hsl.l * 1.35 + 0.06);
-            hsl.s = Math.min(0.8, hsl.s * 1.2 + 0.05);
-            m.color.setHSL(hsl.h, hsl.s, hsl.l);
-            m.metalness = 0;
-          }
-        });
-      });
+    var left = 2;
+    function doneOne(){
+      left--;
+      if(left > 0) return;
       _rigReady = true;
       _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
-    }, undefined, function(err){
-      console.warn('FarmerRig load fail', err);
-      _rigReady = true;
-      _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+    }
+    function ingest(gltf, isFemale){
+      cozyLift(gltf.scene);
+      var map = {};
+      (gltf.animations || []).forEach(function(c){ map[c.name] = c; });
+      if(isFemale){ _rigFemale = gltf.scene; _clipsFemale = map; }
+      else { _rigMale = gltf.scene; _clipsMale = map; _rigClips = map; }
+      doneOne();
+    }
+    loader.load(RIG_MALE, function(g){ ingest(g, false); }, undefined, function(err){
+      console.warn('FarmerAnim load fail', err); doneOne();
+    });
+    loader.load(RIG_FEMALE, function(g){ ingest(g, true); }, undefined, function(err){
+      console.warn('FarmerAnim_F load fail', err); doneOne();
     });
   }
 
@@ -249,29 +232,28 @@
     return g;
   }
 
-  // ── Animated Quaternius character (real GLB clips via AnimationMixer) ──────
+  // ── Real Quaternius farmer meshes + retargeted Idle/Walk/Duck/Punch clips ──
   function buildAnimatedFarmer(kind){
     var g = new THREE.Group();
     var mixer = null, actions = {};
-    if(_rigScene){
-      var body = cloneSkinned(_rigScene);
-      tintRig(body, kind);
-      // fit ~1.55m
+    var src = kind === 'female' ? (_rigFemale || _rigMale) : (_rigMale || _rigFemale);
+    if(src){
+      var body = cloneSkinned(src);
+      // fit ~1.6m human farmer
       body.updateMatrixWorld(true);
       var box = new THREE.Box3().setFromObject(body);
       var h = box.max.y - box.min.y;
-      if(h > 1e-4) body.scale.multiplyScalar(1.55 / h);
+      if(h > 1e-4) body.scale.multiplyScalar(1.62 / h);
       body.updateMatrixWorld(true);
       box.setFromObject(body);
       if(isFinite(box.min.y)) body.position.y -= box.min.y;
       g.add(body);
       mixer = new THREE.AnimationMixer(body);
     } else {
-      // brief placeholder until rig loads
       var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
       stub.position.y = 0.7; g.add(stub);
     }
-    if(typeof sitShadow === 'function') g.add(sitShadow(0.4));
+    if(typeof sitShadow === 'function') g.add(sitShadow(0.45));
     g.userData.mixer = mixer;
     g.userData.actions = actions;
     return g;
@@ -485,7 +467,7 @@
     if(f.job.type === 'tend'){
       f.state = 'work';
       f.timer = 1.35;
-      // Duck ≈ kneel/tend (real clip). Female prefers Wave as soft water gesture fallback.
+      // Duck = kneel/tend; Wave = soft water gesture for female farmer
       playClip(f, f.kind === 'female' ? 'Wave' : 'Duck', {fade: 0.12});
       for(var j=0;j<harvestItems.length;j++){
         var h = harvestItems[j];
