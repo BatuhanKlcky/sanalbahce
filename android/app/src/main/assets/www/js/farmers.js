@@ -143,8 +143,9 @@
       clips.Idle = new THREE.AnimationClip('Idle', 2.5, tracks);
     })();
 
-    // Walk — thigh swing = local Z (X was sideways kick). Knee = local +X.
-    // Forward leg stays extended; trailing/passing leg bends more.
+    // Walk — Farmer L/R thigh forward uses the SAME local Z sign (not mirrored).
+    // Old opposite-sign keys put BOTH feet forward → "spastic" double-step.
+    // Arms open (abducted) + swing opposite the legs.
     (function(){
       var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
@@ -152,20 +153,24 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      //          L-fwd           L-pass          R-fwd           R-pass          L-fwd
-      add('UpperLegL', [[0,0,24],[0,0,2],[0,0,-22],[0,0,2],[0,0,24]]);
-      add('UpperLegR', [[0,0,-22],[0,0,2],[0,0,24],[0,0,2],[0,0,-22]]);
-      add('LowerLegL', [[4,0,0],[38,0,0],[34,0,0],[10,0,0],[4,0,0]]);
-      add('LowerLegR', [[34,0,0],[10,0,0],[4,0,0],[38,0,0],[34,0,0]]);
-      // Arms opposite legs; modest Z so hands stay near hips
-      add('UpperArmL', [[0,0,12],[0,0,0],[0,0,-14],[0,0,0],[0,0,12]]);
-      add('UpperArmR', [[0,0,-14],[0,0,0],[0,0,12],[0,0,0],[0,0,-14]]);
-      add('LowerArmL', [[0,0,0],[0,0,0],[0,0,-3],[0,0,0],[0,0,0]]);
-      add('LowerArmR', [[0,0,-3],[0,0,0],[0,0,0],[0,0,0],[0,0,-3]]);
-      add('Abdomen', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
-      add('Torso', [[0,2,0],[0,0,0],[0,-2,0],[0,0,0],[0,2,0]]);
-      add('Head', [[0,2,0],[0,0,0],[0,-2,0],[0,0,0],[0,2,0]]);
-      clips.Walk = new THREE.AnimationClip('Walk', 0.95, tracks);
+      // Thigh Z: + = L forward AND R back; − = L back AND R forward
+      //          L-fwd            mid             R-fwd            mid             L-fwd
+      add('UpperLegL', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('UpperLegR', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('LowerLegL', [[5,0,0],[16,0,0],[34,0,0],[24,0,0],[5,0,0]]);
+      add('LowerLegR', [[34,0,0],[24,0,0],[5,0,0],[16,0,0],[34,0,0]]);
+      // Open arms (abducted) vs idle REST, then ±Z swing (same sign L/R = opposite world)
+      // REST [-78,8,22] → walk open ≈ +28 X / +14 Z / shoulders out
+      add('ShoulderL', [[0,0,20],[0,0,20],[0,0,20],[0,0,20],[0,0,20]]);
+      add('ShoulderR', [[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20]]);
+      add('UpperArmL', [[28,-2,48],[28,-2,32],[28,-2,-4],[28,-2,12],[28,-2,48]]);
+      add('UpperArmR', [[28,2,20],[28,2,4],[28,2,-32],[28,2,-16],[28,2,20]]);
+      add('LowerArmL', [[0,0,6],[0,0,3],[0,0,8],[0,0,3],[0,0,6]]);
+      add('LowerArmR', [[0,0,-6],[0,0,-3],[0,0,-8],[0,0,-3],[0,0,-6]]);
+      add('Abdomen', [[0,4,0],[0,0,0],[0,-4,0],[0,0,0],[0,4,0]]);
+      add('Torso', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      add('Head', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
     })();
 
     // Duck — kneel/tend: thighs forward (Z), knees bend (+X)
