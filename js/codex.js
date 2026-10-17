@@ -31,18 +31,17 @@
     modal.id = 'codexModal';
     modal.className = 'spanel';
     modal.innerHTML = [
-      '<div class="spanel-handle"></div>',
-      '<div class="spanel-head">',
-      '  <h2>📖 Bahçe Keşif Rehberi</h2>',
-      '  <button class="spanel-close" onclick="window.togglePanel(\'codex\');window.triggerHaptic(\'light\')">×</button>',
+      '<div class="spanel-header">',
+      '  <div class="spanel-title">📖 Bahçe Keşif Rehberi</div>',
+      '  <button class="spanel-close" onclick="window.togglePanel(\'codex\');window.triggerHaptic(\'light\')">✕</button>',
       '</div>',
       '<div class="codex-tabs" style="display:flex;gap:8px;margin-bottom:12px;">',
-      '  <button class="tab-btn on" onclick="window.filterCodex(\'all\', this)">Tümü</button>',
-      '  <button class="tab-btn" onclick="window.filterCodex(\'flower\', this)">🌸 Çiçekler</button>',
-      '  <button class="tab-btn" onclick="window.filterCodex(\'crop\', this)">🥕 Hasat</button>',
-      '  <button class="tab-btn" onclick="window.filterCodex(\'special\', this)">✨ Özel</button>',
+      '  <button type="button" class="tab-btn on" onclick="window.filterCodex(\'all\', this)">Tümü</button>',
+      '  <button type="button" class="tab-btn" onclick="window.filterCodex(\'flower\', this)">🌸 Çiçekler</button>',
+      '  <button type="button" class="tab-btn" onclick="window.filterCodex(\'crop\', this)">🥕 Hasat</button>',
+      '  <button type="button" class="tab-btn" onclick="window.filterCodex(\'special\', this)">✨ Özel</button>',
       '</div>',
-      '<div id="codexList" class="codex-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-height:60vh;overflow-y:auto;padding-right:4px;">',
+      '<div id="codexList" class="codex-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:55vh;overflow-y:auto;padding-right:4px;">',
       '</div>'
     ].join('\n');
 
@@ -51,6 +50,8 @@
     // CSS ekle
     var st = document.createElement('style');
     st.textContent = [
+      '.codex-tabs .tab-btn { flex: 1; padding: 8px 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.65); cursor: pointer; text-align: center; transition: all .18s; }',
+      '.codex-tabs .tab-btn.on { background: rgba(245,185,66,0.22); border-color: rgba(245,185,66,0.48); color: #fce282; }',
       '.codex-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform .18s ease, background .18s; }',
       '.codex-card:active { transform: scale(0.96); background: rgba(255,255,255,0.12); }',
       '.codex-icon { font-size: 32px; margin-bottom: 6px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }',
@@ -66,6 +67,7 @@
   }
 
   window.renderCodex = function(filterCategory){
+    injectCodexModal();
     var list = document.getElementById('codexList');
     if(!list) return;
     list.innerHTML = '';
@@ -139,10 +141,8 @@
   }
   window.showWelcomeSummary = showWelcomeSummary;
 
-  // DOMContentLoaded / Script Load
-  setTimeout(function(){
-    injectCodexModal();
-    window.renderCodex('all');
-  }, 150);
+  // Hemen oluştur
+  injectCodexModal();
+  window.renderCodex('all');
 
 })();

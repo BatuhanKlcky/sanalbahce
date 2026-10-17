@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-20';
+var CACHE = 'sanalbahce-shell-21';
 var LOCAL = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ var LOCAL = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
+  './js/groundArt.js',
   './js/scene.js',
   './js/save.js',
   './js/harvest.js',
@@ -14,6 +15,15 @@ var LOCAL = [
   './js/flower.js',
   './js/flowerArt.js',
   './js/deco.js',
+  './js/cozyArt.js',
+  './js/premiumArt.js',
+  './js/modelPack.js',
+  './js/biomes.js',
+  './js/cozy.js',
+  './js/cozyLife.js',
+  './js/farmers.js',
+  './js/visualFX.js',
+  './js/codex.js',
   './js/gameUI.js',
   './js/loop.js'
 ];

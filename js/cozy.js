@@ -24,8 +24,10 @@ function clearDecoSelection(){
   selectedDeco = null;
   _moveArmed = false;
   if(_selRing) _selRing.visible = false;
-  var bar = document.getElementById('editBar');
-  if(bar) bar.classList.remove('show');
+  if(!editMode){
+    var bar = document.getElementById('editBar');
+    if(bar) bar.classList.remove('show');
+  }
 }
 
 function selectDeco(rec){
@@ -37,7 +39,7 @@ function selectDeco(rec){
   ring.scale.setScalar(Math.max(.8, sc * 1.15));
   var bar = document.getElementById('editBar');
   if(bar) bar.classList.add('show');
-  showToast('Seçildi · döndür / büyüt / taşı');
+  showToast('Seçildi · döndür / büyüt / taşı ✨');
 }
 
 function findDecoAt(clientX, clientY){
@@ -71,22 +73,30 @@ window.toggleEditMode = function(){
   if(placementMode) window.cancelPlace();
   if(deleteMode) window.toggleDeleteMode();
   if(flowerPlaceMode) window.cancelFlowerPlace();
+  if(typeof window.closeMoreDrawer === 'function') window.closeMoreDrawer();
+  if(typeof window.closeInspector === 'function') window.closeInspector();
   editMode = !editMode;
   var btn = document.getElementById('btnEdit');
   if(btn) btn.classList.toggle('on', editMode);
-  controls.enabled = !editMode;
-  if(!editMode) clearDecoSelection();
-  else showToast('Düzenle: objeye dokun ✨');
+  var bar = document.getElementById('editBar');
+  if(bar) bar.classList.toggle('show', editMode);
+  if(!editMode){
+    clearDecoSelection();
+    controls.enabled = true;
+  } else {
+    controls.enabled = true;
+    showToast('✋ Düzenle modu açık: Bir objeye dokun');
+  }
 };
 
 window.rotateSelected = function(dir){
-  if(!selectedDeco) return;
+  if(!selectedDeco){ showToast('Önce sahnedeki bir objeye dokun 👆'); return; }
   selectedDeco.group.rotation.y += (dir || 1) * (Math.PI / 8);
   markDirty(); save(true);
 };
 
 window.scaleSelected = function(dir){
-  if(!selectedDeco) return;
+  if(!selectedDeco){ showToast('Önce sahnedeki bir objeye dokun 👆'); return; }
   var s = selectedDeco.group.scale.x || 1;
   s = Math.max(.45, Math.min(2.4, s + (dir || 1) * .12));
   selectedDeco.group.scale.setScalar(s);
@@ -95,14 +105,19 @@ window.scaleSelected = function(dir){
 };
 
 window.armMoveSelected = function(){
-  if(!selectedDeco) return;
+  if(!selectedDeco){ showToast('Önce sahnedeki bir objeye dokun 👆'); return; }
   _moveArmed = true;
   showToast('Yeni yere dokun 📍');
 };
 
 window.deselectDeco = function(){
+  editMode = false;
+  var btn = document.getElementById('btnEdit');
+  if(btn) btn.classList.remove('on');
   clearDecoSelection();
-  if(editMode) showToast('Seçim kaldırıldı');
+  var bar = document.getElementById('editBar');
+  if(bar) bar.classList.remove('show');
+  showToast('Düzenleme kapatıldı');
 };
 
 window.photoMode = function(){
@@ -214,7 +229,7 @@ function wrapDayClock(){
 
 window.addEventListener('pointerup', function(e){
   if(!editMode || deleteMode || placementMode || flowerPlaceMode) return;
-  var uiHit = e.target.closest('.ui-container') || e.target.closest('.spanel') || e.target.closest('#sidebar') || e.target.closest('#biomeBar') || e.target.closest('#pBar') || e.target.closest('#delBar') || e.target.closest('#editBar');
+  var uiHit = e.target.closest('#topHud') || e.target.closest('#bottomDock') || e.target.closest('#moreDrawer') || e.target.closest('#objInspector') || e.target.closest('.ui-container') || e.target.closest('.spanel') || e.target.closest('#sidebar') || e.target.closest('#biomeBar') || e.target.closest('#pBar') || e.target.closest('#delBar') || e.target.closest('#editBar');
   if(uiHit) return;
 
   if(_moveArmed && selectedDeco){

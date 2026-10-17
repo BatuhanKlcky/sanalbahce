@@ -374,12 +374,33 @@ window.shareBahce = function(){
     + '⭐ Seviye '+level+' | 🏆 Skor '+gardenScore()+'\n'
     + '💰 '+stats.coin+' coin | 🔥 '+stats.streak+' gün\n'
     + 'Sanal Bahçe uygulamasında!';
+  function fallbackCopy(){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('📋 Bahçe özeti kopyalandı!');
+    } catch(e) {
+      showToast('📤 ' + text.split('\n')[0] + ' | Skor: ' + gardenScore());
+    }
+  }
   if(navigator.share){
-    navigator.share({title:'Sanal Bahçem', text:text}).catch(function(){});
-  } else {
-    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){
-      showToast('📋 Kopyalandı!');
+    navigator.share({title:'Sanal Bahçem', text:text}).then(function(){
+      showToast('📤 Paylaşıldı!');
+    }).catch(function(err){
+      if(err && err.name !== 'AbortError') fallbackCopy();
     });
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('📋 Bahçe özeti kopyalandı!');
+    }).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
   }
 };
 

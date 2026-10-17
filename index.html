@@ -240,43 +240,43 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <!-- MORE ACTIONS DRAWER -->
 <div id="moreDrawer">
   <div class="more-grid">
-    <div class="more-item" id="btnCodex" onclick="window.togglePanel('codex');window.closeAllPanelsAndDrawers()">
+    <div class="more-item" id="btnCodex" onclick="window.togglePanel('codex');window.triggerHaptic('light')">
       <span class="mi-icon">📖</span>
       <span>Rehber</span>
     </div>
-    <div class="more-item" id="btnStats" onclick="window.togglePanel('stats');window.closeAllPanelsAndDrawers()">
+    <div class="more-item" id="btnStats" onclick="window.togglePanel('stats');window.triggerHaptic('light')">
       <span class="mi-icon">📊</span>
       <span>İstatistik</span>
     </div>
-    <div class="more-item" onclick="window.addPet('cat');window.triggerHaptic('light')">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.addPet('cat');window.triggerHaptic('light')">
       <span class="mi-icon">🐱</span>
       <span>Kedi Ekle</span>
     </div>
-    <div class="more-item" onclick="window.addPet('dog');window.triggerHaptic('light')">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.addPet('dog');window.triggerHaptic('light')">
       <span class="mi-icon">🐶</span>
       <span>Köpek Ekle</span>
     </div>
-    <div class="more-item" onclick="window.addBug();window.triggerHaptic('light')">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.addBug();window.triggerHaptic('light')">
       <span class="mi-icon">🦋</span>
       <span>Dost Böcek</span>
     </div>
-    <div class="more-item" onclick="window.killAllBadBugs();window.triggerHaptic('medium')">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.killAllBadBugs();window.triggerHaptic('medium')">
       <span class="mi-icon">🐛</span>
       <span>Zararlı Sil</span>
     </div>
-    <div class="more-item" id="btnEdit" onclick="window.toggleEditMode()">
+    <div class="more-item" id="btnEdit" onclick="window.closeMoreDrawer();window.toggleEditMode();window.triggerHaptic('light')">
       <span class="mi-icon">✋</span>
       <span>Düzenle</span>
     </div>
-    <div class="more-item" id="btnDel" onclick="window.toggleDeleteMode()">
+    <div class="more-item" id="btnDel" onclick="window.closeMoreDrawer();window.toggleDeleteMode();window.triggerHaptic('light')">
       <span class="mi-icon">🗑️</span>
       <span>Silme Modu</span>
     </div>
-    <div class="more-item" onclick="window.photoMode()">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.photoMode();window.triggerHaptic('light')">
       <span class="mi-icon">📷</span>
       <span>Fotoğraf</span>
     </div>
-    <div class="more-item" onclick="window.shareBahce()">
+    <div class="more-item" onclick="window.closeMoreDrawer();window.shareBahce();window.triggerHaptic('light')">
       <span class="mi-icon">📤</span>
       <span>Paylaş</span>
     </div>

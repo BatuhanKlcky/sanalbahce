@@ -1149,21 +1149,24 @@ var allDecoMeshes = []; // tüm deco mesh'leri raycast için
 window.toggleDeleteMode = function() {
     if (placementMode) { window.cancelPlace(); return; }
     if (flowerPlaceMode) { window.cancelFlowerPlace(); return; }
+    if (typeof editMode !== 'undefined' && editMode && typeof window.deselectDeco === 'function') { window.deselectDeco(); }
+    if (typeof window.closeMoreDrawer === 'function') window.closeMoreDrawer();
+    if (typeof window.closeInspector === 'function') window.closeInspector();
     deleteMode = !deleteMode;
     var bar = document.getElementById('delBar');
     var btn = document.getElementById('btnDel');
     if (deleteMode) {
-        bar.classList.add('show');
-        btn.classList.add('on');
-        controls.enabled = false;
+        if(bar) bar.classList.add('show');
+        if(btn) btn.classList.add('on');
+        controls.enabled = true;
         // Close panels
         openP = null;
         document.getElementById('decoPanel').classList.remove('open');
         document.getElementById('btnDeco').classList.remove('on');
         showToast('Silmek için objeye dokun 🗑️');
     } else {
-        bar.classList.remove('show');
-        btn.classList.remove('on');
+        if(bar) bar.classList.remove('show');
+        if(btn) btn.classList.remove('on');
         controls.enabled = true;
     }
 };
@@ -1199,7 +1202,7 @@ window.cancelPlace=function(){placementMode=false;placementType=null;controls.en
 window.cancelFlowerPlace=window.cancelFlowerPlace||function(){flowerPlaceMode=false;controls.enabled=true;document.getElementById('pBar').classList.remove('show');};
 window.addEventListener('pointermove',function(e){if(!placementMode)return;plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;plRay.setFromCamera(plM,camera);var hits=plRay.intersectObject(planeR);if(!hits.length)return;var pt=hits[0].point;if(!prevGhost){prevGhost=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.05,16),ghostMat.clone());scene.add(prevGhost);}prevGhost.position.set(pt.x,.03,pt.z);});
 window.addEventListener('pointerup',function(e){
-  var uiHit = e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||e.target.closest('#pBar')||e.target.closest('#delBar');
+  var uiHit = e.target.closest('#topHud')||e.target.closest('#bottomDock')||e.target.closest('#moreDrawer')||e.target.closest('#objInspector')||e.target.closest('.ui-container')||e.target.closest('.spanel')||e.target.closest('#sidebar')||e.target.closest('#biomeBar')||e.target.closest('#pBar')||e.target.closest('#delBar')||e.target.closest('#editBar');
 
   // DELETE MODE
   if(deleteMode && !uiHit){

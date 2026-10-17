@@ -199,10 +199,22 @@ function placePet(g, type, x, z, tail, msg, legs, rig){
 }
 
 window.addPet = function(type) {
-  if (pets.length >= 2) { showToast('En fazla 2 evcil hayvan! 🐾'); return; }
-  var a = Math.random()*Math.PI*2, r = 5+Math.random()*6;
-  if(type==='cat') mkCat(Math.cos(a)*r, Math.sin(a)*r);
-  else mkDog(Math.cos(a)*r, Math.sin(a)*r);
+  var maxPets = 4;
+  if (pets.length >= maxPets) {
+    var old = pets.shift();
+    if(old && old.mesh){
+      if(old.mesh.parent) old.mesh.parent.remove(old.mesh);
+      else scene.remove(old.mesh);
+    }
+  }
+  var cx = 0, cz = 0;
+  if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
+    var b = window.getActiveBiome();
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; }
+  }
+  var a = Math.random()*Math.PI*2, r = 2.5 + Math.random()*4.5;
+  if(type==='cat') mkCat(cx + Math.cos(a)*r, cz + Math.sin(a)*r);
+  else mkDog(cx + Math.cos(a)*r, cz + Math.sin(a)*r);
 };
 
 

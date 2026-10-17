@@ -25,12 +25,17 @@ function stepWeather(dt){
   if(curWeather!=='clear') drawWx(dt);
 }
 function pickPetTarget(pet){
+  var cx = 0, cz = 0;
+  if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
+    var b = window.getActiveBiome();
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; }
+  }
   if(flowers.length>0&&Math.random()>.3){
     var rf2=flowers[Math.floor(Math.random()*flowers.length)];
     pet.target=new THREE.Vector3(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
   }else{
     var a=Math.random()*Math.PI*2, r=Math.random()*PET_R;
-    pet.target=new THREE.Vector3(Math.cos(a)*r,0,Math.sin(a)*r);
+    pet.target=new THREE.Vector3(cx + Math.cos(a)*r,0,cz + Math.sin(a)*r);
   }
 }
 function stepPets(dt){
@@ -48,8 +53,6 @@ function stepPets(dt){
       moving=step>.004;
       _petDir.normalize().multiplyScalar(step);
       pet.mesh.position.add(_petDir);
-      var rad=Math.hypot(pet.mesh.position.x, pet.mesh.position.z);
-      if(rad>PET_R){ pet.mesh.position.x*=PET_R/rad; pet.mesh.position.z*=PET_R/rad; }
     }
     var gait=pet.time*(pet.type==='dog'?11:9);
     pet.mesh.position.y=moving?Math.abs(Math.sin(gait))*.03:Math.sin(pet.time*2)*.008;

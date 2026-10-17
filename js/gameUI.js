@@ -435,12 +435,34 @@
   requestAnimationFrame(tickInspector);
 
   // ── MORE ACTIONS DRAWER (Gelişmiş İşlemler Çekmecesi) ───────────────────────
+  window.closeMoreDrawer = function(){
+    var drawer = document.getElementById('moreDrawer');
+    if(drawer) drawer.classList.remove('open');
+  };
+
   window.toggleMoreDrawer = function(){
     var drawer = document.getElementById('moreDrawer');
     if(!drawer) return;
-    drawer.classList.toggle('open');
+    var willOpen = !drawer.classList.contains('open');
+    if(willOpen){
+      closeInspector();
+      var panels = document.querySelectorAll('.spanel');
+      panels.forEach(function(p){ p.classList.remove('open'); });
+      if(typeof openP !== 'undefined') openP = null;
+    }
+    drawer.classList.toggle('open', willOpen);
     window.triggerHaptic('light');
   };
+
+  // Sahneye dokunulduğunda açık olan #moreDrawer'ı kapat
+  window.addEventListener('pointerdown', function(e){
+    var drawer = document.getElementById('moreDrawer');
+    if(drawer && drawer.classList.contains('open')){
+      if(!e.target.closest('#moreDrawer') && !e.target.closest('#bottomDock')){
+        drawer.classList.remove('open');
+      }
+    }
+  });
 
   window.closeAllPanelsAndDrawers = function(){
     var drawer = document.getElementById('moreDrawer');
@@ -449,7 +471,8 @@
     var panels = document.querySelectorAll('.spanel');
     panels.forEach(function(p){ p.classList.remove('open'); });
     var barBtns = document.querySelectorAll('.dock-btn');
-    barBtns.forEach(function(b){ b.classList.remove('on'); });
+    barBtns.forEach(function(b){ if(b.id !== 'btnCozy') b.classList.remove('on'); });
+    if(typeof openP !== 'undefined') openP = null;
   };
 
   // ── COIN & RESOURCE BOUNCE EFFECT ──────────────────────────────────────────
