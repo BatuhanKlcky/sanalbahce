@@ -465,6 +465,12 @@ function load(){
       });
       localStorage.setItem('gdn_rm_autohouse_v1','1');
     }
+    if(!localStorage.getItem('gdn_rm_fences_v2')){
+      savedDecos=savedDecos.filter(function(d){
+        return d && d.type !== 'fence';
+      });
+      localStorage.setItem('gdn_rm_fences_v2','1');
+    }
     function _applyXform(d){
       var last=decos[decos.length-1];if(!last)return;
       if(d.y!=null&&!isNaN(d.y))last.group.position.y=d.y;

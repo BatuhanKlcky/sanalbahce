@@ -291,9 +291,6 @@
       var keys = ['wheat','corn','pumpkin','watermelon','carrot','tomato','lettuce','plant_5'];
       addAt(root, spawn(keys[i % keys.length], 0.6 + s.r() * 0.35), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 6 : 8, R * 0.76, R * 0.92, 202).forEach(function(s){
-      addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
-    });
     // Çiftlik biyomuna yakışır canlı İnek, At, Alpaka ve Civciv modelleri (.glb + AnimationMixer)
     if(typeof window.spawnBiomeAnimal === 'function'){
       window.spawnBiomeAnimal('cow', root, -2.2, 2.8, 0.6, 1);
@@ -371,9 +368,7 @@
     ringSlots(isMobile ? 5 : 8, R * 0.68, R * 0.92, 401).forEach(function(s, i){
       addAt(root, spawn(['tree_1','birch_2','bush_1','plant_4','apple_tree'][i % 5], 2.3), s.x, s.z, 1, s.a);
     });
-    ringSlots(isMobile ? 5 : 8, R * 0.78, R * 0.95, 402).forEach(function(s){
-      addAt(root, spawn('fence', 1.0), s.x, s.z, 1, s.a + Math.PI / 2);
-    });
+    // Çitler kaldırıldı - açık bahçe özgürlüğü
     addAt(root, spawnBloom('rose', 0xcc0022, 1.05), 2.0, 2.5, 1, 0);
     addAt(root, spawnBloom('tulip', 0xff3366, 1.05), -2.2, 2.8, 1, 0);
     var villagePatch = spawnWildPatch(0.5, 3.8);

@@ -990,7 +990,13 @@
         return new THREE.Vector3(lake.cx, 0.08, lake.cz);
       }
     }
-    // 2) Sahnedeki herhangi bir gölet / çeşme / gölü bul
+    // 2) Kıyıdaki Doğal Gölet & İskele (Shore Pond)
+    if(window._shorePond && window._shorePond.group && window._shorePond.group.parent){
+      var wp = new THREE.Vector3();
+      window._shorePond.group.getWorldPosition(wp);
+      return new THREE.Vector3(wp.x + 0.3, 0.08, wp.z - 0.2);
+    }
+    // 3) Sahnedeki herhangi bir gölet / çeşme / gölü bul
     if(typeof decos !== 'undefined' && decos && decos.length){
       for(var i = 0; i < decos.length; i++){
         var d = decos[i];
