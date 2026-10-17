@@ -1,11 +1,16 @@
-// Cozy farmer house + stylized NPC farmhands (reference: soft toon farmers + rock bed).
+// Cozy farmer house + Quaternius rig with REAL AnimationMixer clips (Idle/Walk/Duck/Punch).
 // Players plant; farmers tend & harvest. Capacity = farmers × 3 jobs.
 (function(){
   var JOBS_PER_FARMER = 3;
-  var WALK = 1.7;
+  var WALK = 1.55;
   var farmers = [];
   var houseRec = null; // {group, level, world, beds:[]}
   var _mats = {};
+  var _rigScene = null;
+  var _rigClips = null; // name -> AnimationClip
+  var _rigReady = false;
+  var _rigWait = [];
+  var RIG_URL = 'models/characters/FarmerRig.glb';
 
   function M(hex, rough){
     var k = hex + ':' + (rough||.8);
@@ -17,6 +22,132 @@
       _mats[k].userData.keep = true;
     }
     return _mats[k];
+  }
+
+  function whenRigReady(fn){
+    if(_rigReady) fn();
+    else _rigWait.push(fn);
+  }
+
+  function findClip(name){
+    if(!_rigClips) return null;
+    if(_rigClips[name]) return _rigClips[name];
+    // CharacterArmature|Idle style
+    var keys = Object.keys(_rigClips);
+    for(var i=0;i<keys.length;i++){
+      if(keys[i] === name || keys[i].indexOf('|'+name) >= 0 || keys[i].endsWith(name)) return _rigClips[keys[i]];
+    }
+    return null;
+  }
+
+  function cloneSkinned(source){
+    var sourceLookup = {}, cloneLookup = {};
+    var clone = source.clone(true);
+    function walk(a, b){
+      sourceLookup[a.uuid] = a; cloneLookup[a.uuid] = b;
+      for(var i=0;i<a.children.length;i++) walk(a.children[i], b.children[i]);
+    }
+    walk(source, clone);
+    clone.traverse(function(node){
+      if(!node.isSkinnedMesh) return;
+      var matched = null;
+      for(var id in cloneLookup){ if(cloneLookup[id] === node){ matched = sourceLookup[id]; break; } }
+      if(!matched || !matched.skeleton) return;
+      var bones = matched.skeleton.bones.map(function(b){ return cloneLookup[b.uuid] || b; });
+      node.bind(new THREE.Skeleton(bones, matched.skeleton.boneInverses), matched.bindMatrix);
+    });
+    return clone;
+  }
+
+  function tintRig(root, kind){
+    var isFemale = kind === 'female';
+    root.traverse(function(c){
+      if(!c.isMesh || !c.material) return;
+      var mats = Array.isArray(c.material) ? c.material : [c.material];
+      mats.forEach(function(m){
+        if(!m || !m.color) return;
+        // clone so male/female don't share
+        var nm = m.clone();
+        var hsl = {h:0,s:0,l:0};
+        nm.color.getHSL(hsl);
+        if(isFemale){
+          hsl.h = (hsl.h * 0.15 + 0.05) % 1;
+          hsl.s = Math.min(0.75, hsl.s * 1.15 + 0.08);
+          hsl.l = Math.min(0.72, hsl.l * 1.08 + 0.04);
+        } else {
+          // cooler farmer blues / straw
+          if(hsl.s < 0.25){ hsl.h = 0.58; hsl.s = 0.45; hsl.l = Math.min(0.55, hsl.l); }
+          else { hsl.l = Math.min(0.62, hsl.l * 1.1 + 0.05); }
+        }
+        nm.color.setHSL(hsl.h, hsl.s, hsl.l);
+        nm.metalness = 0;
+        nm.roughness = 0.78;
+        nm.userData.keep = true;
+        if(Array.isArray(c.material)){
+          var idx = c.material.indexOf(m);
+          if(idx>=0) c.material[idx] = nm;
+        } else c.material = nm;
+      });
+      // hide cute ears — keep humanoid farmer silhouette
+      if(c.name && /^Ear/i.test(c.name)) c.visible = false;
+      if(c.parent && c.parent.name && /^Ear/i.test(c.parent.name)) c.visible = false;
+    });
+  }
+
+  function playClip(f, clipName, opts){
+    opts = opts || {};
+    if(!f.mixer || !f.actions) return;
+    var clip = findClip(clipName);
+    if(!clip) return;
+    var key = clip.name;
+    if(!f.actions[key]) f.actions[key] = f.mixer.clipAction(clip);
+    var next = f.actions[key];
+    if(f.currentAction === next && next.isRunning()) return;
+    next.reset();
+    next.setLoop(opts.loop === false ? THREE.LoopOnce : THREE.LoopRepeat, opts.loop === false ? 1 : Infinity);
+    if(opts.loop === false) next.clampWhenFinished = true;
+    next.setEffectiveWeight(1);
+    if(f.currentAction){
+      f.currentAction.crossFadeTo(next, opts.fade != null ? opts.fade : 0.18, false);
+    } else {
+      next.fadeIn(0.12);
+    }
+    next.play();
+    f.currentAction = next;
+    f.animName = clipName;
+  }
+
+  function loadFarmerRig(){
+    if(typeof THREE === 'undefined' || !THREE.GLTFLoader){
+      _rigReady = true; _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+      return;
+    }
+    var loader = new THREE.GLTFLoader();
+    loader.load(RIG_URL, function(gltf){
+      _rigScene = gltf.scene;
+      _rigClips = {};
+      (gltf.animations || []).forEach(function(c){ _rigClips[c.name] = c; });
+      // cozy material lift
+      _rigScene.traverse(function(c){
+        if(!c.isMesh || !c.material) return;
+        var mats = Array.isArray(c.material) ? c.material : [c.material];
+        mats.forEach(function(m){
+          if(m && m.color){
+            var hsl={h:0,s:0,l:0}; m.color.getHSL(hsl);
+            hsl.l = Math.min(0.65, hsl.l * 1.35 + 0.06);
+            hsl.s = Math.min(0.8, hsl.s * 1.2 + 0.05);
+            m.color.setHSL(hsl.h, hsl.s, hsl.l);
+            m.metalness = 0;
+          }
+        });
+      });
+      _rigReady = true;
+      _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+    }, undefined, function(err){
+      console.warn('FarmerRig load fail', err);
+      _rigReady = true;
+      _rigWait.splice(0).forEach(function(fn){try{fn();}catch(e){}});
+    });
   }
 
   function cozyNow(){ return typeof isCozy === 'function' && isCozy(); }
@@ -118,111 +249,31 @@
     return g;
   }
 
-  // ── Stylized farmers matching reference ────────────────────────────────────
-  function buildToonFarmer(kind){
-    // kind: 'male' | 'female'
+  // ── Animated Quaternius character (real GLB clips via AnimationMixer) ──────
+  function buildAnimatedFarmer(kind){
     var g = new THREE.Group();
-    var skin = M(0xf0c8a8, 0.7);
-    var isMale = kind !== 'female';
-
-    // boots
-    var bootM = M(0x5a3a28, 0.9);
-    [[-0.12, 0.08, 0.06],[0.12, 0.08, 0.06]].forEach(function(p){
-      var b = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.22), bootM);
-      b.position.set(p[0], p[1], p[2]); g.add(b);
-    });
-    // legs
-    var jean = M(isMale ? 0x3d6db5 : 0x4a7cc9, 0.85);
-    [[-0.11, 0.32, 0],[0.11, 0.32, 0]].forEach(function(p){
-      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.4, 8), jean);
-      leg.position.set(p[0], p[1], p[2]); g.add(leg);
-    });
-    // torso
-    var shirt = M(isMale ? 0xe8d2b0 : 0xe6d4b8, 0.8);
-    var body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.48, 10), shirt);
-    body.position.y = 0.72; g.add(body);
-    if(isMale){
-      // overalls bib
-      var ov = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.38, 0.2), M(0x3a68b0, 0.85));
-      ov.position.set(0, 0.78, 0.06); g.add(ov);
-      var strapL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.35, 0.04), ov.material);
-      strapL.position.set(-0.12, 0.95, 0.14); g.add(strapL);
-      var strapR = strapL.clone(); strapR.position.x = 0.12; g.add(strapR);
+    var mixer = null, actions = {};
+    if(_rigScene){
+      var body = cloneSkinned(_rigScene);
+      tintRig(body, kind);
+      // fit ~1.55m
+      body.updateMatrixWorld(true);
+      var box = new THREE.Box3().setFromObject(body);
+      var h = box.max.y - box.min.y;
+      if(h > 1e-4) body.scale.multiplyScalar(1.55 / h);
+      body.updateMatrixWorld(true);
+      box.setFromObject(body);
+      if(isFinite(box.min.y)) body.position.y -= box.min.y;
+      g.add(body);
+      mixer = new THREE.AnimationMixer(body);
     } else {
-      // checkered hint — light vest stripes
-      for(var s=0;s<3;s++){
-        var stripe = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.04, 0.22), M(0xf7f1e6, 0.75));
-        stripe.position.set(0, 0.58 + s*0.12, 0.05); g.add(stripe);
-      }
+      // brief placeholder until rig loads
+      var stub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1.4, 8), M(0xc4a06a, 0.8));
+      stub.position.y = 0.7; g.add(stub);
     }
-    // arms
-    var armM = isMale ? shirt : M(0xf5e6c8, 0.8);
-    var armL = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, 0.38, 7), armM);
-    armL.position.set(-0.3, 0.72, 0.05); armL.rotation.z = 0.35; g.add(armL);
-    var armR = armL.clone(); armR.position.x = 0.3; armR.rotation.z = -0.35; g.add(armR);
-    // gloves / hands
-    var handM = isMale ? skin : M(0xf0d24a, 0.7);
-    var handL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), handM);
-    handL.position.set(-0.38, 0.52, 0.12); g.add(handL);
-    var handR = handL.clone(); handR.position.x = 0.38; g.add(handR);
-
-    // tool
-    var tool = new THREE.Group();
-    if(isMale){
-      // pink shears
-      var blade = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 0.02), M(0xff8ab8, 0.45));
-      blade.position.y = 0.1; tool.add(blade);
-      var blade2 = blade.clone(); blade2.rotation.z = 0.35; blade2.position.x = 0.04; tool.add(blade2);
-      var handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.12, 6), M(0xe8e8e8, 0.5));
-      handle.position.y = -0.02; tool.add(handle);
-      tool.position.set(0.42, 0.48, 0.18);
-      tool.rotation.z = -0.8;
-    } else {
-      // silver watering can
-      var can = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.16, 8), M(0xcfd8e0, 0.35));
-      can.position.y = 0.08; tool.add(can);
-      var spout = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.02, 0.18, 6), can.material);
-      spout.rotation.z = 1.1; spout.position.set(0.12, 0.12, 0); tool.add(spout);
-      var handleC = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.015, 6, 10, Math.PI), can.material);
-      handleC.rotation.y = Math.PI/2; handleC.position.set(-0.02, 0.16, 0); tool.add(handleC);
-      tool.position.set(0.4, 0.5, 0.16);
-      tool.rotation.z = -0.5;
-    }
-    g.add(tool);
-    g.userData.tool = tool;
-    g.userData.armR = armR;
-
-    // head
-    var head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), skin);
-    head.position.y = 1.18; g.add(head);
-    // eyes
-    var eyeM = M(0x2a221c, 0.5);
-    [[-0.06, 1.2, 0.15],[0.06, 1.2, 0.15]].forEach(function(p){
-      var e = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 5), eyeM);
-      e.position.set(p[0], p[1], p[2]); g.add(e);
-    });
-    // smile
-    var smile = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.008, 4, 8, Math.PI), M(0xc47a6a, 0.7));
-    smile.position.set(0, 1.12, 0.16); smile.rotation.x = Math.PI; g.add(smile);
-    if(isMale){
-      var beard = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), M(0x6b4a32, 0.9));
-      beard.scale.set(1, 0.55, 0.7); beard.position.set(0, 1.08, 0.1); g.add(beard);
-    } else {
-      // ponytail
-      var hair = new THREE.Mesh(new THREE.SphereGeometry(0.19, 10, 8), M(0x5a3a28, 0.85));
-      hair.position.set(0, 1.22, -0.02); hair.scale.set(1.05, 0.85, 1.05); g.add(hair);
-      var tail = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.28, 6), hair.material);
-      tail.position.set(0, 1.05, -0.18); tail.rotation.x = 0.5; g.add(tail);
-    }
-    // straw hat
-    var hatM = M(0xe0c070, 0.9);
-    var brim = new THREE.Mesh(new THREE.CylinderGeometry(isMale?0.32:0.26, isMale?0.32:0.26, 0.03, 14), hatM);
-    brim.position.y = 1.32; g.add(brim);
-    var crown = new THREE.Mesh(new THREE.CylinderGeometry(isMale?0.16:0.14, isMale?0.18:0.16, 0.14, 12), hatM);
-    crown.position.y = 1.4; g.add(crown);
-
     if(typeof sitShadow === 'function') g.add(sitShadow(0.4));
-    g.scale.setScalar(1.05);
+    g.userData.mixer = mixer;
+    g.userData.actions = actions;
     return g;
   }
 
@@ -235,14 +286,17 @@
   }
 
   function spawnFarmerAt(kind, x, z){
-    var g = buildToonFarmer(kind);
+    var g = buildAnimatedFarmer(kind);
     g.position.set(x, 0, z);
     scene.add(g);
     var rec = {
       group: g, kind: kind, state: 'idle', timer: 1 + Math.random(),
-      target: null, job: null, slots: [], time: Math.random()*8, pose: 0
+      target: null, job: null, slots: [], time: Math.random()*8,
+      mixer: g.userData.mixer, actions: g.userData.actions || {},
+      currentAction: null, animName: ''
     };
     farmers.push(rec);
+    playClip(rec, 'Idle', {fade: 0.05});
     return rec;
   }
 
@@ -254,28 +308,27 @@
 
   function refreshFarmers(){
     if(!houseRec){ clearFarmers(); return; }
-    var need = farmerCount();
-    var home = homeAnchor();
-    // keep existing if possible
-    while(farmers.length > need){
-      var drop = farmers.pop();
-      if(drop.group && drop.group.parent) scene.remove(drop.group);
-    }
-    while(farmers.length < need){
-      var kind = farmers.length === 0 ? 'male' : 'female';
-      var ang = farmers.length === 0 ? -0.9 : 0.9;
-      spawnFarmerAt(kind, home.x + Math.cos(ang)*1.8, home.z + Math.sin(ang)*1.8 + 1.6);
-    }
-    // park idle farmers by bed
-    for(var i=0;i<farmers.length;i++){
-      var f = farmers[i];
-      if(f.state === 'idle' && !f.job){
-        var a = i === 0 ? -0.85 : 0.85;
+    whenRigReady(function(){
+      // Rebuild so stub placeholders become real animated rigs.
+      var need = farmerCount();
+      var home = homeAnchor();
+      var keepSlots = farmers.map(function(f){ return f.slots.slice(); });
+      clearFarmers();
+      for(var i=0;i<need;i++){
+        var kind = i === 0 ? 'male' : 'female';
+        var ang = i === 0 ? -0.9 : 0.9;
+        var rec = spawnFarmerAt(kind, home.x + Math.cos(ang)*1.8, home.z + Math.sin(ang)*1.8 + 1.6);
+        if(keepSlots[i]) rec.slots = keepSlots[i];
+      }
+      for(var j=0;j<farmers.length;j++){
+        var f = farmers[j];
+        var a = j === 0 ? -0.85 : 0.85;
         f.group.position.x = home.x + Math.cos(a)*1.9;
         f.group.position.z = home.z + 1.7 + Math.sin(a)*0.3;
         f.group.rotation.y = Math.atan2(home.x - f.group.position.x, home.z + 1.2 - f.group.position.z);
+        playClip(f, 'Idle');
       }
-    }
+    });
   }
 
   function rebuildHouseVisual(){
@@ -431,9 +484,9 @@
     }
     if(f.job.type === 'tend'){
       f.state = 'work';
-      f.timer = 1.1;
-      f.pose = 1; // kneel
-      // slight growth boost when tended
+      f.timer = 1.35;
+      // Duck ≈ kneel/tend (real clip). Female prefers Wave as soft water gesture fallback.
+      playClip(f, f.kind === 'female' ? 'Wave' : 'Duck', {fade: 0.12});
       for(var j=0;j<harvestItems.length;j++){
         var h = harvestItems[j];
         if(h && h._farmId === f.job.farmId && h.stage < 2){
@@ -442,8 +495,8 @@
       }
     } else if(f.job.type === 'harvest'){
       f.state = 'work';
-      f.timer = 0.9;
-      f.pose = 1;
+      f.timer = 1.1;
+      playClip(f, 'Punch', {fade: 0.1});
       var idx = -1;
       for(var i=0;i<harvestItems.length;i++){
         if(harvestItems[i] && harvestItems[i]._farmId === f.job.farmId && harvestItems[i].stage >= 2){
@@ -460,13 +513,13 @@
       }
     } else {
       f.state = 'idle'; f.timer = 1.2;
+      playClip(f, 'Idle');
     }
   }
 
   function stepFarmers(dt){
     if(!(dt > 0)) return;
     pruneSlots();
-    // visibility with house
     if(houseRec && houseRec.group){
       var vis = houseRec.group.visible !== false;
       for(var vi=0;vi<farmers.length;vi++){
@@ -477,12 +530,12 @@
       var f = farmers[i];
       if(!f.group || f.group.visible === false) continue;
       f.time += dt;
+      if(f.mixer) f.mixer.update(dt);
 
-      // idle farmers look for ripe crops on their slots
       if(f.state === 'idle'){
         f.timer -= dt;
-        f.group.position.y = Math.sin(f.time * 2) * 0.012;
-        f.group.rotation.x = 0;
+        if(f.animName !== 'Idle') playClip(f, 'Idle');
+        f.group.position.y = 0;
         if(f.timer <= 0){
           if(!chooseHarvestJob(f)) f.timer = 1.4 + Math.random();
         }
@@ -493,37 +546,32 @@
         if(dist < 0.4){
           f.group.position.x = f.target.x;
           f.group.position.z = f.target.z;
+          f.group.position.y = 0;
           doArrive(f);
         } else {
           var step = Math.min(dist, WALK * dt);
           f.group.position.x += dx / dist * step;
           f.group.position.z += dz / dist * step;
           f.group.rotation.y = Math.atan2(dx, dz);
-          f.group.position.y = Math.abs(Math.sin(f.time * 9)) * 0.04;
-          f.group.rotation.x = 0;
+          f.group.position.y = 0;
+          if(f.animName !== 'Walk') playClip(f, 'Walk', {fade: 0.12});
         }
       } else if(f.state === 'work'){
         f.timer -= dt;
-        // kneel + tool bob
-        f.group.position.y = -0.08;
-        f.group.rotation.x = 0.35;
-        if(f.group.userData.tool){
-          f.group.userData.tool.rotation.z = -0.6 + Math.sin(f.time * 10) * 0.25;
-        }
+        f.group.position.y = 0;
         if(f.timer <= 0){
-          f.group.position.y = 0;
-          f.group.rotation.x = 0;
           f.job = null;
           f.target = null;
           f.state = 'idle';
           f.timer = 0.8 + Math.random();
-          // walk back toward house bed
+          playClip(f, 'Idle');
           if(houseRec){
             var home = homeAnchor();
             var side = f.kind === 'female' ? 0.9 : -0.9;
             f.target = {x: home.x + Math.cos(side)*1.9, z: home.z + 1.7};
             f.state = 'walk';
             f.job = {type: 'return'};
+            playClip(f, 'Walk', {fade: 0.12});
           }
         }
       }
@@ -578,8 +626,11 @@
   window.farmers = farmers;
   window.getFarmerHouse = function(){ return houseRec; };
 
+  loadFarmerRig();
   // After models/boot — rebind house from save
   if(typeof window.whenModelsReady === 'function'){
     window.whenModelsReady(function(){ setTimeout(function(){ window.bindFarmerHouseFromDecos(); }, 80); });
+  } else {
+    setTimeout(function(){ window.bindFarmerHouseFromDecos(); }, 400);
   }
 })();
