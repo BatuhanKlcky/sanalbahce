@@ -717,6 +717,259 @@ function mkScarecrow(x,z){pushDeco(buildScarecrow(x,z),'scarecrow');}
 function mkWildFlower(x,z){pushDeco(buildWild(x,z),'flower_wild');}
 function mkHouse(x,z,angle){var o=buildHouse(x,z,angle); pushDeco(o.group,'house',{light:o.light});}
 
+function buildTrainStation(x, z, angle){
+  var g = new THREE.Group();
+  var woodDark = kept(0x4a2e16, 0.85);
+  var woodPlank = kept(0x734c29, 0.8);
+  var woodRoof = kept(0x8a3c26, 0.75);
+  var steelMat = kept(0x2d3238, 0.4, 0.7);
+  var gravelMat = kept(0x524d46, 0.95);
+
+  // 1) Demiryolu balast yatağı ve raylar
+  var ballast = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.05, 5.8), gravelMat);
+  ballast.position.set(-0.85, 0.025, 0);
+  g.add(ballast);
+
+  // Ahşap traversler
+  for(var ti = -4; ti <= 4; ti++){
+    var tie = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.22), woodDark);
+    tie.position.set(-0.85, 0.05, ti * 0.62);
+    g.add(tie);
+  }
+
+  // 2 Çelik Ray
+  [-1.25, -0.45].forEach(function(rx){
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 5.8), steelMat);
+    rail.position.set(rx, 0.12, 0);
+    g.add(rail);
+  });
+
+  // 2) Ahşap İstasyon Platformu
+  var platform = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.32, 5.6), woodPlank);
+  platform.position.set(1.1, 0.16, 0);
+  g.add(platform);
+
+  var curb = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.36, 5.6), woodDark);
+  curb.position.set(0.04, 0.18, 0);
+  g.add(curb);
+
+  // 3) İstasyon Sundurması / Bekleme Çardağı (4 Kolon)
+  var postPositions = [[0.25, -1.8], [1.95, -1.8], [0.25, 1.8], [1.95, 1.8]];
+  postPositions.forEach(function(p){
+    var col = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.1, 0.12), woodDark);
+    col.position.set(p[0], 1.15, p[1]);
+    g.add(col);
+  });
+
+  var beamFront = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 3.8), woodDark);
+  beamFront.position.set(0.25, 2.15, 0);
+  g.add(beamFront);
+  var beamBack = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 3.8), woodDark);
+  beamBack.position.set(1.95, 2.15, 0);
+  g.add(beamBack);
+
+  var roof = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 4.2), woodRoof);
+  roof.position.set(1.1, 2.32, 0);
+  roof.rotation.z = -0.08;
+  g.add(roof);
+
+  // 4) İstasyon Feneri (Sıcak ışık veren demiryolu feneri)
+  var lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.8, 6), steelMat);
+  lanternPost.position.set(1.8, 0.9, -2.4);
+  g.add(lanternPost);
+  var lanternArm = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.04, 0.04), steelMat);
+  lanternArm.position.set(1.68, 1.75, -2.4);
+  g.add(lanternArm);
+
+  var lanternGlass = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.22, 0.16),
+    new THREE.MeshStandardMaterial({ color: 0xffea78, emissive: 0xf59e0b, emissiveIntensity: 0.9, roughness: 0.2 })
+  );
+  lanternGlass.position.set(1.52, 1.62, -2.4);
+  g.add(lanternGlass);
+
+  var light = new THREE.PointLight(0xffdf78, 2.8, 7.5);
+  light.position.set(1.52, 1.62, -2.4);
+  g.add(light);
+
+  // 5) İstasyon Saati & Tabelası
+  var clockBoard = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 1.2), kept(0xfdfbf7, 0.7));
+  clockBoard.position.set(1.1, 1.95, 0);
+  g.add(clockBoard);
+  var clockRim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 16), steelMat);
+  clockRim.rotation.z = Math.PI / 2;
+  clockRim.position.set(1.1, 1.95, -0.8);
+  g.add(clockRim);
+
+  // 6) Platform Dekorları: Sandıklar, çuvallar, bank
+  var crate1 = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), kept(0x8a5d3b, 0.9));
+  crate1.position.set(1.6, 0.55, 1.2);
+  g.add(crate1);
+  var crate2 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), kept(0x734828, 0.9));
+  crate2.position.set(1.6, 1.0, 1.25);
+  crate2.rotation.y = 0.25;
+  g.add(crate2);
+
+  var sack = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 7), kept(0xc2a67e, 0.95));
+  sack.scale.set(1, 0.75, 1.2);
+  sack.position.set(1.55, 0.42, 0.4);
+  g.add(sack);
+
+  var benchSeat = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.06, 1.1), woodPlank);
+  benchSeat.position.set(1.5, 0.46, -1.1);
+  g.add(benchSeat);
+  var benchBack = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.35, 1.1), woodPlank);
+  benchBack.position.set(1.68, 0.68, -1.1);
+  g.add(benchBack);
+
+  g.add(sitShadow(2.4));
+  g.position.set(x, 0, z);
+  g.rotation.y = angle || 0;
+  g.userData.isTrainStation = true;
+
+  return { group: g, light: light };
+}
+function mkTrainStation(x, z, a){
+  var o = buildTrainStation(x, z, a);
+  pushDeco(o.group, 'train_station', { light: o.light });
+}
+
+function buildMiniTrain(x, z, a){
+  var g = new THREE.Group();
+  var darkIron = kept(0x22262a, 0.4, 0.7);
+  var goldMat = kept(0xd4af37, 0.3, 0.8);
+  var redMat = kept(0x992222, 0.5);
+
+  // Dairesel mini ray
+  var trackRing = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.035, 8, 24), darkIron);
+  trackRing.rotation.x = Math.PI / 2;
+  trackRing.position.y = 0.04;
+  g.add(trackRing);
+
+  // Küçük buharlı lokomotif gövdesi
+  var loco = new THREE.Group();
+  loco.position.set(0, 0.12, 0.85);
+
+  var boiler = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.38, 10), darkIron);
+  boiler.rotation.x = Math.PI / 2;
+  boiler.position.y = 0.12;
+  loco.add(boiler);
+
+  var cab = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.28, 0.2), redMat);
+  cab.position.set(0, 0.16, -0.16);
+  loco.add(cab);
+
+  var chim = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.16, 8), darkIron);
+  chim.position.set(0, 0.28, 0.12);
+  loco.add(chim);
+
+  var dome = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), goldMat);
+  dome.position.set(0, 0.25, -0.02);
+  loco.add(dome);
+
+  // Vagon
+  var wagon = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.28), redMat);
+  wagon.position.set(0, 0.1, -0.44);
+  loco.add(wagon);
+
+  g.add(loco);
+  g.userData.miniLoco = loco;
+  g.add(sitShadow(0.95));
+  g.position.set(x, 0, z);
+  g.rotation.y = a || 0;
+  return g;
+}
+function mkMiniTrain(x, z, a){
+  var g = buildMiniTrain(x, z, a);
+  pushDeco(g, 'mini_train');
+}
+
+function buildPierLantern(x, z){
+  var g = new THREE.Group();
+  var woodDark = kept(0x4a2e16, 0.9);
+  var brassMat = kept(0xc29b38, 0.3, 0.8);
+
+  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.85, 8), woodDark);
+  post.position.y = 0.92;
+  g.add(post);
+
+  var ring = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.04, 8, 16), kept(0xdc2626, 0.8));
+  ring.position.set(0, 1.2, 0.08);
+  g.add(ring);
+
+  var arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.35), brassMat);
+  arm.position.set(0, 1.78, 0.16);
+  g.add(arm);
+
+  var lantern = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.14, 0.28, 6),
+    new THREE.MeshStandardMaterial({ color: 0xffea78, emissive: 0xf59e0b, emissiveIntensity: 1.0, roughness: 0.2 })
+  );
+  lantern.position.set(0, 1.62, 0.32);
+  g.add(lantern);
+
+  var lt = new THREE.PointLight(0xffdf78, 3.2, 8.5);
+  lt.position.set(0, 1.62, 0.32);
+  g.add(lt);
+
+  g.add(sitShadow(0.75));
+  g.position.set(x, 0, z);
+  return { group: g, light: lt };
+}
+function mkPierLantern(x, z){
+  var o = buildPierLantern(x, z);
+  pushDeco(o.group, 'pier_lantern', { light: o.light });
+}
+
+function buildGoldenLocomotive(x, z, a){
+  var g = new THREE.Group();
+  var goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.85, roughness: 0.25 });
+  var stonePedestal = kept(0x3e4247, 0.9);
+
+  var base = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.45, 2.6), stonePedestal);
+  base.position.y = 0.22;
+  g.add(base);
+
+  var plaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.18, 0.04), goldMat);
+  plaque.position.set(0, 0.24, 1.32);
+  g.add(plaque);
+
+  var locoBody = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.4, 12), goldMat);
+  locoBody.rotation.x = Math.PI / 2;
+  locoBody.position.set(0, 0.78, 0.1);
+  g.add(locoBody);
+
+  var cab = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.75, 0.65), goldMat);
+  cab.position.set(0, 0.95, -0.65);
+  g.add(cab);
+
+  var stack = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.08, 0.45, 10), goldMat);
+  stack.position.set(0, 1.25, 0.55);
+  g.add(stack);
+
+  [-0.42, 0.42].forEach(function(wx){
+    [-0.4, 0.1, 0.6].forEach(function(wz){
+      var wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 12), goldMat);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(wx, 0.58, wz);
+      g.add(wheel);
+    });
+  });
+
+  var lt = new THREE.PointLight(0xffe680, 2.2, 6);
+  lt.position.set(0, 1.2, 0);
+  g.add(lt);
+
+  g.add(sitShadow(1.8));
+  g.position.set(x, 0, z);
+  g.rotation.y = a || 0;
+  return { group: g, light: lt };
+}
+function mkGoldenLocomotive(x, z, a){
+  var o = buildGoldenLocomotive(x, z, a);
+  pushDeco(o.group, 'golden_loco', { light: o.light });
+}
+
 /** Placeable Quaternius pack props (catalog key + fit height). */
 var PACK_PROPS = {
   pine:       { keys:['pine_4','pine_5','pine_1','pine_2','pine_3'], h:3.4, shadow:1.1, spin:true },
@@ -1259,6 +1512,10 @@ window.addEventListener('pointerup',function(e){
   }
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
   else if(tp==='house')mkHouse(pt.x,pt.z,ang);
+  else if(tp==='train_station')mkTrainStation(pt.x,pt.z,ang);
+  else if(tp==='mini_train')mkMiniTrain(pt.x,pt.z,ang);
+  else if(tp==='pier_lantern')mkPierLantern(pt.x,pt.z);
+  else if(tp==='golden_loco')mkGoldenLocomotive(pt.x,pt.z,ang);
   else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'){
     if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
       var ab = window.getActiveBiome();

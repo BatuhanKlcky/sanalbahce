@@ -210,6 +210,17 @@
     }
   }
 
+  window.getBarn = function(){ return barn; };
+  window.ITEMS_META = ITEMS_META;
+  window.canAffordCost = canAffordCost;
+  window.consumeBarnItems = function(items){
+    for(var k in items){
+      barn[k] = Math.max(0, (barn[k] || 0) - (items[k] || 0));
+    }
+    saveBarn();
+    renderMarketPanel();
+  };
+
   window.addBarnItem = function(key, qty){
     if(!ITEMS_META[key]) return;
     barn[key] = (barn[key] || 0) + (qty || 1);

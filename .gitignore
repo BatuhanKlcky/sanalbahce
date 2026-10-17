@@ -1,0 +1,7 @@
+sanalbahce/
+*.aab
+android/*.keystore
+android/*.pem
+android/build/
+.gradle/
+build/

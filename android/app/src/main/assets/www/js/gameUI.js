@@ -293,6 +293,49 @@
       }
     }
 
+    // 1.6) 3D Çiftlik Treni Kontrolü
+    if(typeof window.getTradeTrainGroup === 'function'){
+      var tGroup = window.getTradeTrainGroup();
+      if(tGroup && tGroup.visible !== false){
+        var tMeshes = [];
+        tGroup.traverse(function(ch){ if(ch.isMesh) tMeshes.push(ch); });
+        var tHits = _ray.intersectObjects(tMeshes, true);
+        if(tHits.length > 0){
+          var tState = (typeof window.getTrainState === 'function') ? window.getTrainState() : 'docked';
+          var tStatusText = tState === 'docked' ? '🟢 İstasyonda · Toptan Teslimat Bekliyor' : (tState === 'arriving' ? '🚂 İstasyona Yanaşıyor…' : 'Başkente Yolda');
+          inspectObject({
+            icon: '🚂',
+            title: 'BÜYÜK ÇİFTLİK TRENİ',
+            sub: tStatusText,
+            pos: tGroup.position,
+            getPos: function(){ return (tGroup && tGroup.parent) ? tGroup.position : null; },
+            heightOffset: 2.2,
+            ringScale: 2.2,
+            actions: [
+              {
+                label: 'Toptan İhracat',
+                icon: '📦',
+                primary: true,
+                onClick: function(){
+                  if(typeof window.openTrainTradeModal === 'function') window.openTrainTradeModal();
+                  closeInspector();
+                }
+              },
+              {
+                label: 'Düdük Çal',
+                icon: '📢',
+                onClick: function(){
+                  if(typeof window.callTradeTrain === 'function') window.callTradeTrain();
+                  closeInspector();
+                }
+              }
+            ]
+          });
+          return;
+        }
+      }
+    }
+
     // 1.75) Evcil Dostlar & Çiftlik Hayvanları Kontrolü
     if(typeof pets !== 'undefined' && pets.length){
       var pMeshes = [];
@@ -531,11 +574,31 @@
         if(dObj){
           var isHouse = dObj.type === 'farmer_house';
           var isPond = dObj.type === 'pond' || dObj.type === 'crystal_pond' || dObj.type === 'fountain';
-          var dName = isHouse ? ('ÇİFTÇİ EVİ (Lv.' + (dObj.level||1) + ')') : (dObj.type || 'Dekor').replace('_', ' ').toUpperCase();
+          var isStation = dObj.type === 'train_station';
+          var dName = isHouse ? ('ÇİFTÇİ EVİ (Lv.' + (dObj.level||1) + ')') : (isStation ? 'TREN İSTASYONU' : (dObj.type || 'Dekor').replace('_', ' ').toUpperCase());
           var subTitle = isHouse 
             ? 'Kapasite: ' + (dObj.level || 1) + ' Çiftçi (' + ((dObj.level || 1) * 3) + ' iş)'
-            : (isPond ? '🐟 Taze Göl Balığı tutulabilir!' : ('Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z)));
+            : (isStation ? '🚂 Toptan ihracat treni yanaşma platformu' : (isPond ? '🐟 Taze Göl Balığı tutulabilir!' : ('Konum: ' + Math.round(dObj.group.position.x) + ', ' + Math.round(dObj.group.position.z))));
           var decoActs = [];
+          if(isStation){
+            decoActs.push({
+              label: 'Toptan İhracat',
+              icon: '📦',
+              primary: true,
+              onClick: function(){
+                if(typeof window.openTrainTradeModal === 'function') window.openTrainTradeModal();
+                closeInspector();
+              }
+            });
+            decoActs.push({
+              label: 'Düdük Çal',
+              icon: '📢',
+              onClick: function(){
+                if(typeof window.callTradeTrain === 'function') window.callTradeTrain();
+                closeInspector();
+              }
+            });
+          }
           if(isPond){
             decoActs.push({
               label: 'Balık Tut',

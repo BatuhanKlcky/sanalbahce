@@ -343,6 +343,10 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
       <span class="mi-icon">🎣</span>
       <span>Balık Tut</span>
     </div>
+    <div class="more-item" onclick="window.closeMoreDrawer();window.openTrainTradeModal();window.triggerHaptic('light')">
+      <span class="mi-icon">🚂</span>
+      <span>Çiftlik Treni</span>
+    </div>
     <div class="more-item" onclick="window.closeMoreDrawer();window.photoMode();window.triggerHaptic('light')">
       <span class="mi-icon">📷</span>
       <span>Fotoğraf</span>
@@ -413,6 +417,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
     <div class="db" onclick="window.startPlace('well')">🪣<span>KUYU</span></div>
     <div class="db" onclick="window.startPlace('path')">🛤️<span>YOL</span></div>
     <div class="db" onclick="window.startPlace('stairs')">🪜<span>MERDİVEN</span></div>
+    <div class="db" onclick="window.startPlace('train_station')">🚂<span>İSTASYON</span></div>
   </div>
   <h3>🏠 Köy</h3>
   <div class="dg">
@@ -515,6 +520,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
   <div class="stat-row"><span>🌶️ Biber</span><span class="stat-val" id="st-pep">0</span></div>
   <div class="stat-row"><span>🥕 Havuç</span><span class="stat-val" id="st-car">0</span></div>
   <div class="stat-row"><span>💰 Toplam Coin</span><span class="stat-val" id="st-coin">0</span></div>
+  <div class="stat-row"><span>🎫 Ticaret Mührü</span><span class="stat-val" id="st-stamps">0 🎫</span></div>
   <div class="stat-row"><span>🏆 Skor</span><span class="stat-val" id="st-score">0</span></div>
   <a class="acct-legal" href="./gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
 </div>
@@ -544,6 +550,7 @@ body.photo-mode #biomeBar{opacity:0!important;pointer-events:none!important}
 <script src="js/codex.js"></script>
 <script src="js/gameUI.js"></script>
 <script src="js/aQuality.js"></script>
+<script src="js/trainTrade.js"></script>
 <script src="js/loop.js"></script>
 </body>
 </html>

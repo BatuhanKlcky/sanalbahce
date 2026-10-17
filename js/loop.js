@@ -322,6 +322,10 @@ function animate(){
     try{ window.stepAQuality(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepAQuality', e); }
   }
+  if(typeof window.stepTrainTrade==='function'){
+    try{ window.stepTrainTrade(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepTrainTrade', e); }
+  }
   // Decos — skip CPU work for hidden groups (mode swap), visuals unchanged when shown.
   decos.forEach(function(d){
     if(!d||!d.group||d.group.visible===false) return;

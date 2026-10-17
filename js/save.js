@@ -114,10 +114,21 @@ function updStats(){
   if(e('st-pep'))e('st-pep').textContent=stats.pep||0;
   if(e('st-car'))e('st-car').textContent=stats.car||0;
   if(e('st-coin'))e('st-coin').textContent=stats.coin;
+  if(e('st-stamps'))e('st-stamps').textContent=(stats.tradeStamps||0)+' 🎫';
   var cb=document.getElementById('coinBadge');
   if(cb)cb.textContent='💰 '+stats.coin;
   paintAccount();
 }
+function addTradeStamps(n, quiet){
+  n=Math.round(Number(n))||0;
+  if(n<=0) return 0;
+  stats.tradeStamps=(stats.tradeStamps||0)+n;
+  updStats();
+  saveStats();
+  if(!quiet) showToast('+'+n+' 🎫 Altın Ticaret Mührü!');
+  return n;
+}
+window.addTradeStamps = addTradeStamps;
 function addCoin(n, quiet){
   n=Math.round(Number(n))||0;
   if(n<=0) return 0;
@@ -485,6 +496,10 @@ function load(){
       else if(d.type==='scarecrow')mkScarecrow(x,z);
       else if(d.type==='flower_wild')mkWildFlower(x,z);
       else if(d.type==='house')mkHouse(x,z,a);
+      else if(d.type==='train_station' && typeof mkTrainStation==='function')mkTrainStation(x,z,a);
+      else if(d.type==='mini_train' && typeof mkMiniTrain==='function')mkMiniTrain(x,z,a);
+      else if(d.type==='pier_lantern' && typeof mkPierLantern==='function')mkPierLantern(x,z);
+      else if(d.type==='golden_loco' && typeof mkGoldenLocomotive==='function')mkGoldenLocomotive(x,z,a);
       else if(d.type==='farmer_house' && typeof window.mkFarmerHouse==='function'){
         window.mkFarmerHouse(x, z, d.level||1);
         var fh=decos[decos.length-1];
