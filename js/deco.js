@@ -1583,7 +1583,7 @@ function deleteDeco(group) {
 }
 // ── PLACEMENT ────────────────────────────────────────────────────────────────
 var placementMode=false,placementType=null;
-var planeR=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide}));
+var planeR=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide}));
 planeR.rotation.x=-Math.PI/2;scene.add(planeR);
 var plRay=new THREE.Raycaster(),plM=new THREE.Vector2();
 var prevGhost=null,ghostMat=new THREE.MeshBasicMaterial({color:0x00ff88,wireframe:true,transparent:true,opacity:.5});
@@ -1633,6 +1633,8 @@ window.addEventListener('pointerup',function(e){
   // DECO PLACEMENT MODE
   if(!placementMode)return;
   if(uiHit)return;
+  var tp = placementType;
+  if(!tp)return;
   plM.x=(e.clientX/innerWidth)*2-1;plM.y=-(e.clientY/innerHeight)*2+1;
   plRay.setFromCamera(plM,camera);
 
