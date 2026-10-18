@@ -324,9 +324,15 @@ window.advancePlants=function(seconds){
   if(seconds<=0||!flowers.length) return 0;
   if(seconds>86400) seconds=86400;
   var live=seconds<5, crossed=0;
+  var bugCounts = {};
+  if(typeof badBugs !== 'undefined' && badBugs && badBugs.length > 0){
+    for(var bidx = 0; bidx < badBugs.length; bidx++){
+      var bti = badBugs[bidx].ti;
+      bugCounts[bti] = (bugCounts[bti] || 0) + 1;
+    }
+  }
   for(var fi=0;fi<flowers.length;fi++){
-    var f=flowers[fi], bugs=0, bi;
-    for(bi=0;bi<badBugs.length;bi++) if(badBugs[bi].ti===fi) bugs++;
+    var f=flowers[fi], bugs=bugCounts[fi]||0;
     var rate=DRY+bugs*BDRAIN, growFor=0, ph=f.h;
     if(!f.isStunted&&f.w>.35&&f.h<1.3&&curWeather!=='snow'){
       growFor=rate>0?Math.min(seconds,Math.max(0,(f.w-.35)/rate)):seconds;

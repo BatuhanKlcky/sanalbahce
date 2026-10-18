@@ -66,22 +66,16 @@
 
   var _origRender = null;
   window.enableVisualFX = function(){
+    if(window.isMobile) return;
+    useBloom = true;
     initBloom();
     if(!bloom || _origRender) return;
-    // Hook end of frame from loop via wrap
     window._fxBloom = bloom;
   };
 
   window.renderWithFX = function(){
-    if(!bloom){ renderer.render(scene, camera); return; }
-    renderer.setRenderTarget(bloom.rt);
+    // Direct hardware rendering - avoids costly multi-pass render buffer switches
     renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-    renderer.render(scene, camera);
-    bloom.mat.uniforms.tDiffuse.value = bloom.rt.texture;
-    renderer.autoClear = false;
-    renderer.render(bloom.scene, bloom.cam);
-    renderer.autoClear = true;
   };
 
   window.addEventListener('resize', function(){

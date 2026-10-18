@@ -253,19 +253,24 @@ function stepButterflies(dt){
       }
     }
 
-    // 2) Anti-Clustering (Yumuşak Ayrışma): Kelebeklerin tek noktada kümelenmesini kesin olarak engeller
-    for(var bi3 = 0; bi3 < bugs.length; bi3++){
-      if(bi3 === bi2) continue;
-      var other = bugs[bi3];
-      if(!other || !other.mesh) continue;
-      var sepX = bug.mesh.position.x - other.mesh.position.x;
-      var sepZ = bug.mesh.position.z - other.mesh.position.z;
-      var sepDistSq = sepX * sepX + sepZ * sepZ;
-      if(sepDistSq > 0.0001 && sepDistSq < 4.8){ // 2.2 metre içinde birbirini nazikçe iter
-        var sepDist = Math.sqrt(sepDistSq);
-        var force = (2.2 - sepDist) * 0.72 * dt;
-        bug.mesh.position.x += (sepX / sepDist) * force;
-        bug.mesh.position.z += (sepZ / sepDist) * force;
+    // 2) Anti-Clustering (Yumuşak Ayrışma): Simetrik ve kare dağıtımlı optimizasyon
+    if((bi2 + _fc) % 2 === 0){
+      for(var bi3 = bi2 + 1; bi3 < bugs.length; bi3++){
+        var other = bugs[bi3];
+        if(!other || !other.mesh) continue;
+        var sepX = bug.mesh.position.x - other.mesh.position.x;
+        var sepZ = bug.mesh.position.z - other.mesh.position.z;
+        var sepDistSq = sepX * sepX + sepZ * sepZ;
+        if(sepDistSq > 0.0001 && sepDistSq < 4.84){ // 2.2 metre içinde birbirini nazikçe iter
+          var sepDist = Math.sqrt(sepDistSq);
+          var force = (2.2 - sepDist) * 0.72 * dt;
+          var fx = (sepX / sepDist) * force;
+          var fz = (sepZ / sepDist) * force;
+          bug.mesh.position.x += fx;
+          bug.mesh.position.z += fz;
+          other.mesh.position.x -= fx;
+          other.mesh.position.z -= fz;
+        }
       }
     }
 
@@ -320,10 +325,14 @@ function animate(){
   requestAnimationFrame(animate);
   // Uygulama arka plandaysa render etme
   if(document.visibilityState==='hidden') return;
-  // FPS limiter - mobilde 30fps
+  // FPS limiter - pil tasarrufunda 30fps, yüksek performansta akıcı 60fps
   var _now=performance.now();
-  if(_now-_lastFrame < _fpsInterval) return;
-  _lastFrame=_now - ((_now-_lastFrame) % _fpsInterval);
+  if(_perfMode==='low'){
+    if(_now-_lastFrame < 28.0) return;
+    _lastFrame=_now;
+  } else {
+    _lastFrame=_now;
+  }
   if(!_lastSim) _lastSim=_now;
   var dt=(_now-_lastSim)/1000;
   _lastSim=_now;
@@ -400,7 +409,7 @@ function animate(){
       if(f.h > 0.5) f.b = Math.min(1, f.b + 0.72 * dt);
       f.head.scale.setScalar(f.b);
       if(f.head) f.head.rotation.z = wind * (isDry ? 0.02 : 0.07);
-      stepBloom(f, now, wind);
+      if((fi + _fc) % 2 === 0) stepBloom(f, now, wind);
       var fsc = f.h * (0.6 + f.w * 0.4);
       f.mesh.scale.set(fsc, fsc, fsc);
     }
@@ -438,7 +447,9 @@ function animate(){
       var dx = dpos.x, dz = dpos.z;
 
       if(d.type === 'tree' || d.type === 'bush'){
-        rustle(d.group, now, d.type === 'bush' ? 1.35 : 1);
+        if(!isMobile || (_fc + di) % 2 === 0){
+          rustle(d.group, now, d.type === 'bush' ? 1.35 : 1);
+        }
       }
       else if(d.type === 'pine' || d.type === 'birch' || d.type === 'willow' || d.type === 'apple_tree' || d.type === 'bamboo' || d.type === 'palm'){
         if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
