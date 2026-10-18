@@ -220,6 +220,7 @@ function applyCozyScenery(){
   if(typeof window.syncDecoWorldVisibility === 'function') window.syncDecoWorldVisibility();
   if(typeof window.bindFarmerHouseFromDecos === 'function') window.bindFarmerHouseFromDecos();
   else if(typeof window.ensureFarmers === 'function') window.ensureFarmers();
+  if(typeof window.syncTrainVisibility === 'function') window.syncTrainVisibility();
 }
 
 function applyCozyHUD(){

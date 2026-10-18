@@ -820,6 +820,10 @@
     }
 
     scene.add(scenicTracks);
+    window._scenicTracks = scenicTracks;
+    if(typeof isCozy === 'function' && isCozy()){
+      scenicTracks.visible = false;
+    }
   }
 
   function findStationTargetPos(){
@@ -860,13 +864,35 @@
       trainGroup.position.set(target.x, target.y, target.z);
       trainGroup.rotation.y = target.rotY;
       scene.add(trainGroup);
+      window._trainGroup = trainGroup;
+      if(typeof isCozy === 'function' && isCozy()){
+        trainGroup.visible = false;
+      }
     }
   }
+
+  window.syncTrainVisibility = function(){
+    var cozy = typeof isCozy === 'function' && isCozy();
+    var show = !cozy;
+    if(scenicTracks) scenicTracks.visible = show;
+    if(trainGroup){
+      trainGroup.visible = show ? (trainState !== 'away') : false;
+    }
+    if(!show && typeof smokeParticles !== 'undefined' && smokeParticles && smokeParticles.length){
+      for(var i = 0; i < smokeParticles.length; i++){
+        if(smokeParticles[i] && smokeParticles[i].mesh) smokeParticles[i].mesh.visible = false;
+      }
+    }
+  };
 
   window.getTradeTrainGroup = function(){ return trainGroup; };
   window.getTrainState = function(){ return trainState; };
 
   window.callTradeTrain = function(forceFree){
+    if(typeof isCozy === 'function' && isCozy()){
+      if(typeof showToast === 'function') showToast('🚂 Büyük Çiftlik Treni sadece Klasik Bahçe modundadır.');
+      return;
+    }
     if(trainState === 'docked'){
       sndTrainWhistle();
       if(typeof showToast === 'function') showToast('📢 TUUUT TUUUT! Tren zaten istasyonda bekliyor!');
@@ -893,7 +919,15 @@
   window.stepTrainTrade = function(dt, now){
     if(!(dt > 0)) return;
 
+    var cozy = typeof isCozy === 'function' && isCozy();
+    if(cozy){
+      if(scenicTracks && scenicTracks.visible) scenicTracks.visible = false;
+      if(trainGroup && trainGroup.visible) trainGroup.visible = false;
+      return;
+    }
+
     ensureTrainMeshInScene();
+    if(scenicTracks && !scenicTracks.visible) scenicTracks.visible = true;
     if(freeWhistleTimer > 0) freeWhistleTimer -= dt;
 
     var stationTarget = findStationTargetPos();
