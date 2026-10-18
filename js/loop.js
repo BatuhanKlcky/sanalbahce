@@ -197,54 +197,113 @@ function rustle(g, now, amp){
   }
 }
 function stepButterflies(dt){
+  if(!bugs || !bugs.length) return;
+  var cx = 0, cz = 0, maxR = 48;
+  if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
+    var b = window.getActiveBiome();
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; maxR = Math.max(8, (b.R || 18) - 1.5); }
+  } else if(typeof GARDEN_R !== 'undefined'){
+    maxR = Math.min(60, GARDEN_R * 0.75);
+  }
+
   for(var bi2=0;bi2<bugs.length;bi2++){
     var bug=bugs[bi2];
-    bug.time+=dt;
-    if(!bug.target||bug.mesh.position.distanceTo(bug.target)<.9||bug.time>(bug.until||0)){
-      bug.until=bug.time+2.6+Math.random()*3.4;
+    if(!bug || !bug.mesh) continue;
+    bug.time += dt;
+
+    // 1) Hedef Seçimi (Bir merkezde takılı kalmayı önler, tüm haritaya yayılır)
+    if(!bug.target || bug.mesh.position.distanceTo(bug.target) < 1.1 || bug.time > (bug.until || 0)){
+      bug.until = bug.time + 3.5 + Math.random() * 5.0;
       if(!bug.target) bug.target = new THREE.Vector3();
-      if(flowers.length&&Math.random()>.2){
-        var rf=flowers[Math.floor(Math.random()*flowers.length)];
-        bug.target.set(rf.mesh.position.x+(Math.random()-.5)*.9, rf.h*rf.mesh.scale.y+.62+Math.random()*.55, rf.mesh.position.z+(Math.random()-.5)*.9);
-      }else{
-        bug.target.set((Math.random()-.5)*18, 1.15+Math.random()*1.7, (Math.random()-.5)*18);
+
+      var pick = Math.random();
+      if(pick < 0.25 && flowers.length > 0){
+        // Çiçek ziyareti (%25 şans, geniş dağılım)
+        var rf = flowers[Math.floor(Math.random() * flowers.length)];
+        var fPos = rf.mesh.position;
+        bug.target.set(
+          fPos.x + (Math.random() - 0.5) * 2.2,
+          Math.max(1.15, rf.h * rf.mesh.scale.y + 0.65 + Math.random() * 0.8),
+          fPos.z + (Math.random() - 0.5) * 2.2
+        );
+      } else if(pick < 0.45 && typeof decos !== 'undefined' && decos && decos.length > 0){
+        // Bahçe dekorları, çalılar, ağaçlar veya gölet etrafında süzülme
+        var rd = decos[Math.floor(Math.random() * decos.length)];
+        if(rd && rd.group && rd.group.visible !== false){
+          var dp = rd.group.position;
+          bug.target.set(
+            dp.x + (Math.random() - 0.5) * 4.0,
+            1.2 + Math.random() * 2.5,
+            dp.z + (Math.random() - 0.5) * 4.0
+          );
+        } else {
+          var a0 = Math.random() * Math.PI * 2;
+          var r0 = 4 + Math.random() * (maxR - 5);
+          bug.target.set(cx + Math.cos(a0) * r0, 1.2 + Math.random() * 2.8, cz + Math.sin(a0) * r0);
+        }
+      } else {
+        // Dünyada tamamen serbest, geniş alanda rastgele uçuş
+        var a = Math.random() * Math.PI * 2;
+        var r = 3 + Math.random() * (maxR - 4);
+        bug.target.set(
+          cx + Math.cos(a) * r,
+          1.15 + Math.random() * 3.0,
+          cz + Math.sin(a) * r
+        );
       }
     }
-    bug.mesh.position.y-=bug.bob||0;
+
+    // 2) Anti-Clustering (Yumuşak Ayrışma): Kelebeklerin tek noktada kümelenmesini kesin olarak engeller
+    for(var bi3 = 0; bi3 < bugs.length; bi3++){
+      if(bi3 === bi2) continue;
+      var other = bugs[bi3];
+      if(!other || !other.mesh) continue;
+      var sepX = bug.mesh.position.x - other.mesh.position.x;
+      var sepZ = bug.mesh.position.z - other.mesh.position.z;
+      var sepDistSq = sepX * sepX + sepZ * sepZ;
+      if(sepDistSq > 0.0001 && sepDistSq < 4.8){ // 2.2 metre içinde birbirini nazikçe iter
+        var sepDist = Math.sqrt(sepDistSq);
+        var force = (2.2 - sepDist) * 0.72 * dt;
+        bug.mesh.position.x += (sepX / sepDist) * force;
+        bug.mesh.position.z += (sepZ / sepDist) * force;
+      }
+    }
+
+    bug.mesh.position.y -= bug.bob || 0;
     _tv.copy(bug.target).sub(bug.mesh.position);
-    var dist=_tv.length();
-    var hovering=dist<1.25;
-    var speed=hovering?.62:(bug.flight||1.25);
-    var hx=0, hz=1, distH=Math.hypot(_tv.x,_tv.z);
-    if(distH>.08){ hx=_tv.x/distH; hz=_tv.z/distH; }
-    if(dist>.04){
-      _tv.multiplyScalar(Math.min(1, speed*dt/dist));
+    var dist = _tv.length();
+    var hovering = dist < 1.35;
+    var speed = hovering ? 0.72 : (bug.flight || 1.35);
+    var hx = 0, hz = 1, distH = Math.hypot(_tv.x, _tv.z);
+    if(distH > 0.08){ hx = _tv.x / distH; hz = _tv.z / distH; }
+    if(dist > 0.04){
+      _tv.multiplyScalar(Math.min(1, speed * dt / dist));
       bug.mesh.position.add(_tv);
     }
-    var phase=bug.time*(hovering?2.3:1.15)+bi2*1.7;
-    var drift=Math.sin(phase);
-    var dAmp=hovering?.32:.11;
-    var d=(drift-(bug._drift||0))*dAmp;
-    bug._drift=drift;
-    bug.mesh.position.x+=-hz*d;
-    bug.mesh.position.z+=hx*d;
-    var hzFlap=hovering?(bug.hz||10)*.62:(bug.hz||10);
-    var s=Math.sin(bug.time*hzFlap);
-    var s2=Math.sin(bug.time*hzFlap-.5);
-    var amp=hovering?.34:.86;
-    var open=hovering?.28:.4;
-    var lift=open+s*amp;
-    var liftH=open*.75+s2*amp*.7;
-    if(bug.wR1){ bug.wR1.rotation.z=lift; bug.wL1.rotation.z=-lift; }
-    if(bug.wR2){ bug.wR2.rotation.z=liftH; bug.wL2.rotation.z=-liftH; }
-    bug.bob=Math.sin(bug.time*hzFlap-.7)*(hovering?.035:.07)+Math.sin(bug.time*1.7)*.035;
-    bug.mesh.position.y+=bug.bob;
+    var phase = bug.time * (hovering ? 2.3 : 1.15) + bi2 * 1.7;
+    var drift = Math.sin(phase);
+    var dAmp = hovering ? 0.32 : 0.12;
+    var d = (drift - (bug._drift || 0)) * dAmp;
+    bug._drift = drift;
+    bug.mesh.position.x += -hz * d;
+    bug.mesh.position.z += hx * d;
+    var hzFlap = hovering ? (bug.hz || 10) * 0.62 : (bug.hz || 10);
+    var s = Math.sin(bug.time * hzFlap);
+    var s2 = Math.sin(bug.time * hzFlap - 0.5);
+    var amp = hovering ? 0.34 : 0.86;
+    var open = hovering ? 0.28 : 0.4;
+    var lift = open + s * amp;
+    var liftH = open * 0.75 + s2 * amp * 0.7;
+    if(bug.wR1){ bug.wR1.rotation.z = lift; bug.wL1.rotation.z = -lift; }
+    if(bug.wR2){ bug.wR2.rotation.z = liftH; bug.wL2.rotation.z = -liftH; }
+    bug.bob = Math.sin(bug.time * hzFlap - 0.7) * (hovering ? 0.035 : 0.07) + Math.sin(bug.time * 1.7) * 0.035;
+    bug.mesh.position.y += bug.bob;
     bug.mesh.lookAt(bug.target);
-    bug.mesh.rotateZ(drift*(hovering?.18:.42));
-    bug.mesh.rotateX(hovering?-.42:(-.2-Math.max(0,s)*.22));
+    bug.mesh.rotateZ(drift * (hovering ? 0.18 : 0.42));
+    bug.mesh.rotateX(hovering ? -0.42 : (-0.2 - Math.max(0, s) * 0.22));
     if(bug.ants){
-      bug.ants[0].rotation.x=Math.sin(bug.time*2.6)*.18;
-      bug.ants[1].rotation.x=Math.sin(bug.time*2.6+.5)*.18;
+      bug.ants[0].rotation.x = Math.sin(bug.time * 2.6) * 0.18;
+      bug.ants[1].rotation.x = Math.sin(bug.time * 2.6 + 0.5) * 0.18;
     }
   }
 }

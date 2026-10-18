@@ -282,12 +282,16 @@ window.addBug=function(kind){
   var wL2=mountWing(sp.hindGeo, sp.hind, -1, -.08);
   hinge.add(wR1,wL1,wR2,wL2);
   bg.scale.setScalar(1.5+Math.random()*.28);
-  var cx = 0, cz = 0;
+  var cx = 0, cz = 0, maxR = 40;
   if(typeof window.getActiveBiome === 'function' && typeof isCozy === 'function' && isCozy()){
     var b = window.getActiveBiome();
-    if(b){ cx = b.cx || 0; cz = b.cz || 0; }
+    if(b){ cx = b.cx || 0; cz = b.cz || 0; maxR = Math.max(8, (b.R || 18) - 2); }
+  } else if(typeof GARDEN_R !== 'undefined'){
+    maxR = Math.min(50, GARDEN_R * 0.65);
   }
-  bg.position.set(cx + (Math.random()-.5)*14, 1.4+Math.random()*1.4, cz + (Math.random()-.5)*14);
+  var spA = Math.random() * Math.PI * 2;
+  var spDist = 3 + Math.random() * (maxR - 4);
+  bg.position.set(cx + Math.cos(spA) * spDist, 1.4 + Math.random() * 2.0, cz + Math.sin(spA) * spDist);
   scene.add(bg);
   bugs.push({mesh:bg, wR1:wR1, wL1:wL1, wR2:wR2, wL2:wL2, ants:ants, target:null, time:Math.random()*20, until:0, bob:0, flight:sp.flight, hz:sp.hz, kind:kind});
   document.getElementById('bC').innerText=bugs.length;

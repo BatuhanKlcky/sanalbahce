@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-35';
+var CACHE = 'sanalbahce-shell-36';
 var LOCAL = [
   './',
   './index.html',

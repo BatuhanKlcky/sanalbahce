@@ -518,6 +518,56 @@
       }
     }
 
+    // 1.9) Kelebekler Kontrolü
+    if(typeof bugs !== 'undefined' && bugs.length){
+      var bugMeshes = [];
+      bugs.forEach(function(bg, idx){
+        if(!bg || !bg.mesh) return;
+        bg.mesh.traverse(function(ch){
+          if(ch.isMesh){
+            ch.userData.bgRef = bg;
+            ch.userData.bgIdx = idx;
+            bugMeshes.push(ch);
+          }
+        });
+      });
+      var bgHits = _ray.intersectObjects(bugMeshes, true);
+      if(bgHits.length > 0){
+        var bgObj = bgHits[0].object.userData.bgRef;
+        if(bgObj){
+          inspectObject({
+            icon: '🦋',
+            title: 'DOST KELEBEK',
+            sub: '🌸 Bahçeyi neşelendiriyor (Toplam: ' + bugs.length + ' kelebek)',
+            pos: bgObj.mesh.position,
+            getPos: function(){ return (bgObj && bgObj.mesh) ? bgObj.mesh.position : null; },
+            heightOffset: 0.8,
+            ringScale: 0.8,
+            actions: [
+              {
+                label: 'Kelebek Azalt',
+                icon: '🦋−',
+                primary: true,
+                onClick: function(){
+                  closeInspector();
+                  if(typeof window.removeBug === 'function') window.removeBug();
+                }
+              },
+              {
+                label: 'Kelebek Ekle',
+                icon: '🦋',
+                onClick: function(){
+                  closeInspector();
+                  if(typeof window.addBug === 'function') window.addBug();
+                }
+              }
+            ]
+          });
+          return;
+        }
+      }
+    }
+
     // 2) Çiçekler Kontrolü
     if(typeof flowers !== 'undefined' && flowers.length){
       var flMeshes = [];
