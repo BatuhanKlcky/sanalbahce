@@ -161,25 +161,53 @@
     glow.position.set(-0.07, 2.18, 1.05);
     root.add(glow);
 
-    // 7. Chicken Wire Run / Paddock Fence
+    // 7. Chicken Wire Run / Paddock Fence (Tam Kapalı Çiftlik Çiti)
     var fenceMat = new THREE.MeshStandardMaterial({ color: 0x8a7052, roughness: 0.9 });
     var posts = [
-      [1.8, 1.8], [1.8, -1.8], [-1.8, -1.8], [-1.8, 1.8], [0, 1.8], [0, -1.8]
+      [-1.9, -1.9], [0, -1.9], [1.9, -1.9],
+      [-1.9, 0],               [1.9, 0],
+      [-1.9, 1.9],  [0.8, 1.9], [1.9, 1.9]
     ];
     posts.forEach(function(pos){
       var fp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.9, 6), fenceMat);
       fp.position.set(pos[0], 0.45, pos[1]);
-      fp.castShadow = true;
+      fp.castShadow = !isMobile;
       root.add(fp);
     });
 
-    // Horizontal rails
-    var railZ1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 3.6), fenceMat);
-    railZ1.position.set(1.8, 0.6, 0);
-    root.add(railZ1);
-    var railZ2 = railZ1.clone();
-    railZ2.position.set(-1.8, 0.6, 0);
-    root.add(railZ2);
+    // North rail (arka)
+    var railN = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.05, 0.04), fenceMat);
+    railN.position.set(0, 0.55, -1.9);
+    root.add(railN);
+    var railN2 = railN.clone(); railN2.position.y = 0.28; root.add(railN2);
+
+    // East & West rails (yanlar)
+    var railE = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 3.8), fenceMat);
+    railE.position.set(1.9, 0.55, 0);
+    root.add(railE);
+    var railE2 = railE.clone(); railE2.position.y = 0.28; root.add(railE2);
+
+    var railW = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 3.8), fenceMat);
+    railW.position.set(-1.9, 0.55, 0);
+    root.add(railW);
+    var railW2 = railW.clone(); railW2.position.y = 0.28; root.add(railW2);
+
+    // South rails (ön - ahşap kapı aralığı ile)
+    var railSW1 = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.05, 0.04), fenceMat);
+    railSW1.position.set(-0.95, 0.55, 1.9);
+    root.add(railSW1);
+    var railSW1_2 = railSW1.clone(); railSW1_2.position.y = 0.28; root.add(railSW1_2);
+
+    var railSW2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.05, 0.04), fenceMat);
+    railSW2.position.set(1.35, 0.55, 1.9);
+    root.add(railSW2);
+    var railSW2_2 = railSW2.clone(); railSW2_2.position.y = 0.28; root.add(railSW2_2);
+
+    // Wooden gate door
+    var gateDoor = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.52, 0.03), fenceMat);
+    gateDoor.position.set(0.4, 0.42, 1.9);
+    gateDoor.rotation.y = 0.35;
+    root.add(gateDoor);
 
     // 8. Feed Bowl (Yem Kabı)
     var trough = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.3), woodDark);
@@ -473,11 +501,11 @@
         } else {
           ch.state = 'walk';
           ch.timer = 2.0 + Math.random() * 3.0;
-          // Target random point inside coop boundary
-          var ang = Math.random() * Math.PI * 2;
-          var dist = 0.5 + Math.random() * 1.6;
-          ch.tx = ch.coop.x + Math.cos(ang) * dist;
-          ch.tz = ch.coop.z + Math.sin(ang) * dist;
+          // Target random point strictly inside coop fenced paddock
+          var ox = (Math.random() - 0.5) * 2.8;
+          var oz = (Math.random() - 0.5) * 2.8;
+          ch.tx = ch.coop.x + ox;
+          ch.tz = ch.coop.z + oz;
         }
       }
 
@@ -504,6 +532,10 @@
         ch.group.rotation.x = 0;
         ch.group.rotation.z = 0;
       }
+
+      // Constrain strictly within fenced perimeter
+      ch.x = THREE.MathUtils.clamp(ch.x, ch.coop.x - 1.6, ch.coop.x + 1.6);
+      ch.z = THREE.MathUtils.clamp(ch.z, ch.coop.z - 1.6, ch.coop.z + 1.6);
 
       ch.group.position.x = ch.x;
       ch.group.position.z = ch.z;

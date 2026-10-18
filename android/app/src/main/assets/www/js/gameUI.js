@@ -275,7 +275,26 @@
           } else if(hitNpc.id === 'chef' && typeof window.openChefDialog === 'function'){
             window.openChefDialog();
             return;
+          } else if(hitNpc.id === 'muhtar' && typeof window.openMarketStallDialog === 'function'){
+            window.openMarketStallDialog();
+            return;
           }
+        }
+        if(npHits[0].object.userData.customerRef && typeof window.openMarketStallDialog === 'function'){
+          window.openMarketStallDialog();
+          return;
+        }
+      }
+    }
+
+    // 1.42) Köy Mutfağı Dükkanı Kontrolü
+    if(typeof window.getKitchenShopGroup === 'function'){
+      var ksG = window.getKitchenShopGroup();
+      if(ksG && ksG.children){
+        var ksHits = _ray.intersectObjects(ksG.children, true);
+        if(ksHits.length > 0 && typeof window.openChefDialog === 'function'){
+          window.openChefDialog();
+          return;
         }
       }
     }

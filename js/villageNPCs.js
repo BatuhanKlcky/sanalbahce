@@ -100,11 +100,74 @@
 
 
 
+  // 5 Distinct Village NPC Archetype Palettes (Quaternius Rig Mesh Material Styling)
+  var NPC_PALETTES = {
+    fisherman: {
+      LightBlue: 0x19376d, // Deep sea nautical navy sweater
+      Brown: 0xf39c12,     // Golden yellow fisherman slicker straps
+      Beige: 0xdce1de,     // Sailor collar / wool under-shirt
+      Brown2: 0x1f2421,    // Heavy black sea boots
+      Red: 0xd90429        // Sailor red bandana
+    },
+    baker: {
+      Worker_Vest: 0xf8f9fa,   // Pure flour-white baker apron
+      Worker_Yellow: 0xdd6e42, // Warm rustic terracotta dress
+      White: 0xfff3e2,         // White flour-dusted baker headwrap
+      Black: 0x3d312a,         // Kitchen leather clogs
+      DarkBrown: 0x5c4033       // Hazel hair
+    },
+    muhtar: {
+      LightBlue: 0x2d6a4f, // Emerald village green waistcoat
+      Brown: 0x7f4f24,     // Amber-brown leather belt & trim
+      Beige: 0xffeedd,     // Crisp linen cream formal shirt
+      Brown2: 0x4a151e,    // Cordovan wine-red polished boots
+      Red: 0xee9b00        // Gold pocket watch chain & handkerchief
+    },
+    blacksmith: {
+      LightBlue: 0x2b2d42, // Soot-dark charcoal smithing tunic
+      Brown: 0x3d2618,     // Fireproof dark leather smithing apron
+      Beige: 0x6c757d,     // Ash-grey work sleeves
+      Brown2: 0x1e1e24,    // Steel-capped black work boots
+      Red: 0x9e2a2b        // Forgemaster crimson headband
+    },
+    herbalist: {
+      Worker_Vest: 0x5a189a,   // Royal violet embroidered traveling vest
+      Worker_Yellow: 0xf4a261, // Saffron amber pleated silk skirt
+      White: 0xa3b18a,         // Sage green lace shawl
+      Black: 0x2b2d42,         // Soft dark traveling boots
+      DarkBrown: 0x1f1f1f       // Raven black hair
+    }
+  };
+
+  function applyNpcPalette(root, paletteKey){
+    var pal = NPC_PALETTES[paletteKey];
+    if(!root || !pal) return;
+    root.traverse(function(c){
+      if(!c.isMesh || !c.material) return;
+      var mats = Array.isArray(c.material) ? c.material.slice(0) : [c.material];
+      var changed = false;
+      for(var i = 0; i < mats.length; i++){
+        var m = mats[i];
+        if(!m) continue;
+        var col = pal[m.name];
+        if(col != null){
+          var cloned = m.clone();
+          cloned.color.setHex(col);
+          mats[i] = cloned;
+          changed = true;
+        }
+      }
+      if(changed){
+        c.material = Array.isArray(c.material) ? mats : mats[0];
+      }
+    });
+  }
+
   // Spawn Fisherman NPC at Shore Pier
   function spawnFisherman(x, y, z){
     var npc = {
       id: 'fisherman',
-      name: 'Balıkçı Reis (Hamdi Dayı)',
+      name: 'Balıkçı Reis (Cemil Usta)',
       role: 'Usta Balıkçı',
       x: x, y: y, z: z,
       rotY: -1.75, // Looking towards water
@@ -126,6 +189,9 @@
       npc.mixer = rec.mixer;
       npc.clips = rec.clips;
       npc.body = rec.body;
+
+      // Apply distinct nautical clothing palette
+      applyNpcPalette(rec.body, 'fisherman');
 
       npc.group.position.set(npc.x, npc.y, npc.z);
       npc.group.rotation.y = npc.rotY;
@@ -151,7 +217,7 @@
       };
       npc.group.traverse(function(c){
         if(c.isMesh){
-          c.castShadow = true;
+          c.castShadow = !isMobile;
           c.userData.npcRef = npc;
         }
       });
@@ -171,14 +237,14 @@
     return npc;
   }
 
-  // Spawn Village Chef & Baker NPC
+  // Spawn Village Chef & Baker NPC (Fatma Bacı)
   function spawnVillageChef(x, y, z){
     var npc = {
       id: 'chef',
-      name: 'Aşçı & Fırıncı (Usta Mahmut)',
-      role: 'Köy Baş Aşçısı',
+      name: 'Aşçı & Fırıncı (Fatma Bacı)',
+      role: 'Köy Baş Fırıncısı',
       x: x, y: y, z: z,
-      rotY: 0.8,
+      rotY: Math.PI,
       group: null,
       mixer: null,
       clips: null,
@@ -196,10 +262,11 @@
       npc.clips = rec.clips;
       npc.body = rec.body;
 
+      // Apply distinct baker white apron and terracotta dress
+      applyNpcPalette(rec.body, 'baker');
+
       npc.group.position.set(npc.x, npc.y, npc.z);
       npc.group.rotation.y = npc.rotY;
-
-
 
       // Wooden cooking ladle in hand
       var ladle = new THREE.Mesh(
@@ -222,7 +289,7 @@
       };
       npc.group.traverse(function(c){
         if(c.isMesh){
-          c.castShadow = true;
+          c.castShadow = !isMobile;
           c.userData.npcRef = npc;
         }
       });
@@ -239,72 +306,127 @@
       }, 500);
     }
 
-    // Build Chef Kitchen Station Surroundings (Market Stand + Cauldron)
-    buildChefStationDecor(x, z);
-
     return npc;
   }
 
-  // Kitchen Scenery Decor (Market Stand + Cauldron with lit coals)
-  function buildChefStationDecor(cx, cz){
+  // 3D Village Kitchen & Bakery Shop Building (Köy Mutfağı & Fırın Dükkanı)
+  function buildVillageKitchenShop(cx, cz){
     var g = new THREE.Group();
     g.position.set(cx, 0, cz);
 
-    // 1. Try to load MarketStand_1.glb or procedural counter
-    loadGlbDecor('models/village/MarketStand_1.glb', function(stand){
-      if(stand){
-        stand.scale.setScalar(1.2);
-        stand.position.set(-0.8, 0, -1.2);
-        stand.rotation.y = 0.6;
-        g.add(stand);
+    var stoneMat = new THREE.MeshStandardMaterial({ color: 0x5a544c, roughness: 0.95 });
+    var woodDark = new THREE.MeshStandardMaterial({ color: 0x4e3118, roughness: 0.85 });
+    var woodLight = new THREE.MeshStandardMaterial({ color: 0x8a5a36, roughness: 0.8 });
+    var clothRed = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.7 });
+    var clothWhite = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.7 });
+
+    // 1. Cobblestone Terrace Floor
+    var floor = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.08, 9.6), stoneMat);
+    floor.position.set(0, 0.04, 0);
+    floor.receiveShadow = !isMobile;
+    g.add(floor);
+
+    // 2. The Kitchen Shop Building (Quaternius Inn.glb scaled to ~4.0m)
+    loadGlbDecor('models/village/Inn.glb', function(shopMesh){
+      if(shopMesh){
+        var box = new THREE.Box3().setFromObject(shopMesh);
+        var h = Math.max(0.1, box.max.y - box.min.y);
+        shopMesh.scale.setScalar(4.0 / h);
+        shopMesh.position.set(0, 0, -2.4);
+        shopMesh.rotation.y = Math.PI;
+        g.add(shopMesh);
       } else {
-        // Fallback wooden counter
-        var counter = new THREE.Mesh(
-          new THREE.BoxGeometry(1.8, 0.9, 0.8),
-          new THREE.MeshStandardMaterial({ color: 0x7c4f2e, roughness: 0.8 })
+        // Fallback timber bakery shop
+        var bldg = new THREE.Mesh(
+          new THREE.BoxGeometry(5.2, 3.4, 4.2),
+          new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.85 })
         );
-        counter.position.set(-0.8, 0.45, -1.2);
-        counter.rotation.y = 0.6;
-        g.add(counter);
+        bldg.position.set(0, 1.7, -2.4);
+        g.add(bldg);
       }
     });
 
-    // 2. Try to load Cauldron.glb or procedural boiling pot
+    // 3. Front Bakery Counter & Display Table
+    var counterGroup = new THREE.Group();
+    counterGroup.position.set(0, 0, 1.2);
+
+    var table = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 0.9), woodDark);
+    table.position.y = 0.45;
+    table.castShadow = !isMobile;
+    counterGroup.add(table);
+
+    // Striped bakery canopy over counter
+    for(var st = 0; st < 5; st++){
+      var sMat = (st % 2 === 0) ? clothRed : clothWhite;
+      var cStripe = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.05, 1.2), sMat);
+      cStripe.position.set(-1.12 + st * 0.56, 2.3, 0);
+      cStripe.rotation.x = 0.12;
+      counterGroup.add(cStripe);
+    }
+    // Canopy posts
+    [-1.3, 1.3].forEach(function(px){
+      var p = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.3, 6), woodDark);
+      p.position.set(px, 1.15, 0.4);
+      counterGroup.add(p);
+    });
+
+    // Fresh baked pies, breads, pastries on counter
+    var bread1 = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.12, 8), new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 }));
+    bread1.position.set(-0.7, 0.96, 0);
+    counterGroup.add(bread1);
+
+    var pie = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.08, 12), new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.85 }));
+    pie.position.set(0, 0.94, 0);
+    counterGroup.add(pie);
+
+    var jamJar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8), new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 }));
+    jamJar.position.set(0.65, 0.98, 0);
+    counterGroup.add(jamJar);
+
+    // Hanging sign: "🥖 KÖY MUTFAĞI & FIRINI"
+    var sign = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.4, 0.06), woodLight);
+    sign.position.set(0, 2.05, 0.62);
+    counterGroup.add(sign);
+
+    g.add(counterGroup);
+
+    // 4. Stone Baking Oven & Hearth Cauldron
     loadGlbDecor('models/village/Cauldron.glb', function(cauld){
       if(cauld){
-        cauld.scale.setScalar(1.1);
-        cauld.position.set(1.2, 0, -0.4);
+        cauld.scale.setScalar(1.2);
+        cauld.position.set(2.4, 0, 0.8);
         g.add(cauld);
-      } else {
-        var pot = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.35, 0.28, 0.5, 12),
-          new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.6, roughness: 0.4 })
-        );
-        pot.position.set(1.2, 0.35, -0.4);
-        g.add(pot);
       }
     });
 
-    // Glowing warm fire embers under pot (zero GPU overhead)
-
+    // Glowing warm fire coals under pot
     var coals = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.3, 0.35, 0.1, 8),
-      new THREE.MeshStandardMaterial({ color: 0x3a1005, emissive: 0xd9480f, emissiveIntensity: 0.8 })
+      new THREE.CylinderGeometry(0.35, 0.42, 0.12, 8),
+      new THREE.MeshStandardMaterial({ color: 0x3a1005, emissive: 0xd9480f, emissiveIntensity: 0.85 })
     );
-    coals.position.set(1.2, 0.05, -0.4);
+    coals.position.set(2.4, 0.06, 0.8);
     g.add(coals);
 
-    // Barrels & crates
-    loadGlbDecor('models/village/Barrel.glb', function(barrel){
-      if(barrel){
-        barrel.scale.setScalar(0.9);
-        barrel.position.set(1.6, 0, -1.2);
-        g.add(barrel);
-      }
+    // 5. Village Props: Flour bags, barrels, bench
+    loadGlbDecor('models/village/Bags.glb', function(bags){
+      if(bags){ bags.scale.setScalar(1.0); bags.position.set(-2.4, 0, 0.5); g.add(bags); }
     });
+    loadGlbDecor('models/village/Barrel.glb', function(barrel){
+      if(barrel){ barrel.scale.setScalar(0.95); barrel.position.set(-2.6, 0, 1.8); g.add(barrel); }
+    });
+    loadGlbDecor('models/village/Bench_1.glb', function(bench){
+      if(bench){ bench.scale.setScalar(1.1); bench.position.set(2.2, 0, -0.6); bench.rotation.y = -Math.PI / 2; g.add(bench); }
+    });
+
+    // Tapping anywhere on the shop opens Chef dialog
+    g.userData.isKitchenShop = true;
+    g.userData.onTap = function(){
+      openChefDialog();
+    };
 
     scene.add(g);
     _chefPropGroup = g;
+    return g;
   }
 
   // Play a specific animation clip on an NPC
@@ -547,10 +669,10 @@
       + '<div style="background:#0f172a;border:2px solid #f59e0b;border-radius:22px;max-width:440px;width:100%;max-height:90vh;display:flex;flex-direction:column;color:#fff;padding:20px;box-shadow:0 25px 50px rgba(0,0,0,0.6);position:relative;">'
       + '  <button id="closeNpcModal" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer;">✕</button>'
       + '  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
-      + '    <div style="font-size:38px;background:#1e293b;border-radius:14px;padding:6px 10px;border:1px solid #d97706;">👨‍🍳</div>'
+      + '    <div style="font-size:38px;background:#1e293b;border-radius:14px;padding:6px 10px;border:1px solid #d97706;">👩‍🍳</div>'
       + '    <div>'
-      + '      <h2 style="margin:0;font-size:18px;color:#fde047;font-weight:800;">Köy Mutfağı & Aşçı (Usta Mahmut)</h2>'
-      + '      <div style="font-size:12px;color:#94a3b8;font-weight:600;">Yumurtalar, Sebzeler ve Balıkla Nefis Tarifler</div>'
+      + '      <h2 style="margin:0;font-size:18px;color:#fde047;font-weight:800;">Köy Mutfağı & Fırını (Aşçı Fatma Bacı)</h2>'
+      + '      <div style="font-size:12px;color:#94a3b8;font-weight:600;">Taş Fırından Taze Ekmekler, Sebzeli Börekler & Nefis Köy Yemekleri</div>'
       + '    </div>'
       + '  </div>'
       + '  <div style="font-size:12px;color:#94a3b8;margin-bottom:12px;background:#1e293b;padding:8px 12px;border-radius:8px;">'
@@ -622,11 +744,14 @@
 
   // Initialize Village NPCs in world
   function initVillageNPCs(){
-    // Spawn Balıkçı Reis on wooden pier of Shore Pond (far coastline)
+    // 1. Spawn Balıkçı Reis on wooden pier of Shore Pond (far northeast coastline)
     spawnFisherman(22.6, 0.28, -14.1);
 
-    // Spawn Village Chef near market / village square (-11.5, 0, -7.0)
-    spawnVillageChef(-11.5, 0, -7.0);
+    // 2. Build 3D Village Kitchen & Bakery Shop building at South-East quadrant (18.0, 18.0)
+    buildVillageKitchenShop(18.0, 18.0);
+
+    // 3. Spawn Chef & Baker Fatma Bacı at bakery counter (18.0, 0, 19.4)
+    spawnVillageChef(18.0, 0, 19.4);
   }
 
   // Export to window
@@ -635,4 +760,7 @@
   window.villageNPCs = npcs;
   window.openFishermanDialog = openFishermanDialog;
   window.openChefDialog = openChefDialog;
+  window.applyNpcPalette = applyNpcPalette;
+  window.NPC_PALETTES = NPC_PALETTES;
+  window.getKitchenShopGroup = function(){ return _chefPropGroup; };
 })();
