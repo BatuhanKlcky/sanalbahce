@@ -414,8 +414,7 @@
 
     // Muhtar animation update
     if(_muhtarNpc && _muhtarNpc.mixer){
-      var fc0 = (typeof window._fc === 'number') ? window._fc : 0;
-      if(fc0 % 2 === 0) _muhtarNpc.mixer.update(dt * 2);
+      _muhtarNpc.mixer.update(dt);
     }
 
     _spawnTimer -= dt;
@@ -435,9 +434,9 @@
         if(cDistSq > 1400){
           if((i + fc) % 4 === 0) c.mixer.update(dt * 4);
         } else if(cDistSq > 600){
-          if((i + fc) % 3 === 0) c.mixer.update(dt * 3);
-        } else {
           if((i + fc) % 2 === 0) c.mixer.update(dt * 2);
+        } else {
+          c.mixer.update(dt);
         }
       }
 
