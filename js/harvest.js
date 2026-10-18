@@ -7,7 +7,8 @@ var HARVEST_TYPES = {
   strawberry:{emoji:'🍓', color:0xff2244, stages:['🌱','🌿','🍓'], growTime:60,  coin:10, statKey:'str'},
   cucumber:  {emoji:'🥒', color:0x228822, stages:['🌱','🌿','🥒'], growTime:120, coin:20, statKey:'cuc'},
   pepper:    {emoji:'🌶️', color:0xcc1e1e, stages:['🌱','🌿','🌶️'], growTime:75,  coin:18, statKey:'pep'},
-  carrot:    {emoji:'🥕', color:0xff7a1a, stages:['🌱','🌿','🥕'], growTime:80,  coin:12, statKey:'car'}
+  carrot:    {emoji:'🥕', color:0xff7a1a, stages:['🌱','🌿','🥕'], growTime:80,  coin:12, statKey:'car'},
+  wheat:     {emoji:'🌾', color:0xd4af37, stages:['🌱','🌿','🌾'], growTime:75,  coin:22, statKey:'whe'}
 };
 
 var _cropTex={};
@@ -30,6 +31,10 @@ function cropTexture(type){
   }else if(type==='carrot'){
     var grd=g.createLinearGradient(0,0,0,64);
     grd.addColorStop(0,'#ffc56a');grd.addColorStop(1,'#e25800');
+    g.fillStyle=grd;g.fillRect(0,0,64,64);
+  }else if(type==='wheat'){
+    var grd=g.createLinearGradient(0,0,0,64);
+    grd.addColorStop(0,'#fef08a');grd.addColorStop(1,'#ca8a04');
     g.fillStyle=grd;g.fillRect(0,0,64,64);
   }else{
     var grd=g.createRadialGradient(24,20,4,32,34,34);
@@ -111,6 +116,28 @@ function mkHarvestPlant(x, z, type, stage) {
       var cuke=new THREE.Mesh(new THREE.TubeGeometry(cv,8,.055,8,false), fruitMat('cucumber'));
       cuke.position.set(.08,.08,0); pivot.add(cuke);
     }
+  }else if(type==='wheat'){
+    var wStemH = ripe ? .85 : (grown ? .55 : .28);
+    var wheatCol = ripe ? 0xdfb141 : (grown ? 0x6e9934 : 0x4d8226);
+    var strawMat = new THREE.MeshStandardMaterial({color:wheatCol, roughness:.8});
+    var earMat = new THREE.MeshStandardMaterial({color:ripe ? 0xf5cf58 : 0x82a843, roughness:.65});
+    for(var k = 0; k < (ripe ? 6 : (grown ? 4 : 2)); k++){
+      var ang = (k / 6) * Math.PI * 2;
+      var rad = 0.05 + Math.random() * 0.04;
+      var stH = wStemH * (0.85 + Math.random() * 0.25);
+      var wStalk = new THREE.Mesh(new THREE.CylinderGeometry(.012, .016, stH, 4), strawMat);
+      wStalk.position.set(Math.cos(ang) * rad, stH / 2, Math.sin(ang) * rad);
+      wStalk.rotation.z = Math.cos(ang) * 0.12;
+      wStalk.rotation.x = Math.sin(ang) * 0.12;
+      pivot.add(wStalk);
+      if(grown){
+        var earH = ripe ? 0.24 : 0.15;
+        var ear = new THREE.Mesh(new THREE.ConeGeometry(ripe ? 0.035 : 0.024, earH, 5), earMat);
+        ear.position.set(wStalk.position.x, stH * 0.95, wStalk.position.z);
+        ear.rotation.x = 0.18 + Math.random() * 0.15;
+        pivot.add(ear);
+      }
+    }
   }else{
     var stemH = ripe ? .7 : (grown ? .46 : .22);
     var stem=new THREE.Mesh(new THREE.CylinderGeometry(.016,.024,stemH,6), new THREE.MeshStandardMaterial({color:0x2f6b32, roughness:.9}));
@@ -161,7 +188,9 @@ function harvestPlant(idx, opts) {
   }
   var hType = item.type;
   var cfg = item.cfg;
-  stats[cfg.statKey]++;
+  stats[cfg.statKey] = (stats[cfg.statKey] || 0) + 1;
+  window.inventory = window.inventory || {};
+  window.inventory[hType] = (window.inventory[hType] || 0) + 1;
   var pay=cfg.coin+Math.max(0,(level||1)-1);
   addCoin(pay, true);
   if(typeof window.onCropHarvested==='function') window.onCropHarvested(hType);
@@ -172,7 +201,7 @@ function harvestPlant(idx, opts) {
   // Re-index hitboxes
   harvestItems.forEach(function(it, i){ it.group.children.forEach(function(ch){ if(ch.userData.harvestIdx!==undefined) ch.userData.harvestIdx=i; }); });
   updStats(); saveStats();
-  if(!opts.silent) showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰 (Ambara +1 eklendi)');
+  if(!opts.silent) showToast(cfg.emoji+' Hasat edildi! +'+pay+' 💰 (' + cfg.emoji + ' Çantaya +1 eklendi)');
   if(typeof sndCoin==='function') sndCoin();
   markDirty();
   return true;

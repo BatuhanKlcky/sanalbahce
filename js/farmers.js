@@ -193,61 +193,95 @@
       clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
     })();
 
-    // Duck — kneel/tend: thighs forward (Z), knees bend (+X)
+    // Walk — authentic Quaternius walk
     (function(){
-      var times = [0, 0.35, 1.0, 1.35];
+      var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('Abdomen', [[0,0,0],[18,0,0],[20,0,0],[0,0,0]]);
-      add('Torso', [[0,0,0],[10,0,0],[12,0,0],[0,0,0]]);
-      add('Chest', [[0,0,0],[6,0,0],[6,0,0],[0,0,0]]);
-      add('Head', [[0,0,0],[-6,0,0],[-8,0,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[30,0,20],[34,0,24],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[30,0,-20],[34,0,-24],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-28],[0,0,-32],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,28],[0,0,32],[0,0,0]]);
-      add('UpperLegL', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
-      add('UpperLegR', [[0,0,0],[0,0,32],[0,0,34],[0,0,0]]);
-      add('LowerLegL', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
-      add('LowerLegR', [[0,0,0],[48,0,0],[50,0,0],[0,0,0]]);
-      clips.Duck = new THREE.AnimationClip('Duck', 1.35, tracks);
+      add('UpperLegL', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('UpperLegR', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
+      add('LowerLegL', [[5,0,0],[16,0,0],[34,0,0],[24,0,0],[5,0,0]]);
+      add('LowerLegR', [[34,0,0],[24,0,0],[5,0,0],[16,0,0],[34,0,0]]);
+      add('ShoulderL', [[0,0,20],[0,0,20],[0,0,20],[0,0,20],[0,0,20]]);
+      add('ShoulderR', [[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20]]);
+      add('UpperArmL', [[28,-2,48],[28,-2,32],[28,-2,-4],[28,-2,12],[28,-2,48]]);
+      add('UpperArmR', [[28,2,20],[28,2,4],[28,2,-32],[28,2,-16],[28,2,20]]);
+      add('LowerArmL', [[0,0,6],[0,0,3],[0,0,8],[0,0,3],[0,0,6]]);
+      add('LowerArmR', [[0,0,-6],[0,0,-3],[0,0,-8],[0,0,-3],[0,0,-6]]);
+      add('Abdomen', [[0,4,0],[0,0,0],[0,-4,0],[0,0,0],[0,4,0]]);
+      add('Torso', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      add('Head', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
     })();
 
-    // Punch — harvest reach from standing rest
+    // 1. SULAMA (Watering): Leaning forward, holding watering can with rhythmic pour
     (function(){
-      var times = [0, 0.2, 0.45, 0.75, 1.05];
+      var times = [0, 0.35, 0.7, 1.05, 1.4];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('Abdomen', [[0,0,0],[8,0,0],[16,5,0],[6,0,0],[0,0,0]]);
-      add('Torso', [[0,0,0],[6,0,0],[10,4,0],[4,0,0],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[25,-15,40],[35,-20,55],[10,-5,15],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,35],[0,0,50],[0,0,10],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[8,0,-8],[12,0,-12],[4,0,0],[0,0,0]]);
-      add('Head', [[0,0,0],[6,0,0],[10,-8,0],[4,0,0],[0,0,0]]);
-      clips.Punch = new THREE.AnimationClip('Punch', 1.05, tracks);
+      add('Abdomen', [[0,0,0],[12,0,0],[14,0,0],[12,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[8,0,0],[10,0,0],[8,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-12,0,0],[-14,0,0],[-12,0,0],[0,0,0]]);
+      // Right arm holds watering can and tips it forward/downward
+      add('UpperArmR', [[0,0,0],[42,-12,38],[48,-16,44],[42,-12,38],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[15,0,42],[22,0,48],[15,0,42],[0,0,0]]);
+      // Left arm rests gracefully near hip
+      add('UpperArmL', [[0,0,0],[14,5,-10],[16,6,-12],[14,5,-10],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-24],[0,0,-28],[0,0,-24],[0,0,0]]);
+      clips.Watering = new THREE.AnimationClip('Watering', 1.4, tracks);
+      clips.Wave = clips.Watering; // backward compatibility
     })();
 
-    // Wave — soft watering / greeting from standing rest
+    // 2. HASAT (Harvesting): Kneeling down, dual-handed reaping and lifting ripe crop
     (function(){
-      var times = [0, 0.25, 0.5, 0.75, 1.2];
+      var times = [0, 0.35, 0.8, 1.25, 1.6];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('UpperArmL', [[0,0,0],[50,25,55],[55,15,65],[50,30,55],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-15],[0,20,-8],[0,-20,-15],[0,0,0]]);
-      add('ShoulderL', [[0,0,0],[0,0,10],[0,0,14],[0,0,10],[0,0,0]]);
-      add('Head', [[0,0,0],[0,8,0],[0,10,0],[0,6,0],[0,0,0]]);
-      add('Abdomen', [[0,0,0],[0,3,0],[0,4,0],[0,2,0],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]);
-      clips.Wave = new THREE.AnimationClip('Wave', 1.2, tracks);
+      add('Abdomen', [[0,0,0],[22,0,0],[26,0,0],[10,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[14,0,0],[18,0,0],[8,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[8,0,0],[12,0,0],[6,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-14,0,0],[-16,0,0],[-4,0,0],[0,0,0]]);
+      add('UpperLegL', [[0,0,0],[0,0,34],[0,0,36],[0,0,12],[0,0,0]]);
+      add('UpperLegR', [[0,0,0],[0,0,34],[0,0,36],[0,0,12],[0,0,0]]);
+      add('LowerLegL', [[0,0,0],[50,0,0],[54,0,0],[18,0,0],[0,0,0]]);
+      add('LowerLegR', [[0,0,0],[50,0,0],[54,0,0],[18,0,0],[0,0,0]]);
+      // Both hands reach down to ground, gather, then lift upward
+      add('UpperArmL', [[0,0,0],[34,0,26],[38,0,32],[15,0,10],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[34,0,-26],[38,0,-32],[15,0,-10],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-34],[0,0,-42],[0,0,-14],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,34],[0,0,42],[0,0,14],[0,0,0]]);
+      clips.Harvesting = new THREE.AnimationClip('Harvesting', 1.6, tracks);
+      clips.Punch = clips.Harvesting; // backward compatibility
+      clips.Duck = clips.Harvesting;
+    })();
+
+    // 3. EKİM / YERLEŞTİRME (Planting): Standing soft bend, seed scattering sweep
+    (function(){
+      var times = [0, 0.3, 0.65, 0.95, 1.3];
+      var tracks = [];
+      function add(name, frames){
+        var t = restTrack(name, times, frames);
+        if(t) tracks.push(t);
+      }
+      add('Abdomen', [[0,0,0],[12,0,0],[14,0,0],[8,0,0],[0,0,0]]);
+      add('Torso', [[0,0,0],[8,0,0],[10,0,0],[5,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[-10,0,0],[-12,0,0],[-6,0,0],[0,0,0]]);
+      // Left hand holds seed pouch at waist
+      add('UpperArmL', [[0,0,0],[22,10,28],[24,12,32],[16,8,20],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-42],[0,0,-46],[0,0,-25],[0,0,0]]);
+      // Right hand reaches into pouch, then swings out and downward to scatter seeds
+      add('UpperArmR', [[0,0,0],[14,-6,12],[38,-18,48],[22,-8,20],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[24,0,28],[32,0,52],[10,0,16],[0,0,0]]);
+      clips.Planting = new THREE.AnimationClip('Planting', 1.3, tracks);
     })();
 
     return clips;
@@ -795,10 +829,11 @@
     if(!f) return;
     if(!item._farmId) item._farmId = 'c' + (_farmIdSeq++);
     if(f.slots.indexOf(item._farmId) < 0) f.slots.push(item._farmId);
-    f.job = {type: 'tend', farmId: item._farmId, x: item.x, z: item.z};
+    var jobType = (Math.random() < 0.5) ? 'plant' : 'water';
+    f.job = {type: jobType, farmId: item._farmId, x: item.x, z: item.z};
     f.target = {x: item.x, z: item.z};
     f.state = 'walk';
-    if(typeof showToast === 'function') showToast(f.kind === 'female' ? '👩‍🌾 Çiftçi sulamaya gidiyor' : '👨‍🌾 Çiftçi bakıma gidiyor');
+    if(typeof showToast === 'function') showToast(jobType === 'plant' ? (f.kind === 'female' ? '👩‍🌾 Çiftçi tohum ekiyor' : '👨‍🌾 Çiftçi ekim yapıyor') : (f.kind === 'female' ? '👩‍🌾 Çiftçi sulamaya gidiyor' : '👨‍🌾 Çiftçi sulama yapıyor'));
   };
 
   function pruneSlots(){
@@ -831,21 +866,30 @@
       f.group.position.y = 0; f.group.rotation.x = 0;
       return;
     }
-    if(f.job.type === 'tend'){
+    if(f.job.type === 'tend' || f.job.type === 'water'){
       f.state = 'work';
-      f.timer = 1.35;
-      // Duck = kneel/tend; Wave = soft water gesture for female farmer
-      playClip(f, f.kind === 'female' ? 'Wave' : 'Duck', {fade: 0.12});
+      f.timer = 1.4;
+      playClip(f, 'Watering', {fade: 0.12});
       for(var j=0;j<harvestItems.length;j++){
         var h = harvestItems[j];
         if(h && h._farmId === f.job.farmId && h.stage < 2){
-          h.growTimer = (h.growTimer || 0) + (h.cfg ? h.cfg.growTime * 0.15 : 8);
+          h.growTimer = (h.growTimer || 0) + (h.cfg ? h.cfg.growTime * 0.18 : 10);
+        }
+      }
+    } else if(f.job.type === 'plant'){
+      f.state = 'work';
+      f.timer = 1.3;
+      playClip(f, 'Planting', {fade: 0.12});
+      for(var j2=0;j2<harvestItems.length;j2++){
+        var h2 = harvestItems[j2];
+        if(h2 && h2._farmId === f.job.farmId && h2.stage < 2){
+          h2.growTimer = (h2.growTimer || 0) + (h2.cfg ? h2.cfg.growTime * 0.12 : 6);
         }
       }
     } else if(f.job.type === 'harvest'){
       f.state = 'work';
-      f.timer = 1.1;
-      playClip(f, 'Punch', {fade: 0.1});
+      f.timer = 1.6;
+      playClip(f, 'Harvesting', {fade: 0.1});
       var idx = -1;
       for(var i=0;i<harvestItems.length;i++){
         if(harvestItems[i] && harvestItems[i]._farmId === f.job.farmId && harvestItems[i].stage >= 2){
@@ -857,7 +901,7 @@
         if(ok){
           f.slots = f.slots.filter(function(id){ return id !== f.job.farmId; });
           if(typeof save === 'function') save(true);
-          if(typeof showToast === 'function') showToast('🧑‍🌾 Hasat tamam');
+          if(typeof showToast === 'function') showToast('🧑‍🌾 Hasat tamam!');
         }
       }
     } else {

@@ -31,12 +31,31 @@ function pickPetTarget(pet){
     if(b){ cx = b.cx || 0; cz = b.cz || 0; }
   }
   if(!pet.target) pet.target = new THREE.Vector3();
+  if(pet.homeX == null && pet.mesh){
+    pet.homeX = pet.mesh.position.x;
+    pet.homeZ = pet.mesh.position.z;
+  }
+  var isLivestock = pet.spec && (pet.spec.breed === 'cow' || pet.spec.breed === 'alpaca' || pet.spec.breed === 'sheep' || pet.spec.breed === 'chick' || pet.spec.breed === 'duck' || pet.spec.breed === 'horse');
+  if(isLivestock && pet.homeX != null){
+    var ang = Math.random() * Math.PI * 2, rad = 1.0 + Math.random() * 4.2;
+    var tx = pet.homeX + Math.cos(ang) * rad;
+    var tz = pet.homeZ + Math.sin(ang) * rad;
+    if(Math.abs(tz - (-21.0)) < 3.2) tz = pet.homeZ; // Never wander into railroad tracks
+    pet.target.set(tx, 0, tz);
+    return;
+  }
   if(flowers.length>0&&Math.random()>.3){
     var rf2=flowers[Math.floor(Math.random()*flowers.length)];
-    pet.target.set(rf2.mesh.position.x+(Math.random()-.5)*1.5,0,rf2.mesh.position.z+(Math.random()-.5)*1.5);
+    var fx = rf2.mesh.position.x+(Math.random()-.5)*1.5;
+    var fz = rf2.mesh.position.z+(Math.random()-.5)*1.5;
+    if(Math.abs(fz - (-21.0)) < 3.2) fz = -17.5;
+    pet.target.set(fx, 0, fz);
   }else{
-    var a=Math.random()*Math.PI*2, r=Math.random()*PET_R;
-    pet.target.set(cx + Math.cos(a)*r,0,cz + Math.sin(a)*r);
+    var a=Math.random()*Math.PI*2, r=Math.random()*Math.min(PET_R, 12);
+    var ptx = cx + Math.cos(a)*r;
+    var ptz = cz + Math.sin(a)*r;
+    if(Math.abs(ptz - (-21.0)) < 3.2) ptz = -17.5;
+    pet.target.set(ptx, 0, ptz);
   }
 }
 function stepPets(dt){

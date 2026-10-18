@@ -879,6 +879,78 @@ function mkWildFlower(x,z){
 }
 function mkHouse(x,z,angle){var o=buildHouse(x,z,angle); pushDeco(o.group,'house',{light:o.light});}
 
+function buildWheatField(x, z){
+  var g = new THREE.Group();
+  g.name = 'WheatFieldParcel';
+  var soilMat = kept(0x563820, 0.95);
+  var borderWood = kept(0x6a4729, 0.85);
+  var wheatStraw = kept(0xd4af37, 0.7);
+  var wheatEarMat = kept(0xe6c25e, 0.6);
+
+  // Raised tilled field parcel (5.4m x 4.2m)
+  var baseSoil = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.08, 4.2), soilMat);
+  baseSoil.position.y = 0.04;
+  baseSoil.receiveShadow = !isMobile;
+  g.add(baseSoil);
+
+  // Wooden log border planks
+  var borderN = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.14, 0.14), borderWood);
+  borderN.position.set(0, 0.08, -2.1); g.add(borderN);
+  var borderS = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.14, 0.14), borderWood);
+  borderS.position.set(0, 0.08, 2.1); g.add(borderS);
+  var borderW = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 4.3), borderWood);
+  borderW.position.set(-2.7, 0.08, 0); g.add(borderW);
+  var borderE = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 4.3), borderWood);
+  borderE.position.set(2.7, 0.08, 0); g.add(borderE);
+
+  // Furrows (tilled ridges)
+  for(var r = -1.6; r <= 1.6; r += 0.8){
+    var ridge = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 5.1, 8), soilMat);
+    ridge.rotation.z = Math.PI / 2;
+    ridge.position.set(0, 0.08, r);
+    g.add(ridge);
+
+    // Decorative wheat stalks along the furrows
+    for(var wx = -2.1; wx <= 2.1; wx += 0.65){
+      var stalkH = 0.65 + Math.random() * 0.25;
+      var stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, stalkH, 4), wheatStraw);
+      stalk.position.set(wx + (Math.random() - 0.5) * 0.1, 0.08 + stalkH * 0.5, r + (Math.random() - 0.5) * 0.08);
+      stalk.rotation.z = (Math.random() - 0.5) * 0.15;
+      stalk.rotation.x = (Math.random() - 0.5) * 0.15;
+      g.add(stalk);
+
+      var ear = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.22, 5), wheatEarMat);
+      ear.position.set(stalk.position.x, stalk.position.y + stalkH * 0.45, stalk.position.z);
+      ear.rotation.x = 0.2 + (Math.random() - 0.5) * 0.2;
+      g.add(ear);
+    }
+  }
+
+  // Small corner wooden post with lantern
+  var cornerPost = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.2, 6), borderWood);
+  cornerPost.position.set(2.5, 0.6, 1.9);
+  g.add(cornerPost);
+
+  g.position.set(x, 0, z);
+  return g;
+}
+
+function mkWheatField(x, z){
+  var f = buildWheatField(x, z);
+  pushDeco(f, 'wheat_field');
+  if(typeof showToast === 'function') showToast('🌾 Verimli Buğday Tarlası parsellendi! Artık bol bol buğday ekebilirsin.');
+}
+window.buildWheatField = buildWheatField;
+window.mkWheatField = mkWheatField;
+
+function mkVillageHouse(x, z, angle){
+  var o = buildHouse(x, z, angle);
+  pushDeco(o.group, 'village_house', { light: o.light });
+  if(typeof showToast === 'function') showToast('🏡 Yeni bir aile köye taşındı! Köy pazarı müşterileri ve satışlar arttı ✨');
+  if(typeof window.refreshVillagePopulation === 'function') window.refreshVillagePopulation();
+}
+window.mkVillageHouse = mkVillageHouse;
+
 function buildTrainStation(x, z, angle){
   var g = new THREE.Group();
   var woodDark = kept(0x4a2e16, 0.85);
@@ -1778,69 +1850,79 @@ function buildVillageRoadNetwork(){
   var roadMat = kept(0x736150, 0.95); // Natural warm compacted earth/cobblestone
   var curbMat = kept(0x8a7b6b, 0.9);
 
-  // 1. Central North-South Avenue: from garden entrance (z = 9.8) down to crossroads (z = 18.0)
-  var northPath = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 8.4), roadMat);
-  northPath.position.set(0, 0.02, 13.9);
-  northPath.receiveShadow = !isMobile;
-  g.add(northPath);
+  // Helper to create straight road segment
+  function addSegment(x1, z1, x2, z2, width){
+    var dx = x2 - x1, dz = z2 - z1;
+    var len = Math.hypot(dx, dz);
+    var ang = Math.atan2(dx, dz);
+    var seg = new THREE.Mesh(new THREE.BoxGeometry(width || 1.85, 0.04, len), roadMat);
+    seg.position.set((x1 + x2) * 0.5, 0.02, (z1 + z2) * 0.5);
+    seg.rotation.y = ang;
+    seg.receiveShadow = !isMobile;
+    g.add(seg);
+    return seg;
+  }
 
-  // 2. West Village Promenade: from crossroads (0, 18.0) to Village Market Square (-21.5, 18.0)
-  var westPath = new THREE.Mesh(new THREE.BoxGeometry(21.5, 0.04, 2.0), roadMat);
-  westPath.position.set(-10.75, 0.02, 18.0);
-  westPath.receiveShadow = !isMobile;
-  g.add(westPath);
+  // Helper to add circular junction plaza
+  function addJunction(x, z, radius){
+    var junc = new THREE.Mesh(new THREE.CircleGeometry(radius || 1.6, 16), roadMat);
+    junc.rotation.x = -Math.PI / 2;
+    junc.position.set(x, 0.022, z);
+    junc.receiveShadow = !isMobile;
+    g.add(junc);
+    return junc;
+  }
 
-  // 3. East Village Promenade: from crossroads (0, 18.0) to Village Kitchen & Bakery (17.5, 18.0)
-  var eastPath = new THREE.Mesh(new THREE.BoxGeometry(17.5, 0.04, 2.0), roadMat);
-  eastPath.position.set(8.75, 0.02, 18.0);
-  eastPath.receiveShadow = !isMobile;
-  g.add(eastPath);
+  // 1. Central Crossroads Plaza at (0, 18.0)
+  addJunction(0, 18.0, 1.85);
 
-  // 4. Central Crossroads Plaza at (0, 18.0)
-  var plaza = new THREE.Mesh(new THREE.CircleGeometry(1.85, 16), roadMat);
-  plaza.rotation.x = -Math.PI / 2;
-  plaza.position.set(0, 0.022, 18.0);
-  plaza.receiveShadow = !isMobile;
-  g.add(plaza);
+  // 2. Central North Avenue: from Crossroads (0, 18.0) up through garden entrance (0, 10.0) to central meadow (0, 3.5)
+  addSegment(0, 18.0, 0, 3.5, 1.9);
+  addJunction(0, 3.5, 1.5);
 
-  // 5. Organic Curb & Stepping Stones along the road borders
-  // Along West road
+  // 3. West Village Promenade: from Crossroads (0, 18.0) to Market Square (-21.5, 18.0)
+  addSegment(0, 18.0, -21.5, 18.0, 2.0);
+  addJunction(-21.5, 18.0, 2.4); // Market Square Plaza
+
+  // 4. Northwest Residential Lane: from West Mid (-10.0, 18.0) northward to Village Houses (-14.0, 6.0)
+  addSegment(-10.0, 18.0, -11.5, 12.0, 1.8);
+  addSegment(-11.5, 12.0, -14.0, 6.0, 1.8);
+  addJunction(-14.0, 6.0, 1.8); // Residential turnaround
+
+  // 5. East Village Promenade: from Crossroads (0, 18.0) to Village Kitchen & Bakery (17.5, 18.0)
+  addSegment(0, 18.0, 17.5, 18.0, 2.0);
+  addJunction(17.5, 18.0, 2.2); // Bakery Front Plaza
+
+  // 6. Northeast Pasture Lane: from Bakery (17.5, 18.0) northward to Grand Barn & Chicken Coop Pasture (20.0, 6.0)
+  addSegment(17.5, 18.0, 19.0, 12.0, 1.8);
+  addSegment(19.0, 12.0, 20.0, 6.0, 1.8);
+  addJunction(20.0, 6.0, 2.0); // Barn Pasture Gate Plaza
+
+  // 7. Pier Shore Pathway: from Barn Pasture (20.0, 6.0) northward-eastward to Fishing Pier Dock (22.0, -13.5)
+  addSegment(20.0, 6.0, 21.0, -4.0, 1.7);
+  addSegment(21.0, -4.0, 22.0, -13.5, 1.7);
+  addJunction(22.0, -13.5, 1.6); // Pier Dock Entrance
+
+  // 8. Organic Stepping Stones along the path borders
   for(var wx = -1.5; wx >= -20.5; wx -= 2.2){
     var cN = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
     cN.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
     cN.rotation.y = Math.random() * Math.PI;
     g.add(cN);
-
     var cS = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
     cS.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
     cS.rotation.y = Math.random() * Math.PI;
     g.add(cS);
   }
-
-  // Along East road
   for(var ex = 1.5; ex <= 16.5; ex += 2.2){
     var cNe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
     cNe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
     cNe.rotation.y = Math.random() * Math.PI;
     g.add(cNe);
-
     var cSe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
     cSe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
     cSe.rotation.y = Math.random() * Math.PI;
     g.add(cSe);
-  }
-
-  // Along North road
-  for(var nz = 10.5; nz <= 17.0; nz += 2.0){
-    var cW = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cW.position.set(-1.1 + (Math.random() - 0.5) * 0.15, 0.025, nz);
-    cW.rotation.y = Math.random() * Math.PI;
-    g.add(cW);
-
-    var cE = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cE.position.set(1.1 + (Math.random() - 0.5) * 0.15, 0.025, nz);
-    cE.rotation.y = Math.random() * Math.PI;
-    g.add(cE);
   }
 
   scene.add(g);
@@ -1848,6 +1930,76 @@ function buildVillageRoadNetwork(){
   return g;
 }
 window.buildVillageRoadNetwork = buildVillageRoadNetwork;
+
+// Full Village Waypoint Graph for NPC Path Navigation
+window.ROAD_WAYPOINTS = {
+  crossroads:         { id: 'crossroads',         x: 0.0,   z: 18.0, neighbors: ['garden_south', 'west_mid', 'east_mid'] },
+  garden_south:       { id: 'garden_south',       x: 0.0,   z: 11.0, neighbors: ['crossroads', 'garden_center'] },
+  garden_center:      { id: 'garden_center',      x: 0.0,   z: 3.5,  neighbors: ['garden_south'] },
+  west_mid:           { id: 'west_mid',           x: -10.0, z: 18.0, neighbors: ['crossroads', 'market_plaza', 'residential_mid'] },
+  residential_mid:    { id: 'residential_mid',    x: -11.5, z: 12.0, neighbors: ['west_mid', 'residential_quarter'] },
+  residential_quarter:{ id: 'residential_quarter',x: -14.0, z: 6.0,  neighbors: ['residential_mid'] },
+  market_plaza:       { id: 'market_plaza',       x: -19.5, z: 18.0, neighbors: ['west_mid', 'market_stall'] },
+  market_stall:       { id: 'market_stall',       x: -21.5, z: 17.0, neighbors: ['market_plaza'] },
+  east_mid:           { id: 'east_mid',           x: 9.0,   z: 18.0, neighbors: ['crossroads', 'bakery_front'] },
+  bakery_front:       { id: 'bakery_front',       x: 17.5,  z: 18.0, neighbors: ['east_mid', 'pasture_mid'] },
+  pasture_mid:        { id: 'pasture_mid',        x: 19.0,  z: 12.0, neighbors: ['bakery_front', 'barn_gate'] },
+  barn_gate:          { id: 'barn_gate',          x: 20.0,  z: 6.0,  neighbors: ['pasture_mid', 'pier_junction'] },
+  pier_junction:      { id: 'pier_junction',      x: 21.0,  z: -4.0, neighbors: ['barn_gate', 'pier_dock'] },
+  pier_dock:          { id: 'pier_dock',          x: 22.0,  z: -13.5,neighbors: ['pier_junction'] }
+};
+
+// BFS Pathfinding along Village Road Graph
+window.findRoadPath = function(fromX, fromZ, targetKey){
+  var waypoints = window.ROAD_WAYPOINTS;
+  if(!waypoints || !waypoints[targetKey]) return [{ x: fromX, z: fromZ }];
+
+  // Find nearest starting waypoint
+  var nearestStart = 'crossroads';
+  var minDistSq = Infinity;
+  for(var k in waypoints){
+    var wp = waypoints[k];
+    var dSq = Math.hypot(wp.x - fromX, wp.z - fromZ);
+    if(dSq < minDistSq){
+      minDistSq = dSq;
+      nearestStart = k;
+    }
+  }
+
+  if(nearestStart === targetKey){
+    return [{ x: waypoints[targetKey].x, z: waypoints[targetKey].z }];
+  }
+
+  // BFS search
+  var queue = [[nearestStart]];
+  var visited = {};
+  visited[nearestStart] = true;
+  var bestPathKeys = null;
+
+  while(queue.length > 0){
+    var curPath = queue.shift();
+    var last = curPath[curPath.length - 1];
+    if(last === targetKey){
+      bestPathKeys = curPath;
+      break;
+    }
+    var node = waypoints[last];
+    if(node && node.neighbors){
+      for(var i = 0; i < node.neighbors.length; i++){
+        var nb = node.neighbors[i];
+        if(!visited[nb]){
+          visited[nb] = true;
+          queue.push(curPath.concat([nb]));
+        }
+      }
+    }
+  }
+
+  if(!bestPathKeys) return [{ x: waypoints[targetKey].x, z: waypoints[targetKey].z }];
+  return bestPathKeys.map(function(k){
+    return { id: k, x: waypoints[k].x, z: waypoints[k].z };
+  });
+};
 
 function dressGarden(){
   window._dress = [];
@@ -2183,12 +2335,13 @@ window.addEventListener('pointerup',function(e){
     if(blocked){ showToast(blocked); return; }
   }
   if(tp==='lantern')mkLantern(pt.x,pt.z);else if(tp==='bench')mkBench(pt.x,pt.z,ang);else if(tp==='stone')mkStone(pt.x,pt.z);else if(tp==='mushroom')mkMushroom(pt.x,pt.z);else if(tp==='pot')mkPot(pt.x,pt.z);else if(tp==='fence')mkFence(pt.x,pt.z,ang);else if(tp==='tree')mkTree(pt.x,pt.z);else if(tp==='bush')mkBush(pt.x,pt.z);else if(tp==='pond')mkPond(pt.x,pt.z);else if(tp==='wall')mkWall(pt.x,pt.z,ang);else if(tp==='arch')mkArch(pt.x,pt.z,ang);else if(tp==='pergola')mkPergola(pt.x,pt.z,ang);else if(tp==='bridge')mkBridge(pt.x,pt.z,ang);else if(tp==='well')mkWell(pt.x,pt.z);else if(tp==='table')mkTable(pt.x,pt.z,ang);else if(tp==='windmill')mkWindmill(pt.x,pt.z);else if(tp==='scarecrow')mkScarecrow(pt.x,pt.z);else if(tp==='flower_wild')mkWildFlower(pt.x,pt.z);
-  else if(tp==='house')mkHouse(pt.x,pt.z,ang);
+  else if(tp==='house'||tp==='village_house')mkVillageHouse(pt.x,pt.z,ang);
+  else if(tp==='wheat_field')mkWheatField(pt.x,pt.z);
   else if(tp==='train_station')mkTrainStation(pt.x,pt.z,ang);
   else if(tp==='mini_train')mkMiniTrain(pt.x,pt.z,ang);
   else if(tp==='pier_lantern')mkPierLantern(pt.x,pt.z);
   else if(tp==='golden_loco')mkGoldenLocomotive(pt.x,pt.z,ang);
-  else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'){
+  else if(tp==='tomato'||tp==='strawberry'||tp==='cucumber'||tp==='pepper'||tp==='carrot'||tp==='wheat'){
     if(typeof isCozy==='function' && isCozy() && typeof window.getActiveBiome==='function'){
       var ab = window.getActiveBiome();
       if(ab && ab.id !== 'meadow'){

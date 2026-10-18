@@ -734,14 +734,25 @@
     return coop;
   }
 
-  // Scan existing decos for chicken coop
+  // Scan existing decos for chicken coop (only player purchased/placed)
   function bindCoopsFromDecos(){
     if(typeof decos !== 'undefined' && Array.isArray(decos)){
-      decos.forEach(function(d){
-        if(d && d.type === 'chicken_coop'){
+      var filtered = [];
+      for(var i = 0; i < decos.length; i++){
+        var d = decos[i];
+        if(!d) continue;
+        if(d.type === 'chicken_coop'){
+          // Strip out old automatic starter coop if it was at (-8.8, 7.2) and unpurchased
+          if(Math.abs((d.x || 0) - (-8.8)) < 0.5 && Math.abs((d.z || 0) - 7.2) < 0.5 && !d.purchased && !localStorage.getItem('coop_bought')){
+            if(d.group && d.group.parent) d.group.parent.remove(d.group);
+            continue;
+          }
           registerCoop(d);
         }
-      });
+        filtered.push(d);
+      }
+      decos.length = 0;
+      for(var j = 0; j < filtered.length; j++) decos.push(filtered[j]);
     }
   }
 

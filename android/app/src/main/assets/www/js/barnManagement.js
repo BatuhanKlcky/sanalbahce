@@ -137,6 +137,49 @@
     return root;
   }
 
+  // Build Wide Rustic Perimeter Fence around Barn Pasture
+  function attachPastureFence(root){
+    var fenceGroup = new THREE.Group();
+    fenceGroup.name = 'BarnPastureFence';
+    var woodDark = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.85 });
+
+    // Perimeter: Width 11m (X: -5.5 to +5.5), Depth 8.5m (Z: -2.2 to +6.3)
+    var postCoords = [
+      [-5.5, -2.2], [-3.5, -2.2], [-1.5, -2.2], [1.5, -2.2], [3.5, -2.2], [5.5, -2.2],
+      [-5.5, 0.0], [-5.5, 2.1], [-5.5, 4.2], [-5.5, 6.3],
+      [5.5, 0.0], [5.5, 2.1], [5.5, 4.2], [5.5, 6.3],
+      [-5.5, 6.3], [-3.5, 6.3], [-1.6, 6.3],
+      [1.6, 6.3], [3.5, 6.3], [5.5, 6.3]
+    ];
+
+    postCoords.forEach(function(p){
+      var post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 1.15, 6), woodDark);
+      post.position.set(p[0], 0.55, p[1]);
+      post.castShadow = !isMobile;
+      fenceGroup.add(post);
+    });
+
+    function addRail(x1, z1, x2, z2){
+      var dx = x2 - x1, dz = z2 - z1;
+      var len = Math.hypot(dx, dz);
+      var ang = Math.atan2(dx, dz);
+      [0.4, 0.8].forEach(function(ry){
+        var rail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.09, len), woodDark);
+        rail.position.set((x1 + x2) * 0.5, ry, (z1 + z2) * 0.5);
+        rail.rotation.y = ang;
+        fenceGroup.add(rail);
+      });
+    }
+
+    addRail(-5.5, -2.2, 5.5, -2.2); // Back rail
+    addRail(-5.5, -2.2, -5.5, 6.3); // Left rail
+    addRail(5.5, -2.2, 5.5, 6.3);   // Right rail
+    addRail(-5.5, 6.3, -1.6, 6.3);  // Front left
+    addRail(1.6, 6.3, 5.5, 6.3);   // Front right (leaving open pasture gate)
+
+    root.add(fenceGroup);
+  }
+
   // Load 3D Barn Model
   function createBarnGroup(onDone){
     var g = new THREE.Group();
@@ -158,19 +201,30 @@
           }
         });
         g.add(m);
+        attachPastureFence(g);
         onDone(g);
       }, undefined, function(){
         g.add(buildFallbackBarn());
+        attachPastureFence(g);
         onDone(g);
       });
     } else {
       g.add(buildFallbackBarn());
+      attachPastureFence(g);
       onDone(g);
     }
   }
 
+  var MAX_ANIMALS_PER_BARN = 4;
+
   // Spawn an individual animated Cow/Alpaca
   function spawnBarnAnimal(barn, spec){
+    var existingCount = cows.filter(function(c){ return c.barn === barn; }).length;
+    if(existingCount >= MAX_ANIMALS_PER_BARN){
+      if(typeof showNotice === 'function') showNotice('Bu ahırın kapasitesi dolu! (Maksimum 4 hayvan). Yeni bir ahır kurmalısın.');
+      return null;
+    }
+
     var animal = {
       id: spec.id,
       name: spec.name,
@@ -314,19 +368,48 @@
         a.badge.rotation.y += dt * 1.5;
       }
 
-      // Natural AI: Chewing cud, turning, standing
+      // Natural AI: Chewing cud, turning, standing, pasture stroll
       a.timer -= dt;
       if(a.timer <= 0){
         a.timer = 3 + Math.random() * 5;
         var r = Math.random();
-        if(r < 0.5){
+        if(r < 0.45){
           a.state = 'chew';
           a.rotY += (Math.random() - 0.5) * 0.4;
           a.group.rotation.y = a.rotY;
+        } else if(r < 0.75){
+          a.state = 'walk';
+          var barnX = a.barn ? a.barn.x : a.x;
+          var barnZ = a.barn ? a.barn.z : a.z;
+          a.tx = barnX + (Math.random() - 0.5) * 8.0;
+          a.tz = barnZ + 0.5 + (Math.random() - 0.5) * 5.0;
         } else {
           a.state = 'idle';
         }
       }
+
+      // Pasture walking
+      if(a.state === 'walk'){
+        var dx = a.tx - a.x;
+        var dz = a.tz - a.z;
+        var dist = Math.hypot(dx, dz);
+        if(dist > 0.15){
+          var spd = 0.65 * dt;
+          a.x += (dx / dist) * Math.min(dist, spd);
+          a.z += (dz / dist) * Math.min(dist, spd);
+          a.group.rotation.y = Math.atan2(dx, dz);
+        } else {
+          a.state = 'idle';
+        }
+      }
+
+      // Strict perimeter clamp so animals NEVER leave their pasture
+      var bX = a.barn ? a.barn.x : a.x;
+      var bZ = a.barn ? a.barn.z : a.z;
+      a.x = THREE.MathUtils.clamp(a.x, bX - 4.8, bX + 4.8);
+      a.z = THREE.MathUtils.clamp(a.z, bZ - 1.8, bZ + 5.5);
+      a.group.position.x = a.x;
+      a.group.position.z = a.z;
 
       // Head chew motion
       if(a.state === 'chew'){
@@ -358,6 +441,7 @@
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:12px;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;';
 
     function renderModalContent(a){
+      var barnAnimals = cows.filter(function(c){ return c.barn === (a.barn || barn); });
       var qualityBadge = a.milkQuality === 'golden' ? '<span style="color:#fde047;font-weight:bold;">👑 Altın Süt</span>' : (a.milkQuality === 'creamy' ? '<span style="color:#67e8f9;font-weight:bold;">🌟 Kaymaklı Süt</span>' : '<span style="color:#e2e8f0;">🥛 Köy Sütü</span>');
       var milkBtnText = a.milkReady ? ('🥛 ' + a.name + '\'ı Sağ (' + qualityBadge + ')') : '⏳ Sağım Bekleniyor (Doluyor…)';
 
@@ -385,6 +469,7 @@
         + '    <div style="width:100%;height:8px;background:#334155;border-radius:4px;overflow:hidden;margin-bottom:10px;">'
         + '      <div style="width:' + a.happiness + '%;height:100%;background:linear-gradient(90deg,#10b981,#4ade80);border-radius:4px;"></div>'
         + '    </div>'
+        + '    <div>🛖 <b>Ahır Kapasitesi:</b> <span style="color:#fde047;font-weight:bold;">' + barnAnimals.length + ' / ' + MAX_ANIMALS_PER_BARN + ' Hayvan (Limit: 4)</span></div>'
         + '    <div>🌾 <b>Mevcut Yem (Buğday):</b> <span style="color:#fde047;font-weight:bold;">' + wheatCount + ' adet</span></div>'
         + '    <div>🥛 <b>Sağım Durumu:</b> ' + (a.milkReady ? '<span style="color:#4ade80;font-weight:bold;">Dolu (Sağıma Hazır)</span>' : '<span style="color:#cbd5e1;">Bekleniyor…</span>') + '</div>'
         + '    <div>✨ <b>Süt Kalitesi:</b> ' + qualityBadge + '</div>'

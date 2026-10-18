@@ -132,6 +132,8 @@
         secStall.scale.setScalar(2.0 / h);
         secStall.position.set(-3.6, 0, 1.2);
         secStall.rotation.y = 0.8;
+        secStall.userData.onTap = function(){ openMarketStallDialog('buy'); };
+        secStall.traverse(function(c){ if(c.isMesh) c.userData.onTap = function(){ openMarketStallDialog('buy'); }; });
         root.add(secStall);
       }
     });
@@ -142,6 +144,8 @@
         cart.scale.setScalar(1.5 / h);
         cart.position.set(3.8, 0, -1.2);
         cart.rotation.y = -0.7;
+        cart.userData.onTap = function(){ openMarketStallDialog('buy'); };
+        cart.traverse(function(c){ if(c.isMesh) c.userData.onTap = function(){ openMarketStallDialog('buy'); }; });
         root.add(cart);
       }
     });
@@ -264,6 +268,20 @@
         name: 'Köy Sakini (Ayşe Teyze)',
         role: 'Çiftlik Komşusu',
         palette: 'baker'
+      },
+      {
+        id: 'cust_tailor',
+        kind: 'female',
+        name: 'Terzi Zeynep Hanım',
+        role: 'Köy Dokumacısı',
+        palette: 'herbalist'
+      },
+      {
+        id: 'cust_carpenter',
+        kind: 'male',
+        name: 'Marangoz Hasan Usta',
+        role: 'Köy Marangozu',
+        palette: 'muhtar'
       }
     ];
 
@@ -286,6 +304,8 @@
             currentAction: null,
             x: -999, z: -999,
             tx: 0, tz: 0,
+            path: [],
+            pathIndex: 0,
             active: false,
             state: 'idle',
             inspectTimer: 0
@@ -310,17 +330,35 @@
     });
   }
 
-  // Activate a pooled customer from the meadow path
+  // Activate a customer NPC from village houses along the road network
   function activateCustomer(){
+    var houseCount = (typeof decos !== 'undefined') ? decos.filter(function(d){
+      return d && (d.type === 'house' || d.type === 'village_house' || d.type === 'farmer_house');
+    }).length : 0;
+
+    // Available pool size scales with village population (houses built)
+    var allowedCount = Math.min(customerPool.length, 2 + houseCount);
+    var activeCount = customerPool.filter(function(c){ return c.active; }).length;
+    if(activeCount >= allowedCount) return;
+
     var available = customerPool.find(function(c){ return !c.active; });
     if(!available) return;
 
-    var startAngle = Math.random() * Math.PI * 2;
-    var startDist = 18.0;
-    available.x = MARKET_POS.x + Math.cos(startAngle) * startDist;
-    available.z = MARKET_POS.z + Math.sin(startAngle) * startDist;
-    available.tx = MARKET_POS.x + (Math.random() - 0.5) * 1.8;
-    available.tz = MARKET_POS.z - 1.2;
+    // Start origin: Residential Quarter (Village Houses) or Bakery
+    var origins = ['residential_quarter', 'bakery_front', 'garden_south'];
+    var origKey = origins[Math.floor(Math.random() * origins.length)];
+    var wp = (window.ROAD_WAYPOINTS && window.ROAD_WAYPOINTS[origKey]) ? window.ROAD_WAYPOINTS[origKey] : { x: -14.0, z: 6.0 };
+
+    available.x = wp.x + (Math.random() - 0.5) * 0.4;
+    available.z = wp.z + (Math.random() - 0.5) * 0.4;
+    available.path = (typeof window.findRoadPath === 'function') ? window.findRoadPath(available.x, available.z, 'market_stall') : [{ x: -21.5, z: 17.0 }];
+    available.pathIndex = 0;
+    if(available.path.length > 0){
+      available.tx = available.path[0].x;
+      available.tz = available.path[0].z;
+    } else {
+      available.tx = -21.5; available.tz = 17.0;
+    }
     available.state = 'walk_in';
     available.active = true;
 
@@ -366,7 +404,7 @@
     saveStallStock();
 
     var prices = {
-      tomato: 8, carrot: 10, pepper: 12, cucumber: 14, strawberry: 18, wheat: 7,
+      tomato: 8, carrot: 10, pepper: 12, cucumber: 14, strawberry: 18, wheat: 9,
       egg: 16, milk: 25, milk_creamy: 50, milk_golden: 120,
       fish: 22, fish_trout: 40, fish_carp: 70, fish_golden: 140,
       omelet: 45, bread: 32, pie: 75, fish_soup: 90, cheese: 60, butter: 80
@@ -399,16 +437,22 @@
   }
 
   function pickExitTarget(cust){
-    var exitAngle = Math.random() * Math.PI * 2;
-    var exitDist = 22.0;
-    cust.tx = MARKET_POS.x + Math.cos(exitAngle) * exitDist;
-    cust.tz = MARKET_POS.z + Math.sin(exitAngle) * exitDist;
+    var exits = ['residential_quarter', 'bakery_front', 'garden_center'];
+    var exitKey = exits[Math.floor(Math.random() * exits.length)];
+    cust.path = (typeof window.findRoadPath === 'function') ? window.findRoadPath(cust.x, cust.z, exitKey) : [];
+    cust.pathIndex = 0;
+    if(cust.path.length > 0){
+      cust.tx = cust.path[0].x;
+      cust.tz = cust.path[0].z;
+    } else {
+      cust.tx = -14.0; cust.tz = 6.0;
+    }
     if(cust.clips && cust.clips.Walk){
       playCustomerClip(cust, 'Walk');
     }
   }
 
-  // Update loop for Market & Customers
+  // Update loop for Market & Customers (Walking strictly on Road Network)
   function stepVillageMarket(dt, now){
     if(dt > 0.1) dt = 0.1;
 
@@ -419,7 +463,10 @@
 
     _spawnTimer -= dt;
     if(_spawnTimer <= 0){
-      _spawnTimer = 15 + Math.random() * 15;
+      var houseCount = (typeof decos !== 'undefined') ? decos.filter(function(d){
+        return d && (d.type === 'house' || d.type === 'village_house' || d.type === 'farmer_house');
+      }).length : 0;
+      _spawnTimer = Math.max(6, 16 - houseCount * 2.2); // More houses = more frequent customers!
       activateCustomer();
     }
 
@@ -445,33 +492,38 @@
         var dz = c.tz - c.z;
         var d = Math.hypot(dx, dz);
 
-        if(d > 0.18){
-          var spd = 1.35 * dt;
+        if(d > 0.25){
+          var spd = 1.45 * dt;
           c.x += (dx / d) * Math.min(d, spd);
           c.z += (dz / d) * Math.min(d, spd);
           var ang = Math.atan2(dx, dz);
           var diffAngle = ang - c.group.rotation.y;
           while(diffAngle < -Math.PI) diffAngle += Math.PI * 2;
           while(diffAngle > Math.PI) diffAngle -= Math.PI * 2;
-          c.group.rotation.y += diffAngle * 0.15;
+          c.group.rotation.y += diffAngle * 0.18;
           c.group.rotation.x = 0;
           c.group.rotation.z = 0;
           c.group.position.y = 0;
         } else {
-          if(c.state === 'walk_in'){
-            c.state = 'inspect';
-            c.inspectTimer = 2.2 + Math.random() * 1.5;
-            c.group.rotation.y = 0;
-            c.group.rotation.x = 0;
-            c.group.rotation.z = 0;
-            c.group.position.y = 0;
-            if(c.clips && c.clips.Duck) playCustomerClip(c, 'Duck');
-            else if(c.clips && c.clips.Idle) playCustomerClip(c, 'Idle');
-          } else if(c.state === 'walk_out'){
-            c.active = false;
-            c.group.visible = false;
-            c.group.position.set(-999, -50, -999);
-            continue;
+          // Advance to next waypoint in path
+          if(c.path && c.pathIndex < c.path.length - 1){
+            c.pathIndex++;
+            c.tx = c.path[c.pathIndex].x + (Math.random() - 0.5) * 0.3;
+            c.tz = c.path[c.pathIndex].z + (Math.random() - 0.5) * 0.3;
+          } else {
+            // Path complete!
+            if(c.state === 'walk_in'){
+              c.state = 'inspect';
+              c.inspectTimer = 2.0 + Math.random() * 1.5;
+              c.group.rotation.y = 0;
+              if(c.clips && (c.clips.Duck || c.clips.Harvesting)) playCustomerClip(c, 'Duck');
+              else if(c.clips && c.clips.Idle) playCustomerClip(c, 'Idle');
+            } else if(c.state === 'walk_out'){
+              c.active = false;
+              c.group.visible = false;
+              c.group.position.set(-999, -50, -999);
+              continue;
+            }
           }
         }
         c.group.position.x = c.x;
@@ -546,12 +598,12 @@
   ];
 
   // Interactive Village Market Dialog (Both SELLING and BUYING Tabs)
-  function openMarketStallDialog(){
+  function openMarketStallDialog(initialTab){
     var existing = document.getElementById('marketStallModal');
     if(existing) existing.remove();
 
     var inv = window.inventory || {};
-    var currentTab = 'sell'; // 'sell' or 'buy'
+    var currentTab = initialTab || 'sell'; // 'sell' or 'buy'
 
     var sellables = [
       { id: 'tomato', name: 'Domates', emoji: '🍅', price: 8 },
