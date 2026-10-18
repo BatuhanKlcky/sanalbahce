@@ -79,6 +79,18 @@
     return new THREE.QuaternionKeyframeTrack(boneName + '.quaternion', times, values);
   }
 
+  function findActualBoneName(root, name){
+    if(!root) return name;
+    if(root.getObjectByName(name)) return name;
+    var dot = name.replace(/([LR])$/, '.$1');
+    if(root.getObjectByName(dot)) return dot;
+    var noDot = name.replace(/\.([LR])$/, '$1');
+    if(root.getObjectByName(noDot)) return noDot;
+    var under = name.replace(/[\._]([LR])$/, '_$1');
+    if(root.getObjectByName(under)) return under;
+    return name;
+  }
+
   /**
    * Farmer-bind-relative clips. Modular Farmer bind is a T-pose.
    * We author standing rest (arms down along sides, soft elbows) + walk/work
@@ -87,17 +99,6 @@
    */
   function buildFarmerClips(root){
     var bind = snapshotBindQuats(root);
-
-    function findActualBoneName(name){
-      if(root.getObjectByName(name)) return name;
-      var dot = name.replace(/([LR])$/, '.$1');
-      if(root.getObjectByName(dot)) return dot;
-      var noDot = name.replace(/\.([LR])$/, '$1');
-      if(root.getObjectByName(noDot)) return noDot;
-      var under = name.replace(/[\._]([LR])$/, '_$1');
-      if(root.getObjectByName(under)) return under;
-      return name;
-    }
 
     // Natural standing rest (arms down, soft elbows) — bind alone is horizontal T-pose.
     var REST = {
@@ -120,21 +121,21 @@
     };
 
     function B(name){
-      var actual = findActualBoneName(name);
+      var actual = findActualBoneName(root, name);
       return bind[actual] || bind[name] || new THREE.Quaternion();
     }
     function has(name){
-      var actual = findActualBoneName(name);
+      var actual = findActualBoneName(root, name);
       return !!(bind[actual] || bind[name]);
     }
     function R(name, dx, dy, dz){
-      var actual = findActualBoneName(name);
+      var actual = findActualBoneName(root, name);
       var r = REST[name] || REST[actual] || [0, 0, 0];
       return bindDelta(B(name), r[0] + (dx || 0), r[1] + (dy || 0), r[2] + (dz || 0));
     }
     function restTrack(name, times, frames){
       if(!has(name)) return null;
-      var actual = findActualBoneName(name);
+      var actual = findActualBoneName(root, name);
       var qs = frames.map(function(f){ return R(name, f[0], f[1], f[2]); });
       return quatTrack(actual, times, qs);
     }
@@ -419,19 +420,54 @@
     });
     body.updateMatrixWorld(true);
 
-    // Build authored bind-relative clips (Idle, Walk, Duck, Punch, Wave) with natural lowered arms
-    var clips = buildFarmerClips(body);
+    var bind = snapshotBindQuats(body);
+    var clips = {};
 
-    // If glTF had extra animations (e.g. Run), preserve them without overwriting our fixed clips
+    // 1. Load Quaternius studio 3D animations (Walk, Run, Duck, Punch, Wave, Idle)
     if(gltfAnimations && gltfAnimations.length > 0){
       gltfAnimations.forEach(function(clip){
         var shortName = clip.name.replace(/^Farmer\|/, '');
-        if(!clips[shortName]){
-          clips[shortName] = clip;
-          clips[clip.name] = clip;
-        }
+        var cl = clip.clone();
+        clips[shortName] = cl;
+        clips[clip.name] = cl;
       });
     }
+
+    // 2. Patch Idle: GLTF Idle has full head/spine/legs but lacks UpperArm tracks (leaving arms in horizontal bind T-pose).
+    // Inject resting upper arm tracks [-78, 8, 22] and [-78, -8, -22] so Idle has relaxed lowered arms.
+    if(clips.Idle){
+      var armLName = findActualBoneName(body, 'UpperArmL');
+      var armRName = findActualBoneName(body, 'UpperArmR');
+      var trNames = clips.Idle.tracks.map(function(t){ return t.name.split('.')[0]; });
+      var idleDur = clips.Idle.duration || 2.0;
+      var idleTimes = [0, idleDur * 0.5, idleDur];
+      if(trNames.indexOf(armLName) < 0 && bind[armLName]){
+        var qL = bindDelta(bind[armLName], -78, 8, 22);
+        clips.Idle.tracks.push(quatTrack(armLName, idleTimes, [qL, qL, qL]));
+      }
+      if(trNames.indexOf(armRName) < 0 && bind[armRName]){
+        var qR = bindDelta(bind[armRName], -78, -8, -22);
+        clips.Idle.tracks.push(quatTrack(armRName, idleTimes, [qR, qR, qR]));
+      }
+    }
+
+    // 3. Patch Wave: keep right arm resting while left arm waves
+    if(clips.Wave){
+      var armRNameW = findActualBoneName(body, 'UpperArmR');
+      var trNamesW = clips.Wave.tracks.map(function(t){ return t.name.split('.')[0]; });
+      if(trNamesW.indexOf(armRNameW) < 0 && bind[armRNameW]){
+        var waveDur = clips.Wave.duration || 2.0;
+        var qRW = bindDelta(bind[armRNameW], -78, -8, -22);
+        clips.Wave.tracks.push(quatTrack(armRNameW, [0, waveDur * 0.5, waveDur], [qRW, qRW, qRW]));
+      }
+    }
+
+    // 4. Fallback only if model has no animations at all
+    if(!clips.Idle || !clips.Walk){
+      var fallback = buildFarmerClips(body);
+      clips = Object.assign(fallback, clips);
+    }
+
     var mixer = new THREE.AnimationMixer(body);
     onDone({ group: g, mixer: mixer, clips: clips, body: body });
   }
