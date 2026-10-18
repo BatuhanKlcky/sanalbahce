@@ -98,47 +98,7 @@
     return rodGroup;
   }
 
-  // Build Fisherman Hat
-  function createFishermanHat(){
-    var hatGroup = new THREE.Group();
-    var strawMat = new THREE.MeshStandardMaterial({ color: 0xd4a359, roughness: 0.9 });
-    var bandMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.8 });
 
-    var brim = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.44, 0.04, 16), strawMat);
-    brim.position.y = 0;
-    hatGroup.add(brim);
-
-    var crown = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.27, 0.22, 16), strawMat);
-    crown.position.y = 0.12;
-    hatGroup.add(crown);
-
-    var band = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.05, 16), bandMat);
-    band.position.y = 0.04;
-    hatGroup.add(band);
-
-    return hatGroup;
-  }
-
-  // Build Chef Hat (Toque)
-  function createChefHat(){
-    var hat = new THREE.Group();
-    var whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.85 });
-
-    var base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.1, 16), whiteMat);
-    base.position.y = 0.05;
-    hat.add(base);
-
-    var puff = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 0.35, 16), whiteMat);
-    puff.position.y = 0.26;
-    hat.add(puff);
-
-    var top = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 8), whiteMat);
-    top.scale.set(1, 0.35, 1);
-    top.position.y = 0.42;
-    hat.add(top);
-
-    return hat;
-  }
 
   // Spawn Fisherman NPC at Shore Pier
   function spawnFisherman(x, y, z){
@@ -170,39 +130,12 @@
       npc.group.position.set(npc.x, npc.y, npc.z);
       npc.group.rotation.y = npc.rotY;
 
-      // Attach Fisherman Hat to Head bone if available
-      var headBone = null;
-      var handBone = null;
-      npc.body.traverse(function(b){
-        if(b.isBone){
-          if(/Head/i.test(b.name) && !headBone) headBone = b;
-          if(/Hand.*R|Right.*Hand/i.test(b.name) && !handBone) handBone = b;
-        }
-      });
-
-      var hat = createFishermanHat();
-      if(headBone){
-        hat.position.set(0, 0.26, 0);
-        hat.rotation.x = -0.1;
-        headBone.add(hat);
-      } else {
-        hat.position.set(0, 1.45, 0);
-        npc.group.add(hat);
-      }
-
-      // Attach Fishing Rod
+      // Attach Fishing Rod to NPC group at hand position (zero bone matrix explosion)
       var rod = createFishingRodMesh();
-      rod.rotation.x = 0.45;
-      rod.rotation.z = -0.3;
-      rod.position.set(0.2, 0.6, 0.3);
-      if(handBone){
-        rod.scale.setScalar(0.7);
-        rod.position.set(0, 0, 0);
-        rod.rotation.set(Math.PI / 4, 0, -Math.PI / 6);
-        handBone.add(rod);
-      } else {
-        npc.group.add(rod);
-      }
+      rod.scale.setScalar(0.75);
+      rod.position.set(0.28, 0.65, 0.35);
+      rod.rotation.set(0.55, -0.25, -0.2);
+      npc.group.add(rod);
       npc.rodMesh = rod;
 
       // Play Idle clip
@@ -266,20 +199,7 @@
       npc.group.position.set(npc.x, npc.y, npc.z);
       npc.group.rotation.y = npc.rotY;
 
-      // Head bone search for Chef Toque
-      var headBone = null;
-      npc.body.traverse(function(b){
-        if(b.isBone && /Head/i.test(b.name) && !headBone) headBone = b;
-      });
 
-      var toque = createChefHat();
-      if(headBone){
-        toque.position.set(0, 0.28, 0);
-        headBone.add(toque);
-      } else {
-        toque.position.set(0, 1.48, 0);
-        npc.group.add(toque);
-      }
 
       // Wooden cooking ladle in hand
       var ladle = new THREE.Mesh(
@@ -691,8 +611,8 @@
 
   // Initialize Village NPCs in world
   function initVillageNPCs(){
-    // Spawn Balıkçı Reis on wooden pier of Shore Pond (13.2, -8.2)
-    spawnFisherman(12.3, 0.28, -7.8);
+    // Spawn Balıkçı Reis on wooden pier of Shore Pond (far coastline)
+    spawnFisherman(22.6, 0.28, -14.1);
 
     // Spawn Village Chef near market / village square (-11.5, 0, -7.0)
     spawnVillageChef(-11.5, 0, -7.0);

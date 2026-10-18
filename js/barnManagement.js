@@ -510,49 +510,61 @@
     modal.onclick = function(e){ if(e.target === modal) modal.remove(); };
   }
 
-  // Register and place Grand Barn in garden
-  function initBarnSystem(){
-    if(barns.length > 0) return;
+  // Register a player-placed barn
+  function registerBarn(decoObj){
+    if(!decoObj) return;
+    var x = decoObj.x || (decoObj.group ? decoObj.group.position.x : 0);
+    var z = decoObj.z || (decoObj.group ? decoObj.group.position.z : 0);
 
-    var barnX = -13.5;
-    var barnZ = 12.0;
+    var existing = barns.find(function(b){ return Math.hypot(b.x - x, b.z - z) < 2.0; });
+    if(existing) return existing;
 
-    createBarnGroup(function(bg){
-      bg.position.set(barnX, 0, barnZ);
-      bg.rotation.y = 0.4;
-      scene.add(bg);
+    var barnRec = {
+      group: decoObj.group,
+      x: x,
+      z: z
+    };
 
-      var barnRec = {
-        group: bg,
-        x: barnX,
-        z: barnZ
-      };
-
-      // Attach click handler to barn building
-      bg.userData.onTap = function(){
+    if(decoObj.group){
+      decoObj.group.userData.onTap = function(){
         openBarnDashboard(barnRec);
       };
+    }
 
-      barns.push(barnRec);
+    barns.push(barnRec);
 
-      // Spawn 2 cows and 1 alpaca
-      spawnBarnAnimal(barnRec, {
-        id: 'cow_1', name: 'Sarıkız', type: 'cow', breed: 'Jersey',
-        ox: 2.8, oz: 1.4, rot: -0.6, scale: 1.2
-      });
-      spawnBarnAnimal(barnRec, {
-        id: 'cow_2', name: 'Benekli', type: 'cow', breed: 'Holstein',
-        ox: 1.8, oz: 3.2, rot: 1.2, scale: 1.25
-      });
-      spawnBarnAnimal(barnRec, {
-        id: 'alpaca_1', name: 'Pamuk', type: 'alpaca', breed: 'Huacaya',
-        ox: -2.2, oz: 2.6, rot: 0.3, scale: 1.15
-      });
+    // Spawn livestock around player's barn
+    spawnBarnAnimal(barnRec, {
+      id: 'cow_' + barns.length + '_1', name: 'Sarıkız', type: 'cow', breed: 'Jersey',
+      ox: 2.6, oz: 1.2, rot: -0.6, scale: 1.2
     });
+    spawnBarnAnimal(barnRec, {
+      id: 'cow_' + barns.length + '_2', name: 'Benekli', type: 'cow', breed: 'Holstein',
+      ox: 1.6, oz: 2.8, rot: 1.2, scale: 1.25
+    });
+    spawnBarnAnimal(barnRec, {
+      id: 'alpaca_' + barns.length + '_1', name: 'Pamuk', type: 'alpaca', breed: 'Huacaya',
+      ox: -2.0, oz: 2.2, rot: 0.3, scale: 1.15
+    });
+
+    return barnRec;
+  }
+
+  // Bind barns from saved decos
+  function bindBarnsFromDecos(){
+    if(typeof decos !== 'undefined' && Array.isArray(decos)){
+      decos.forEach(function(d){
+        if(d && (d.type === 'stable' || d.type === 'grand_barn')){
+          registerBarn(d);
+        }
+      });
+    }
   }
 
   // Export to window
-  window.initBarnSystem = initBarnSystem;
+  window.createBarnGroup = createBarnGroup;
+  window.registerBarn = registerBarn;
+  window.bindBarnsFromDecos = bindBarnsFromDecos;
   window.stepBarn = stepBarn;
   window.barns = barns;
   window.cows = cows;

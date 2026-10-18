@@ -1733,7 +1733,7 @@ function dressGarden(){
   if(window._shorePond && window._shorePond.group && window._shorePond.group.parent){
     window._shorePond.group.parent.remove(window._shorePond.group);
   }
-  var shorePond = buildNaturalShorePond(13.2, -8.2);
+  var shorePond = buildNaturalShorePond(23.5, -14.5);
   scene.add(shorePond.group);
   window._shorePond = shorePond;
   soilBed(0, 6.2, 3.55);
@@ -1744,7 +1744,7 @@ function dressGarden(){
   var path = new THREE.Mesh(new THREE.BoxGeometry(1.85, .04, 8.4), pathMat);
   path.position.set(0, .02, 17.6);
   scene.add(path);
-  sceneryBarrel(11.4, -7.4);
+  sceneryBarrel(21.8, -13.8);
 
   placeDressProps();
 

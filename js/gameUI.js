@@ -326,6 +326,18 @@
       }
     }
 
+    // 1.49) Köy Pazarı Tezgahı ve Müşteri Köylüler Kontrolü
+    var allHits = _ray.intersectObjects(scene.children, true);
+    for(var hi = 0; hi < Math.min(allHits.length, 6); hi++){
+      var ho = allHits[hi].object;
+      if(ho && (ho.userData.isMarketStall || (ho.parent && ho.parent.userData && ho.parent.userData.isMarketStall))){
+        if(typeof window.openMarketStallDialog === 'function'){
+          window.openMarketStallDialog();
+          return;
+        }
+      }
+    }
+
     // 1.5) Çiftçiler Kontrolü
     if(typeof farmers !== 'undefined' && farmers.length){
       var fMeshes = [];

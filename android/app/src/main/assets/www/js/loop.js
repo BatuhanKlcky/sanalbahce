@@ -436,6 +436,10 @@ function animate(){
     try{ window.stepBarn(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepBarn', e); }
   }
+  if(typeof window.stepVillageMarket==='function'){
+    try{ window.stepVillageMarket(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepVillageMarket', e); }
+  }
   if(typeof window.stepVisualFX==='function'){
     try{ window.stepVisualFX(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
@@ -557,24 +561,15 @@ function bootGame(){
   if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
   else if(typeof window.ensureFarmers==='function') window.ensureFarmers();
 
-  // Bind or ensure Chicken Coop
+  // Bind Chicken Coops only if player placed them
   if(typeof window.bindCoopsFromDecos==='function') window.bindCoopsFromDecos();
-  if(typeof window.chickenCoops !== 'undefined' && window.chickenCoops.length === 0 && typeof window.createCoopMesh === 'function'){
-    // Create an initial starter coop in garden if none exists
-    var starterCoopG = window.createCoopMesh();
-    starterCoopG.position.set(-8.8, 0, 7.2);
-    starterCoopG.rotation.y = 0.3;
-    scene.add(starterCoopG);
-    var coopRec = { type: 'chicken_coop', group: starterCoopG, x: -8.8, z: 7.2, rot: 0.3, world: 'both' };
-    if(typeof decos !== 'undefined') decos.push(coopRec);
-    if(typeof window.registerChickenCoop === 'function') window.registerChickenCoop(coopRec);
-  }
+  if(typeof window.bindBarnsFromDecos==='function') window.bindBarnsFromDecos();
 
   // Initialize Village NPCs (Balıkçı Reis at Pier & Aşçı Usta at Market)
   if(typeof window.initVillageNPCs === 'function') window.initVillageNPCs();
 
-  // Initialize Grand Barn & Dairy System
-  if(typeof window.initBarnSystem === 'function') window.initBarnSystem();
+  // Initialize Village Market Square (far corner bazaar)
+  if(typeof window.initVillageMarket === 'function') window.initVillageMarket();
 }
 animate();
 if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);
