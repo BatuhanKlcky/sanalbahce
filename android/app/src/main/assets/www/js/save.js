@@ -628,7 +628,8 @@ function load(){
     else if(d.type==='windmill')mkWindmill(x,z);
     else if(d.type==='scarecrow')mkScarecrow(x,z);
     else if(d.type==='flower_wild'){ if(Math.abs(z - (-21.0)) >= 2.8) mkWildFlower(x,z); }
-    else if(d.type==='house')mkHouse(x,z,a);
+    else if(d.type==='house'||d.type==='village_house'){ if(typeof mkVillageHouse==='function') mkVillageHouse(x,z,a); else mkHouse(x,z,a); }
+    else if(d.type==='wheat_field'){ if(typeof mkWheatField==='function') mkWheatField(x,z); }
     else if(d.type==='train_station' && typeof mkTrainStation==='function')mkTrainStation(x,z,a);
     else if(d.type==='mini_train' && typeof mkMiniTrain==='function')mkMiniTrain(x,z,a);
     else if(d.type==='pier_lantern' && typeof mkPierLantern==='function')mkPierLantern(x,z);

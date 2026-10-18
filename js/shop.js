@@ -461,45 +461,47 @@ window.addPet = function(type) {
 
 
 
-// ── MAĞAZA SİSTEMİ ────────────────────────────────────────────────────────
 var SHOP_ITEMS = {
   seeds: [
-    {id:'rose',      emoji:'🌹', name:'Gül Tohumu',     desc:'Kırmızı zarif gül çiçeği',    price:30,  color:0xcc0022, type:'flower'},
-    {id:'lotus',     emoji:'🪷', name:'Lotus Tohumu',   desc:'Nadir pembe lotus çiçeği',     price:50,  color:0xff69b4, type:'flower'},
-    {id:'sunflower', emoji:'🌻', name:'Ayçiçeği',       desc:'Sarı dev ayçiçeği',            price:25,  color:0xffcc00, type:'flower'},
-    {id:'tulip',     emoji:'🌷', name:'Lale Tohumu',    desc:'Klasik Türk lalesi',           price:35,  color:0xff3366, type:'flower'},
-    {id:'bluebell',  emoji:'💙', name:'Çan Çiçeği',    desc:'Mavi sallanan çan çiçeği',     price:45,  color:0x4488ff, type:'flower'},
-    {id:'cherry',    emoji:'🌸', name:'Kiraz Çiçeği',  desc:'Japon kiraz çiçeği',           price:60,  color:0xffb7c5, type:'flower'},
+    {id:'wheat',     emoji:'🌾', name:'Buğday Tohumu',   desc:'Altın başaklı buğday. Tavuk ve ineklerin en sevdiği yem!', price:30, color:0xd4af37, type:'flower', deco:'wheat'},
+    {id:'rose',      emoji:'🌹', name:'Gül Tohumu',      desc:'Kırmızı zarif gül çiçeği',    price:35,  color:0xcc0022, type:'flower'},
+    {id:'lotus',     emoji:'🪷', name:'Lotus Tohumu',    desc:'Nadir pembe lotus çiçeği',     price:55,  color:0xff69b4, type:'flower'},
+    {id:'sunflower', emoji:'🌻', name:'Ayçiçeği',        desc:'Sarı dev ayçiçeği',            price:30,  color:0xffcc00, type:'flower'},
+    {id:'tulip',     emoji:'🌷', name:'Lale Tohumu',     desc:'Klasik Türk lalesi',           price:40,  color:0xff3366, type:'flower'},
+    {id:'bluebell',  emoji:'💙', name:'Çan Çiçeği',     desc:'Mavi sallanan çan çiçeği',     price:50,  color:0x4488ff, type:'flower'},
+    {id:'cherry',    emoji:'🌸', name:'Kiraz Çiçeği',   desc:'Japon kiraz çiçeği',           price:70,  color:0xffb7c5, type:'flower'},
   ],
   animals: [
-    {id:'animal_cow',       emoji:'🐮', name:'Süt İneği',      desc:'Otlar ve 🥛 Taze Süt üretir',       price:280, type:'animal', specKey:'cow'},
-    {id:'animal_alpaca',    emoji:'🦙', name:'Alpaka',         desc:'Gezinir ve 🧶 Yumuşak Yün üretir',  price:320, type:'animal', specKey:'alpaca'},
-    {id:'animal_chick',     emoji:'🐥', name:'Köy Civcivi',    desc:'Yemlenir ve 🥚 Yumurta üretir',     price:120, type:'animal', specKey:'chick'},
-    {id:'animal_duck',      emoji:'🦆', name:'Gölet Ördeği',   desc:'Badi badi yürür, 🥚 Yumurta verir', price:160, type:'animal', specKey:'duck'},
-    {id:'animal_horse',     emoji:'🐴', name:'Doru At',        desc:'Bahçede dörtnala koşan asil at',    price:550, type:'animal', specKey:'horse'},
-    {id:'animal_deer',      emoji:'🦌', name:'Orman Geyiği',   desc:'Zarif boynuzlu uysal geyik',        price:420, type:'animal', specKey:'deer'},
-    {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',       price:340, type:'animal', specKey:'fox'},
-    {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',        price:220, type:'animal', specKey:'cat_van'},
-    {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',    price:260, type:'animal', specKey:'dog_shiba'},
-    {id:'animal_sheep',     emoji:'🐑', name:'Merinos Koyun',  desc:'Otlar ve 🧶 Yumuşak Yün üretir',    price:240, type:'animal', specKey:'sheep'},
+    {id:'animal_cow',       emoji:'🐮', name:'Süt İneği',      desc:'Otlar ve 🥛 Taze Süt üretir (Ahırda Yaşar)', price:480, type:'animal', specKey:'cow'},
+    {id:'animal_alpaca',    emoji:'🦙', name:'Alpaka',         desc:'Gezinir ve 🧶 Yumuşak Yün üretir',            price:520, type:'animal', specKey:'alpaca'},
+    {id:'animal_sheep',     emoji:'🐑', name:'Merinos Koyun',  desc:'Otlar ve 🧶 Yumuşak Yün üretir',              price:390, type:'animal', specKey:'sheep'},
+    {id:'animal_chick',     emoji:'🐥', name:'Köy Civcivi',    desc:'Yemlenir ve 🥚 Yumurta üretir',               price:180, type:'animal', specKey:'chick'},
+    {id:'animal_duck',      emoji:'🦆', name:'Gölet Ördeği',   desc:'Badi badi yürür, 🥚 Yumurta verir',           price:240, type:'animal', specKey:'duck'},
+    {id:'animal_horse',     emoji:'🐴', name:'Doru At',        desc:'Bahçede dörtnala koşan asil at',              price:880, type:'animal', specKey:'horse'},
+    {id:'animal_deer',      emoji:'🦌', name:'Orman Geyiği',   desc:'Zarif boynuzlu uysal geyik',                  price:580, type:'animal', specKey:'deer'},
+    {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',                 price:450, type:'animal', specKey:'fox'},
+    {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',                  price:340, type:'animal', specKey:'cat_van'},
+    {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',              price:380, type:'animal', specKey:'dog_shiba'},
   ],
   items: [
-    {id:'chicken_coop',     emoji:'🐔', name:'Tavuk Kümesi & Çit', desc:'Geniş çitli ahşap kümes. Yumurta üretir!', price:320,  deco:'chicken_coop'},
-    {id:'barn_building',    emoji:'🛖', name:'Köy Ahırı & Ağıl',  desc:'İnek ve alpakalar için büyük köy ahırı!',  price:460,  deco:'stable'},
-    {id:'golden_pot',       emoji:'🏆', name:'Altın Saksı',       desc:'Özel altın renkli saksı',         price:140,  deco:'golden_pot'},
-    {id:'crystal_pond',     emoji:'💎', name:'Kristal Gölet',     desc:'Parlayan mavi gölet',             price:240,  deco:'crystal_pond'},
-    {id:'magic_lamp',       emoji:'🔮', name:'Sihirli Fener',     desc:'Mor ışık saçan fener',            price:180,  deco:'magic_lamp'},
-    {id:'rainbow_arch',     emoji:'🌈', name:'Gökkuşağı Kemeri',  desc:'Renkli taş kemer',                price:280,  deco:'rainbow_arch'},
-    {id:'fountain',         emoji:'⛲', name:'Çeşme',             desc:'Şırıl şırıl çeşme',               price:360,  deco:'fountain'},
-    {id:'treehouse',        emoji:'🏚️', name:'Ağaç Evi',         desc:'Mini ağaç üstü ev',                price:480,  deco:'treehouse'},
-    {id:'oven',             emoji:'🏡', name:'Köy Taş Fırını',    desc:'Sıcak pide & ekmek fırını',       price:280,  deco:'oven'},
-    {id:'dairy_stand',      emoji:'🥛', name:'Ahşap Mandıra',     desc:'Süt güğümü ve yayık tezgahı',     price:320,  deco:'dairy_stand'},
-    {id:'hay_stack',        emoji:'🌾', name:'Büyük Saman Yığını',desc:'Sarı kokulu saman balyaları',     price:110,  deco:'hay_stack'},
-    {id:'chopping_block',   emoji:'🪵', name:'Odun Kırma Kütüğü', desc:'Kütük ve odun yığınları',        price:130,  deco:'chopping_block'},
-    {id:'street_lantern',   emoji:'🏮', name:'Köy Sokak Feneri',  desc:'Paslı demir fener direği',        price:85,   deco:'street_lantern'},
-    {id:'water_trough',     emoji:'⛲', name:'Taş Su Yalağı',     desc:'Hayvanlar için taze su teknesi',  price:170,  deco:'water_trough'},
-    {id:'beehive',          emoji:'🍯', name:'Arı Kovanı',        desc:'Bal arıları ve çiçekli kovan',    price:390,  deco:'beehive'},
-    {id:'wagon',            emoji:'🚜', name:'Ahşap Köy Arabası', desc:'Nostaljik tekerlekli araba',      price:250,  deco:'wagon'},
+    {id:'village_house',    emoji:'🏡', name:'Köy Aile Evi',      desc:'Yeni ailenin köye taşınmasını sağlar. Pazar müşteri sayısı ve satışlar artar!', price:620, deco:'village_house'},
+    {id:'chicken_coop',     emoji:'🐔', name:'Tavuk Kümesi & Çit',desc:'Geniş çitli ahşap kümes. Yumurta üretir!', price:550, deco:'chicken_coop'},
+    {id:'barn_building',    emoji:'🛖', name:'Köy Ahırı & Ağıl',  desc:'İnek ve alpakalar için 4 hayvan kapasiteli ahır & mandıra!', price:880, deco:'stable'},
+    {id:'wheat_field',      emoji:'🌾', name:'Buğday Tarlası Parseli', desc:'Geniş tarlada bol bol buğday ekimi!', price:220, deco:'wheat_field'},
+    {id:'oven',             emoji:'🏠', name:'Köy Taş Fırını',    desc:'Sıcak pide & ekmek fırını',       price:420,  deco:'oven'},
+    {id:'dairy_stand',      emoji:'🥛', name:'Ahşap Mandıra',     desc:'Süt güğümü ve yayık tezgahı',     price:460,  deco:'dairy_stand'},
+    {id:'treehouse',        emoji:'🏚️', name:'Ağaç Evi',         desc:'Mini ağaç üstü ev',                price:750,  deco:'treehouse'},
+    {id:'fountain',         emoji:'⛲', name:'Çeşme',             desc:'Şırıl şırıl çeşme',               price:480,  deco:'fountain'},
+    {id:'golden_pot',       emoji:'🏆', name:'Altın Saksı',       desc:'Özel altın renkli saksı',         price:220,  deco:'golden_pot'},
+    {id:'crystal_pond',     emoji:'💎', name:'Kristal Gölet',     desc:'Parlayan mavi gölet',             price:380,  deco:'crystal_pond'},
+    {id:'magic_lamp',       emoji:'🔮', name:'Sihirli Fener',     desc:'Mor ışık saçan fener',            price:260,  deco:'magic_lamp'},
+    {id:'rainbow_arch',     emoji:'🌈', name:'Gökkuşağı Kemeri',  desc:'Renkli taş kemer',                price:420,  deco:'rainbow_arch'},
+    {id:'hay_stack',        emoji:'🌾', name:'Büyük Saman Yığını',desc:'Sarı kokulu saman balyaları',     price:140,  deco:'hay_stack'},
+    {id:'chopping_block',   emoji:'🪵', name:'Odun Kırma Kütüğü', desc:'Kütük ve odun yığınları',        price:160,  deco:'chopping_block'},
+    {id:'street_lantern',   emoji:'🏮', name:'Köy Sokak Feneri',  desc:'Paslı demir fener direği',        price:110,  deco:'street_lantern'},
+    {id:'water_trough',     emoji:'⛲', name:'Taş Su Yalağı',     desc:'Hayvanlar için taze su teknesi',  price:210,  deco:'water_trough'},
+    {id:'beehive',          emoji:'🍯', name:'Arı Kovanı',        desc:'Bal arıları ve çiçekli kovan',    price:560,  deco:'beehive'},
+    {id:'wagon',            emoji:'🚜', name:'Ahşap Köy Arabası', desc:'Nostaljik tekerlekli araba',      price:360,  deco:'wagon'},
   ],
   special: [
     {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı', desc:'Beyaz altın kanat ve hale', price:5000, special:true},
@@ -676,6 +678,19 @@ window.placeShopDeco = function(tp, x, z, ang){
       return true;
     }
   }
+  else if(tp==='village_house' || tp==='house'){
+    if(typeof window.mkVillageHouse === 'function') window.mkVillageHouse(x, z, ang || 0);
+    else if(typeof mkHouse === 'function') mkHouse(x, z, ang || 0);
+    if(typeof sndPlant === 'function') sndPlant();
+    if(typeof save === 'function') save(true);
+    return true;
+  }
+  else if(tp==='wheat_field'){
+    if(typeof window.mkWheatField === 'function') window.mkWheatField(x, z);
+    if(typeof sndPlant === 'function') sndPlant();
+    if(typeof save === 'function') save(true);
+    return true;
+  }
   else if(tp==='golden_pot') mkGoldenPot(x,z);
   else if(tp==='crystal_pond') mkCrystalPond(x,z);
   else if(tp==='magic_lamp') mkMagicLamp(x,z);
@@ -716,6 +731,18 @@ window.buyItem = function(id) {
     return;
   }
   if(isAnimal){
+    if(item.specKey === 'cow' || item.specKey === 'alpaca' || item.specKey === 'sheep'){
+      var bList = (typeof window.barns !== 'undefined' && Array.isArray(window.barns)) ? window.barns : [];
+      if(bList.length === 0){
+        if(typeof showToast === 'function') showToast('🛖 Önce bir Köy Ahırı kurmalısın!');
+        return;
+      }
+      var curLivestock = (typeof window.cows !== 'undefined') ? window.cows.length : 0;
+      if(curLivestock >= bList.length * 4){
+        if(typeof showToast === 'function') showToast('🛖 Tüm ahırların dolu! (Maksimum 4 hayvan/ahır). Yeni ahır kurmalısın.');
+        return;
+      }
+    }
     stats.coin -= item.price;
     saveStats(); updStats(); renderShop();
     sndCoin();
