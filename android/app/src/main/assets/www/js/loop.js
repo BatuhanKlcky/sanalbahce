@@ -424,6 +424,14 @@ function animate(){
     try{ window.stepFarmers(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepFarmers', e); }
   }
+  if(typeof window.stepChickenCoop==='function'){
+    try{ window.stepChickenCoop(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepChickenCoop', e); }
+  }
+  if(typeof window.stepVillageNPCs==='function'){
+    try{ window.stepVillageNPCs(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepVillageNPCs', e); }
+  }
   if(typeof window.stepVisualFX==='function'){
     try{ window.stepVisualFX(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
@@ -544,6 +552,22 @@ function bootGame(){
   if(typeof window.ensureCozyLife==='function'&&typeof isCozy==='function'&&isCozy()) window.ensureCozyLife();
   if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
   else if(typeof window.ensureFarmers==='function') window.ensureFarmers();
+
+  // Bind or ensure Chicken Coop
+  if(typeof window.bindCoopsFromDecos==='function') window.bindCoopsFromDecos();
+  if(typeof window.chickenCoops !== 'undefined' && window.chickenCoops.length === 0 && typeof window.createCoopMesh === 'function'){
+    // Create an initial starter coop in garden if none exists
+    var starterCoopG = window.createCoopMesh();
+    starterCoopG.position.set(-8.8, 0, 7.2);
+    starterCoopG.rotation.y = 0.3;
+    scene.add(starterCoopG);
+    var coopRec = { type: 'chicken_coop', group: starterCoopG, x: -8.8, z: 7.2, rot: 0.3, world: 'both' };
+    if(typeof decos !== 'undefined') decos.push(coopRec);
+    if(typeof window.registerChickenCoop === 'function') window.registerChickenCoop(coopRec);
+  }
+
+  // Initialize Village NPCs (Balıkçı Reis at Pier & Aşçı Usta at Market)
+  if(typeof window.initVillageNPCs === 'function') window.initVillageNPCs();
 }
 animate();
 if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);

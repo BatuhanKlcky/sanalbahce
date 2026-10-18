@@ -1780,6 +1780,29 @@ window.addEventListener('pointerup',function(e){
       return;
     } else { showToast('Çiftçi sistemi yok'); return; }
   }
+  else if(tp==='chicken_coop'){
+    var coopMesh = (typeof window.createCoopMesh === 'function') ? window.createCoopMesh() : null;
+    if(coopMesh){
+      coopMesh.position.set(pt.x, 0, pt.z);
+      coopMesh.rotation.y = ang;
+      scene.add(coopMesh);
+      var coopRec = {
+        type: 'chicken_coop',
+        group: coopMesh,
+        x: pt.x,
+        z: pt.z,
+        rot: ang,
+        world: (typeof isCozy==='function' && isCozy()) ? 'cozy' : 'normal'
+      };
+      decos.push(coopRec);
+      if(typeof window.registerChickenCoop === 'function') window.registerChickenCoop(coopRec);
+      window.cancelPlace();
+      sndPlant();
+      showToast('🐔 Tavuk Kümesi kuruldu! Tavuklar yumurtlamaya başladı 🥚');
+      save(true);
+      return;
+    }
+  }
   else if(PACK_PROPS[tp]){
     if(mkPackProp(tp, pt.x, pt.z, ang)){
       /* placed */

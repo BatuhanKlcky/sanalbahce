@@ -638,6 +638,17 @@ function load(){
       var fh = decos[decos.length-1];
       if(fh && d.world) fh.world = d.world;
     }
+    else if(d.type==='chicken_coop'){
+      if(typeof window.createCoopMesh==='function'){
+        var coopG = window.createCoopMesh();
+        coopG.position.set(x, 0, z);
+        coopG.rotation.y = a;
+        scene.add(coopG);
+        var coopRec = { type:'chicken_coop', group:coopG, x:x, z:z, rot:a, world:d.world||'both' };
+        decos.push(coopRec);
+        if(typeof window.registerChickenCoop === 'function') window.registerChickenCoop(coopRec);
+      }
+    }
     else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[d.type] && typeof mkPackProp==='function'){
       mkPackProp(d.type, x, z, a);
     }

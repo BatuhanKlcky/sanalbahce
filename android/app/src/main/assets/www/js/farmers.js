@@ -297,7 +297,7 @@
       candidates.push(url);
       candidates.push(cleanRel + '?cb=' + Date.now());
     }
-    candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/' + cleanRel);
+    candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main/' + cleanRel);
     var idx = 0;
     function tryNext(lastErr){
       if(idx >= candidates.length){
@@ -930,6 +930,12 @@
   window.stepFarmers = stepFarmers;
   window.farmers = farmers;
   window.getFarmerHouse = function(){ return houseRec; };
+  window.parseFarmerInstance = parseFarmerInstance;
+  window.whenFarmerRigReady = whenRigReady;
+  window.buildFarmerClips = buildFarmerClips;
+  window.buildFromScene = buildFromScene;
+  window.loadArrayBuffer = loadArrayBuffer;
+  window.isValidGLB = isValidGLB;
 
   loadFarmerRig();
   // After models/boot — rebind house from save

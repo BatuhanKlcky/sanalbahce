@@ -236,6 +236,73 @@
       }
     }
 
+    // 1.35) Yumurtalar Kontrolü
+    if(typeof eggsInWorld !== 'undefined' && eggsInWorld.length){
+      var eggMeshes = [];
+      eggsInWorld.forEach(function(eg){
+        if(eg && eg.parent) eg.traverse(function(c){ if(c.isMesh) { c.userData._eggParent = eg; eggMeshes.push(c); } });
+      });
+      var eggHits = _ray.intersectObjects(eggMeshes, true);
+      if(eggHits.length > 0){
+        var hitEg = eggHits[0].object.userData._eggParent;
+        if(hitEg && typeof window.collectEggs === 'function'){
+          window.collectEggs(hitEg.position.x, hitEg.position.z, 2.5);
+          return;
+        }
+      }
+    }
+
+    // 1.4) Köy NPC'leri Kontrolü (Balıkçı Reis & Aşçı Usta)
+    if(typeof villageNPCs !== 'undefined' && villageNPCs.length){
+      var npMeshes = [];
+      villageNPCs.forEach(function(npc){
+        if(npc && npc.group && npc.group.parent){
+          npc.group.traverse(function(c){
+            if(c.isMesh && c.visible !== false){
+              c.userData.npcRef = npc;
+              npMeshes.push(c);
+            }
+          });
+        }
+      });
+      var npHits = _ray.intersectObjects(npMeshes, true);
+      if(npHits.length > 0){
+        var hitNpc = npHits[0].object.userData.npcRef;
+        if(hitNpc){
+          if(hitNpc.id === 'fisherman' && typeof window.openFishermanDialog === 'function'){
+            window.openFishermanDialog();
+            return;
+          } else if(hitNpc.id === 'chef' && typeof window.openChefDialog === 'function'){
+            window.openChefDialog();
+            return;
+          }
+        }
+      }
+    }
+
+    // 1.45) Tavuk Kümesi Kontrolü
+    if(typeof chickenCoops !== 'undefined' && chickenCoops.length){
+      var coopMeshes = [];
+      chickenCoops.forEach(function(cp){
+        if(cp && cp.mesh && cp.mesh.parent){
+          cp.mesh.traverse(function(c){
+            if(c.isMesh){
+              c.userData.coopRef = cp;
+              coopMeshes.push(c);
+            }
+          });
+        }
+      });
+      var cpHits = _ray.intersectObjects(coopMeshes, true);
+      if(cpHits.length > 0){
+        var hitCp = cpHits[0].object.userData.coopRef;
+        if(hitCp && typeof window.openCoopDialog === 'function'){
+          window.openCoopDialog(hitCp);
+          return;
+        }
+      }
+    }
+
     // 1.5) Çiftçiler Kontrolü
     if(typeof farmers !== 'undefined' && farmers.length){
       var fMeshes = [];

@@ -20,10 +20,18 @@
     cucumber:   { emoji: '🥒', name: 'Kabak',          kind: 'raw' },
     pepper:     { emoji: '🌶️', name: 'Biber',          kind: 'raw' },
     carrot:     { emoji: '🥕', name: 'Havuç',          kind: 'raw' },
+    wheat:      { emoji: '🌾', name: 'Buğday',         kind: 'raw' },
     milk:       { emoji: '🥛', name: 'Taze Süt',       kind: 'raw' },
     egg:        { emoji: '🥚', name: 'Köy Yumurtası',  kind: 'raw' },
     wool:       { emoji: '🧶', name: 'Alpaka Yünü',    kind: 'raw' },
     fish:       { emoji: '🐟', name: 'Göl Balığı',     kind: 'raw' },
+    fish_trout: { emoji: '✨', name: 'Gümüş Alabalık', kind: 'raw' },
+    fish_carp:  { emoji: '🔴', name: 'Kızıl Sazan',    kind: 'raw' },
+    fish_golden:{ emoji: '👑', name: 'Altın Sazan',    kind: 'raw' },
+    omelet:     { emoji: '🍳', name: 'Köy Omleti',     kind: 'craft' },
+    bread:      { emoji: '🥐', name: 'Köy Ekmeği/Pide',kind: 'craft' },
+    pie:        { emoji: '🥧', name: 'Sebzeli Börek',  kind: 'craft' },
+    fish_soup:  { emoji: '🍲', name: 'Balıkçı Çorbası',kind: 'craft' },
     jam:        { emoji: '🍯', name: 'Çilek Reçeli',   kind: 'craft' },
     soup:       { emoji: '🥣', name: 'Bahçe Çorbası',  kind: 'craft' },
     salad:      { emoji: '🥗', name: 'Köy Salatası',   kind: 'craft' },
@@ -35,6 +43,38 @@
   };
 
   var RECIPES = [
+    {
+      id: 'omelet',
+      emoji: '🍳',
+      name: 'Köy Omleti',
+      desc: '2x 🥚 Yumurta + 1x 🍅 Domates',
+      cost: { egg: 2, tomato: 1 },
+      xp: 25
+    },
+    {
+      id: 'bread',
+      emoji: '🥐',
+      name: 'Köy Ekmeği / Pide',
+      desc: '2x 🌾 Buğday',
+      cost: { wheat: 2 },
+      xp: 20
+    },
+    {
+      id: 'pie',
+      emoji: '🥧',
+      name: 'Sebzeli Köy Böreği',
+      desc: '2x 🥚 Yumurta + 1x 🌶️ Biber + 1x 🥒 Kabak',
+      cost: { egg: 2, pepper: 1, cucumber: 1 },
+      xp: 35
+    },
+    {
+      id: 'fish_soup',
+      emoji: '🍲',
+      name: 'Usta Balıkçı Çorbası',
+      desc: '1x 🐟 Balık + 1x 🥕 Havuç + 1x 🍅 Domates',
+      cost: { fish: 1, carrot: 1, tomato: 1 },
+      xp: 40
+    },
     {
       id: 'jam',
       emoji: '🍯',
@@ -1034,11 +1074,39 @@
     return null;
   }
 
+  var _fishShadowMesh = null;
+
+  function createFishShadow(x, z){
+    if(_fishShadowMesh && _fishShadowMesh.parent) _fishShadowMesh.parent.remove(_fishShadowMesh);
+    var g = new THREE.Group();
+    var mat = new THREE.MeshBasicMaterial({ color: 0x0a2233, transparent: true, opacity: 0.65 });
+    var body = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.35, 6), mat);
+    body.rotation.x = Math.PI / 2;
+    g.add(body);
+    var finL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.06), mat);
+    finL.position.set(0.06, 0, 0.05);
+    finL.rotation.y = 0.4;
+    g.add(finL);
+    var finR = finL.clone();
+    finR.position.set(-0.06, 0, 0.05);
+    finR.rotation.y = -0.4;
+    g.add(finR);
+    g.position.set(x + 0.8, 0.04, z + 0.8);
+    g.scale.setScalar(0.9);
+    scene.add(g);
+    _fishShadowMesh = g;
+    return g;
+  }
+
   window.startFishingGame = function(pondPos){
     if(typeof window.closeAllPanelsAndDrawers === 'function') window.closeAllPanelsAndDrawers();
     ensureFishingDOM();
     if(_fishingState.bobber && _fishingState.bobber.parent){
       _fishingState.bobber.parent.remove(_fishingState.bobber);
+    }
+    if(_fishShadowMesh && _fishShadowMesh.parent){
+      _fishShadowMesh.parent.remove(_fishShadowMesh);
+      _fishShadowMesh = null;
     }
     var spot = findFishingSpot(pondPos);
     if(!spot){
@@ -1047,9 +1115,10 @@
     }
     _fishingState.pos.copy(spot);
     _fishingState.bobber = create3DBobber(spot.x, spot.z);
+    createFishShadow(spot.x, spot.z);
     _fishingState.active = true;
     _fishingState.bite = false;
-    _fishingState.timer = 2.0 + Math.random() * 2.2;
+    _fishingState.timer = 2.2 + Math.random() * 2.5;
     _fishingState.biteWindow = 0;
     _fishingState.rippleAcc = 0;
 
@@ -1060,7 +1129,7 @@
       hud.classList.add('open');
       hud.classList.remove('bite');
     }
-    if(txt) txt.textContent = '🎣 Olta suya atıldı... Şamandırayı izle!';
+    if(txt) txt.textContent = '🎣 Olta suya atıldı... Balık gölgesini izle!';
     if(btn) btn.textContent = '⏳ Bekle...';
     if(typeof sndWater === 'function') sndWater();
     if(typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
@@ -1081,17 +1150,48 @@
       window.startFishingGame(_fishingState.pos);
       return;
     }
-    // Başarılı balık yakalama!
+    // Başarılı balık yakalama — Çoklu Tür Mekaniği
     var pos = _fishingState.pos.clone();
     window.stopFishingGame();
-    window.addBarnItem('fish', 1);
-    window.spawnPetLoveFX(pos, '🐟');
-    var bonusCoin = 18 + Math.floor(Math.random() * 12);
+
+    var rand = Math.random();
+    var caughtId = 'fish';
+    var caughtName = 'Göl Balığı';
+    var caughtIcon = '🐟';
+    var bonusCoin = 25;
+    var bonusXP = 24;
+
+    if(rand < 0.08){
+      caughtId = 'fish_golden';
+      caughtName = 'Efsanevi Altın Sazan';
+      caughtIcon = '👑';
+      bonusCoin = 150;
+      bonusXP = 90;
+    } else if(rand < 0.28){
+      caughtId = 'fish_carp';
+      caughtName = 'Kızıl Sazan';
+      caughtIcon = '🔴';
+      bonusCoin = 80;
+      bonusXP = 50;
+    } else if(rand < 0.55){
+      caughtId = 'fish_trout';
+      caughtName = 'Gümüş Alabalık';
+      caughtIcon = '✨';
+      bonusCoin = 50;
+      bonusXP = 36;
+    }
+
+    window.addBarnItem(caughtId, 1);
+    if(typeof inventory !== 'undefined'){
+      inventory[caughtId] = (inventory[caughtId] || 0) + 1;
+      if(typeof window.save === 'function') window.save();
+    }
+    window.spawnPetLoveFX(pos, caughtIcon);
     if(typeof addCoin === 'function') addCoin(bonusCoin, true);
-    if(typeof addXP === 'function') addXP(24);
+    if(typeof addXP === 'function') addXP(bonusXP);
     if(typeof sndHarvest === 'function') sndHarvest();
     if(typeof window.triggerHaptic === 'function') window.triggerHaptic('harvest');
-    showToast('🐟 Harika! Taze Göl Balığı yakaladın! Ambara eklendi (+' + bonusCoin + '💰 +24 XP)');
+    showToast(caughtIcon + ' Harika! ' + caughtName + ' yakaladın! Ambara ve Çantana eklendi (+' + bonusCoin + '🟡 +' + bonusXP + ' XP)');
   };
 
   window.stopFishingGame = function(){
@@ -1101,6 +1201,10 @@
       _fishingState.bobber.parent.remove(_fishingState.bobber);
     }
     _fishingState.bobber = null;
+    if(_fishShadowMesh && _fishShadowMesh.parent){
+      _fishShadowMesh.parent.remove(_fishShadowMesh);
+      _fishShadowMesh = null;
+    }
     var hud = document.getElementById('fishingHud');
     if(hud){
       hud.classList.remove('open');
@@ -1118,6 +1222,13 @@
     // 0) 3D Balık Tutma Mini-Oyunu Güncellemesi
     if(_fishingState.active && _fishingState.bobber){
       _fishingState.rippleAcc += dt;
+      if(_fishShadowMesh){
+        var shAng = (now || 0) * 2.2;
+        var shRad = _fishingState.bite ? 0.12 : (0.55 + Math.sin((now || 0) * 3.0) * 0.25);
+        _fishShadowMesh.position.x = _fishingState.pos.x + Math.cos(shAng) * shRad;
+        _fishShadowMesh.position.z = _fishingState.pos.z + Math.sin(shAng) * shRad;
+        _fishShadowMesh.rotation.y = -shAng + Math.PI / 2;
+      }
       if(!_fishingState.bite){
         _fishingState.bobber.position.y = 0.09 + Math.sin((now || 0) * 3.5) * 0.025;
         if(_fishingState.rippleAcc >= 0.85){
