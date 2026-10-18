@@ -760,6 +760,9 @@ function buildScarecrow(x, z){
   return g;
 }
 function buildWild(x, z){
+  if(Math.abs(z - (-21.0)) < 3.0){
+    z = (z < -21.0 ? -24.8 : -17.2);
+  }
   if(typeof window.buildPerfectWild === 'function') return window.buildPerfectWild(x, z);
   var g = new THREE.Group();
   var rnd = gardenRand(x+11, z+6);
@@ -867,7 +870,13 @@ function mkWell(x,z){pushDeco(buildWell(x,z),'well');}
 function mkTable(x,z,a){pushDeco(buildTable(x,z,a),'table');}
 function mkWindmill(x,z){var o=buildWindmill(x,z); pushDeco(o.group,'windmill',{blades:o.blades});}
 function mkScarecrow(x,z){pushDeco(buildScarecrow(x,z),'scarecrow');}
-function mkWildFlower(x,z){pushDeco(buildWild(x,z),'flower_wild');}
+function mkWildFlower(x,z){
+  if(Math.abs(z - (-21.0)) < 3.0){
+    if(typeof showToast === 'function') showToast('🚂 Tren raylarının üzerine çiçek dikilemez!');
+    return;
+  }
+  pushDeco(buildWild(x,z),'flower_wild');
+}
 function mkHouse(x,z,angle){var o=buildHouse(x,z,angle); pushDeco(o.group,'house',{light:o.light});}
 
 function buildTrainStation(x, z, angle){
@@ -1589,6 +1598,24 @@ function clearDressProps(){
   wipe(window._millGroups);
   wipe(window._cozyDress);
   wipe(window._meadow);
+  // Clear any errant wild flowers sitting in the railroad tracks corridor (z = -21.0)
+  if(typeof scene !== 'undefined' && scene){
+    var errantBlooms = [];
+    scene.traverse(function(obj){
+      if(!obj || obj.name === 'ScenicTrainTracks' || (obj.parent && obj.parent.name === 'ScenicTrainTracks') || obj.userData.isTrain) return;
+      if(obj.userData && (obj.userData.heads || obj.userData.isWildFlower)){
+        var wp = new THREE.Vector3();
+        obj.getWorldPosition(wp);
+        if(Math.abs(wp.z - (-21.0)) < 3.0){
+          errantBlooms.push(obj);
+        }
+      }
+    });
+    errantBlooms.forEach(function(o){
+      if(o.parent) o.parent.remove(o);
+      else scene.remove(o);
+    });
+  }
   if(window._villageRoadGroup && window._villageRoadGroup.parent){
     window._villageRoadGroup.parent.remove(window._villageRoadGroup);
     window._villageRoadGroup = null;
@@ -1662,6 +1689,7 @@ function placeDressProps(){
     var ang = sprig() * Math.PI * 2, rad = 16 + sprig() * 12;
     var sx = Math.cos(ang) * rad, sz = Math.sin(ang) * rad;
     if(Math.abs(sx) < 14 && Math.abs(sz) < 13) continue;
+    if(Math.abs(sz - (-21.0)) < 3.2) continue; // NEVER spawn flowers on railroad tracks
     if(typeof buildWild === 'function' && window.modelPackReady && window.modelPackReady()){
       holder = buildWild(sx, sz);
     } else {

@@ -371,6 +371,9 @@
 
   // Dense wild flower patch — replaces Quaternius flower clusters.
   window.buildPerfectWild = function(x, z){
+    if(Math.abs(z - (-21.0)) < 3.0){
+      z = (z < -21.0 ? -24.8 : -17.2);
+    }
     var g = new THREE.Group();
     g.userData.heads = [];
     var seed = ((x * 97 + z * 53) * 1000) | 0;

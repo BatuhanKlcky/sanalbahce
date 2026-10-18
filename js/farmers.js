@@ -51,17 +51,13 @@
   function snapshotBindQuats(root){
     var bind = {};
     root.traverse(function(o){
-      if(!o.isBone) return;
+      if(!o.isBone && !(/^(Root|Hips|Abdomen|Torso|Chest|Neck|Head|Shoulder|UpperArm|LowerArm|Hand|UpperLeg|LowerLeg|Foot)/.test(o.name))) return;
       bind[o.name] = o.quaternion.clone();
+      var noDot = o.name.replace(/\.([LR])$/, '$1');
+      var withDot = o.name.replace(/([LR])$/, '.$1');
+      bind[noDot] = bind[o.name];
+      bind[withDot] = bind[o.name];
     });
-    if(Object.keys(bind).length < 8){
-      root.traverse(function(o){
-        if(!o.name || bind[o.name]) return;
-        if(/^(Root|Hips|Abdomen|Torso|Chest|Neck|Head|Shoulder|UpperArm|LowerArm|Hand|UpperLeg|LowerLeg|Foot)/.test(o.name)){
-          bind[o.name] = o.quaternion.clone();
-        }
-      });
-    }
     return bind;
   }
 
@@ -84,16 +80,26 @@
   }
 
   /**
-   * Farmer-bind-relative clips. Modular Farmer bind is a T-pose; Character pack
-   * Idle cannot be retargeted (Head bind −90° vs 0°, arms break). We author
-   * standing rest + walk/work as local euler deltas from Farmer bind.
-   * Bone names use GLTFLoader sanitization: UpperArm.L → UpperArmL.
+   * Farmer-bind-relative clips. Modular Farmer bind is a T-pose.
+   * We author standing rest (arms down along sides, soft elbows) + walk/work
+   * as local euler deltas from Farmer bind pose.
+   * Matches both sanitized (UpperArmL) and dotted (UpperArm.L) scene bone names.
    */
   function buildFarmerClips(root){
     var bind = snapshotBindQuats(root);
-    function B(name){ return bind[name] || new THREE.Quaternion(); }
-    function has(name){ return !!bind[name]; }
-    // Natural standing rest (arms down, soft elbows) — bind alone is T-pose.
+
+    function findActualBoneName(name){
+      if(root.getObjectByName(name)) return name;
+      var dot = name.replace(/([LR])$/, '.$1');
+      if(root.getObjectByName(dot)) return dot;
+      var noDot = name.replace(/\.([LR])$/, '$1');
+      if(root.getObjectByName(noDot)) return noDot;
+      var under = name.replace(/[\._]([LR])$/, '_$1');
+      if(root.getObjectByName(under)) return under;
+      return name;
+    }
+
+    // Natural standing rest (arms down, soft elbows) — bind alone is horizontal T-pose.
     var REST = {
       UpperArmL: [-78, 8, 22],
       UpperArmR: [-78, -8, -22],
@@ -112,14 +118,25 @@
       Neck: [0, 0, 0],
       Head: [0, 0, 0]
     };
+
+    function B(name){
+      var actual = findActualBoneName(name);
+      return bind[actual] || bind[name] || new THREE.Quaternion();
+    }
+    function has(name){
+      var actual = findActualBoneName(name);
+      return !!(bind[actual] || bind[name]);
+    }
     function R(name, dx, dy, dz){
-      var r = REST[name] || [0, 0, 0];
+      var actual = findActualBoneName(name);
+      var r = REST[name] || REST[actual] || [0, 0, 0];
       return bindDelta(B(name), r[0] + (dx || 0), r[1] + (dy || 0), r[2] + (dz || 0));
     }
     function restTrack(name, times, frames){
       if(!has(name)) return null;
+      var actual = findActualBoneName(name);
       var qs = frames.map(function(f){ return R(name, f[0], f[1], f[2]); });
-      return quatTrack(name, times, qs);
+      return quatTrack(actual, times, qs);
     }
 
     var clips = {};
@@ -397,22 +414,23 @@
     g.scale.setScalar(1.62 / h);
 
     body.updateMatrixWorld(true);
-    var clips = {};
+    body.traverse(function(c){
+      if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+    });
+    body.updateMatrixWorld(true);
+
+    // Build authored bind-relative clips (Idle, Walk, Duck, Punch, Wave) with natural lowered arms
+    var clips = buildFarmerClips(body);
+
+    // If glTF had extra animations (e.g. Run), preserve them without overwriting our fixed clips
     if(gltfAnimations && gltfAnimations.length > 0){
       gltfAnimations.forEach(function(clip){
         var shortName = clip.name.replace(/^Farmer\|/, '');
-        clips[shortName] = clip;
-        clips[clip.name] = clip;
+        if(!clips[shortName]){
+          clips[shortName] = clip;
+          clips[clip.name] = clip;
+        }
       });
-    }
-    // Fallback if gltf has no animations
-    if(!clips.Idle || !clips.Walk){
-      body.traverse(function(c){
-        if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
-      });
-      body.updateMatrixWorld(true);
-      var fallbackClips = buildFarmerClips(body);
-      clips = Object.assign(fallbackClips, clips);
     }
     var mixer = new THREE.AnimationMixer(body);
     onDone({ group: g, mixer: mixer, clips: clips, body: body });

@@ -627,7 +627,7 @@ function load(){
     else if(d.type==='table')mkTable(x,z,a);
     else if(d.type==='windmill')mkWindmill(x,z);
     else if(d.type==='scarecrow')mkScarecrow(x,z);
-    else if(d.type==='flower_wild')mkWildFlower(x,z);
+    else if(d.type==='flower_wild'){ if(Math.abs(z - (-21.0)) >= 2.8) mkWildFlower(x,z); }
     else if(d.type==='house')mkHouse(x,z,a);
     else if(d.type==='train_station' && typeof mkTrainStation==='function')mkTrainStation(x,z,a);
     else if(d.type==='mini_train' && typeof mkMiniTrain==='function')mkMiniTrain(x,z,a);
