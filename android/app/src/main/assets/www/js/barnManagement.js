@@ -336,14 +336,7 @@
       if(!a.group || a.group.visible === false) continue;
 
       if(a.mixer){
-        var aDistSq = cam ? a.group.position.distanceToSquared(cam.position) : 0;
-        if(aDistSq > 1400){
-          if((i + fc) % 4 === 0) a.mixer.update(dt * 4);
-        } else if(aDistSq > 600){
-          if((i + fc) % 3 === 0) a.mixer.update(dt * 3);
-        } else {
-          if((i + fc) % 2 === 0) a.mixer.update(dt * 2);
-        }
+        a.mixer.update(dt);
       }
 
       // Care timers

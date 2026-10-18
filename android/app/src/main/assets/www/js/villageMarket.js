@@ -477,14 +477,7 @@
       if(!c.active || !c.group || c.group.visible === false) continue;
 
       if(c.mixer){
-        var cDistSq = cam ? c.group.position.distanceToSquared(cam.position) : 0;
-        if(cDistSq > 1400){
-          if((i + fc) % 4 === 0) c.mixer.update(dt * 4);
-        } else if(cDistSq > 600){
-          if((i + fc) % 2 === 0) c.mixer.update(dt * 2);
-        } else {
-          c.mixer.update(dt);
-        }
+        c.mixer.update(dt);
       }
 
       if(c.state === 'walk_in' || c.state === 'walk_out'){

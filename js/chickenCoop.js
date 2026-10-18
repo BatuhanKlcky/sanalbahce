@@ -497,15 +497,8 @@
       var ch = chickens[i];
       if(!ch.group || ch.group.visible === false) continue;
 
-      var chDistSq = (ch.x - camX) * (ch.x - camX) + (ch.z - camZ) * (ch.z - camZ);
       if(ch.mixer){
-        if(chDistSq > 1200){
-          if((i + fc) % 4 === 0) ch.mixer.update(dt * 4);
-        } else if(chDistSq > 600){
-          if((i + fc) % 3 === 0) ch.mixer.update(dt * 3);
-        } else {
-          if((i + fc) % 2 === 0) ch.mixer.update(dt * 2);
-        }
+        ch.mixer.update(dt);
       }
 
       ch.timer -= dt;

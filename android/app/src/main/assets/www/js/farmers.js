@@ -165,8 +165,8 @@
 
     // Walk — authentic, upright walking cycle with natural arm & leg swing
     // In Farmer bind pose:
-    // UpperLegL & UpperLegR +Z rotates L-forward & R-backward. -Z rotates L-backward & R-forward.
-    // UpperArmL & UpperArmR +Z rotates L-backward & R-forward (contralateral arm swing!).
+    // UpperLeg swing forward/backward occurs in X (flexion/extension)
+    // UpperArm swing forward/backward occurs in Z (when arms are at sides)
     (function(){
       var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
@@ -174,24 +174,24 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      // Thighs: swing ±20° in Z
-      //           0.0s (L fwd, R back)   0.25s (passing)   0.5s (L back, R fwd)   0.75s (passing)   1.0s (loop)
-      add('UpperLegL', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
-      add('UpperLegR', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
+      // Thighs: alternate swing ±18° in X (forward/backward stride)
+      //               0.0s (L fwd, R back)   0.25s (passing)   0.5s (L back, R fwd)   0.75s (passing)   1.0s (loop)
+      add('UpperLegL', [[18,0,0],             [0,0,0],          [-18,0,0],             [0,0,0],          [18,0,0]]);
+      add('UpperLegR', [[-18,0,0],            [0,0,0],          [18,0,0],              [0,0,0],          [-18,0,0]]);
       // Knees: flex on passing / swing phase to clear the ground
-      add('LowerLegL', [[2,0,0],             [6,0,0],          [26,0,0],              [34,0,0],         [2,0,0]]);
-      add('LowerLegR', [[26,0,0],            [34,0,0],         [2,0,0],               [6,0,0],          [26,0,0]]);
-      // Arms: contralateral swing ±14° along torso, arms hanging naturally
-      add('UpperArmL', [[0,0,14],            [0,0,0],          [0,0,-14],             [0,0,0],          [0,0,14]]);
-      add('UpperArmR', [[0,0,14],            [0,0,0],          [0,0,-14],             [0,0,0],          [0,0,14]]);
-      add('LowerArmL', [[0,0,2],             [0,0,0],          [0,0,-8],              [0,0,0],          [0,0,2]]);
-      add('LowerArmR', [[0,0,8],             [0,0,0],          [0,0,-2],              [0,0,0],          [0,0,8]]);
-      add('ShoulderL', [[0,0,0],             [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
-      add('ShoulderR', [[0,0,0],             [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
+      add('LowerLegL', [[0,0,0],              [6,0,0],          [-22,0,0],             [0,0,0],          [0,0,0]]);
+      add('LowerLegR', [[-22,0,0],            [0,0,0],          [0,0,0],               [6,0,0],          [-22,0,0]]);
+      // Arms: contralateral swing ±18° along torso in Z
+      add('UpperArmL', [[0,0,-18],            [0,0,0],          [0,0,18],              [0,0,0],          [0,0,-18]]);
+      add('UpperArmR', [[0,0,18],             [0,0,0],          [0,0,-18],             [0,0,0],          [0,0,18]]);
+      add('LowerArmL', [[0,0,-8],             [0,0,0],          [0,0,4],               [0,0,0],          [0,0,-8]]);
+      add('LowerArmR', [[0,0,4],              [0,0,0],          [0,0,-8],              [0,0,0],          [0,0,4]]);
+      add('ShoulderL', [[0,0,0],              [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
+      add('ShoulderR', [[0,0,0],              [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
       // Pelvis & Spine: natural subtle counter-rotation and upright posture
-      add('Abdomen',   [[1.5,1.8,0],         [1.0,0,0],        [1.5,-1.8,0],          [1.0,0,0],        [1.5,1.8,0]]);
-      add('Torso',     [[0,-1.2,0],          [0,0,0],          [0,1.2,0],             [0,0,0],          [0,-1.2,0]]);
-      add('Head',      [[0,-0.4,0],          [0,0,0],          [0,0.4,0],             [0,0,0],          [0,-0.4,0]]);
+      add('Abdomen',   [[0,2.0,0],            [0,0,0],          [0,-2.0,0],            [0,0,0],          [0,2.0,0]]);
+      add('Torso',     [[0,-1.0,0],           [0,0,0],          [0,1.0,0],             [0,0,0],          [0,-1.0,0]]);
+      add('Head',      [[0,-0.4,0],           [0,0,0],          [0,0.4,0],             [0,0,0],          [0,-0.4,0]]);
       clips.Walk = new THREE.AnimationClip('Walk', 1.0, tracks);
     })();
 
@@ -203,17 +203,17 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('UpperLegL', [[0,0,28],            [0,0,0],          [0,0,-28],             [0,0,0],          [0,0,28]]);
-      add('UpperLegR', [[0,0,28],            [0,0,0],          [0,0,-28],             [0,0,0],          [0,0,28]]);
-      add('LowerLegL', [[4,0,0],             [10,0,0],         [36,0,0],              [44,0,0],         [4,0,0]]);
-      add('LowerLegR', [[36,0,0],            [44,0,0],         [4,0,0],               [10,0,0],         [36,0,0]]);
-      add('UpperArmL', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
-      add('UpperArmR', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
-      add('LowerArmL', [[0,0,4],             [0,0,-6],         [0,0,-16],             [0,0,-6],         [0,0,4]]);
-      add('LowerArmR', [[0,0,16],            [0,0,6],          [0,0,-4],              [0,0,6],          [0,0,16]]);
-      add('Abdomen',   [[3,2.5,0],           [2.5,0,0],        [3,-2.5,0],            [2.5,0,0],        [3,2.5,0]]);
-      add('Torso',     [[0,-1.8,0],          [0,0,0],          [0,1.8,0],             [0,0,0],          [0,-1.8,0]]);
-      add('Head',      [[0,-0.6,0],          [0,0,0],          [0,0.6,0],             [0,0,0],          [0,-0.6,0]]);
+      add('UpperLegL', [[28,0,0],             [0,0,0],          [-28,0,0],             [0,0,0],          [28,0,0]]);
+      add('UpperLegR', [[-28,0,0],            [0,0,0],          [28,0,0],              [0,0,0],          [-28,0,0]]);
+      add('LowerLegL', [[0,0,0],              [10,0,0],         [-34,0,0],             [0,0,0],          [0,0,0]]);
+      add('LowerLegR', [[-34,0,0],            [0,0,0],          [0,0,0],               [10,0,0],         [-34,0,0]]);
+      add('UpperArmL', [[0,0,-26],            [0,0,0],          [0,0,26],              [0,0,0],          [0,0,-26]]);
+      add('UpperArmR', [[0,0,26],             [0,0,0],          [0,0,-26],             [0,0,0],          [0,0,26]]);
+      add('LowerArmL', [[0,0,-14],            [0,0,-6],         [0,0,6],               [0,0,-6],         [0,0,-14]]);
+      add('LowerArmR', [[0,0,6],              [0,0,-6],         [0,0,-14],             [0,0,-6],         [0,0,6]]);
+      add('Abdomen',   [[0,3.5,0],            [0,0,0],          [0,-3.5,0],            [0,0,0],          [0,3.5,0]]);
+      add('Torso',     [[0,-1.6,0],           [0,0,0],          [0,1.6,0],             [0,0,0],          [0,-1.6,0]]);
+      add('Head',      [[0,-0.6,0],           [0,0,0],          [0,0.6,0],             [0,0,0],          [0,-0.6,0]]);
       clips.Run = new THREE.AnimationClip('Run', 0.7, tracks);
     })();
 
@@ -883,14 +883,7 @@
       if(!f.group || f.group.visible === false) continue;
       f.time += dt;
       if(f.mixer){
-        var fDistSq = (typeof camera !== 'undefined' && camera) ? f.group.position.distanceToSquared(camera.position) : 0;
-        if(fDistSq > 1600){
-          if((i + fc) % 4 === 0) f.mixer.update(dt * 4);
-        } else if(fDistSq > 625){
-          if((i + fc) % 3 === 0) f.mixer.update(dt * 3);
-        } else {
-          if((i + fc) % 2 === 0) f.mixer.update(dt * 2);
-        }
+        f.mixer.update(dt);
       }
 
       var terrY = (typeof window.getVillageTerrainHeight === 'function') ? window.getVillageTerrainHeight(f.group.position.x, f.group.position.z) : 0;
