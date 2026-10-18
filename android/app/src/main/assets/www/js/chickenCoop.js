@@ -199,14 +199,13 @@
     return root;
   }
 
-  // Load Chick model once, clone for instances
-  function loadChickGLTF(onDone){
-    if(_chickGltf){ onDone(_chickGltf); return; }
+  // Load Chick ArrayBuffer once, parse fresh for each instance to prevent bone matrix leaks
+  function loadChickBuffer(onDone){
+    if(_chickBuf){ onDone(_chickBuf); return; }
     if(typeof THREE === 'undefined' || !THREE.GLTFLoader){
-      setTimeout(function(){ loadChickGLTF(onDone); }, 200);
+      setTimeout(function(){ loadChickBuffer(onDone); }, 200);
       return;
     }
-    var loader = new THREE.GLTFLoader();
     var cleanUrl = CHICK_URL;
     var candidates = [
       cleanUrl,
@@ -216,17 +215,32 @@
     var cIdx = 0;
     function tryNext(){
       if(cIdx >= candidates.length){
-        console.warn('[ChickenCoop] Chick.glb could not be loaded, using procedural chick');
+        console.warn('[ChickenCoop] Chick.glb buffer failed, using procedural fallback');
         onDone(null);
         return;
       }
       var target = candidates[cIdx++];
-      loader.load(target, function(gltf){
-        _chickGltf = gltf;
-        onDone(gltf);
-      }, undefined, function(){
-        tryNext();
-      });
+      if(typeof fetch === 'function'){
+        fetch(target).then(function(r){
+          if(!r.ok) throw new Error(r.status);
+          return r.arrayBuffer();
+        }).then(function(buf){
+          _chickBuf = buf;
+          onDone(buf);
+        }).catch(function(){ tryNext(); });
+      } else {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', target, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(){
+          if(xhr.status === 200 || xhr.status === 0){
+            _chickBuf = xhr.response;
+            onDone(xhr.response);
+          } else tryNext();
+        };
+        xhr.onerror = tryNext;
+        xhr.send(null);
+      }
     }
     tryNext();
   }
@@ -285,61 +299,88 @@
       scale: 0.55 + Math.random() * 0.1
     };
 
-    loadChickGLTF(function(gltf){
-      if(!gltf || !gltf.scene){
+    loadChickBuffer(function(buf){
+      if(!buf){
         var proc = makeProceduralChick();
         ch.group = proc.group;
         ch.isProcedural = true;
-      } else {
-        var clone = THREE.SkeletonUtils ? THREE.SkeletonUtils.clone(gltf.scene) : gltf.scene.clone(true);
-        // Normalize size
-        var box = new THREE.Box3().setFromObject(clone);
-        var h = Math.max(0.1, box.max.y - box.min.y);
-        clone.position.y -= box.min.y;
-        var wrap = new THREE.Group();
-        wrap.add(clone);
-        wrap.scale.setScalar(0.6 / h);
-
-        ch.group = wrap;
-        if(gltf.animations && gltf.animations.length > 0){
-          ch.mixer = new THREE.AnimationMixer(clone);
-          var clip = gltf.animations[0];
-          ch.action = ch.mixer.clipAction(clip);
-          ch.action.play();
-        }
+        finishSpawn();
+        return;
       }
 
+      try {
+        new THREE.GLTFLoader().parse(buf.slice(0), '', function(gltf){
+          var body = gltf.scene;
+          var box = new THREE.Box3().setFromObject(body);
+          var h = Math.max(0.1, box.max.y - box.min.y);
+          body.position.y -= box.min.y;
+          var wrap = new THREE.Group();
+          wrap.add(body);
+          wrap.scale.setScalar(0.6 / h);
+
+          ch.group = wrap;
+          if(gltf.animations && gltf.animations.length > 0){
+            ch.mixer = new THREE.AnimationMixer(body);
+            ch.action = ch.mixer.clipAction(gltf.animations[0]);
+            ch.action.play();
+          }
+          finishSpawn();
+        }, function(){
+          var proc = makeProceduralChick();
+          ch.group = proc.group;
+          ch.isProcedural = true;
+          finishSpawn();
+        });
+      } catch(e){
+        var proc = makeProceduralChick();
+        ch.group = proc.group;
+        ch.isProcedural = true;
+        finishSpawn();
+      }
+    });
+
+    function finishSpawn(){
+      if(!ch.group) return;
       ch.group.position.set(ch.x, 0, ch.z);
       ch.group.rotation.y = ch.rotY;
       ch.group.traverse(function(c){
         if(c.isMesh){
-          c.castShadow = true;
-          c.receiveShadow = true;
+          c.frustumCulled = true;
+          c.castShadow = !isMobile;
+          c.receiveShadow = !isMobile;
         }
       });
       scene.add(ch.group);
-    });
+    }
 
     chickens.push(ch);
     return ch;
   }
 
-  // Create an egg on the ground or in nest
+  var _sharedEggMat = null;
+  var _sharedGlowMat = null;
+
+  // Create an egg on the ground or in nest (Zero GC overhead)
   function spawnEgg(x, y, z){
     var eggGroup = new THREE.Group();
-    var eggMat = new THREE.MeshStandardMaterial({
-      color: 0xfff6ea, roughness: 0.5, metalness: 0.05
-    });
-    var eggMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 10), eggMat);
+    if(!_sharedEggMat){
+      _sharedEggMat = new THREE.MeshStandardMaterial({
+        color: 0xfff6ea, roughness: 0.5, metalness: 0.05
+      });
+      _sharedGlowMat = new THREE.MeshBasicMaterial({
+        color: 0xffd23f, side: THREE.DoubleSide, transparent: true, opacity: 0.6
+      });
+    }
+    var eggMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), _sharedEggMat);
     eggMesh.scale.set(0.85, 1.25, 0.85);
     eggMesh.position.y = 0.12;
-    eggMesh.castShadow = true;
+    eggMesh.castShadow = !isMobile;
     eggGroup.add(eggMesh);
 
     // Soft glow ring underneath
     var glowRing = new THREE.Mesh(
-      new THREE.RingGeometry(0.08, 0.22, 16),
-      new THREE.MeshBasicMaterial({ color: 0xffd23f, side: THREE.DoubleSide, transparent: true, opacity: 0.6 })
+      new THREE.RingGeometry(0.08, 0.22, 12),
+      _sharedGlowMat
     );
     glowRing.rotation.x = -Math.PI / 2;
     glowRing.position.y = 0.02;
@@ -366,17 +407,20 @@
 
       if(coop.eggTimer >= interval){
         coop.eggTimer = 0;
-        // Max 6 uncollected eggs per coop in world to prevent clutter
-        var nearbyEggs = eggsInWorld.filter(function(e){
-          return e.position.distanceTo(coop.mesh.position) < 4.0;
-        });
-        if(nearbyEggs.length < 6){
+        // Count nearby eggs without allocating arrays
+        var nearbyCount = 0;
+        var cx = coop.x, cz = coop.z;
+        for(var ei = 0; ei < eggsInWorld.length; ei++){
+          var ep = eggsInWorld[ei].position;
+          if(Math.hypot(ep.x - cx, ep.z - cz) < 4.0) nearbyCount++;
+        }
+        if(nearbyCount < 6){
           var ox = (Math.random() - 0.5) * 2.2;
           var oz = (Math.random() - 0.5) * 2.2;
-          spawnEgg(coop.x + ox, 0, coop.z + oz);
+          spawnEgg(cx + ox, 0, cz + oz);
           playCluck();
           if(typeof showFloatingNotice === 'function'){
-            showFloatingNotice('🥚 Tavuklar taze bir yumurta yumurtladı!', coop.x, 1.5, coop.z);
+            showFloatingNotice('🥚 Tavuklar taze bir yumurta yumurtladı!', cx, 1.5, cz);
           }
         }
       }

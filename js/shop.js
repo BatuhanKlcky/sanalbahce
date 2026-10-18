@@ -42,7 +42,7 @@ function fetchAnimalArrayBuffer(url, cb){
     candidates.push(url);
     candidates.push(cleanRel + '?cb=' + Date.now());
   }
-  candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/' + cleanRel);
+  candidates.push('https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main/' + cleanRel);
   var idx = 0;
   function tryNext(lastErr){
     if(idx >= candidates.length){
@@ -471,30 +471,38 @@ var SHOP_ITEMS = {
     {id:'cherry',    emoji:'🌸', name:'Kiraz Çiçeği',  desc:'Japon kiraz çiçeği',           price:60,  color:0xffb7c5, type:'flower'},
   ],
   animals: [
-    {id:'animal_cow',       emoji:'🐮', name:'Süt İneği',      desc:'Otlar ve 🥛 Taze Süt üretir',       price:120, type:'animal', specKey:'cow'},
-    {id:'animal_alpaca',    emoji:'🦙', name:'Alpaka',         desc:'Gezinir ve 🧶 Yumuşak Yün üretir',  price:140, type:'animal', specKey:'alpaca'},
-    {id:'animal_chick',     emoji:'🐥', name:'Köy Civcivi',    desc:'Yemlenir ve 🥚 Yumurta üretir',     price:65,  type:'animal', specKey:'chick'},
-    {id:'animal_duck',      emoji:'🦆', name:'Gölet Ördeği',   desc:'Badi badi yürür, 🥚 Yumurta verir', price:85,  type:'animal', specKey:'duck'},
-    {id:'animal_horse',     emoji:'🐴', name:'Doru At',        desc:'Bahçede dörtnala koşan asil at',    price:220, type:'animal', specKey:'horse'},
-    {id:'animal_deer',      emoji:'🦌', name:'Orman Geyiği',   desc:'Zarif boynuzlu uysal geyik',        price:180, type:'animal', specKey:'deer'},
-    {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',       price:150, type:'animal', specKey:'fox'},
-    {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',        price:95,  type:'animal', specKey:'cat_van'},
-    {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',    price:110, type:'animal', specKey:'dog_shiba'},
+    {id:'animal_cow',       emoji:'🐮', name:'Süt İneği',      desc:'Otlar ve 🥛 Taze Süt üretir',       price:280, type:'animal', specKey:'cow'},
+    {id:'animal_alpaca',    emoji:'🦙', name:'Alpaka',         desc:'Gezinir ve 🧶 Yumuşak Yün üretir',  price:320, type:'animal', specKey:'alpaca'},
+    {id:'animal_chick',     emoji:'🐥', name:'Köy Civcivi',    desc:'Yemlenir ve 🥚 Yumurta üretir',     price:120, type:'animal', specKey:'chick'},
+    {id:'animal_duck',      emoji:'🦆', name:'Gölet Ördeği',   desc:'Badi badi yürür, 🥚 Yumurta verir', price:160, type:'animal', specKey:'duck'},
+    {id:'animal_horse',     emoji:'🐴', name:'Doru At',        desc:'Bahçede dörtnala koşan asil at',    price:550, type:'animal', specKey:'horse'},
+    {id:'animal_deer',      emoji:'🦌', name:'Orman Geyiği',   desc:'Zarif boynuzlu uysal geyik',        price:420, type:'animal', specKey:'deer'},
+    {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',       price:340, type:'animal', specKey:'fox'},
+    {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',        price:220, type:'animal', specKey:'cat_van'},
+    {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',    price:260, type:'animal', specKey:'dog_shiba'},
   ],
   items: [
-    {id:'golden_pot',   emoji:'🏆', name:'Altın Saksı',   desc:'Özel altın renkli saksı',    price:80,  deco:'golden_pot'},
-    {id:'crystal_pond', emoji:'💎', name:'Kristal Gölet', desc:'Parlayan mavi gölet',        price:120, deco:'crystal_pond'},
-    {id:'magic_lamp',   emoji:'🔮', name:'Sihirli Fener', desc:'Mor ışık saçan fener',       price:100, deco:'magic_lamp'},
-    {id:'rainbow_arch', emoji:'🌈', name:'Gökkuşağı Kemeri',desc:'Renkli taş kemer',        price:150, deco:'rainbow_arch'},
-    {id:'fountain',     emoji:'⛲', name:'Çeşme',         desc:'Şırıl şırıl çeşme',          price:200, deco:'fountain'},
-    {id:'treehouse',    emoji:'🏚️', name:'Ağaç Evi',     desc:'Mini ağaç üstü ev',           price:250, deco:'treehouse'},
+    {id:'golden_pot',       emoji:'🏆', name:'Altın Saksı',       desc:'Özel altın renkli saksı',         price:140,  deco:'golden_pot'},
+    {id:'crystal_pond',     emoji:'💎', name:'Kristal Gölet',     desc:'Parlayan mavi gölet',             price:240,  deco:'crystal_pond'},
+    {id:'magic_lamp',       emoji:'🔮', name:'Sihirli Fener',     desc:'Mor ışık saçan fener',            price:180,  deco:'magic_lamp'},
+    {id:'rainbow_arch',     emoji:'🌈', name:'Gökkuşağı Kemeri',  desc:'Renkli taş kemer',                price:280,  deco:'rainbow_arch'},
+    {id:'fountain',         emoji:'⛲', name:'Çeşme',             desc:'Şırıl şırıl çeşme',               price:360,  deco:'fountain'},
+    {id:'treehouse',        emoji:'🏚️', name:'Ağaç Evi',         desc:'Mini ağaç üstü ev',                price:480,  deco:'treehouse'},
+    {id:'oven',             emoji:'🏡', name:'Köy Taş Fırını',    desc:'Sıcak pide & ekmek fırını',       price:280,  deco:'oven'},
+    {id:'dairy_stand',      emoji:'🥛', name:'Ahşap Mandıra',     desc:'Süt güğümü ve yayık tezgahı',     price:320,  deco:'dairy_stand'},
+    {id:'hay_stack',        emoji:'🌾', name:'Büyük Saman Yığını',desc:'Sarı kokulu saman balyaları',     price:110,  deco:'hay_stack'},
+    {id:'chopping_block',   emoji:'🪵', name:'Odun Kırma Kütüğü', desc:'Kütük ve odun yığınları',        price:130,  deco:'chopping_block'},
+    {id:'street_lantern',   emoji:'🏮', name:'Köy Sokak Feneri',  desc:'Paslı demir fener direği',        price:85,   deco:'street_lantern'},
+    {id:'water_trough',     emoji:'⛲', name:'Taş Su Yalağı',     desc:'Hayvanlar için taze su teknesi',  price:170,  deco:'water_trough'},
+    {id:'beehive',          emoji:'🍯', name:'Arı Kovanı',        desc:'Bal arıları ve çiçekli kovan',    price:390,  deco:'beehive'},
+    {id:'wagon',            emoji:'🚜', name:'Ahşap Köy Arabası', desc:'Nostaljik tekerlekli araba',      price:250,  deco:'wagon'},
   ],
   special: [
-    {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı', desc:'Beyaz altın kanat ve hale', price:3500, special:true},
-    {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:1000, special:true},
-    {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:700, special:true},
-    {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:550, special:true},
-    {id:'firefly_jar', emoji:'🫙', name:'Ateşböceği Kavanozu',desc:'Geceleri ışıl ışıl',     price:480, special:true},
+    {id:'angel_wing', emoji:'🪽', name:'Melek Kanadı', desc:'Beyaz altın kanat ve hale', price:5000, special:true},
+    {id:'dragon_egg',  emoji:'🥚', name:'Ejder Yumurtası', desc:'Gizemli parlayan yumurta',  price:1800, special:true},
+    {id:'moonflower',  emoji:'🌕', name:'Ay Çiçeği',      desc:'Sadece gece açan çiçek',     price:1200, special:true},
+    {id:'golden_tree', emoji:'🌳', name:'Altın Ağaç',     desc:'Yaprakları altın döken ağaç',price:950, special:true},
+    {id:'firefly_jar', emoji:'🫙', name:'Ateşböceği Kavanozu',desc:'Geceleri ışıl ışıl',     price:750, special:true},
   ]
 };
 
@@ -640,6 +648,12 @@ window.placeShopDeco = function(tp, x, z, ang){
   else if(tp==='fountain') mkFountain(x,z);
   else if(tp==='treehouse') mkTreehouse(x,z);
   else if(tp==='angel_wing') mkAngelWing(x,z);
+  else if(tp==='oven' && typeof window.mkOven==='function') window.mkOven(x,z,ang);
+  else if(tp==='water_trough' && typeof window.mkWaterTrough==='function') window.mkWaterTrough(x,z,ang);
+  else if(tp==='chopping_block' && typeof window.mkChoppingBlock==='function') window.mkChoppingBlock(x,z);
+  else if(tp==='street_lantern' && typeof window.mkStreetLantern==='function') window.mkStreetLantern(x,z);
+  else if(tp==='beehive' && typeof window.mkBeehive==='function') window.mkBeehive(x,z,ang);
+  else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[tp] && typeof mkPackProp==='function') mkPackProp(tp,x,z,ang);
   else if(tp==='dragon_egg'||tp==='moonflower'||tp==='golden_tree'||tp==='firefly_jar'){
     var item = null;
     SHOP_ITEMS.special.forEach(function(s){ if(s.id===tp) item=s; });

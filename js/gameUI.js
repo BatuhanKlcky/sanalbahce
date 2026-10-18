@@ -303,6 +303,29 @@
       }
     }
 
+    // 1.48) Ahır ve Ahır Hayvanları (İnekler & Alpaka) Kontrolü
+    if(typeof cows !== 'undefined' && cows.length){
+      var cowMeshes = [];
+      cows.forEach(function(cw){
+        if(cw && cw.group && cw.group.parent){
+          cw.group.traverse(function(c){
+            if(c.isMesh){
+              c.userData.cowRef = cw;
+              cowMeshes.push(c);
+            }
+          });
+        }
+      });
+      var cwHits = _ray.intersectObjects(cowMeshes, true);
+      if(cwHits.length > 0){
+        var hitCw = cwHits[0].object.userData.cowRef;
+        if(hitCw && typeof window.openBarnDashboard === 'function'){
+          window.openBarnDashboard(hitCw.barn, hitCw);
+          return;
+        }
+      }
+    }
+
     // 1.5) Çiftçiler Kontrolü
     if(typeof farmers !== 'undefined' && farmers.length){
       var fMeshes = [];

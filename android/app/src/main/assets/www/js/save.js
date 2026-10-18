@@ -659,6 +659,11 @@ function load(){
     else if(d.type==='fountain')mkFountain(x,z);
     else if(d.type==='treehouse')mkTreehouse(x,z);
     else if(d.type==='angel_wing'||d.type==='angel_winggg')mkAngelWing(x,z);
+    else if(d.type==='oven' && typeof window.mkOven==='function') window.mkOven(x,z,a);
+    else if(d.type==='water_trough' && typeof window.mkWaterTrough==='function') window.mkWaterTrough(x,z,a);
+    else if(d.type==='chopping_block' && typeof window.mkChoppingBlock==='function') window.mkChoppingBlock(x,z);
+    else if(d.type==='street_lantern' && typeof window.mkStreetLantern==='function') window.mkStreetLantern(x,z);
+    else if(d.type==='beehive' && typeof window.mkBeehive==='function') window.mkBeehive(x,z,a);
     else if(d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar'){
       var sItem=null;
       if(typeof SHOP_ITEMS!=='undefined'&&SHOP_ITEMS.special){

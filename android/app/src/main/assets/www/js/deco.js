@@ -1117,6 +1117,183 @@ function mkGoldenLocomotive(x, z, a){
   pushDeco(o.group, 'golden_loco', { light: o.light });
 }
 
+// ── YENİ A-KALİTE ÇİFTLİK VE KÖY DEKORASYONLARI ──
+function buildOven(x, z, a){
+  var g = new THREE.Group();
+  var stoneMat = new THREE.MeshStandardMaterial({ color: 0x6e665e, roughness: 0.9 });
+  var brickMat = new THREE.MeshStandardMaterial({ color: 0x9c412e, roughness: 0.85 });
+  var ironMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.7, roughness: 0.3 });
+  var glowMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
+
+  // Stone base
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.95, 0.6, 12), stoneMat);
+  base.position.y = 0.3;
+  g.add(base);
+
+  // Dome oven
+  var dome = new THREE.Mesh(new THREE.SphereGeometry(0.75, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), brickMat);
+  dome.position.y = 0.6;
+  g.add(dome);
+
+  // Chimney
+  var chim = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.65, 8), stoneMat);
+  chim.position.set(0, 1.45, -0.2);
+  g.add(chim);
+
+  // Oven mouth opening
+  var mouth = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.2, 10), ironMat);
+  mouth.rotation.x = Math.PI / 2;
+  mouth.position.set(0, 0.75, 0.65);
+  g.add(mouth);
+
+  // Glowing embers inside
+  var ember = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), glowMat);
+  ember.position.set(0, 0.75, 0.6);
+  g.add(ember);
+
+  g.add(sitShadow(1.1));
+  g.position.set(x, 0, z);
+  g.rotation.y = a || 0;
+  return g;
+}
+function mkOven(x, z, a){
+  var g = buildOven(x, z, a);
+  pushDeco(g, 'oven');
+}
+
+function buildWaterTrough(x, z, a){
+  var g = new THREE.Group();
+  var stoneMat = new THREE.MeshStandardMaterial({ color: 0x5a5854, roughness: 0.95 });
+  var waterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.2 });
+
+  var basin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.45, 0.75), stoneMat);
+  basin.position.y = 0.23;
+  g.add(basin);
+
+  var water = new THREE.Mesh(new THREE.PlaneGeometry(1.22, 0.58), waterMat);
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = 0.38;
+  g.add(water);
+
+  g.add(sitShadow(1.0));
+  g.position.set(x, 0, z);
+  g.rotation.y = a || 0;
+  return g;
+}
+function mkWaterTrough(x, z, a){
+  var g = buildWaterTrough(x, z, a);
+  pushDeco(g, 'water_trough');
+}
+
+function buildChoppingBlock(x, z){
+  var g = new THREE.Group();
+  var barkMat = new THREE.MeshStandardMaterial({ color: 0x5a3e26, roughness: 0.9 });
+  var woodMat = new THREE.MeshStandardMaterial({ color: 0xcca068, roughness: 0.75 });
+  var metalMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
+
+  var log = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 0.55, 10), barkMat);
+  log.position.y = 0.28;
+  g.add(log);
+
+  // Axe stuck into log
+  var handle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.7, 6), woodMat);
+  handle.position.set(0.1, 0.7, 0);
+  handle.rotation.z = -0.4;
+  g.add(handle);
+
+  var blade = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.03), metalMat);
+  blade.position.set(0.04, 0.55, 0);
+  g.add(blade);
+
+  // Scattered split logs
+  for(var i = 0; i < 3; i++){
+    var split = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.35, 6), barkMat);
+    split.rotation.z = Math.PI / 2;
+    split.rotation.y = i * 1.8;
+    split.position.set((Math.random() - 0.5) * 0.7, 0.07, (Math.random() - 0.5) * 0.7);
+    g.add(split);
+  }
+
+  g.add(sitShadow(0.7));
+  g.position.set(x, 0, z);
+  return g;
+}
+function mkChoppingBlock(x, z){
+  var g = buildChoppingBlock(x, z);
+  pushDeco(g, 'chopping_block');
+}
+
+function buildStreetLantern(x, z){
+  var g = new THREE.Group();
+  var ironMat = new THREE.MeshStandardMaterial({ color: 0x27272a, metalness: 0.8, roughness: 0.4 });
+  var glassMat = new THREE.MeshBasicMaterial({ color: 0xffd23f });
+
+  // Post
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.07, 2.4, 8), ironMat);
+  pole.position.y = 1.2;
+  g.add(pole);
+
+  // Lantern head
+  var lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.1, 0.32, 6), glassMat);
+  lamp.position.y = 2.4;
+  g.add(lamp);
+
+  var cap = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.15, 6), ironMat);
+  cap.position.y = 2.62;
+  g.add(cap);
+
+  g.add(sitShadow(0.65));
+  g.position.set(x, 0, z);
+  return g;
+}
+function mkStreetLantern(x, z){
+  var g = buildStreetLantern(x, z);
+  pushDeco(g, 'street_lantern');
+}
+
+function buildBeehive(x, z, a){
+  var g = new THREE.Group();
+  var woodMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.8 });
+  var roofMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+
+  // Stilts
+  [-0.22, 0.22].forEach(function(px){
+    [-0.22, 0.22].forEach(function(pz){
+      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.3, 4), roofMat);
+      leg.position.set(px, 0.15, pz);
+      g.add(leg);
+    });
+  });
+
+  // Hive boxes
+  var box1 = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.3, 0.55), woodMat);
+  box1.position.y = 0.45;
+  g.add(box1);
+
+  var box2 = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.3, 0.52), woodMat);
+  box2.position.y = 0.75;
+  g.add(box2);
+
+  // Slanted roof
+  var roof = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.06, 0.62), roofMat);
+  roof.position.y = 0.93;
+  g.add(roof);
+
+  // Flight hole
+  var slit = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 0.02), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  slit.position.set(0, 0.45, 0.28);
+  g.add(slit);
+
+  g.add(sitShadow(0.75));
+  g.position.set(x, 0, z);
+  g.rotation.y = a || 0;
+  return g;
+}
+function mkBeehive(x, z, a){
+  var g = buildBeehive(x, z, a);
+  pushDeco(g, 'beehive');
+}
+
 /** Placeable Quaternius pack props (catalog key + fit height). */
 var PACK_PROPS = {
   pine:       { keys:['pine_4','pine_5','pine_1','pine_2','pine_3'], h:3.4, shadow:1.1, spin:true },
@@ -1148,7 +1325,10 @@ var PACK_PROPS = {
   stairs:     { keys:['stairs'], h:1.2, shadow:0.7 },
   blacksmith: { keys:['blacksmith'], h:3.8, shadow:2.0 },
   bell:       { keys:['bell'], h:1.4, shadow:0.5, spin:true },
-  sawmill:    { keys:['sawmill'], h:3.6, shadow:2.0 }
+  sawmill:    { keys:['sawmill'], h:3.6, shadow:2.0 },
+  hay_stack:  { keys:['hay'], h:1.6, shadow:1.0, spin:true },
+  wagon:      { keys:['cart'], h:1.6, shadow:1.2 },
+  dairy_stand:{ keys:['stand_2','stand'], h:2.1, shadow:1.3 }
 };
 
 function mkPackProp(type, x, z, ang){

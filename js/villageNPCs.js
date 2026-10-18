@@ -365,10 +365,7 @@
       }
     });
 
-    // Glowing warm fire light under pot
-    var fireGlow = new THREE.PointLight(0xff6600, 1.2, 3.5);
-    fireGlow.position.set(1.2, 0.25, -0.4);
-    g.add(fireGlow);
+    // Glowing warm fire embers under pot (zero GPU overhead)
 
     var coals = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.35, 0.1, 8),

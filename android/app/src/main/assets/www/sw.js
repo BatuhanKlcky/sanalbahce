@@ -1,4 +1,4 @@
-var CACHE = 'sanalbahce-shell-40';
+var CACHE = 'sanalbahce-shell-41';
 var LOCAL = [
   './',
   './index.html',
@@ -25,6 +25,7 @@ var LOCAL = [
   './js/farmers.js',
   './js/chickenCoop.js',
   './js/villageNPCs.js',
+  './js/barnManagement.js',
   './js/visualFX.js',
   './js/codex.js',
   './js/gameUI.js',

@@ -432,6 +432,10 @@ function animate(){
     try{ window.stepVillageNPCs(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepVillageNPCs', e); }
   }
+  if(typeof window.stepBarn==='function'){
+    try{ window.stepBarn(dt, now); }
+    catch(e){ if(!_fc||_fc%300===1) console.warn('stepBarn', e); }
+  }
   if(typeof window.stepVisualFX==='function'){
     try{ window.stepVisualFX(dt, now); }
     catch(e){ if(!_fc||_fc%300===1) console.warn('stepVisualFX', e); }
@@ -568,6 +572,9 @@ function bootGame(){
 
   // Initialize Village NPCs (Balıkçı Reis at Pier & Aşçı Usta at Market)
   if(typeof window.initVillageNPCs === 'function') window.initVillageNPCs();
+
+  // Initialize Grand Barn & Dairy System
+  if(typeof window.initBarnSystem === 'function') window.initBarnSystem();
 }
 animate();
 if(typeof window.whenModelsReady==='function') window.whenModelsReady(bootGame);
