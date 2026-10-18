@@ -444,15 +444,6 @@
     eggMesh.castShadow = !isMobile;
     eggGroup.add(eggMesh);
 
-    // Soft glow ring underneath
-    var glowRing = new THREE.Mesh(
-      new THREE.RingGeometry(0.08, 0.22, 12),
-      _sharedGlowMat
-    );
-    glowRing.rotation.x = -Math.PI / 2;
-    glowRing.position.y = 0.02;
-    eggGroup.add(glowRing);
-
     eggGroup.position.set(x, y || 0, z);
     eggGroup.userData.isEgg = true;
     eggGroup.userData.created = Date.now();

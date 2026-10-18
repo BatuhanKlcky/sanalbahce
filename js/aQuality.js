@@ -828,21 +828,8 @@
   }
 
   function spawnWaterRipple(){
-    if(typeof scene === 'undefined') return;
-    var rx = 10.8, rz = -6.5;
-    if(typeof decos !== 'undefined' && decos.length){
-      var ponds = decos.filter(function(d){
-        return d && d.group && d.group.visible !== false && (d.type === 'pond' || d.type === 'crystal_pond');
-      });
-      if(ponds.length > 0){
-        var p = ponds[Math.floor(Math.random() * ponds.length)];
-        rx = p.group.position.x + (Math.random() - 0.5) * 0.8;
-        rz = p.group.position.z + (Math.random() - 0.5) * 0.8;
-      }
-    }
-    var item = getPooledRippleMesh(0xd8f6ff, 0.55);
-    item.mesh.position.set(rx, 0.055, rz);
-    waterRipples.push({ mesh: item.mesh, mat: item.mat, age: 0, maxAge: 1.8 });
+    // Disabled: prevents unwanted concentric rings appearing on the ground
+    return;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1143,6 +1130,264 @@
     waterRipples.push({ mesh: item.mesh, mat: item.mat, age: 0, maxAge: 1.5 });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 🎣 STARDREW VALLEY STYLE FISHING REEL TENSION MINIGAME
+  // ═══════════════════════════════════════════════════════════════════════════
+  var _reelGame = {
+    active: false,
+    el: null,
+    barPos: 0.20,      // 0.0 (bottom) to 1.0 (top)
+    barVel: 0,
+    barH: 0.28,        // green bar covers 28% of track height
+    fishPos: 0.45,
+    fishTarget: 0.5,
+    fishVel: 0,
+    fishTimer: 0,
+    progress: 0.35,    // 0.0 to 1.0 (starts at 35%)
+    isPressing: false,
+    caughtFish: null,
+    tickTimer: 0
+  };
+
+  function playReelTickSound(pitch){
+    try {
+      if(window.audioCtx && window.audioCtx.state === 'running'){
+        var ctx = window.audioCtx;
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(pitch || 520, ctx.currentTime);
+        g.gain.setValueAtTime(0.035, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.045);
+      }
+    } catch(e){}
+  }
+
+  function startReelMinigame(){
+    var rand = Math.random();
+    var caught = {
+      id: 'fish',
+      name: 'Taze Göl Balığı',
+      icon: '🐟',
+      bonusCoin: 30,
+      bonusXP: 25,
+      difficulty: 0.8
+    };
+
+    if(rand < 0.10){
+      caught.id = 'fish_golden';
+      caught.name = 'Efsanevi Altın Sazan';
+      caught.icon = '👑';
+      caught.bonusCoin = 160;
+      caught.bonusXP = 95;
+      caught.difficulty = 1.45;
+    } else if(rand < 0.32){
+      caught.id = 'fish_carp';
+      caught.name = 'Kızıl Sazan';
+      caught.icon = '🔴';
+      caught.bonusCoin = 85;
+      caught.bonusXP = 55;
+      caught.difficulty = 1.18;
+    } else if(rand < 0.65){
+      caught.id = 'fish_trout';
+      caught.name = 'Gümüş Alabalık';
+      caught.icon = '✨';
+      caught.bonusCoin = 55;
+      caught.bonusXP = 38;
+      caught.difficulty = 0.95;
+    }
+
+    _reelGame.active = true;
+    _reelGame.barPos = 0.20;
+    _reelGame.barVel = 0;
+    _reelGame.barH = (caught.difficulty > 1.2) ? 0.24 : 0.28;
+    _reelGame.fishPos = 0.45;
+    _reelGame.fishTarget = 0.50;
+    _reelGame.fishTimer = 0.4;
+    _reelGame.progress = 0.35;
+    _reelGame.isPressing = false;
+    _reelGame.caughtFish = caught;
+
+    if(_reelGame.el) _reelGame.el.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'fishingReelModal';
+    modal.style.cssText = 'position:fixed;right:20px;bottom:24px;z-index:99999;background:rgba(15,23,42,0.95);border:2px solid #38bdf8;border-radius:24px;padding:16px 18px;color:#fff;box-shadow:0 20px 45px rgba(0,0,0,0.65);backdrop-filter:blur(12px);font-family:system-ui,-apple-system,sans-serif;width:290px;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;';
+
+    modal.innerHTML = ''
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      + '  <div style="font-size:15px;font-weight:800;color:#7dd3fc;display:flex;align-items:center;gap:6px;">'
+      + '    <span>🎣</span> <span>' + caught.name + '</span>'
+      + '  </div>'
+      + '  <button id="closeReelBtn" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:2px 6px;">✕</button>'
+      + '</div>'
+      + '<div style="font-size:12px;color:#cbd5e1;margin-bottom:12px;line-height:1.4;">'
+      + '  👆 <b>Dokunup basılı tutarak</b> yeşil çubuğu balığın üzerinde tut!'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:14px;">'
+      + '  <!-- Reeling Su Kanalı (Track) -->'
+      + '  <div id="reelTrack" style="width:56px;height:220px;background:linear-gradient(180deg,#0369a1,#075985 60%,#0c4a6e);border:2px solid #38bdf8;border-radius:14px;position:relative;overflow:hidden;box-shadow:inset 0 0 16px rgba(0,0,0,0.5);cursor:pointer;">'
+      + '    <!-- Yeşil Gerilim Çubuğu -->'
+      + '    <div id="reelGreenBar" style="position:absolute;left:2px;right:2px;bottom:20%;height:' + (_reelGame.barH * 100) + '%;background:linear-gradient(180deg,rgba(74,222,128,0.9),rgba(34,197,94,0.95));border:2px solid #86efac;border-radius:8px;box-shadow:0 0 12px rgba(74,222,128,0.7);pointer-events:none;"></div>'
+      + '    <!-- Yüzen Balık -->'
+      + '    <div id="reelFishIcon" style="position:absolute;left:50%;bottom:45%;transform:translate(-50%,50%);font-size:24px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));pointer-events:none;">' + caught.icon + '</div>'
+      + '  </div>'
+      + '  <!-- İlerleme Barı (Catch Meter) -->'
+      + '  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">'
+      + '    <div style="font-size:11px;font-weight:700;color:#a7f3d0;" id="reelProgTxt">35%</div>'
+      + '    <div style="width:16px;height:200px;background:#0f172a;border:2px solid #64748b;border-radius:10px;position:relative;overflow:hidden;">'
+      + '      <div id="reelProgBar" style="position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(0deg,#f59e0b,#10b981);box-shadow:0 0 8px #10b981;border-radius:6px;transition:height 0.05s linear;"></div>'
+      + '    </div>'
+      + '    <div style="font-size:14px;">🎯</div>'
+      + '  </div>'
+      + '</div>'
+      + '<button id="reelHoldBtn" style="width:100%;background:linear-gradient(135deg,#0284c7,#0369a1);border:2px solid #38bdf8;color:#fff;border-radius:14px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(2,132,199,0.4);user-select:none;">'
+      + '  🎣 YUKARI ÇEK (BASILI TUT)'
+      + '</button>';
+
+    document.body.appendChild(modal);
+    _reelGame.el = modal;
+
+    var holdBtn = document.getElementById('reelHoldBtn');
+    var track = document.getElementById('reelTrack');
+
+    function startPress(e){
+      if(e.cancelable) e.preventDefault();
+      _reelGame.isPressing = true;
+      holdBtn.style.transform = 'scale(0.96)';
+      holdBtn.style.background = 'linear-gradient(135deg,#0369a1,#075985)';
+    }
+    function endPress(e){
+      _reelGame.isPressing = false;
+      holdBtn.style.transform = 'scale(1)';
+      holdBtn.style.background = 'linear-gradient(135deg,#0284c7,#0369a1)';
+    }
+
+    holdBtn.addEventListener('mousedown', startPress);
+    window.addEventListener('mouseup', endPress);
+    holdBtn.addEventListener('touchstart', startPress, { passive: false });
+    window.addEventListener('touchend', endPress, { passive: false });
+
+    track.addEventListener('mousedown', startPress);
+    track.addEventListener('touchstart', startPress, { passive: false });
+
+    document.getElementById('closeReelBtn').onclick = function(){
+      finishReelMinigame(false);
+    };
+
+    var hud = document.getElementById('fishingHud');
+    if(hud) hud.classList.remove('open');
+  }
+
+  function stepReelMinigame(dt){
+    if(!_reelGame.active) return;
+    if(dt > 0.1) dt = 0.1;
+
+    var g = _reelGame;
+    // 1. Bar Physics
+    var gravity = 1.35;
+    var lift = g.isPressing ? 2.5 : 0;
+    g.barVel += (lift - gravity) * dt;
+    g.barVel *= 0.93; // Air/water damping
+    g.barPos += g.barVel * dt;
+
+    var maxBar = 1.0 - g.barH;
+    if(g.barPos < 0){
+      g.barPos = 0;
+      if(g.barVel < 0) g.barVel = -g.barVel * 0.25;
+    } else if(g.barPos > maxBar){
+      g.barPos = maxBar;
+      if(g.barVel > 0) g.barVel = -g.barVel * 0.25;
+    }
+
+    // 2. Fish AI
+    g.fishTimer -= dt;
+    if(g.fishTimer <= 0){
+      g.fishTimer = 0.7 + Math.random() * 1.3;
+      g.fishTarget = 0.08 + Math.random() * 0.84;
+      g.fishSpeed = (0.55 + Math.random() * 0.75) * (g.caughtFish ? g.caughtFish.difficulty : 1.0);
+    }
+    var fishDiff = g.fishTarget - g.fishPos;
+    var fishStep = Math.sign(fishDiff) * Math.min(Math.abs(fishDiff), g.fishSpeed * dt);
+    g.fishPos += fishStep;
+    g.fishPos = Math.max(0.04, Math.min(0.96, g.fishPos));
+
+    // 3. Catch progress check (is fish inside green bar?)
+    var isInside = (g.fishPos >= g.barPos - 0.03 && g.fishPos <= g.barPos + g.barH + 0.03);
+
+    if(isInside){
+      g.progress += dt * 0.20;
+      g.tickTimer = (g.tickTimer || 0) + dt;
+      if(g.tickTimer >= 0.12){
+        g.tickTimer = 0;
+        playReelTickSound(440 + Math.round(g.progress * 400));
+        if(typeof window.triggerHaptic === 'function') window.triggerHaptic('light');
+      }
+    } else {
+      g.progress -= dt * 0.16;
+    }
+
+    g.progress = Math.max(0, Math.min(1.0, g.progress));
+
+    // Update Visuals
+    var barEl = document.getElementById('reelGreenBar');
+    var fishEl = document.getElementById('reelFishIcon');
+    var progBar = document.getElementById('reelProgBar');
+    var progTxt = document.getElementById('reelProgTxt');
+
+    if(barEl){
+      barEl.style.bottom = (g.barPos * 100) + '%';
+      barEl.style.boxShadow = isInside ? '0 0 16px rgba(74,222,128,0.95)' : '0 0 6px rgba(239,68,68,0.6)';
+      barEl.style.borderColor = isInside ? '#86efac' : '#f87171';
+    }
+    if(fishEl){
+      fishEl.style.bottom = (g.fishPos * 100) + '%';
+    }
+    if(progBar && progTxt){
+      var pct = Math.round(g.progress * 100);
+      progBar.style.height = pct + '%';
+      progTxt.textContent = pct + '%';
+      progTxt.style.color = isInside ? '#a7f3d0' : '#fca5a5';
+    }
+
+    // Check Win / Lose
+    if(g.progress >= 1.0){
+      finishReelMinigame(true);
+    } else if(g.progress <= 0.0){
+      finishReelMinigame(false);
+    }
+  }
+
+  function finishReelMinigame(win){
+    var g = _reelGame;
+    g.active = false;
+    if(g.el) g.el.remove();
+    g.el = null;
+
+    var pos = _fishingState.pos.clone();
+    window.stopFishingGame();
+
+    if(win && g.caughtFish){
+      var f = g.caughtFish;
+      window.addBarnItem(f.id, 1);
+      if(typeof inventory !== 'undefined'){
+        inventory[f.id] = (inventory[f.id] || 0) + 1;
+        if(typeof window.save === 'function') window.save();
+      }
+      window.spawnPetLoveFX(pos, f.icon);
+      if(typeof addCoin === 'function') addCoin(f.bonusCoin, true);
+      if(typeof addXP === 'function') addXP(f.bonusXP);
+      if(typeof sndHarvest === 'function') sndHarvest();
+      if(typeof window.triggerHaptic === 'function') window.triggerHaptic('harvest');
+      showToast(f.icon + ' Tebrikler! ' + f.name + ' yakaladın! (+ ' + f.bonusCoin + ' 🟡 +' + f.bonusXP + ' XP)');
+    } else {
+      if(typeof showNotice === 'function') showNotice('🐟 Balık iğneden kurtuldu ve kaçtı! Tekrar şansını dene.');
+      else showToast('🐟 Balık iğneden kurtuldu ve kaçtı!');
+    }
+  }
+
   window.pullFishingRod = function(){
     if(!_fishingState.active) return;
     if(!_fishingState.bite){
@@ -1150,51 +1395,15 @@
       window.startFishingGame(_fishingState.pos);
       return;
     }
-    // Başarılı balık yakalama — Çoklu Tür Mekaniği
-    var pos = _fishingState.pos.clone();
-    window.stopFishingGame();
-
-    var rand = Math.random();
-    var caughtId = 'fish';
-    var caughtName = 'Göl Balığı';
-    var caughtIcon = '🐟';
-    var bonusCoin = 25;
-    var bonusXP = 24;
-
-    if(rand < 0.08){
-      caughtId = 'fish_golden';
-      caughtName = 'Efsanevi Altın Sazan';
-      caughtIcon = '👑';
-      bonusCoin = 150;
-      bonusXP = 90;
-    } else if(rand < 0.28){
-      caughtId = 'fish_carp';
-      caughtName = 'Kızıl Sazan';
-      caughtIcon = '🔴';
-      bonusCoin = 80;
-      bonusXP = 50;
-    } else if(rand < 0.55){
-      caughtId = 'fish_trout';
-      caughtName = 'Gümüş Alabalık';
-      caughtIcon = '✨';
-      bonusCoin = 50;
-      bonusXP = 36;
-    }
-
-    window.addBarnItem(caughtId, 1);
-    if(typeof inventory !== 'undefined'){
-      inventory[caughtId] = (inventory[caughtId] || 0) + 1;
-      if(typeof window.save === 'function') window.save();
-    }
-    window.spawnPetLoveFX(pos, caughtIcon);
-    if(typeof addCoin === 'function') addCoin(bonusCoin, true);
-    if(typeof addXP === 'function') addXP(bonusXP);
-    if(typeof sndHarvest === 'function') sndHarvest();
-    if(typeof window.triggerHaptic === 'function') window.triggerHaptic('harvest');
-    showToast(caughtIcon + ' Harika! ' + caughtName + ' yakaladın! Ambara ve Çantana eklendi (+' + bonusCoin + '🟡 +' + bonusXP + ' XP)');
+    startReelMinigame();
   };
 
   window.stopFishingGame = function(){
+    if(_reelGame && _reelGame.active){
+      _reelGame.active = false;
+      if(_reelGame.el) _reelGame.el.remove();
+      _reelGame.el = null;
+    }
     _fishingState.active = false;
     _fishingState.bite = false;
     if(_fishingState.bobber && _fishingState.bobber.parent){
@@ -1218,6 +1427,11 @@
   var _winLightTick = 0;
   window.stepAQuality = function(dt, now){
     if(!(dt > 0)) return;
+
+    // Gerilim Çubuğu Balık Tutma Mini-Oyunu
+    if(_reelGame && _reelGame.active){
+      stepReelMinigame(dt);
+    }
 
     // 0) 3D Balık Tutma Mini-Oyunu Güncellemesi
     if(_fishingState.active && _fishingState.bobber){
@@ -1322,12 +1536,7 @@
       }
     }
 
-    // 4) Canlı 3D Su Dalgaları (Ripples)
-    _rippleSpawnAcc += dt;
-    if(_rippleSpawnAcc >= 1.6){
-      _rippleSpawnAcc = 0;
-      if(waterRipples.length < 4) spawnWaterRipple();
-    }
+    // 4) Su Dalgaları (Sadece olta atıldığında gölette küçük dalga)
     for(var ri = waterRipples.length - 1; ri >= 0; ri--){
       var rp = waterRipples[ri];
       rp.age += dt;
@@ -1338,9 +1547,9 @@
         continue;
       }
       var ru = rp.age / rp.maxAge;
-      var rScale = 1 + ru * 7.5;
+      var rScale = 1 + ru * 2.5;
       rp.mesh.scale.set(rScale, rScale, 1);
-      rp.mat.opacity = (1 - ru) * 0.45;
+      rp.mat.opacity = (1 - ru) * 0.35;
     }
 
     // 5) Gece Sıcak Pencere Işıkları (her ~1.5 saniyede kontrol)

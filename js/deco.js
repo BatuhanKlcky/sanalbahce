@@ -1589,6 +1589,10 @@ function clearDressProps(){
   wipe(window._millGroups);
   wipe(window._cozyDress);
   wipe(window._meadow);
+  if(window._villageRoadGroup && window._villageRoadGroup.parent){
+    window._villageRoadGroup.parent.remove(window._villageRoadGroup);
+    window._villageRoadGroup = null;
+  }
   window._mills = [];
   window._dress = [];
   window._dressStones = [];
@@ -1724,7 +1728,86 @@ function dressCozyIsland(){
     window._cozyDress.push(mill.group);
     if(mill.blades) window._mills.push(mill.blades);
   }
+function buildVillageRoadNetwork(){
+  if(window._villageRoadGroup && window._villageRoadGroup.parent){
+    window._villageRoadGroup.parent.remove(window._villageRoadGroup);
+  }
+  var g = new THREE.Group();
+  g.name = 'VillageRoadNetwork';
+
+  var roadMat = kept(0x736150, 0.95); // Natural warm compacted earth/cobblestone
+  var curbMat = kept(0x8a7b6b, 0.9);
+
+  // 1. Central North-South Avenue: from garden entrance (z = 9.8) down to crossroads (z = 18.0)
+  var northPath = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 8.4), roadMat);
+  northPath.position.set(0, 0.02, 13.9);
+  northPath.receiveShadow = !isMobile;
+  g.add(northPath);
+
+  // 2. West Village Promenade: from crossroads (0, 18.0) to Village Market Square (-21.5, 18.0)
+  var westPath = new THREE.Mesh(new THREE.BoxGeometry(21.5, 0.04, 2.0), roadMat);
+  westPath.position.set(-10.75, 0.02, 18.0);
+  westPath.receiveShadow = !isMobile;
+  g.add(westPath);
+
+  // 3. East Village Promenade: from crossroads (0, 18.0) to Village Kitchen & Bakery (17.5, 18.0)
+  var eastPath = new THREE.Mesh(new THREE.BoxGeometry(17.5, 0.04, 2.0), roadMat);
+  eastPath.position.set(8.75, 0.02, 18.0);
+  eastPath.receiveShadow = !isMobile;
+  g.add(eastPath);
+
+  // 4. Central Crossroads Plaza at (0, 18.0)
+  var plaza = new THREE.Mesh(new THREE.CircleGeometry(1.85, 16), roadMat);
+  plaza.rotation.x = -Math.PI / 2;
+  plaza.position.set(0, 0.022, 18.0);
+  plaza.receiveShadow = !isMobile;
+  g.add(plaza);
+
+  // 5. Organic Curb & Stepping Stones along the road borders
+  // Along West road
+  for(var wx = -1.5; wx >= -20.5; wx -= 2.2){
+    var cN = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cN.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
+    cN.rotation.y = Math.random() * Math.PI;
+    g.add(cN);
+
+    var cS = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cS.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
+    cS.rotation.y = Math.random() * Math.PI;
+    g.add(cS);
+  }
+
+  // Along East road
+  for(var ex = 1.5; ex <= 16.5; ex += 2.2){
+    var cNe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cNe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
+    cNe.rotation.y = Math.random() * Math.PI;
+    g.add(cNe);
+
+    var cSe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cSe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
+    cSe.rotation.y = Math.random() * Math.PI;
+    g.add(cSe);
+  }
+
+  // Along North road
+  for(var nz = 10.5; nz <= 17.0; nz += 2.0){
+    var cW = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cW.position.set(-1.1 + (Math.random() - 0.5) * 0.15, 0.025, nz);
+    cW.rotation.y = Math.random() * Math.PI;
+    g.add(cW);
+
+    var cE = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
+    cE.position.set(1.1 + (Math.random() - 0.5) * 0.15, 0.025, nz);
+    cE.rotation.y = Math.random() * Math.PI;
+    g.add(cE);
+  }
+
+  scene.add(g);
+  window._villageRoadGroup = g;
+  return g;
 }
+window.buildVillageRoadNetwork = buildVillageRoadNetwork;
 
 function dressGarden(){
   window._dress = [];
@@ -1746,10 +1829,7 @@ function dressGarden(){
   soilBed(-8.2, -1.3, 3.15);
   soilBed(8.2, -1.3, 3.15);
   soilBed(0, -7.1, 2.85);
-  var pathMat = kept(0x6b5340, 1);
-  var path = new THREE.Mesh(new THREE.BoxGeometry(1.85, .04, 8.4), pathMat);
-  path.position.set(0, .02, 17.6);
-  scene.add(path);
+  buildVillageRoadNetwork();
   sceneryBarrel(21.8, -13.8);
 
   placeDressProps();
