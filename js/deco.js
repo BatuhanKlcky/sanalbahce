@@ -1616,6 +1616,17 @@ function clearDressProps(){
       else scene.remove(o);
     });
   }
+  if(window._mountainBackdrop && window._mountainBackdrop.parent){
+    window._mountainBackdrop.parent.remove(window._mountainBackdrop);
+    window._mountainBackdrop = null;
+  }
+  if(window._cozyHills && window._cozyHills.length){
+    window._cozyHills.forEach(function(h){
+      if(h && h.parent) h.parent.remove(h);
+      else if(h && typeof scene !== 'undefined') scene.remove(h);
+    });
+    window._cozyHills = [];
+  }
   if(window._villageRoadGroup && window._villageRoadGroup.parent){
     window._villageRoadGroup.parent.remove(window._villageRoadGroup);
     window._villageRoadGroup = null;
@@ -1860,22 +1871,153 @@ function dressGarden(){
   buildVillageRoadNetwork();
   sceneryBarrel(21.8, -13.8);
 
-  placeDressProps();
+  buildScenicMountainBackdrop();
+}
 
-  window._cozyHills = [];
-  [[-70,-8,-58,44,.42],[62,-6,-78,36,.4],[86,-7,16,32,.38],[-28,-5,72,40,.36]].forEach(function(h){
-    var hill = new THREE.Mesh(new THREE.SphereGeometry(h[3], 22, 14), kept(0x345c30, 1));
-    hill.scale.y = h[4];
-    hill.position.set(h[0], h[1], h[2]);
-    scene.add(hill);
-    window._cozyHills.push(hill);
+// Organic alpine mountain range backdrop replacing crude spherical mounds
+function buildScenicMountainBackdrop(){
+  if(window._mountainBackdrop && window._mountainBackdrop.parent){
+    window._mountainBackdrop.parent.remove(window._mountainBackdrop);
+    window._mountainBackdrop = null;
+  }
+  if(window._cozyHills && window._cozyHills.length){
+    window._cozyHills.forEach(function(h){
+      if(h && h.parent) h.parent.remove(h);
+      else if(h && typeof scene !== 'undefined') scene.remove(h);
+    });
+    window._cozyHills = [];
+  }
+
+  var root = new THREE.Group();
+  root.name = 'AlpineMountainBackdrop';
+
+  var snowMat = kept(0xf1f5f9, 0.85); // High altitude snow caps
+  var slateRock = kept(0x525b68, 0.95); // Cold granite peak slate
+  var darkRock = kept(0x3b424a, 0.96); // Lower mountain crags & cliff faces
+  var screeMat = kept(0x483e37, 0.94); // Earthy scree & mountain rock slopes
+  var alpineGrass = kept(0x27482b, 0.92); // Forested foothills & mountain skirts
+  var pineLeafMat = kept(0x19361e, 0.85);
+  var pineTrunkMat = kept(0x3a2416, 0.9);
+
+  function createAlpineMassif(x, z, radius, height, colMat, snowHeight){
+    var g = new THREE.Group();
+    g.position.set(x, 0, z);
+
+    var segs = 7 + (Math.floor(Math.abs(x + z)) % 3);
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(radius, height, segs), colMat);
+    cone.position.y = height * 0.48;
+    cone.rotation.y = (x * 0.7 + z * 0.4) % Math.PI;
+    cone.scale.set(1.0 + (Math.abs(x) % 3) * 0.08, 1.0, 0.85 + (Math.abs(z) % 3) * 0.08);
+    cone.castShadow = !isMobile;
+    g.add(cone);
+
+    if(snowHeight && height >= 20){
+      var snR = radius * (1.0 - (snowHeight / height));
+      var snCone = new THREE.Mesh(new THREE.ConeGeometry(snR * 1.05, height - snowHeight, segs), snowMat);
+      snCone.position.y = snowHeight + (height - snowHeight) * 0.48;
+      snCone.rotation.y = cone.rotation.y;
+      snCone.scale.copy(cone.scale);
+      g.add(snCone);
+    }
+
+    for(var b = 0; b < 3; b++){
+      var ba = (b / 3) * Math.PI * 2 + (x * 0.3);
+      var br = radius * 0.55;
+      var bldg = new THREE.Mesh(new THREE.DodecahedronGeometry(radius * 0.32, 0), darkRock);
+      bldg.position.set(Math.cos(ba) * br, radius * 0.22, Math.sin(ba) * br);
+      bldg.scale.set(1.15, 0.75, 1.25);
+      g.add(bldg);
+    }
+
+    var skirt = new THREE.Mesh(new THREE.ConeGeometry(radius * 1.4, height * 0.28, segs), alpineGrass);
+    skirt.position.y = height * 0.12;
+    skirt.rotation.y = cone.rotation.y + 0.3;
+    g.add(skirt);
+
+    return g;
+  }
+
+  function createAlpinePine(px, pz, sc){
+    var pt = new THREE.Group();
+    pt.position.set(px, 0, pz);
+    var tr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.5, 5), pineTrunkMat);
+    tr.position.y = 0.75;
+    pt.add(tr);
+    for(var l = 0; l < 3; l++){
+      var leaf = new THREE.Mesh(new THREE.ConeGeometry(1.25 - l * 0.28, 1.6, 6), pineLeafMat);
+      leaf.position.y = 1.45 + l * 0.88;
+      pt.add(leaf);
+    }
+    pt.scale.setScalar(sc || 1.0);
+    return pt;
+  }
+
+  // 1. WESTERN ALPINE RANGE (Behind West tunnel, replaces crude swollen dome with natural alpine peaks)
+  var westRangeData = [
+    { x: -68, z: -48, r: 18, h: 26, mat: darkRock, snow: 21 },
+    { x: -84, z: -56, r: 24, h: 34, mat: slateRock, snow: 24 },
+    { x: -62, z: -68, r: 21, h: 30, mat: slateRock, snow: 23 },
+    { x: -98, z: -64, r: 26, h: 38, mat: slateRock, snow: 27 },
+    { x: -78, z: -80, r: 28, h: 42, mat: darkRock, snow: 30 },
+    { x: -52, z: -52, r: 15, h: 22, mat: screeMat, snow: 0 },
+    { x: -108, z: -46, r: 22, h: 32, mat: darkRock, snow: 24 },
+    { x: -92, z: -38, r: 17, h: 24, mat: screeMat, snow: 0 }
+  ];
+  westRangeData.forEach(function(m){
+    root.add(createAlpineMassif(m.x, m.z, m.r, m.h, m.mat, m.snow));
   });
+
+  // 2. CENTRAL NORTHERN HORIZON RANGE (Grand panoramic mountain peaks behind the railway)
+  var centralRangeData = [
+    { x: -36, z: -62, r: 22, h: 32, mat: slateRock, snow: 24 },
+    { x: -20, z: -76, r: 28, h: 40, mat: darkRock, snow: 28 },
+    { x: 0,   z: -88, r: 32, h: 46, mat: slateRock, snow: 32 },
+    { x: 22,  z: -74, r: 26, h: 38, mat: darkRock, snow: 27 },
+    { x: 38,  z: -64, r: 20, h: 30, mat: slateRock, snow: 22 },
+    { x: -14, z: -54, r: 16, h: 22, mat: screeMat, snow: 0 },
+    { x: 12,  z: -56, r: 17, h: 24, mat: screeMat, snow: 0 }
+  ];
+  centralRangeData.forEach(function(m){
+    root.add(createAlpineMassif(m.x, m.z, m.r, m.h, m.mat, m.snow));
+  });
+
+  // 3. EASTERN ALPINE RANGE (Directly behind the East tunnel)
+  var eastRangeData = [
+    { x: 68,  z: -48, r: 18, h: 26, mat: darkRock, snow: 21 },
+    { x: 84,  z: -56, r: 24, h: 34, mat: slateRock, snow: 24 },
+    { x: 62,  z: -68, r: 21, h: 30, mat: slateRock, snow: 23 },
+    { x: 98,  z: -64, r: 26, h: 38, mat: slateRock, snow: 27 },
+    { x: 78,  z: -80, r: 28, h: 42, mat: darkRock, snow: 30 },
+    { x: 52,  z: -52, r: 15, h: 22, mat: screeMat, snow: 0 },
+    { x: 108, z: -46, r: 22, h: 32, mat: darkRock, snow: 24 }
+  ];
+  eastRangeData.forEach(function(m){
+    root.add(createAlpineMassif(m.x, m.z, m.r, m.h, m.mat, m.snow));
+  });
+
+  // 4. ALPINE PINE FOREST BELT (Scattered along the foothills and mountain skirts)
+  var pineCoords = [
+    [-44, -34, 1.4], [-49, -37, 1.6], [-56, -33, 1.3], [-64, -36, 1.7],
+    [-72, -34, 1.5], [-80, -32, 1.8], [-88, -35, 1.4], [-38, -39, 1.5],
+    [-28, -36, 1.3], [-18, -38, 1.6], [-8,  -35, 1.4], [6,   -36, 1.5],
+    [16,  -37, 1.3], [26,  -35, 1.7], [36,  -38, 1.4], [44,  -34, 1.5],
+    [54,  -36, 1.6], [64,  -33, 1.4], [72,  -35, 1.7], [82,  -32, 1.5],
+    [90,  -34, 1.3]
+  ];
+  pineCoords.forEach(function(pc){
+    root.add(createAlpinePine(pc[0], pc[1], pc[2]));
+  });
+
+  scene.add(root);
+  window._mountainBackdrop = root;
+  return root;
 }
 
 // Rebuild props once real GLBs are ready (dressGarden runs before async model pack).
 window.redressGardenModels = function(){
   clearDressProps();
   placeDressProps();
+  buildScenicMountainBackdrop();
   // Legacy single-island dress replaced by multi-biome archipelago when available.
   if(typeof window.buildAllBiomes === 'function'){
     try{ window.buildAllBiomes(); }

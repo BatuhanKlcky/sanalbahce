@@ -1,0 +1,17 @@
+{
+  "version": "2.2.0",
+  "versionCode": 16,
+  "releaseDate": "2026-10-18",
+  "title": "Köy Pazarı, Mutfak & A-Kalite Güncellemesi",
+  "notes": [
+    "Köy Pazarı ve Köy Mutfağı dükkanı",
+    "Gelişmiş gerilim çubuklu balık tutma mini oyunu",
+    "A-Kalite Köy sakinleri, Muhtar, Aşçı ve Balıkçı animasyonları",
+    "Doğal dağ sırasıyla zenginleştirilmiş manzara",
+    "Performans ve batarya optimizasyonları"
+  ],
+  "updateUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
+  "downloadUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
+  "apkUrl": "https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main/sanal-bahce.apk",
+  "isMandatory": false
+}
