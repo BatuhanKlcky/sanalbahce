@@ -209,11 +209,15 @@ camera.position.set(0,16,22);
 var isMobile=/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||('ontouchstart' in window && window.innerWidth<1024)||(window.innerWidth<768);
 var renderer=new THREE.WebGLRenderer({antialias:!isMobile,powerPreference:"high-performance",precision:isMobile?"mediump":"highp"});
 renderer.setSize(innerWidth,innerHeight);
-var maxPR=isMobile?1.25:1.75;
+var maxPR=isMobile?1.25:1.5;
 if(localStorage.getItem('gdn_perf')==='low') maxPR=1.0;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,maxPR));
 renderer.shadowMap.enabled=!isMobile;
-if(renderer.shadowMap.enabled&&THREE.PCFShadowMap!=null) renderer.shadowMap.type=THREE.PCFShadowMap;
+if(renderer.shadowMap.enabled&&THREE.PCFShadowMap!=null){
+  renderer.shadowMap.type=THREE.PCFShadowMap;
+  renderer.shadowMap.autoUpdate=false;
+  renderer.shadowMap.needsUpdate=true;
+}
 document.body.appendChild(renderer.domElement);
 var controls=new THREE.OrbitControls(camera,renderer.domElement);
 window.resetCamera=function(){if(placementMode){window.cancelPlace();return;}if(typeof window.applyCozyMode==='function'&&typeof isCozy==='function'&&isCozy()){camera.position.set(0,16,22);controls.target.set(0,.4,0);}else{camera.position.set(6,14,24);controls.target.set(0,0,0);}controls.update();showToast('Kamera sıfırlandı');};

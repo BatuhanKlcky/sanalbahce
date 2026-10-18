@@ -11,18 +11,18 @@
   if(renderer.outputEncoding != null && THREE.sRGBEncoding != null){
     renderer.outputEncoding = THREE.sRGBEncoding;
   }
-  renderer.domElement.style.filter = 'saturate(1.28) contrast(1.1) brightness(1.0)';
+  renderer.domElement.style.filter = 'none';
 
-  // Soft contact vignette overlay (2D) — adds depth without heavy post stack
+  // Soft contact vignette overlay (2D) — lightweight alpha gradient without mix-blend-mode readback
   var vig = document.createElement('div');
   vig.id = 'fxVignette';
-  vig.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center, transparent 42%, rgba(20,10,6,.38) 100%);mix-blend-mode:multiply;opacity:.85';
+  vig.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center, transparent 55%, rgba(15,8,3,.28) 100%);opacity:.85;';
   document.body.appendChild(vig);
 
-  // Warm grade wash
+  // Warm grade wash — lightweight alpha wash without mix-blend-mode
   var grade = document.createElement('div');
   grade.id = 'fxGrade';
-  grade.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,210,160,.12),transparent 38%,rgba(120,80,180,.06));mix-blend-mode:soft-light;';
+  grade.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,rgba(255,210,160,.06),transparent 38%,rgba(120,80,180,.03));';
   document.body.appendChild(grade);
 
   // Bloom off by default — the cheap fullscreen pass draws milky squares over props.
@@ -156,7 +156,7 @@
       return;
     }
     _fxTick++;
-    if(window.isMobile && (_fxTick % 2 !== 0)) return;
+    if(_fxTick % 2 !== 0) return;
 
     var p = fxParticles;
     var isNight = (typeof window.dayPhase === 'number') ? (window.dayPhase < 0.229 || window.dayPhase >= 0.896) : false;

@@ -274,12 +274,23 @@
   // Update loop for barn and livestock
   function stepBarn(dt, now){
     if(dt > 0.1) dt = 0.1;
+    var cam = (typeof camera !== 'undefined') ? camera : null;
+    var fc = (typeof window._fc === 'number') ? window._fc : 0;
 
     for(var i = 0; i < cows.length; i++){
       var a = cows[i];
-      if(!a.group) continue;
+      if(!a.group || a.group.visible === false) continue;
 
-      if(a.mixer) a.mixer.update(dt);
+      if(a.mixer){
+        var aDistSq = cam ? a.group.position.distanceToSquared(cam.position) : 0;
+        if(aDistSq > 1400){
+          if((i + fc) % 4 === 0) a.mixer.update(dt * 4);
+        } else if(aDistSq > 600){
+          if((i + fc) % 3 === 0) a.mixer.update(dt * 3);
+        } else {
+          if((i + fc) % 2 === 0) a.mixer.update(dt * 2);
+        }
+      }
 
       // Care timers
       a.milkTimer += dt;

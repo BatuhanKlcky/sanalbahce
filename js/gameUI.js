@@ -326,14 +326,16 @@
       }
     }
 
-    // 1.49) Köy Pazarı Tezgahı ve Müşteri Köylüler Kontrolü
-    var allHits = _ray.intersectObjects(scene.children, true);
-    for(var hi = 0; hi < Math.min(allHits.length, 6); hi++){
-      var ho = allHits[hi].object;
-      if(ho && (ho.userData.isMarketStall || (ho.parent && ho.parent.userData && ho.parent.userData.isMarketStall))){
-        if(typeof window.openMarketStallDialog === 'function'){
-          window.openMarketStallDialog();
-          return;
+    // 1.49) Köy Pazarı Tezgahı Kontrolü (Targeted check, never scan all scene.children)
+    if(typeof window.getMarketStallGroup === 'function'){
+      var stG = window.getMarketStallGroup();
+      if(stG && stG.children){
+        var stHits = _ray.intersectObjects(stG.children, true);
+        if(stHits.length > 0){
+          if(typeof window.openMarketStallDialog === 'function'){
+            window.openMarketStallDialog();
+            return;
+          }
         }
       }
     }

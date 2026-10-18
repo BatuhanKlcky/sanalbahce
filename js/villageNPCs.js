@@ -336,11 +336,22 @@
   // NPC Update Loop
   function stepVillageNPCs(dt, now){
     if(dt > 0.1) dt = 0.1;
+    var cam = (typeof camera !== 'undefined') ? camera : null;
+    var fc = (typeof window._fc === 'number') ? window._fc : 0;
     for(var i = 0; i < npcs.length; i++){
       var npc = npcs[i];
-      if(!npc || !npc.mixer) continue;
+      if(!npc || !npc.mixer || !npc.group || npc.group.visible === false) continue;
 
-      npc.mixer.update(dt);
+      if(npc.mixer){
+        var nDistSq = cam ? npc.group.position.distanceToSquared(cam.position) : 0;
+        if(nDistSq > 1600){
+          if((i + fc) % 4 === 0) npc.mixer.update(dt * 4);
+        } else if(nDistSq > 625){
+          if((i + fc) % 3 === 0) npc.mixer.update(dt * 3);
+        } else {
+          if((i + fc) % 2 === 0) npc.mixer.update(dt * 2);
+        }
+      }
 
       // Periodic natural gestures (wave at player if camera near, or duck/fiddle)
       npc.talkTimer = (npc.talkTimer || 0) + dt;

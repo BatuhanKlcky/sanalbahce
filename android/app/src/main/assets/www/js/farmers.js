@@ -802,6 +802,7 @@
 
   function stepFarmers(dt){
     if(!(dt > 0)) return;
+    if(dt > 0.1) dt = 0.1;
     pruneSlots();
     if(houseRec && houseRec.group){
       var vis = houseRec.group.visible !== false;
@@ -809,11 +810,21 @@
         if(farmers[vi].group) farmers[vi].group.visible = vis;
       }
     }
+    var fc = (typeof window._fc === 'number') ? window._fc : 0;
     for(var i=0;i<farmers.length;i++){
       var f = farmers[i];
       if(!f.group || f.group.visible === false) continue;
       f.time += dt;
-      if(f.mixer) f.mixer.update(dt);
+      if(f.mixer){
+        var fDistSq = (typeof camera !== 'undefined' && camera) ? f.group.position.distanceToSquared(camera.position) : 0;
+        if(fDistSq > 1600){
+          if((i + fc) % 4 === 0) f.mixer.update(dt * 4);
+        } else if(fDistSq > 625){
+          if((i + fc) % 3 === 0) f.mixer.update(dt * 3);
+        } else {
+          if((i + fc) % 2 === 0) f.mixer.update(dt * 2);
+        }
+      }
 
       if(f.state === 'idle'){
         f.timer -= dt;

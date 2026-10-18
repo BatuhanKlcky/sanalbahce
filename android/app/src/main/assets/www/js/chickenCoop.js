@@ -432,11 +432,23 @@
     }
 
     // 2. Chicken AI behavior & animations
+    var camX = (typeof camera !== 'undefined' && camera) ? camera.position.x : 0;
+    var camZ = (typeof camera !== 'undefined' && camera) ? camera.position.z : 0;
+    var fc = (typeof window._fc === 'number') ? window._fc : 0;
     for(var i = 0; i < chickens.length; i++){
       var ch = chickens[i];
-      if(!ch.group) continue;
+      if(!ch.group || ch.group.visible === false) continue;
 
-      if(ch.mixer) ch.mixer.update(dt);
+      var chDistSq = (ch.x - camX) * (ch.x - camX) + (ch.z - camZ) * (ch.z - camZ);
+      if(ch.mixer){
+        if(chDistSq > 1200){
+          if((i + fc) % 4 === 0) ch.mixer.update(dt * 4);
+        } else if(chDistSq > 600){
+          if((i + fc) % 3 === 0) ch.mixer.update(dt * 3);
+        } else {
+          if((i + fc) % 2 === 0) ch.mixer.update(dt * 2);
+        }
+      }
 
       ch.timer -= dt;
       ch.cluckTimer -= dt;

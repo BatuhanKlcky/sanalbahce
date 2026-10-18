@@ -916,6 +916,7 @@
     if(typeof showToast === 'function') showToast('📢 TUUUT! Çiftlik Treni istasyona yanaşıyor!');
   };
 
+  var _sharedSmokePos = new THREE.Vector3();
   window.stepTrainTrade = function(dt, now){
     if(!(dt > 0)) return;
 
@@ -967,9 +968,8 @@
         _chugPuffAcc = 0;
         sndTrainChug();
         if(trainSmokeEmitter && curX > (stationTarget.x - 68)){
-          var ep = new THREE.Vector3();
-          trainSmokeEmitter.getWorldPosition(ep);
-          spawnSmokePuff(ep, true);
+          trainSmokeEmitter.getWorldPosition(_sharedSmokePos);
+          spawnSmokePuff(_sharedSmokePos, true);
         }
       }
     }
@@ -983,9 +983,8 @@
       if(_chugPuffAcc >= 1.4){
         _chugPuffAcc = 0;
         if(trainSmokeEmitter){
-          var ep2 = new THREE.Vector3();
-          trainSmokeEmitter.getWorldPosition(ep2);
-          spawnSmokePuff(ep2, false);
+          trainSmokeEmitter.getWorldPosition(_sharedSmokePos);
+          spawnSmokePuff(_sharedSmokePos, false);
         }
       }
     }
@@ -1006,9 +1005,8 @@
         sndTrainChug();
         // Tünel içine girdikten sonra duman tünel dışına taşmasın
         if(trainSmokeEmitter && departX < (stationTarget.x + 71.5)){
-          var ep3 = new THREE.Vector3();
-          trainSmokeEmitter.getWorldPosition(ep3);
-          spawnSmokePuff(ep3, true);
+          trainSmokeEmitter.getWorldPosition(_sharedSmokePos);
+          spawnSmokePuff(_sharedSmokePos, true);
         }
       }
 

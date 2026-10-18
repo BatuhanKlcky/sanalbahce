@@ -755,7 +755,7 @@
     var gradeEl = document.getElementById('fxGrade');
     if(gradeEl) gradeEl.style.background = cfg.grade;
     if(typeof renderer !== 'undefined' && renderer && renderer.domElement && !document.body.classList.contains('photo-mode')){
-      renderer.domElement.style.filter = cfg.filter;
+      renderer.domElement.style.filter = 'none';
     }
 
     // Hava durumu parçacıklarını mevsime göre senkronize et

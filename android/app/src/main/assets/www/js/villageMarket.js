@@ -1,12 +1,13 @@
-// Village Market Square & Live Customer NPC Shopping System
-// Players place farm goods on stalls; animated villagers walk in, inspect, buy, and pay gold!
+// Village Market Square & High-Performance Customer NPC Shopping System
+// Zero runtime GLTF parsing: Pre-pools 2 villager customers to eliminate all frame drops
 (function(){
   var marketSquare = null;
-  var customerNpcs = [];
+  var _stallGroup = null;
+  var customerPool = [];
+  var activeCustomers = [];
   var stallStock = {}; // itemId -> quantity
-  var _customerBufs = {};
-  var _isSpawningCustomer = false;
-  var _spawnTimer = 5;
+  var _poolReady = false;
+  var _spawnTimer = 6;
 
   var MARKET_POS = { x: -24.0, z: -18.0 };
 
@@ -93,6 +94,7 @@
       openMarketStallDialog();
     };
     root.add(stall);
+    _stallGroup = stall;
 
     // Decorative Barrels & Crates around plaza
     if(typeof window.spawnModel === 'function'){
@@ -106,88 +108,101 @@
 
     scene.add(root);
     marketSquare = root;
+
+    // Pre-pool 2 customer NPCs once at startup (Zero runtime parse = Zero stutter!)
+    initCustomerPool();
+
     return root;
   }
 
-  // Villager Customer AI
-  var VILLAGER_NAMES = [
-    { name: 'Ayşe Teyze', role: 'Köy Sakini', kind: 'female' },
-    { name: 'Demirci Hasan', role: 'Usta Demirci', kind: 'male' },
-    { name: 'Değirmenci Ali', role: 'Köy Değirmencisi', kind: 'male' },
-    { name: 'Öğretmen Sevgi', role: 'Köy Öğretmeni', kind: 'female' },
-    { name: 'Marangoz Yusuf', role: 'Ahşap Ustası', kind: 'male' }
-  ];
+  // Pre-pool exactly 2 customer NPCs (1 male, 1 female) once
+  function initCustomerPool(){
+    if(_poolReady) return;
+    _poolReady = true;
 
-  // Spawn customer walking toward the market stall
-  function spawnCustomerNpc(){
-    if(_isSpawningCustomer || customerNpcs.length >= 3) return;
-    _isSpawningCustomer = true;
+    var kinds = [
+      { kind: 'male', name: 'Demirci Hasan', role: 'Usta Demirci' },
+      { kind: 'female', name: 'Ayşe Teyze', role: 'Köy Sakini' }
+    ];
 
-    var profile = VILLAGER_NAMES[Math.floor(Math.random() * VILLAGER_NAMES.length)];
+    kinds.forEach(function(spec, idx){
+      if(typeof window.parseFarmerInstance === 'function'){
+        window.parseFarmerInstance(spec.kind, function(rec){
+          if(!rec) return;
+          var cust = {
+            id: 'cust_' + idx,
+            profile: spec,
+            group: rec.group,
+            mixer: rec.mixer,
+            clips: rec.clips,
+            currentAction: null,
+            x: -999, z: -999,
+            tx: 0, tz: 0,
+            active: false,
+            state: 'idle',
+            inspectTimer: 0
+          };
+          cust.group.position.set(-999, -50, -999);
+          cust.group.traverse(function(c){
+            if(c.isMesh){
+              c.frustumCulled = true;
+              c.castShadow = !isMobile;
+              c.receiveShadow = !isMobile;
+            }
+          });
+          scene.add(cust.group);
+          customerPool.push(cust);
+        });
+      }
+    });
+  }
+
+  // Activate a pooled customer (Zero allocation, 60 FPS)
+  function activateCustomer(){
+    var available = customerPool.find(function(c){ return !c.active; });
+    if(!available) return;
+
     var startAngle = Math.random() * Math.PI * 2;
     var startDist = 18.0;
-    var startX = MARKET_POS.x + Math.cos(startAngle) * startDist;
-    var startZ = MARKET_POS.z + Math.sin(startAngle) * startDist;
+    available.x = MARKET_POS.x + Math.cos(startAngle) * startDist;
+    available.z = MARKET_POS.z + Math.sin(startAngle) * startDist;
+    available.tx = MARKET_POS.x + (Math.random() - 0.5) * 1.6;
+    available.tz = MARKET_POS.z - 1.2;
+    available.state = 'walk_in';
+    available.active = true;
 
-    var cust = {
-      profile: profile,
-      group: null,
-      mixer: null,
-      clips: null,
-      currentAction: null,
-      x: startX,
-      z: startZ,
-      tx: MARKET_POS.x + (Math.random() - 0.5) * 1.8,
-      tz: MARKET_POS.z - 1.2,
-      state: 'walk_in', // walk_in, inspect, buy, walk_out
-      inspectTimer: 0,
-      animName: 'Walk',
-      targetYRot: 0
-    };
+    available.group.position.set(available.x, 0, available.z);
+    available.group.visible = true;
 
-    if(typeof window.parseFarmerInstance === 'function'){
-      window.parseFarmerInstance(profile.kind, function(rec){
-        _isSpawningCustomer = false;
-        if(!rec) return;
-
-        cust.group = rec.group;
-        cust.mixer = rec.mixer;
-        cust.clips = rec.clips;
-
-        cust.group.position.set(cust.x, 0, cust.z);
-        cust.group.traverse(function(c){
-          if(c.isMesh){
-            c.frustumCulled = true;
-            c.castShadow = !isMobile;
-            c.receiveShadow = !isMobile;
-            c.userData.customerRef = cust;
-          }
-        });
-
-        // Start Walk
-        if(cust.clips && cust.clips.Walk){
-          cust.currentAction = cust.mixer.clipAction(cust.clips.Walk);
-          cust.currentAction.play();
-        }
-
-        scene.add(cust.group);
-        customerNpcs.push(cust);
-      });
-    } else {
-      _isSpawningCustomer = false;
+    if(available.clips && available.clips.Walk){
+      var act = available.mixer.clipAction(available.clips.Walk);
+      if(available.currentAction) available.currentAction.fadeOut(0.2);
+      act.reset().fadeIn(0.2).play();
+      available.currentAction = act;
     }
+  }
+
+  function playCustomerClip(cust, name, dur){
+    if(!cust || !cust.mixer || !cust.clips) return;
+    var clip = cust.clips[name];
+    if(!clip) return;
+    var next = cust.mixer.clipAction(clip);
+    if(cust.currentAction && cust.currentAction !== next){
+      cust.currentAction.fadeOut(0.2);
+    }
+    next.reset().fadeIn(0.2).play();
+    cust.currentAction = next;
   }
 
   // Customer Buying Item Logic
   function customerMakePurchase(cust){
     var inStockKeys = Object.keys(stallStock).filter(function(k){ return stallStock[k] > 0; });
     if(inStockKeys.length === 0){
-      // Stall empty, villager waves disappointed and leaves
-      playCustomerClip(cust, 'Wave', 1800);
+      playCustomerClip(cust, 'Wave');
       setTimeout(function(){
         cust.state = 'walk_out';
         pickExitTarget(cust);
-      }, 1900);
+      }, 1500);
       return;
     }
 
@@ -196,7 +211,6 @@
     if(stallStock[chosenKey] <= 0) delete stallStock[chosenKey];
     saveStallStock();
 
-    // Prices
     var prices = {
       tomato: 6, carrot: 8, pepper: 10, cucumber: 12, strawberry: 15, wheat: 5,
       egg: 14, milk: 22, milk_creamy: 45, milk_golden: 110,
@@ -230,12 +244,11 @@
       showToast('🛒 ' + cust.profile.name + ' tezgahından ' + (itemNames[chosenKey] || chosenKey) + ' satın aldı! (+' + earn + ' 🟡 Altın)');
     }
 
-    // Wave happy and leave
-    playCustomerClip(cust, 'Wave', 2000);
+    playCustomerClip(cust, 'Wave');
     setTimeout(function(){
       cust.state = 'walk_out';
       pickExitTarget(cust);
-    }, 2100);
+    }, 1800);
   }
 
   function pickExitTarget(cust){
@@ -247,43 +260,39 @@
     }
   }
 
-  function playCustomerClip(cust, name, dur){
-    if(!cust || !cust.mixer || !cust.clips) return;
-    var clip = cust.clips[name];
-    if(!clip) return;
-    var next = cust.mixer.clipAction(clip);
-    if(cust.currentAction && cust.currentAction !== next){
-      cust.currentAction.fadeOut(0.2);
-    }
-    next.reset().fadeIn(0.2).play();
-    cust.currentAction = next;
-    cust.animName = name;
-  }
-
-  // Update loop for Market & Customers
+  // Update loop for Market & Customers (Optimized: zero garbage, throttled updates)
   function stepVillageMarket(dt, now){
     if(dt > 0.1) dt = 0.1;
 
-    // Customer Spawner
     _spawnTimer -= dt;
     if(_spawnTimer <= 0){
-      _spawnTimer = 14 + Math.random() * 16;
-      spawnCustomerNpc();
+      _spawnTimer = 16 + Math.random() * 18;
+      activateCustomer();
     }
 
-    // Step each customer
-    for(var i = customerNpcs.length - 1; i >= 0; i--){
-      var c = customerNpcs[i];
-      if(!c.group) continue;
+    var cam = (typeof camera !== 'undefined') ? camera : null;
+    var fc = (typeof window._fc === 'number') ? window._fc : 0;
+    for(var i = 0; i < customerPool.length; i++){
+      var c = customerPool[i];
+      if(!c.active || !c.group || c.group.visible === false) continue;
 
-      if(c.mixer) c.mixer.update(dt);
+      if(c.mixer){
+        var cDistSq = cam ? c.group.position.distanceToSquared(cam.position) : 0;
+        if(cDistSq > 1400){
+          if((i + fc) % 4 === 0) c.mixer.update(dt * 4);
+        } else if(cDistSq > 600){
+          if((i + fc) % 3 === 0) c.mixer.update(dt * 3);
+        } else {
+          if((i + fc) % 2 === 0) c.mixer.update(dt * 2);
+        }
+      }
 
       if(c.state === 'walk_in' || c.state === 'walk_out'){
         var dx = c.tx - c.x;
         var dz = c.tz - c.z;
         var d = Math.hypot(dx, dz);
 
-        if(d > 0.15){
+        if(d > 0.18){
           var spd = 1.35 * dt;
           c.x += (dx / d) * Math.min(d, spd);
           c.z += (dz / d) * Math.min(d, spd);
@@ -291,16 +300,15 @@
           c.group.rotation.y += (ang - c.group.rotation.y) * 0.15;
         } else {
           if(c.state === 'walk_in'){
-            // Arrived at stall!
             c.state = 'inspect';
-            c.inspectTimer = 2.5 + Math.random() * 2.0;
-            c.group.rotation.y = 0; // Look at counter
+            c.inspectTimer = 2.2 + Math.random() * 1.5;
+            c.group.rotation.y = 0;
             if(c.clips && c.clips.Duck) playCustomerClip(c, 'Duck');
             else if(c.clips && c.clips.Idle) playCustomerClip(c, 'Idle');
           } else if(c.state === 'walk_out'){
-            // Left the area, remove
-            scene.remove(c.group);
-            customerNpcs.splice(i, 1);
+            c.active = false;
+            c.group.visible = false;
+            c.group.position.set(-999, -50, -999);
             continue;
           }
         }
@@ -435,5 +443,6 @@
   window.initVillageMarket = initVillageMarket;
   window.stepVillageMarket = stepVillageMarket;
   window.openMarketStallDialog = openMarketStallDialog;
+  window.getMarketStallGroup = function(){ return _stallGroup; };
   window.stallStock = stallStock;
 })();

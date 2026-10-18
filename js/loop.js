@@ -46,9 +46,14 @@ function stepPets(dt){
     if(!pet || !pet.mesh) continue;
     pet.time=(pet.time||0)+dt;
 
-    // 1) İskelet animasyon mikserini güncelle (gerçek .glb kemik animasyonları)
+    // 1) İskelet animasyon mikserini güncelle (mesafe tabanlı ve dönüşümlü optimizasyon)
     if(pet.mixer){
-      pet.mixer.update(dt);
+      var distSq = pet.mesh.position.distanceToSquared(camera.position);
+      if(distSq > 900){
+        if((pi + _fc) % 3 === 0) pet.mixer.update(dt * 3);
+      } else {
+        if((pi + _fc) % 2 === 0) pet.mixer.update(dt * 2);
+      }
     }
 
     // 1.5) Çiftlik Hayvanları Üretim Zamanlayıcısı (Süt 🥛, Yün 🧶, Yumurta 🥚)
@@ -254,7 +259,7 @@ function stepButterflies(dt){
     }
 
     // 2) Anti-Clustering (Yumuşak Ayrışma): Simetrik ve kare dağıtımlı optimizasyon
-    if((bi2 + _fc) % 2 === 0){
+    if((bi2 + _fc) % 4 === 0){
       for(var bi3 = bi2 + 1; bi3 < bugs.length; bi3++){
         var other = bugs[bi3];
         if(!other || !other.mesh) continue;
@@ -339,6 +344,7 @@ function animate(){
   if(!(dt>0)) dt=0;
   if(dt>86400) dt=86400;
   _fc++;
+  window._fc = _fc;
   var now=_now*.001;
   // Clock
   if(_fc%60===0){var t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});if(t!==_lc){_eClock.innerText=t;_lc=t;}}
@@ -367,10 +373,13 @@ function animate(){
   var flen = flowers.length;
   if(flen > 0){
     var baseNowWind = now * 1.15;
+    var camX = camera.position.x, camZ = camera.position.z;
     for(var fi = 0; fi < flen; fi++){
       var f = flowers[fi];
       var fpos = f.mesh.position;
       var fx = fpos.x, fz = fpos.z;
+      var fDistSq = (fx - camX) * (fx - camX) + (fz - camZ) * (fz - camZ);
+      if(fDistSq > 2200) continue;
       var wind = Math.sin(baseNowWind + fx * 0.65 + fz * 0.4);
       var gust = 0.65 + 0.35 * Math.sin(now * 0.33 + fz);
 
@@ -456,14 +465,17 @@ function animate(){
   var dlen = decos.length;
   if(dlen > 0){
     var isNightTime = (dayPhase < 0.229 || dayPhase >= 0.896);
+    var camX = camera.position.x, camZ = camera.position.z;
     for(var di = 0; di < dlen; di++){
       var d = decos[di];
       if(!d || !d.group || d.group.visible === false) continue;
       var dpos = d.group.position;
       var dx = dpos.x, dz = dpos.z;
+      var distSq = (dx - camX) * (dx - camX) + (dz - camZ) * (dz - camZ);
+      if(distSq > 2200) continue;
 
       if(d.type === 'tree' || d.type === 'bush'){
-        if(!isMobile || (_fc + di) % 2 === 0){
+        if((_fc + di) % 2 === 0){
           rustle(d.group, now, d.type === 'bush' ? 1.35 : 1);
         }
       }
@@ -541,7 +553,11 @@ function animate(){
     }
   }
   if(dt>0) advanceHarvest(dt);
-  for(var hi=0;hi<harvestItems.length;hi++){var hv=harvestItems[hi];if(hv.sway){var spd=hv.type==='strawberry'?2.5:hv.type==='carrot'?1.05:hv.type==='cucumber'?.85:hv.type==='pepper'?1.7:1.15;var amp=hv.type==='strawberry'?.07:hv.type==='carrot'?.045:hv.type==='cucumber'?.09:hv.type==='pepper'?.06:.035;hv.sway.rotation.z=Math.sin(now*spd+hv.x)*amp;hv.sway.rotation.x=Math.sin(now*spd*.8+hv.z)*amp*.65;if(hv.type==='cucumber')hv.sway.rotation.y=Math.sin(now*.6+hv.z)*.12;}}
+  for(var hi=0;hi<harvestItems.length;hi++){
+    if((hi + _fc) % 2 === 0){
+      var hv=harvestItems[hi];if(hv.sway){var spd=hv.type==='strawberry'?2.5:hv.type==='carrot'?1.05:hv.type==='cucumber'?.85:hv.type==='pepper'?1.7:1.15;var amp=hv.type==='strawberry'?.07:hv.type==='carrot'?.045:hv.type==='cucumber'?.09:hv.type==='pepper'?.06:.035;hv.sway.rotation.z=Math.sin(now*spd+hv.x)*amp;hv.sway.rotation.x=Math.sin(now*spd*.8+hv.z)*amp*.65;if(hv.type==='cucumber')hv.sway.rotation.y=Math.sin(now*.6+hv.z)*.12;}
+    }
+  }
 
   stepPets(dt);
 
@@ -550,6 +566,9 @@ function animate(){
   if(Date.now()-lastSave>SINT)save(false);
   if(_fc%3600===0){saveStats();checkNotifications();}
   controls.update();
+  if(renderer.shadowMap && renderer.shadowMap.enabled && (_fc % 2 === 0)){
+    renderer.shadowMap.needsUpdate = true;
+  }
   if(typeof window.renderWithFX==='function'&&window._fxBloom) window.renderWithFX();
   else renderer.render(scene,camera);
 }
