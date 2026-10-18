@@ -474,14 +474,7 @@
       if(!npc || !npc.mixer || !npc.group || npc.group.visible === false) continue;
 
       if(npc.mixer){
-        var nDistSq = cam ? npc.group.position.distanceToSquared(cam.position) : 0;
-        if(nDistSq > 1600){
-          if((i + fc) % 4 === 0) npc.mixer.update(dt * 4);
-        } else if(nDistSq > 625){
-          if((i + fc) % 3 === 0) npc.mixer.update(dt * 3);
-        } else {
-          if((i + fc) % 2 === 0) npc.mixer.update(dt * 2);
-        }
+        npc.mixer.update(dt);
       }
 
       // Periodic natural gestures (wave at player if camera near, or duck/fiddle)

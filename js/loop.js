@@ -65,14 +65,9 @@ function stepPets(dt){
     if(!pet || !pet.mesh) continue;
     pet.time=(pet.time||0)+dt;
 
-    // 1) İskelet animasyon mikserini güncelle (mesafe tabanlı ve dönüşümlü optimizasyon)
+    // 1) İskelet animasyon mikserini güncelle (kesintisiz ve pürüzsüz)
     if(pet.mixer){
-      var distSq = pet.mesh.position.distanceToSquared(camera.position);
-      if(distSq > 900){
-        if((pi + _fc) % 3 === 0) pet.mixer.update(dt * 3);
-      } else {
-        if((pi + _fc) % 2 === 0) pet.mixer.update(dt * 2);
-      }
+      pet.mixer.update(dt);
     }
 
     // 1.5) Çiftlik Hayvanları Üretim Zamanlayıcısı (Süt 🥛, Yün 🧶, Yumurta 🥚)
@@ -389,8 +384,6 @@ function animate(){
       var f = flowers[fi];
       var fpos = f.mesh.position;
       var fx = fpos.x, fz = fpos.z;
-      var fDistSq = (fx - camX) * (fx - camX) + (fz - camZ) * (fz - camZ);
-      if(fDistSq > 2200) continue;
       var wind = Math.sin(baseNowWind + fx * 0.65 + fz * 0.4);
       var gust = 0.65 + 0.35 * Math.sin(now * 0.33 + fz);
 
@@ -482,8 +475,6 @@ function animate(){
       if(!d || !d.group || d.group.visible === false) continue;
       var dpos = d.group.position;
       var dx = dpos.x, dz = dpos.z;
-      var distSq = (dx - camX) * (dx - camX) + (dz - camZ) * (dz - camZ);
-      if(distSq > 2200) continue;
 
       if(d.type === 'tree' || d.type === 'bush'){
         if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
