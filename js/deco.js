@@ -1767,6 +1767,7 @@ function dressCozyIsland(){
     window._cozyDress.push(mill.group);
     if(mill.blades) window._mills.push(mill.blades);
   }
+}
 function buildVillageRoadNetwork(){
   if(window._villageRoadGroup && window._villageRoadGroup.parent){
     window._villageRoadGroup.parent.remove(window._villageRoadGroup);
@@ -1871,6 +1872,7 @@ function dressGarden(){
   buildVillageRoadNetwork();
   sceneryBarrel(21.8, -13.8);
 
+  placeDressProps();
   buildScenicMountainBackdrop();
 }
 
