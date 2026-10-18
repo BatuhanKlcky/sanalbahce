@@ -13,10 +13,10 @@
   var _bufFemale = null;
   var _rigReady = false;
   var _rigWait = [];
-  var RIG_MALE = 'models/characters/FarmerAnim.glb?v=4';
-  var RIG_FEMALE = 'models/characters/FarmerAnim_F.glb?v=4';
-  var FALLBACK_MALE = 'models/characters/Farmer.glb?v=4';
-  var FALLBACK_FEMALE = 'models/characters/Farmer_F.glb?v=4';
+  var RIG_MALE = 'models/characters/Farmer.glb?v=5';
+  var RIG_FEMALE = 'models/characters/Farmer.glb?v=5';
+  var FALLBACK_MALE = 'models/characters/Farmer.glb?v=5';
+  var FALLBACK_FEMALE = 'models/characters/Farmer.glb?v=5';
   var DEG = Math.PI / 180;
 
   function M(hex, rough){
@@ -102,18 +102,18 @@
 
     // Natural standing rest (arms down, soft elbows) — bind alone is horizontal T-pose.
     var REST = {
-      UpperArmL: [-78, 8, 22],
-      UpperArmR: [-78, -8, -22],
-      LowerArmL: [0, 0, -32],
-      LowerArmR: [0, 0, 32],
-      ShoulderL: [0, 0, 4],
-      ShoulderR: [0, 0, -4],
+      UpperArmL: [-78, 8, 0],
+      UpperArmR: [-78, -8, 0],
+      LowerArmL: [0, 0, -22],
+      LowerArmR: [0, 0, 22],
+      ShoulderL: [0, 0, 0],
+      ShoulderR: [0, 0, 0],
       UpperLegL: [0, 0, 0],
       UpperLegR: [0, 0, 0],
       LowerLegL: [0, 0, 0],
       LowerLegR: [0, 0, 0],
       Hips: [0, 0, 0],
-      Abdomen: [2, 0, 0],
+      Abdomen: [0, 0, 0],
       Torso: [0, 0, 0],
       Chest: [0, 0, 0],
       Neck: [0, 0, 0],
@@ -142,7 +142,7 @@
 
     var clips = {};
 
-    // Idle — arms-down rest + tiny breath (not T-pose, not Character Head tilt)
+    // Idle — natural standing breath, arms relaxed at sides, subtle life
     (function(){
       var times = [0, 1.25, 2.5];
       var tracks = [];
@@ -150,22 +150,23 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('Abdomen', [[0,0,0],[2.2,0,0],[0,0,0]]);
-      add('Chest', [[0,0,0],[1.4,0,0],[0,0,0]]);
-      add('Head', [[0,0,0],[1.5,4,0],[0,0,0]]);
-      add('UpperArmL', [[0,0,0],[1,0,0],[0,0,0]]);
-      add('UpperArmR', [[0,0,0],[1,0,0],[0,0,0]]);
-      add('LowerArmL', [[0,0,0],[0,0,-3],[0,0,0]]);
-      add('LowerArmR', [[0,0,0],[0,0,3],[0,0,0]]);
+      add('Abdomen', [[0,0,0],[1.5,0,0],[0,0,0]]);
+      add('Chest', [[0,0,0],[1.0,0,0],[0,0,0]]);
+      add('Head', [[0,0,0],[0.8,1.5,0],[0,0,0]]);
+      add('UpperArmL', [[0,0,0],[0.5,0,0],[0,0,0]]);
+      add('UpperArmR', [[0,0,0],[0.5,0,0],[0,0,0]]);
+      add('LowerArmL', [[0,0,0],[0,0,-1.5],[0,0,0]]);
+      add('LowerArmR', [[0,0,0],[0,0,1.5],[0,0,0]]);
       ['ShoulderL','ShoulderR','UpperLegL','UpperLegR','LowerLegL','LowerLegR','Hips','Torso','Neck'].forEach(function(n){
         add(n, [[0,0,0],[0,0,0],[0,0,0]]);
       });
       clips.Idle = new THREE.AnimationClip('Idle', 2.5, tracks);
     })();
 
-    // Walk — Farmer L/R thigh forward uses the SAME local Z sign (not mirrored).
-    // Old opposite-sign keys put BOTH feet forward → "spastic" double-step.
-    // Arms open (abducted) + swing opposite the legs.
+    // Walk — authentic, upright walking cycle with natural arm & leg swing
+    // In Farmer bind pose:
+    // UpperLegL & UpperLegR +Z rotates L-forward & R-backward. -Z rotates L-backward & R-forward.
+    // UpperArmL & UpperArmR +Z rotates L-backward & R-forward (contralateral arm swing!).
     (function(){
       var times = [0, 0.25, 0.5, 0.75, 1.0];
       var tracks = [];
@@ -173,48 +174,47 @@
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      // Thigh Z: + = L forward AND R back; − = L back AND R forward
-      //          L-fwd            mid             R-fwd            mid             L-fwd
-      add('UpperLegL', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
-      add('UpperLegR', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
-      add('LowerLegL', [[5,0,0],[16,0,0],[34,0,0],[24,0,0],[5,0,0]]);
-      add('LowerLegR', [[34,0,0],[24,0,0],[5,0,0],[16,0,0],[34,0,0]]);
-      // Open arms (abducted) vs idle REST, then ±Z swing (same sign L/R = opposite world)
-      // REST [-78,8,22] → walk open ≈ +28 X / +14 Z / shoulders out
-      add('ShoulderL', [[0,0,20],[0,0,20],[0,0,20],[0,0,20],[0,0,20]]);
-      add('ShoulderR', [[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20]]);
-      add('UpperArmL', [[28,-2,48],[28,-2,32],[28,-2,-4],[28,-2,12],[28,-2,48]]);
-      add('UpperArmR', [[28,2,20],[28,2,4],[28,2,-32],[28,2,-16],[28,2,20]]);
-      add('LowerArmL', [[0,0,6],[0,0,3],[0,0,8],[0,0,3],[0,0,6]]);
-      add('LowerArmR', [[0,0,-6],[0,0,-3],[0,0,-8],[0,0,-3],[0,0,-6]]);
-      add('Abdomen', [[0,4,0],[0,0,0],[0,-4,0],[0,0,0],[0,4,0]]);
-      add('Torso', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
-      add('Head', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
-      clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
+      // Thighs: swing ±20° in Z
+      //           0.0s (L fwd, R back)   0.25s (passing)   0.5s (L back, R fwd)   0.75s (passing)   1.0s (loop)
+      add('UpperLegL', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
+      add('UpperLegR', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
+      // Knees: flex on passing / swing phase to clear the ground
+      add('LowerLegL', [[2,0,0],             [6,0,0],          [26,0,0],              [34,0,0],         [2,0,0]]);
+      add('LowerLegR', [[26,0,0],            [34,0,0],         [2,0,0],               [6,0,0],          [26,0,0]]);
+      // Arms: contralateral swing ±14° along torso, arms hanging naturally
+      add('UpperArmL', [[0,0,14],            [0,0,0],          [0,0,-14],             [0,0,0],          [0,0,14]]);
+      add('UpperArmR', [[0,0,14],            [0,0,0],          [0,0,-14],             [0,0,0],          [0,0,14]]);
+      add('LowerArmL', [[0,0,2],             [0,0,0],          [0,0,-8],              [0,0,0],          [0,0,2]]);
+      add('LowerArmR', [[0,0,8],             [0,0,0],          [0,0,-2],              [0,0,0],          [0,0,8]]);
+      add('ShoulderL', [[0,0,0],             [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
+      add('ShoulderR', [[0,0,0],             [0,0,0],          [0,0,0],               [0,0,0],          [0,0,0]]);
+      // Pelvis & Spine: natural subtle counter-rotation and upright posture
+      add('Abdomen',   [[1.5,1.8,0],         [1.0,0,0],        [1.5,-1.8,0],          [1.0,0,0],        [1.5,1.8,0]]);
+      add('Torso',     [[0,-1.2,0],          [0,0,0],          [0,1.2,0],             [0,0,0],          [0,-1.2,0]]);
+      add('Head',      [[0,-0.4,0],          [0,0,0],          [0,0.4,0],             [0,0,0],          [0,-0.4,0]]);
+      clips.Walk = new THREE.AnimationClip('Walk', 1.0, tracks);
     })();
 
-    // Walk — authentic Quaternius walk
+    // Run — energetic run cadence
     (function(){
-      var times = [0, 0.25, 0.5, 0.75, 1.0];
+      var times = [0, 0.175, 0.35, 0.525, 0.7];
       var tracks = [];
       function add(name, frames){
         var t = restTrack(name, times, frames);
         if(t) tracks.push(t);
       }
-      add('UpperLegL', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
-      add('UpperLegR', [[0,0,24],[0,0,12],[0,0,-24],[0,0,-12],[0,0,24]]);
-      add('LowerLegL', [[5,0,0],[16,0,0],[34,0,0],[24,0,0],[5,0,0]]);
-      add('LowerLegR', [[34,0,0],[24,0,0],[5,0,0],[16,0,0],[34,0,0]]);
-      add('ShoulderL', [[0,0,20],[0,0,20],[0,0,20],[0,0,20],[0,0,20]]);
-      add('ShoulderR', [[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20],[0,0,-20]]);
-      add('UpperArmL', [[28,-2,48],[28,-2,32],[28,-2,-4],[28,-2,12],[28,-2,48]]);
-      add('UpperArmR', [[28,2,20],[28,2,4],[28,2,-32],[28,2,-16],[28,2,20]]);
-      add('LowerArmL', [[0,0,6],[0,0,3],[0,0,8],[0,0,3],[0,0,6]]);
-      add('LowerArmR', [[0,0,-6],[0,0,-3],[0,0,-8],[0,0,-3],[0,0,-6]]);
-      add('Abdomen', [[0,4,0],[0,0,0],[0,-4,0],[0,0,0],[0,4,0]]);
-      add('Torso', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
-      add('Head', [[0,3,0],[0,0,0],[0,-3,0],[0,0,0],[0,3,0]]);
-      clips.Walk = new THREE.AnimationClip('Walk', 1.05, tracks);
+      add('UpperLegL', [[0,0,28],            [0,0,0],          [0,0,-28],             [0,0,0],          [0,0,28]]);
+      add('UpperLegR', [[0,0,28],            [0,0,0],          [0,0,-28],             [0,0,0],          [0,0,28]]);
+      add('LowerLegL', [[4,0,0],             [10,0,0],         [36,0,0],              [44,0,0],         [4,0,0]]);
+      add('LowerLegR', [[36,0,0],            [44,0,0],         [4,0,0],               [10,0,0],         [36,0,0]]);
+      add('UpperArmL', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
+      add('UpperArmR', [[0,0,20],            [0,0,0],          [0,0,-20],             [0,0,0],          [0,0,20]]);
+      add('LowerArmL', [[0,0,4],             [0,0,-6],         [0,0,-16],             [0,0,-6],         [0,0,4]]);
+      add('LowerArmR', [[0,0,16],            [0,0,6],          [0,0,-4],              [0,0,6],          [0,0,16]]);
+      add('Abdomen',   [[3,2.5,0],           [2.5,0,0],        [3,-2.5,0],            [2.5,0,0],        [3,2.5,0]]);
+      add('Torso',     [[0,-1.8,0],          [0,0,0],          [0,1.8,0],             [0,0,0],          [0,-1.8,0]]);
+      add('Head',      [[0,-0.6,0],          [0,0,0],          [0,0.6,0],             [0,0,0],          [0,-0.6,0]]);
+      clips.Run = new THREE.AnimationClip('Run', 0.7, tracks);
     })();
 
     // 1. SULAMA (Watering): Leaning forward, holding watering can with rhythmic pour
@@ -454,53 +454,10 @@
     });
     body.updateMatrixWorld(true);
 
-    var bind = snapshotBindQuats(body);
-    var clips = {};
-
-    // 1. Load Quaternius studio 3D animations (Walk, Run, Duck, Punch, Wave, Idle)
-    if(gltfAnimations && gltfAnimations.length > 0){
-      gltfAnimations.forEach(function(clip){
-        var shortName = clip.name.replace(/^Farmer\|/, '');
-        var cl = clip.clone();
-        clips[shortName] = cl;
-        clips[clip.name] = cl;
-      });
-    }
-
-    // 2. Patch Idle: GLTF Idle has full head/spine/legs but lacks UpperArm tracks (leaving arms in horizontal bind T-pose).
-    // Inject resting upper arm tracks [-78, 8, 22] and [-78, -8, -22] so Idle has relaxed lowered arms.
-    if(clips.Idle){
-      var armLName = findActualBoneName(body, 'UpperArmL');
-      var armRName = findActualBoneName(body, 'UpperArmR');
-      var trNames = clips.Idle.tracks.map(function(t){ return t.name.split('.')[0]; });
-      var idleDur = clips.Idle.duration || 2.0;
-      var idleTimes = [0, idleDur * 0.5, idleDur];
-      if(trNames.indexOf(armLName) < 0 && bind[armLName]){
-        var qL = bindDelta(bind[armLName], -78, 8, 22);
-        clips.Idle.tracks.push(quatTrack(armLName, idleTimes, [qL, qL, qL]));
-      }
-      if(trNames.indexOf(armRName) < 0 && bind[armRName]){
-        var qR = bindDelta(bind[armRName], -78, -8, -22);
-        clips.Idle.tracks.push(quatTrack(armRName, idleTimes, [qR, qR, qR]));
-      }
-    }
-
-    // 3. Patch Wave: keep right arm resting while left arm waves
-    if(clips.Wave){
-      var armRNameW = findActualBoneName(body, 'UpperArmR');
-      var trNamesW = clips.Wave.tracks.map(function(t){ return t.name.split('.')[0]; });
-      if(trNamesW.indexOf(armRNameW) < 0 && bind[armRNameW]){
-        var waveDur = clips.Wave.duration || 2.0;
-        var qRW = bindDelta(bind[armRNameW], -78, -8, -22);
-        clips.Wave.tracks.push(quatTrack(armRNameW, [0, waveDur * 0.5, waveDur], [qRW, qRW, qRW]));
-      }
-    }
-
-    // 4. Fallback only if model has no animations at all
-    if(!clips.Idle || !clips.Walk){
-      var fallback = buildFarmerClips(body);
-      clips = Object.assign(fallback, clips);
-    }
+    // Build authored bind-relative clips strictly tailored to Farmer rig bind pose.
+    // Discard raw GLTF animation tracks from FarmerAnim.glb because their retargeted deltas
+    // cause extreme backward spine/head/arm contortions (~90° head pitch, twisted arms).
+    var clips = buildFarmerClips(body);
 
     var mixer = new THREE.AnimationMixer(body);
     onDone({ group: g, mixer: mixer, clips: clips, body: body });
