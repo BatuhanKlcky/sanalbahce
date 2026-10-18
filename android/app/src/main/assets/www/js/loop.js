@@ -4,8 +4,8 @@ var _tc=new THREE.Color(),_cd=new THREE.Color(0x2a1a0a),_soil=new THREE.Color(0x
 var _fc=0,_lc='',_eClock=document.getElementById('clock'),_eHp=document.getElementById('hp');
 var growNames=['🌱 Tohum','🌿 Fide','🌸 Filiz','🌺 Tam Çiçek'];
 var growSteps=[.20,.45,.80,1.3];
-var _perfMode = localStorage.getItem('gdn_perf') || (isMobile ? 'low' : 'high');
-var _lastFrame=0, _targetFPS=(_perfMode==='low'?30:60), _fpsInterval=1000/_targetFPS;
+var _perfMode = localStorage.getItem('gdn_perf') || 'high';
+var _lastFrame=0, _targetFPS=60, _fpsInterval=1000/60;
 var _lastSim=0, _bugAcc=0, _rainAcc=0;
 var BUG_EVERY=5184/60*2.2, RAIN_EVERY=1800/60, PET_SPEED=1.5, PET_R=12;
 function stepWeather(dt){
@@ -349,19 +349,11 @@ function animate(){
   requestAnimationFrame(animate);
   // Uygulama arka plandaysa render etme
   if(document.visibilityState==='hidden') return;
-  // FPS limiter - pil tasarrufunda 30fps, yüksek performansta akıcı 60fps
-  var _now=performance.now();
-  if(_perfMode==='low'){
-    if(_now-_lastFrame < 28.0) return;
-    _lastFrame=_now;
-  } else {
-    _lastFrame=_now;
-  }
-  if(!_lastSim) _lastSim=_now;
-  var dt=(_now-_lastSim)/1000;
-  _lastSim=_now;
-  if(!(dt>0)) dt=0;
-  if(dt>86400) dt=86400;
+  var _now = performance.now();
+  if(!_lastSim) _lastSim = _now;
+  var dt = Math.min(0.065, (_now - _lastSim) / 1000);
+  _lastSim = _now;
+  _lastFrame = _now;
   _fc++;
   window._fc = _fc;
   var now=_now*.001;
@@ -494,9 +486,9 @@ function animate(){
       if(distSq > 2200) continue;
 
       if(d.type === 'tree' || d.type === 'bush'){
-        if((_fc + di) % 2 === 0){
-          rustle(d.group, now, d.type === 'bush' ? 1.35 : 1);
-        }
+        if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
+        var amp = d.type === 'bush' ? 0.025 : 0.016;
+        d.group.rotation.z = d.group.userData.baseRotZ + Math.sin(now * 1.35 + dx * 0.7 + dz * 0.5) * amp;
       }
       else if(d.type === 'pine' || d.type === 'birch' || d.type === 'willow' || d.type === 'apple_tree' || d.type === 'bamboo' || d.type === 'palm'){
         if(d.group.userData.baseRotZ === undefined) d.group.userData.baseRotZ = d.group.rotation.z || 0;
@@ -585,7 +577,7 @@ function animate(){
   if(Date.now()-lastSave>SINT)save(false);
   if(_fc%3600===0){saveStats();checkNotifications();}
   controls.update();
-  if(renderer.shadowMap && renderer.shadowMap.enabled && (_fc % 2 === 0)){
+  if(renderer.shadowMap && renderer.shadowMap.enabled && (_fc % 30 === 0)){
     renderer.shadowMap.needsUpdate = true;
   }
   if(typeof window.renderWithFX==='function'&&window._fxBloom) window.renderWithFX();

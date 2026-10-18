@@ -1840,6 +1840,18 @@ function dressCozyIsland(){
     if(mill.blades) window._mills.push(mill.blades);
   }
 }
+function getVillageTerrainHeight(x, z){
+  if(typeof isCozy === 'function' && isCozy()){
+    var R = (typeof window._islandR === 'number') ? window._islandR : 20;
+    var r = Math.sqrt(x * x + z * z) / R;
+    if(r >= 1.0) return 0.03;
+    var fall = Math.max(0, 1.0 - r * r);
+    return 0.03 + fall * 0.42 * 0.75;
+  }
+  return 0.03;
+}
+window.getVillageTerrainHeight = getVillageTerrainHeight;
+
 function buildVillageRoadNetwork(){
   if(window._villageRoadGroup && window._villageRoadGroup.parent){
     window._villageRoadGroup.parent.remove(window._villageRoadGroup);
@@ -1847,83 +1859,187 @@ function buildVillageRoadNetwork(){
   var g = new THREE.Group();
   g.name = 'VillageRoadNetwork';
 
-  var roadMat = kept(0x736150, 0.95); // Natural warm compacted earth/cobblestone
-  var curbMat = kept(0x8a7b6b, 0.9);
+  // Authentic warm village cobblestone & packed earth materials
+  var roadMat = kept(0x9a8062, 0.92);      // Warm compacted trail surface
+  var curbMat = kept(0x756353, 0.95);      // Cobblestone border
+  var pebbleMat = kept(0xb5a494, 0.88);    // River stones
+  var lanternWood = kept(0x422817, 0.88);  // Post wood
+  var lanternGlow = new THREE.MeshStandardMaterial({
+    color: 0xfff0a0,
+    emissive: 0xf59e0b,
+    emissiveIntensity: 0.92,
+    roughness: 0.3
+  });
 
-  // Helper to create straight road segment
+  // Subdivided road segment following terrain height smoothly
   function addSegment(x1, z1, x2, z2, width){
-    var dx = x2 - x1, dz = z2 - z1;
-    var len = Math.hypot(dx, dz);
-    var ang = Math.atan2(dx, dz);
-    var seg = new THREE.Mesh(new THREE.BoxGeometry(width || 1.85, 0.04, len), roadMat);
-    seg.position.set((x1 + x2) * 0.5, 0.02, (z1 + z2) * 0.5);
-    seg.rotation.y = ang;
-    seg.receiveShadow = !isMobile;
-    g.add(seg);
-    return seg;
+    width = width || 2.0;
+    var totalDx = x2 - x1, totalDz = z2 - z1;
+    var totalLen = Math.hypot(totalDx, totalDz);
+    if(totalLen < 0.1) return;
+    var ang = Math.atan2(totalDx, totalDz);
+
+    var maxStep = 2.2;
+    var steps = Math.max(1, Math.ceil(totalLen / maxStep));
+    var stepLen = totalLen / steps;
+
+    for(var s = 0; s < steps; s++){
+      var t1 = s / steps, t2 = (s + 1) / steps;
+      var sx1 = x1 + totalDx * t1, sz1 = z1 + totalDz * t1;
+      var sx2 = x1 + totalDx * t2, sz2 = z1 + totalDz * t2;
+      var mx = (sx1 + sx2) * 0.5, mz = (sz1 + sz2) * 0.5;
+
+      var y1 = getVillageTerrainHeight(sx1, sz1) + 0.065;
+      var y2 = getVillageTerrainHeight(sx2, sz2) + 0.065;
+      var my = (y1 + y2) * 0.5;
+      var pitch = Math.atan2(y2 - y1, stepLen);
+
+      // Main Road Bed
+      var seg = new THREE.Mesh(new THREE.BoxGeometry(width, 0.13, stepLen * 1.05), roadMat);
+      seg.position.set(mx, my, mz);
+      seg.rotation.y = ang;
+      seg.rotation.x = pitch;
+      seg.receiveShadow = !isMobile;
+      g.add(seg);
+
+      // Left & Right Cobblestone Curbs
+      var halfW = width * 0.5;
+      var cosA = Math.cos(ang), sinA = Math.sin(ang);
+      [-halfW, halfW].forEach(function(sideOff){
+        var cx = mx + cosA * sideOff;
+        var cz = mz - sinA * sideOff;
+        var curb = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, stepLen * 1.05), curbMat);
+        curb.position.set(cx, my + 0.01, cz);
+        curb.rotation.y = ang;
+        curb.rotation.x = pitch;
+        g.add(curb);
+      });
+
+      // Stepping river stones along path edges
+      if(s % 2 === 0){
+        var pebL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.06, 6), pebbleMat);
+        pebL.position.set(mx + cosA * (halfW + 0.22), my + 0.01, mz - sinA * (halfW + 0.22));
+        pebL.rotation.y = (s * 1.7) % Math.PI;
+        g.add(pebL);
+
+        var pebR = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.06, 6), pebbleMat);
+        pebR.position.set(mx - cosA * (halfW + 0.22), my + 0.01, mz + sinA * (halfW + 0.22));
+        pebR.rotation.y = (s * 2.3) % Math.PI;
+        g.add(pebR);
+      }
+    }
   }
 
-  // Helper to add circular junction plaza
+  // Circular Cobblestone Junction Plaza
   function addJunction(x, z, radius){
-    var junc = new THREE.Mesh(new THREE.CircleGeometry(radius || 1.6, 16), roadMat);
-    junc.rotation.x = -Math.PI / 2;
-    junc.position.set(x, 0.022, z);
+    radius = radius || 2.0;
+    var jy = getVillageTerrainHeight(x, z) + 0.068;
+    var junc = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 1.05, 0.13, 24), roadMat);
+    junc.position.set(x, jy, z);
     junc.receiveShadow = !isMobile;
     g.add(junc);
+
+    // Outer cobblestone ring
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.11, 8, 24), curbMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(x, jy + 0.01, z);
+    g.add(ring);
     return junc;
   }
 
+  // Cozy Village Wooden Trail Lantern
+  function addVillageLantern(x, z){
+    var ly = getVillageTerrainHeight(x, z);
+    var lp = new THREE.Group();
+    lp.position.set(x, ly, z);
+
+    // Post
+    var post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.85, 6), lanternWood);
+    post.position.y = 0.925;
+    post.castShadow = !isMobile;
+    lp.add(post);
+
+    // Cross-arm
+    var arm = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.06, 0.06), lanternWood);
+    arm.position.set(0.14, 1.75, 0);
+    lp.add(arm);
+
+    // Lantern fixture
+    var lantern = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.24, 0.18), lanternWood);
+    lantern.position.set(0.28, 1.58, 0);
+    lp.add(lantern);
+
+    // Glowing core
+    var core = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), lanternGlow);
+    core.position.set(0.28, 1.58, 0);
+    lp.add(core);
+
+    g.add(lp);
+  }
+
+  // Crossroads Signpost
+  function addVillageSignpost(x, z){
+    var sy = getVillageTerrainHeight(x, z);
+    var sp = new THREE.Group();
+    sp.position.set(x, sy, z);
+
+    var post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.7, 6), lanternWood);
+    post.position.y = 0.85;
+    sp.add(post);
+
+    // Arrow to Market
+    var sign1 = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.16, 0.04), kept(0xd97706, 0.85));
+    sign1.position.set(-0.25, 1.45, 0.04);
+    sign1.rotation.y = 0.2;
+    sp.add(sign1);
+
+    // Arrow to Bakery & Barn
+    var sign2 = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.16, 0.04), kept(0x15803d, 0.85));
+    sign2.position.set(0.25, 1.25, -0.04);
+    sign2.rotation.y = -0.2;
+    sp.add(sign2);
+
+    g.add(sp);
+  }
+
   // 1. Central Crossroads Plaza at (0, 18.0)
-  addJunction(0, 18.0, 1.85);
+  addJunction(0, 18.0, 2.2);
+  addVillageSignpost(0.7, 16.7);
+  addVillageLantern(-1.2, 16.7);
 
-  // 2. Central North Avenue: from Crossroads (0, 18.0) up through garden entrance (0, 10.0) to central meadow (0, 3.5)
-  addSegment(0, 18.0, 0, 3.5, 1.9);
-  addJunction(0, 3.5, 1.5);
+  // 2. Central North Avenue: Crossroads (0, 18.0) -> Garden Entrance (0, 10.0) -> Meadow (0, 3.5)
+  addSegment(0, 18.0, 0, 10.0, 2.0);
+  addSegment(0, 10.0, 0, 3.5, 1.9);
+  addJunction(0, 3.5, 1.8);
 
-  // 3. West Village Promenade: from Crossroads (0, 18.0) to Market Square (-21.5, 18.0)
-  addSegment(0, 18.0, -21.5, 18.0, 2.0);
-  addJunction(-21.5, 18.0, 2.4); // Market Square Plaza
+  // 3. West Village Promenade: Crossroads (0, 18.0) -> Market Square (-21.5, 18.0)
+  addSegment(0, 18.0, -10.0, 18.0, 2.1);
+  addSegment(-10.0, 18.0, -21.5, 18.0, 2.1);
+  addJunction(-21.5, 18.0, 2.8); // Market Square Plaza
+  addVillageLantern(-19.5, 16.6);
 
-  // 4. Northwest Residential Lane: from West Mid (-10.0, 18.0) northward to Village Houses (-14.0, 6.0)
-  addSegment(-10.0, 18.0, -11.5, 12.0, 1.8);
-  addSegment(-11.5, 12.0, -14.0, 6.0, 1.8);
-  addJunction(-14.0, 6.0, 1.8); // Residential turnaround
+  // 4. Northwest Residential Lane: West Mid (-10.0, 18.0) -> Residential Quarter (-14.0, 6.0)
+  addSegment(-10.0, 18.0, -11.5, 12.0, 1.9);
+  addSegment(-11.5, 12.0, -14.0, 6.0, 1.9);
+  addJunction(-14.0, 6.0, 2.2); // Residential Turnaround Plaza
+  addVillageLantern(-12.7, 7.2);
 
-  // 5. East Village Promenade: from Crossroads (0, 18.0) to Village Kitchen & Bakery (17.5, 18.0)
-  addSegment(0, 18.0, 17.5, 18.0, 2.0);
-  addJunction(17.5, 18.0, 2.2); // Bakery Front Plaza
+  // 5. East Village Promenade: Crossroads (0, 18.0) -> Bakery & Kitchen (18.0, 18.0)
+  addSegment(0, 18.0, 9.0, 18.0, 2.1);
+  addSegment(9.0, 18.0, 18.0, 18.0, 2.1);
+  addJunction(18.0, 18.0, 2.6); // Bakery Front Plaza
+  addVillageLantern(16.5, 16.6);
 
-  // 6. Northeast Pasture Lane: from Bakery (17.5, 18.0) northward to Grand Barn & Chicken Coop Pasture (20.0, 6.0)
-  addSegment(17.5, 18.0, 19.0, 12.0, 1.8);
-  addSegment(19.0, 12.0, 20.0, 6.0, 1.8);
-  addJunction(20.0, 6.0, 2.0); // Barn Pasture Gate Plaza
+  // 6. Northeast Pasture Lane: Bakery (18.0, 18.0) -> Grand Barn & Coop Pasture (20.0, 6.0)
+  addSegment(18.0, 18.0, 19.0, 12.0, 1.9);
+  addSegment(19.0, 12.0, 20.0, 6.0, 1.9);
+  addJunction(20.0, 6.0, 2.4); // Barn Gate Plaza
+  addVillageLantern(18.4, 7.2);
 
-  // 7. Pier Shore Pathway: from Barn Pasture (20.0, 6.0) northward-eastward to Fishing Pier Dock (22.0, -13.5)
-  addSegment(20.0, 6.0, 21.0, -4.0, 1.7);
-  addSegment(21.0, -4.0, 22.0, -13.5, 1.7);
-  addJunction(22.0, -13.5, 1.6); // Pier Dock Entrance
-
-  // 8. Organic Stepping Stones along the path borders
-  for(var wx = -1.5; wx >= -20.5; wx -= 2.2){
-    var cN = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cN.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
-    cN.rotation.y = Math.random() * Math.PI;
-    g.add(cN);
-    var cS = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cS.position.set(wx + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
-    cS.rotation.y = Math.random() * Math.PI;
-    g.add(cS);
-  }
-  for(var ex = 1.5; ex <= 16.5; ex += 2.2){
-    var cNe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cNe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 16.9 + (Math.random() - 0.5) * 0.15);
-    cNe.rotation.y = Math.random() * Math.PI;
-    g.add(cNe);
-    var cSe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.05, 6), curbMat);
-    cSe.position.set(ex + (Math.random() - 0.5) * 0.2, 0.025, 19.1 + (Math.random() - 0.5) * 0.15);
-    cSe.rotation.y = Math.random() * Math.PI;
-    g.add(cSe);
-  }
+  // 7. Pier Shore Pathway: Barn Pasture (20.0, 6.0) -> Shore Pond & Fishing Pier (21.5, -13.5)
+  addSegment(20.0, 6.0, 21.0, -4.0, 1.8);
+  addSegment(21.0, -4.0, 21.5, -13.5, 1.8);
+  addJunction(21.5, -13.5, 1.9); // Pier Dock Entrance
 
   scene.add(g);
   window._villageRoadGroup = g;
@@ -2062,7 +2178,8 @@ function buildScenicMountainBackdrop(){
     cone.position.y = height * 0.48;
     cone.rotation.y = (x * 0.7 + z * 0.4) % Math.PI;
     cone.scale.set(1.0 + (Math.abs(x) % 3) * 0.08, 1.0, 0.85 + (Math.abs(z) % 3) * 0.08);
-    cone.castShadow = !isMobile;
+    cone.castShadow = false;
+    cone.receiveShadow = false;
     g.add(cone);
 
     if(snowHeight && height >= 20){
@@ -2071,6 +2188,8 @@ function buildScenicMountainBackdrop(){
       snCone.position.y = snowHeight + (height - snowHeight) * 0.48;
       snCone.rotation.y = cone.rotation.y;
       snCone.scale.copy(cone.scale);
+      snCone.castShadow = false;
+      snCone.receiveShadow = false;
       g.add(snCone);
     }
 
