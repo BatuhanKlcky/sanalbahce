@@ -127,6 +127,7 @@
       var a2 = (j/n)*Math.PI*2 + Math.random()*.4;
       var r2 = 4 + Math.random()*(R-5);
       var x = Math.cos(a2)*r2, z = Math.sin(a2)*r2;
+      if(Math.abs(z - (-21.0)) < 3.0) continue;
       if(typeof buildWild === 'function'){
         var patch2 = buildWild(x, z);
         patch2.scale.setScalar(.55 + Math.random()*.35);
