@@ -164,13 +164,13 @@
   }
 
   // Spawn Fisherman NPC at Shore Pier
-  function spawnFisherman(x, y, z){
+  function spawnFisherman(x, y, z, rotY){
     var npc = {
       id: 'fisherman',
       name: 'Balıkçı Reis (Cemil Usta)',
       role: 'Usta Balıkçı',
       x: x, y: y, z: z,
-      rotY: -1.75, // Looking towards water
+      rotY: rotY != null ? rotY : 1.85, // Looking towards water
       group: null,
       mixer: null,
       clips: null,
@@ -320,11 +320,20 @@
     var clothRed = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.7 });
     var clothWhite = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.7 });
 
-    // 1. Cobblestone Terrace Floor
-    var floor = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.08, 9.6), stoneMat);
-    floor.position.set(0, 0.04, 0);
-    floor.receiveShadow = !isMobile;
-    g.add(floor);
+    // 1. Organic stepping stones in front of the bakery shop
+    var stoneMat = new THREE.MeshStandardMaterial({ color: 0x827d74, roughness: 0.9 });
+    var shopStoneCoords = [
+      [0, 1.8, 0.42], [-0.8, 1.6, 0.36], [0.8, 1.65, 0.38],
+      [-0.4, 0.9, 0.35], [0.4, 0.95, 0.34],
+      [0, 0.2, 0.4]
+    ];
+    shopStoneCoords.forEach(function(sc){
+      var stone = new THREE.Mesh(new THREE.CylinderGeometry(sc[2], sc[2] * 1.08, 0.04, 7), stoneMat);
+      stone.position.set(sc[0], 0.02, sc[1]);
+      stone.rotation.y = (sc[0] * 2.8 + sc[1] * 1.7) % Math.PI;
+      stone.receiveShadow = !isMobile;
+      g.add(stone);
+    });
 
     // 2. The Kitchen Shop Building (Quaternius Inn.glb scaled to ~4.0m)
     loadGlbDecor('models/village/Inn.glb', function(shopMesh){
@@ -744,8 +753,8 @@
 
   // Initialize Village NPCs in world
   function initVillageNPCs(){
-    // 1. Spawn Balıkçı Reis on wooden pier of Shore Pond (far northeast coastline)
-    spawnFisherman(22.6, 0.28, -14.1);
+    // 1. Spawn Balıkçı Reis on wooden pier of Shore Pond (firmly on the wooden dock planks facing water)
+    spawnFisherman(21.35, 0.57, -13.87, 1.85);
 
     // 2. Build 3D Village Kitchen & Bakery Shop building at South-East quadrant (18.0, 18.0)
     buildVillageKitchenShop(18.0, 18.0);

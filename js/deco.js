@@ -53,6 +53,12 @@ function pushDeco(g, type, extra){
   else if(rec.world === 'classic') g.visible = !(typeof isCozy === 'function') || !isCozy();
   decos.push(rec);
   markDirty();
+  if(type === 'chicken_coop' && typeof window.registerChickenCoop === 'function'){
+    window.registerChickenCoop(rec);
+  }
+  if((type === 'stable' || type === 'grand_barn' || type === 'barn_building') && typeof window.registerBarn === 'function'){
+    window.registerBarn(rec);
+  }
 }
 function sailCloth(){
   if(!sailCloth.m){

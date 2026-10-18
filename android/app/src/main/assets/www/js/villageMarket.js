@@ -71,11 +71,20 @@
     var clothMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.7 });
     var goldClothMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
 
-    // 1. Cobblestone plaza floor (11m x 11m)
-    var floor = new THREE.Mesh(new THREE.BoxGeometry(11.2, 0.08, 11.2), stoneMat);
-    floor.position.y = 0.04;
-    floor.receiveShadow = !isMobile;
-    root.add(floor);
+    // 1. Organic natural stepping stones embedded in the meadow grass
+    var steppingStoneMat = new THREE.MeshStandardMaterial({ color: 0x827d74, roughness: 0.9 });
+    var stoneCoords = [
+      [0, -1.8, 0.4], [-0.9, -1.7, 0.35], [0.9, -1.7, 0.38],
+      [-0.45, -0.9, 0.36], [0.45, -0.9, 0.34],
+      [-0.2, 0.0, 0.38], [0.3, 0.8, 0.35], [-0.1, 1.6, 0.36]
+    ];
+    stoneCoords.forEach(function(sc){
+      var stone = new THREE.Mesh(new THREE.CylinderGeometry(sc[2], sc[2] * 1.08, 0.04, 7), steppingStoneMat);
+      stone.position.set(sc[0], 0.02, sc[1]);
+      stone.rotation.y = (sc[0] * 3.7 + sc[1] * 2.1) % Math.PI;
+      stone.receiveShadow = !isMobile;
+      root.add(stone);
+    });
 
     // 2. Main Player Market Stall Counter
     var stall = new THREE.Group();
@@ -442,12 +451,21 @@
           c.x += (dx / d) * Math.min(d, spd);
           c.z += (dz / d) * Math.min(d, spd);
           var ang = Math.atan2(dx, dz);
-          c.group.rotation.y += (ang - c.group.rotation.y) * 0.15;
+          var diffAngle = ang - c.group.rotation.y;
+          while(diffAngle < -Math.PI) diffAngle += Math.PI * 2;
+          while(diffAngle > Math.PI) diffAngle -= Math.PI * 2;
+          c.group.rotation.y += diffAngle * 0.15;
+          c.group.rotation.x = 0;
+          c.group.rotation.z = 0;
+          c.group.position.y = 0;
         } else {
           if(c.state === 'walk_in'){
             c.state = 'inspect';
             c.inspectTimer = 2.2 + Math.random() * 1.5;
             c.group.rotation.y = 0;
+            c.group.rotation.x = 0;
+            c.group.rotation.z = 0;
+            c.group.position.y = 0;
             if(c.clips && c.clips.Duck) playCustomerClip(c, 'Duck');
             else if(c.clips && c.clips.Idle) playCustomerClip(c, 'Idle');
           } else if(c.state === 'walk_out'){
@@ -459,6 +477,7 @@
         }
         c.group.position.x = c.x;
         c.group.position.z = c.z;
+        c.group.position.y = 0;
       } else if(c.state === 'inspect'){
         c.inspectTimer -= dt;
         if(c.inspectTimer <= 0){

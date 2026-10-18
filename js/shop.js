@@ -19,6 +19,7 @@ var ANIMAL_SPECS = {
   deer:       { url: 'models/animals/Deer.glb?v=2',   targetH: 1.35, rotY: 0, lift: true,  emoji: '🦌', label: 'Orman Geyiği',  idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
   fox:        { url: 'models/animals/Fox.glb?v=2',    targetH: 0.68, rotY: 0, lift: true,  emoji: '🦊', label: 'Kızıl Tilki',   idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_2_HeadLow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_ToIdle', feedClip: 'AnimalArmature|Eating' },
   chick:      { url: 'models/animals/Chick.glb?v=2',  targetH: 0.36, rotY: 0, lift: false, emoji: '🐥', label: 'Köy Civcivi',   prodItem: 'egg',  prodEmoji: '🥚', prodName: 'Köy Yumurtası', prodVerb: 'Yumurtayı Al', prodTime: 30, idleClips: ['Idle','Idle_Peck'], walkClip: 'Run', runClip: 'Run', loveClip: 'Idle_Peck', feedClip: 'Idle_Peck' },
+  sheep:      { url: 'models/animals/Alpaca.glb?v=2', targetH: 1.15, rotY: 0, lift: true,  emoji: '🐑', label: 'Merinos Koyun',  prodItem: 'wool', prodEmoji: '🧶', prodName: 'Köy Yünü',      prodVerb: 'Yünü Kırk',    prodTime: 36, idleClips: ['AnimalArmature|Idle','AnimalArmature|Eating','AnimalArmature|Idle_2','AnimalArmature|Idle_Headlow'], walkClip: 'AnimalArmature|Walk', runClip: 'AnimalArmature|Gallop', loveClip: 'AnimalArmature|Jump_toIdle', feedClip: 'AnimalArmature|Eating' },
   duck:       { url: 'models/animals/Duck.glb?v=2',   targetH: 0.44, rotY: 0, lift: false, emoji: '🦆', label: 'Gölet Ördeği',  prodItem: 'egg',  prodEmoji: '🥚', prodName: 'Köy Yumurtası', prodVerb: 'Yumurtayı Al', prodTime: 34, idleClips: ['idle'], walkClip: 'walk', runClip: 'walk', loveClip: 'idle', feedClip: 'idle' }
 };
 
@@ -480,8 +481,11 @@ var SHOP_ITEMS = {
     {id:'animal_fox',       emoji:'🦊', name:'Kızıl Tilki',    desc:'Meraklı ve çevik dost tilki',       price:340, type:'animal', specKey:'fox'},
     {id:'animal_cat_van',   emoji:'🐱', name:'Van Kedisi',     desc:'Hazine bulan 3D Van Kedisi',        price:220, type:'animal', specKey:'cat_van'},
     {id:'animal_dog_shiba', emoji:'🐕', name:'Shiba Inu',      desc:'Zararlı avcısı sadık Shiba Inu',    price:260, type:'animal', specKey:'dog_shiba'},
+    {id:'animal_sheep',     emoji:'🐑', name:'Merinos Koyun',  desc:'Otlar ve 🧶 Yumuşak Yün üretir',    price:240, type:'animal', specKey:'sheep'},
   ],
   items: [
+    {id:'chicken_coop',     emoji:'🐔', name:'Tavuk Kümesi & Çit', desc:'Geniş çitli ahşap kümes. Yumurta üretir!', price:320,  deco:'chicken_coop'},
+    {id:'barn_building',    emoji:'🛖', name:'Köy Ahırı & Ağıl',  desc:'İnek ve alpakalar için büyük köy ahırı!',  price:460,  deco:'stable'},
     {id:'golden_pot',       emoji:'🏆', name:'Altın Saksı',       desc:'Özel altın renkli saksı',         price:140,  deco:'golden_pot'},
     {id:'crystal_pond',     emoji:'💎', name:'Kristal Gölet',     desc:'Parlayan mavi gölet',             price:240,  deco:'crystal_pond'},
     {id:'magic_lamp',       emoji:'🔮', name:'Sihirli Fener',     desc:'Mor ışık saçan fener',            price:180,  deco:'magic_lamp'},
@@ -641,7 +645,38 @@ window.placeShopDeco = function(tp, x, z, ang){
       return true;
     }
   }
-  if(tp==='golden_pot') mkGoldenPot(x,z);
+  if(tp==='chicken_coop'){
+    var coopMesh = (typeof window.createCoopMesh === 'function') ? window.createCoopMesh() : null;
+    if(coopMesh){
+      coopMesh.position.set(x, 0, z);
+      coopMesh.rotation.y = ang || 0;
+      scene.add(coopMesh);
+      var coopRec = {
+        type: 'chicken_coop',
+        group: coopMesh,
+        x: x,
+        z: z,
+        rot: ang || 0,
+        world: (typeof isCozy==='function' && isCozy()) ? 'cozy' : 'normal'
+      };
+      decos.push(coopRec);
+      if(typeof window.registerChickenCoop === 'function') window.registerChickenCoop(coopRec);
+      if(typeof sndPlant === 'function') sndPlant();
+      if(typeof showToast === 'function') showToast('🐔 Tavuk Kümesi kuruldu! Tavuklar yumurtlamaya başladı 🥚');
+      if(typeof save === 'function') save(true);
+      return true;
+    }
+  }
+  else if(tp==='stable' || tp==='barn_building'){
+    if(typeof mkPackProp === 'function'){
+      mkPackProp('stable', x, z, ang || 0);
+      if(typeof sndPlant === 'function') sndPlant();
+      if(typeof showToast === 'function') showToast('🛖 Köy Ahırı kuruldu! Çiftlik hayvanları yerleşti 🐮🦙');
+      if(typeof save === 'function') save(true);
+      return true;
+    }
+  }
+  else if(tp==='golden_pot') mkGoldenPot(x,z);
   else if(tp==='crystal_pond') mkCrystalPond(x,z);
   else if(tp==='magic_lamp') mkMagicLamp(x,z);
   else if(tp==='rainbow_arch') mkRainbowArch(x,z,ang);

@@ -161,12 +161,12 @@
     glow.position.set(-0.07, 2.18, 1.05);
     root.add(glow);
 
-    // 7. Chicken Wire Run / Paddock Fence (Tam Kapalı Çiftlik Çiti)
+    // 7. Chicken Wire Run / Paddock Fence (Genişletilmiş Ferah Çiftlik Çiti: 5.6m x 4.8m)
     var fenceMat = new THREE.MeshStandardMaterial({ color: 0x8a7052, roughness: 0.9 });
     var posts = [
-      [-1.9, -1.9], [0, -1.9], [1.9, -1.9],
-      [-1.9, 0],               [1.9, 0],
-      [-1.9, 1.9],  [0.8, 1.9], [1.9, 1.9]
+      [-2.8, -2.4], [0, -2.4], [2.8, -2.4],
+      [-2.8, 0],               [2.8, 0],
+      [-2.8, 2.4],  [0.6, 2.4], [1.4, 2.4], [2.8, 2.4]
     ];
     posts.forEach(function(pos){
       var fp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.9, 6), fenceMat);
@@ -175,37 +175,37 @@
       root.add(fp);
     });
 
-    // North rail (arka)
-    var railN = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.05, 0.04), fenceMat);
-    railN.position.set(0, 0.55, -1.9);
+    // North rail (arka: 5.6m)
+    var railN = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.05, 0.04), fenceMat);
+    railN.position.set(0, 0.55, -2.4);
     root.add(railN);
     var railN2 = railN.clone(); railN2.position.y = 0.28; root.add(railN2);
 
-    // East & West rails (yanlar)
-    var railE = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 3.8), fenceMat);
-    railE.position.set(1.9, 0.55, 0);
+    // East & West rails (yanlar: 4.8m)
+    var railE = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 4.8), fenceMat);
+    railE.position.set(2.8, 0.55, 0);
     root.add(railE);
     var railE2 = railE.clone(); railE2.position.y = 0.28; root.add(railE2);
 
-    var railW = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 3.8), fenceMat);
-    railW.position.set(-1.9, 0.55, 0);
+    var railW = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 4.8), fenceMat);
+    railW.position.set(-2.8, 0.55, 0);
     root.add(railW);
     var railW2 = railW.clone(); railW2.position.y = 0.28; root.add(railW2);
 
-    // South rails (ön - ahşap kapı aralığı ile)
-    var railSW1 = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.05, 0.04), fenceMat);
-    railSW1.position.set(-0.95, 0.55, 1.9);
+    // South rails (ön - kapı boşluğu ile)
+    var railSW1 = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.05, 0.04), fenceMat);
+    railSW1.position.set(-1.1, 0.55, 2.4);
     root.add(railSW1);
     var railSW1_2 = railSW1.clone(); railSW1_2.position.y = 0.28; root.add(railSW1_2);
 
-    var railSW2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.05, 0.04), fenceMat);
-    railSW2.position.set(1.35, 0.55, 1.9);
+    var railSW2 = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.05, 0.04), fenceMat);
+    railSW2.position.set(2.1, 0.55, 2.4);
     root.add(railSW2);
     var railSW2_2 = railSW2.clone(); railSW2_2.position.y = 0.28; root.add(railSW2_2);
 
     // Wooden gate door
-    var gateDoor = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.52, 0.03), fenceMat);
-    gateDoor.position.set(0.4, 0.42, 1.9);
+    var gateDoor = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.52, 0.03), fenceMat);
+    gateDoor.position.set(0.65, 0.42, 2.4);
     gateDoor.rotation.y = 0.35;
     root.add(gateDoor);
 
@@ -324,7 +324,10 @@
       timer: 1 + Math.random() * 3,
       cluckTimer: 5 + Math.random() * 10,
       rotY: Math.random() * Math.PI * 2,
-      scale: 0.55 + Math.random() * 0.1
+      scale: 0.55 + Math.random() * 0.1,
+      clips: {},
+      actions: {},
+      currentAction: null
     };
 
     loadChickBuffer(function(buf){
@@ -349,8 +352,18 @@
           ch.group = wrap;
           if(gltf.animations && gltf.animations.length > 0){
             ch.mixer = new THREE.AnimationMixer(body);
-            ch.action = ch.mixer.clipAction(gltf.animations[0]);
-            ch.action.play();
+            gltf.animations.forEach(function(anim){
+              var k = anim.name;
+              if(k.indexOf('Idle_Peck') >= 0) ch.clips.peck = anim;
+              else if(k.indexOf('Idle') >= 0) ch.clips.idle = anim;
+              else if(k.indexOf('Run') >= 0) ch.clips.run = anim;
+              else if(k.indexOf('Attack') >= 0) ch.clips.attack = anim;
+            });
+            if(ch.clips.idle){
+              ch.actions.idle = ch.mixer.clipAction(ch.clips.idle);
+              ch.actions.idle.play();
+              ch.currentAction = ch.actions.idle;
+            }
           }
           finishSpawn();
         }, function(){
@@ -383,6 +396,32 @@
 
     chickens.push(ch);
     return ch;
+  }
+
+  // Play skeletal animation clip on chicken instance
+  function playChickenClip(ch, name, loop){
+    if(!ch || !ch.mixer || !ch.clips) return;
+    var clip = ch.clips[name] || ch.clips.idle;
+    if(!clip) return;
+    if(!ch.actions) ch.actions = {};
+    if(!ch.actions[name]){
+      ch.actions[name] = ch.mixer.clipAction(clip);
+    }
+    var next = ch.actions[name];
+    if(ch.currentAction === next && next.isRunning()) return;
+    if(ch.currentAction && ch.currentAction !== next){
+      ch.currentAction.fadeOut(0.18);
+    }
+    next.reset();
+    if(loop === false){
+      next.setLoop(THREE.LoopOnce, 1);
+      next.clampWhenFinished = true;
+    } else {
+      next.setLoop(THREE.LoopRepeat, Infinity);
+    }
+    next.timeScale = (name === 'run') ? 0.9 : 1.0;
+    next.fadeIn(0.18).play();
+    ch.currentAction = next;
   }
 
   var _sharedEggMat = null;
@@ -483,10 +522,8 @@
 
       if(ch.cluckTimer <= 0){
         ch.cluckTimer = 12 + Math.random() * 20;
-        // Small jump on cluck
-        ch.group.position.y = 0.12;
-      } else if(ch.group.position.y > 0){
-        ch.group.position.y = Math.max(0, ch.group.position.y - dt * 1.5);
+        // Quaternius attack/cluck animation
+        playChickenClip(ch, 'attack', false);
       }
 
       if(ch.timer <= 0){
@@ -495,17 +532,20 @@
         if(r < 0.45){
           ch.state = 'idle';
           ch.timer = 1.5 + Math.random() * 2.5;
+          playChickenClip(ch, 'idle');
         } else if(r < 0.75){
           ch.state = 'peck';
-          ch.timer = 1.0 + Math.random() * 2.0;
+          ch.timer = 1.2 + Math.random() * 2.0;
+          playChickenClip(ch, 'peck');
         } else {
           ch.state = 'walk';
-          ch.timer = 2.0 + Math.random() * 3.0;
-          // Target random point strictly inside coop fenced paddock
-          var ox = (Math.random() - 0.5) * 2.8;
-          var oz = (Math.random() - 0.5) * 2.8;
+          ch.timer = 2.2 + Math.random() * 3.0;
+          // Target random point inside widened fenced paddock
+          var ox = (Math.random() - 0.5) * 4.6;
+          var oz = (Math.random() - 0.5) * 3.8;
           ch.tx = ch.coop.x + ox;
           ch.tz = ch.coop.z + oz;
+          playChickenClip(ch, 'run');
         }
       }
 
@@ -514,28 +554,29 @@
         var dz = ch.tz - ch.z;
         var d = Math.hypot(dx, dz);
         if(d > 0.05){
-          var spd = 0.8 * dt;
+          var spd = 0.85 * dt;
           ch.x += (dx / d) * Math.min(d, spd);
           ch.z += (dz / d) * Math.min(d, spd);
           var targetAngle = Math.atan2(dx, dz);
-          ch.rotY += (targetAngle - ch.rotY) * 0.15;
-          // Walking waddle
-          ch.group.rotation.z = Math.sin(now * 12) * 0.12;
+          var diff = targetAngle - ch.rotY;
+          while(diff < -Math.PI) diff += Math.PI * 2;
+          while(diff > Math.PI) diff -= Math.PI * 2;
+          ch.rotY += diff * 0.18;
         } else {
           ch.state = 'peck';
           ch.timer = 1.5;
+          playChickenClip(ch, 'peck');
         }
-      } else if(ch.state === 'peck'){
-        ch.group.rotation.x = Math.max(0, Math.sin(now * 10)) * 0.45;
-        ch.group.rotation.z = 0;
-      } else {
-        ch.group.rotation.x = 0;
-        ch.group.rotation.z = 0;
       }
 
-      // Constrain strictly within fenced perimeter
-      ch.x = THREE.MathUtils.clamp(ch.x, ch.coop.x - 1.6, ch.coop.x + 1.6);
-      ch.z = THREE.MathUtils.clamp(ch.z, ch.coop.z - 1.6, ch.coop.z + 1.6);
+      // Authentic skeletal motion — keep mesh upright without procedural wobble
+      ch.group.rotation.x = 0;
+      ch.group.rotation.z = 0;
+      ch.group.position.y = 0;
+
+      // Constrain strictly within widened fenced perimeter (5.6m x 4.8m)
+      ch.x = THREE.MathUtils.clamp(ch.x, ch.coop.x - 2.5, ch.coop.x + 2.5);
+      ch.z = THREE.MathUtils.clamp(ch.z, ch.coop.z - 2.1, ch.coop.z + 2.1);
 
       ch.group.position.x = ch.x;
       ch.group.position.z = ch.z;

@@ -384,7 +384,7 @@
     });
   }
 
-  function buildFromScene(body, onDone){
+  function buildFromScene(body, onDone, gltfAnimations){
     if(!body){ onDone(null); return; }
     cozyLift(body);
     body.updateMatrixWorld(true);
@@ -395,13 +395,25 @@
     var g = new THREE.Group();
     g.add(body);
     g.scale.setScalar(1.62 / h);
-    // Reset skeletons to Farmer bind, then build clips from that pose.
-    // Discard gltf.animations — Character retargets break Modular Farmer Idle.
-    body.traverse(function(c){
-      if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
-    });
+
     body.updateMatrixWorld(true);
-    var clips = buildFarmerClips(body);
+    var clips = {};
+    if(gltfAnimations && gltfAnimations.length > 0){
+      gltfAnimations.forEach(function(clip){
+        var shortName = clip.name.replace(/^Farmer\|/, '');
+        clips[shortName] = clip;
+        clips[clip.name] = clip;
+      });
+    }
+    // Fallback if gltf has no animations
+    if(!clips.Idle || !clips.Walk){
+      body.traverse(function(c){
+        if(c.isSkinnedMesh && c.skeleton) c.skeleton.pose();
+      });
+      body.updateMatrixWorld(true);
+      var fallbackClips = buildFarmerClips(body);
+      clips = Object.assign(fallbackClips, clips);
+    }
     var mixer = new THREE.AnimationMixer(body);
     onDone({ group: g, mixer: mixer, clips: clips, body: body });
   }
@@ -417,7 +429,7 @@
           else _bufMale = freshBuf;
           try {
             new THREE.GLTFLoader().parse(freshBuf, '', function(gltf){
-              buildFromScene(gltf.scene, onDone);
+              buildFromScene(gltf.scene, onDone, gltf.animations);
             }, function(){ onDone(null); });
           } catch(e){ onDone(null); }
         } else {
@@ -429,7 +441,7 @@
     var loader = new THREE.GLTFLoader();
     try {
       loader.parse(buf, '', function(gltf){
-        buildFromScene(gltf.scene, onDone);
+        buildFromScene(gltf.scene, onDone, gltf.animations);
       }, function(err){
         console.warn('parse farmer', err);
         onDone(null);
