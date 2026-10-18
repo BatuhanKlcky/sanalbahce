@@ -1,9 +1,10 @@
-var CACHE = 'sanalbahce-shell-47';
+var CACHE = 'sanalbahce-shell-48';
 var LOCAL = [
   './',
   './index.html',
   './gizlilik.html',
   './manifest.json',
+  './version.json',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
@@ -32,6 +33,7 @@ var LOCAL = [
   './js/gameUI.js',
   './js/aQuality.js',
   './js/trainTrade.js',
+  './js/appUpdate.js',
   './js/loop.js'
 ];
 var CDN = [
