@@ -1153,13 +1153,39 @@ var PACK_PROPS = {
 
 function mkPackProp(type, x, z, ang){
   var def = PACK_PROPS[type];
-  if(!def || typeof window.spawnModel !== 'function') return false;
+  if(!def) return false;
   var o = null, i;
-  for(i=0;i<def.keys.length;i++){
-    o = window.spawnModel(def.keys[i], def.h);
-    if(o) break;
+  if(typeof window.spawnModel === 'function'){
+    for(i=0;i<def.keys.length;i++){
+      o = window.spawnModel(def.keys[i], def.h);
+      if(o) break;
+    }
   }
-  if(!o) return false;
+  if(!o){
+    // Procedural fallback: construct clean prop geometry so model is NEVER lost from save
+    var h = def.h || 1.5;
+    var phMat = new THREE.MeshStandardMaterial({
+      color: /pine|tree|birch|willow|bush|plant|bamboo|palm/.test(type) ? 0x5a8c48 : 0x8a6e4d,
+      roughness: 0.85
+    });
+    phMat.userData.keep = true;
+    var phMesh;
+    if(/tree|pine|birch|willow|bamboo|palm/.test(type)){
+      phMesh = new THREE.Mesh(new THREE.ConeGeometry(h * 0.4, h, 8), phMat);
+      phMesh.position.y = h * 0.5;
+    } else if(/rock|stone/.test(type)){
+      phMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(h * 0.45), phMat);
+      phMesh.position.y = h * 0.45;
+    } else {
+      phMesh = new THREE.Mesh(new THREE.BoxGeometry(h * 0.8, h * 0.7, h * 0.8), phMat);
+      phMesh.position.y = h * 0.35;
+    }
+    o = phMesh;
+    o.userData.isPlaceholder = true;
+    o.userData.targetType = type;
+    o.userData.targetKeys = def.keys;
+    o.userData.targetH = def.h;
+  }
   var g = new THREE.Group();
   g.add(o);
   g.position.set(x, 0, z);
@@ -1179,6 +1205,31 @@ function mkPackProp(type, x, z, ang){
 }
 window.mkPackProp = mkPackProp;
 window.PACK_PROPS = PACK_PROPS;
+
+window.upgradePlaceholders = function(){
+  if(typeof decos === 'undefined' || !decos || typeof window.spawnModel !== 'function') return;
+  for(var i = 0; i < decos.length; i++){
+    var d = decos[i];
+    if(!d || !d.group) continue;
+    var ch = d.group.children;
+    for(var j = 0; j < ch.length; j++){
+      if(ch[j] && ch[j].userData && ch[j].userData.isPlaceholder){
+        var ph = ch[j];
+        var keys = ph.userData.targetKeys || [ph.userData.targetKey];
+        var newO = null;
+        for(var k = 0; k < keys.length; k++){
+          newO = window.spawnModel(keys[k], ph.userData.targetH);
+          if(newO) break;
+        }
+        if(newO){
+          d.group.remove(ph);
+          d.group.add(newO);
+          break;
+        }
+      }
+    }
+  }
+};
 
 var PLACE_SPAN = {fence:1.16, wall:1.5, bench:1.35, table:1.3, arch:1.65, pergola:2.3, bridge:1.7, house:0};
 function tidyPlace(tp, x, z){

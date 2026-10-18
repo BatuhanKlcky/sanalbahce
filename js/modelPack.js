@@ -758,6 +758,9 @@
         }
       }, 0);
       if(bar) bar.classList.remove('show');
+      if(typeof window.upgradePlaceholders === 'function'){
+        try { window.upgradePlaceholders(); } catch(e){ console.warn('upgradePlaceholders', e); }
+      }
       waiting.splice(0).forEach(function(fn){ try{fn();}catch(e){} });
       if(typeof showToast === 'function') showToast('🌿 Bahçe modelleri hazır');
     }
@@ -770,7 +773,7 @@
       } else if(attempt === 1 && !isFileOrPreview){
         url = BASE + path + '?v=4&r=' + Date.now();
       } else {
-        url = 'https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main2/models/' + path;
+        url = 'https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main/models/' + path;
       }
       loader.load(url, function(gltf){
         templates[path] = gltf.scene;
@@ -790,6 +793,10 @@
       });
     }
     paths.forEach(function(path){ loadOne(path, 0); });
+    // Safety timeout: ensure finishPack() is always called within 4.5 seconds
+    setTimeout(function(){
+      if(!ready) finishPack();
+    }, 4500);
   }
 
   window.modelPackReady = function(){ return ready; };

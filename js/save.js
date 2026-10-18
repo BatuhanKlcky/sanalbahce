@@ -425,29 +425,130 @@ function loadProg(){
     }
   });
   try{var d=JSON.parse(localStorage.getItem('gdn_xp')||'null');if(d){xp=d.xp||0;level=d.level||1;}}catch(e){}updXP();rstTasks();loadTasks();}
-// ── GAME CONSTANTS ───────────────────────────────────────────────────────────
-var SAVE_KEY='gdn_save',DRY=.00001389,GROW=.000012,BDRAIN=.00018,SINT=15000;
-var flowers=[],bugs=[],badBugs=[],badM=[],decos=[];
-var badID=0,lastSave=0,isDirty=false,isLoading=false;
-function markDirty(){isDirty=true;}
-function save(force){var now=Date.now();if(!force&&(now-lastSave)<SINT&&!isDirty)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify({lastUpdate:now,
-      plants:flowers.map(function(f){return{x:f.mesh.position.x,z:f.mesh.position.z,h:f.h,b:f.b,w:f.w,c:f.c,t:f.t,k:f.k||'',isStunted:f.isStunted};}),
-      badBugs:badBugs.map(function(b){return{ti:b.ti};}),
-      bugCount:bugs.length,
-      decos:decos.map(function(d){
-        var o={type:d.type,x:d.group.position.x,y:Math.round((d.group.position.y||0)*100)/100,z:d.group.position.z,ry:d.group.rotation.y,sc:d.group.scale.x||1,world:d.world||'both'};
-        if(d.type==='farmer_house') o.level=d.level||1;
+// ── GAME CONSTANTS & SAVE SYSTEM ─────────────────────────────────────────────
+var SAVE_KEY='gdn_save', BACKUP_KEY='gdn_save_backup', BACKUP_V2='gdn_save_backup_v2';
+var DRY=.00001389, GROW=.000012, BDRAIN=.00018, SINT=15000;
+var flowers=[], bugs=[], badBugs=[], badM=[], decos=[];
+var badID=0, lastSave=0, isDirty=false, isLoading=false;
+function markDirty(){ isDirty=true; }
+
+// IndexedDB Yedekleme ve Kalıcılık Katmanı
+(function initStorage(){
+  if(typeof window === 'undefined' || !window.indexedDB) return;
+  try {
+    var req = indexedDB.open('sanalbahce_db', 1);
+    req.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if(!db.objectStoreNames.contains('saves')) db.createObjectStore('saves');
+    };
+    req.onsuccess = function(e){ window._idb = e.target.result; };
+  } catch(e){}
+})();
+
+function mirrorToIDB(key, val){
+  if(!window._idb) return;
+  try {
+    var tx = window._idb.transaction('saves', 'readwrite');
+    tx.objectStore('saves').put(val, key);
+  } catch(e){}
+}
+
+function save(force){
+  var now = Date.now();
+  // KORUMA 1: Oyun yükleme aşamasındayken veya boot tamamlanmadan asla kayıt alma (boş liste üzerine yazmayı engeller)
+  if(isLoading || !window._bootGameDone) return;
+  if(!force && (now - lastSave) < SINT && !isDirty) return;
+
+  // KORUMA 2: Hafızada 0 obje varken eski kayıt doluysa kazara silinmeyi kesinlikle engelle
+  var prevRaw = localStorage.getItem(SAVE_KEY);
+  if(prevRaw && decos.length === 0 && flowers.length === 0 && !window._allowEmptyGardenSave){
+    try {
+      var prevCheck = JSON.parse(prevRaw);
+      if((prevCheck.decos && prevCheck.decos.length > 0) || (prevCheck.plants && prevCheck.plants.length > 0)){
+        console.warn('save() koruması: Hafızada obje yokken kayıt silinmesi engellendi.');
+        return;
+      }
+    } catch(e){}
+  }
+
+  try {
+    var payload = {
+      v: 2,
+      lastUpdate: now,
+      plants: flowers.map(function(f){
+        return {
+          x: Math.round(f.mesh.position.x * 100) / 100,
+          z: Math.round(f.mesh.position.z * 100) / 100,
+          h: Math.round(f.h * 100) / 100,
+          b: Math.round(f.b * 100) / 100,
+          w: Math.round(f.w * 100) / 100,
+          c: f.c,
+          t: f.t,
+          k: f.k || '',
+          isStunted: !!f.isStunted
+        };
+      }),
+      badBugs: badBugs.map(function(b){ return { ti: b.ti }; }),
+      bugCount: bugs.length,
+      decos: decos.map(function(d){
+        var o = {
+          type: d.type,
+          x: Math.round(d.group.position.x * 100) / 100,
+          y: Math.round((d.group.position.y || 0) * 100) / 100,
+          z: Math.round(d.group.position.z * 100) / 100,
+          ry: Math.round((d.group.rotation.y || 0) * 100) / 100,
+          sc: Math.round((d.group.scale.x || 1) * 100) / 100,
+          world: d.world || 'both'
+        };
+        if(d.type === 'farmer_house') o.level = d.level || 1;
         return o;
       }),
-      weather:curWeather,
-      harvest:harvestItems.map(function(h){return{type:h.type,stage:h.stage,x:h.x,z:h.z,growTimer:h.growTimer||0};}),
-      petCount:pets.map(function(p){return{type:p.type,breed:p.breed||p.type,x:p.mesh.position.x,z:p.mesh.position.z};})
-    }));lastSave=now;isDirty=false;showSave();updateWidgetData();}catch(e){}}
-window.addEventListener('pagehide',function(){flushProgress();save(true);},{capture:true});
-window.addEventListener('beforeunload',function(){flushProgress();save(true);});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){flushProgress();save(true);}});
+      weather: curWeather,
+      harvest: harvestItems.map(function(h){
+        return {
+          type: h.type,
+          stage: h.stage,
+          x: Math.round(h.x * 100) / 100,
+          z: Math.round(h.z * 100) / 100,
+          growTimer: Math.round((h.growTimer || 0) * 10) / 10
+        };
+      }),
+      petCount: pets.map(function(p){
+        return {
+          type: p.type,
+          breed: p.breed || p.type,
+          x: Math.round(p.mesh.position.x * 100) / 100,
+          z: Math.round(p.mesh.position.z * 100) / 100
+        };
+      })
+    };
+
+    var jsonStr = JSON.stringify(payload);
+
+    // KORUMA 3: Çift yedekleme (Rotating backup)
+    if(prevRaw && prevRaw.length > 50){
+      localStorage.setItem(BACKUP_KEY, prevRaw);
+      mirrorToIDB('backup_save', prevRaw);
+    }
+    localStorage.setItem(SAVE_KEY, jsonStr);
+    mirrorToIDB('current_save', jsonStr);
+
+    lastSave = now;
+    isDirty = false;
+    showSave();
+    updateWidgetData();
+  } catch(e){
+    console.error('Save failed:', e);
+  }
+}
+
+window.addEventListener('pagehide', function(){ flushProgress(); save(true); }, { capture: true });
+window.addEventListener('beforeunload', function(){ flushProgress(); save(true); });
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden'){ flushProgress(); save(true); } });
+
 // ── LOAD ─────────────────────────────────────────────────────────────────────
 function load(){
+  isLoading = true;
   // Eski versiyonlardan migration - hiçbir şey kaybolmasın
   var oldKeys=['gdn_v14','gdn_v13','gdn_v12','gdn_organic_v12','garden_organic_v12'];
   oldKeys.forEach(function(k){
@@ -457,103 +558,159 @@ function load(){
       console.log('Migrated from', k);
     }
   });
-  var raw=localStorage.getItem(SAVE_KEY);if(!raw)return;var data;try{data=JSON.parse(raw);}catch(e){localStorage.removeItem(SAVE_KEY);return;}isLoading=true;var elapsed=Math.max(0,(Date.now()-data.lastUpdate)/1000);var sB=data.badBugs||[];(data.plants||[]).forEach(function(p){mkFlower(p.x,p.z,p);});if(!(typeof isCozy==='function'&&isCozy())){sB.forEach(function(b){if(b.ti<flowers.length)mkBadBug(b.ti);});}if(elapsed>0)advancePlants(elapsed);if(!(typeof isCozy==='function'&&isCozy())&&typeof BUG_EVERY!=='undefined'&&elapsed>=BUG_EVERY&&flowers.length)mkBadBug(Math.floor(Math.random()*flowers.length));var bc=data.bugCount||0;for(var i=0;i<bc;i++)window.addBug();// Restore decos
-    var savedDecos=data.decos||[];
-    if(!localStorage.getItem('gdn_rm_autohouse_v1')){
-      savedDecos=savedDecos.filter(function(d){
-        return !(d && d.type==='farmer_house' && Math.abs((d.x||0)-(-4.8))<0.15 && Math.abs((d.z||0)-(-5.2))<0.15);
-      });
-      localStorage.setItem('gdn_rm_autohouse_v1','1');
+
+  var raw = localStorage.getItem(SAVE_KEY);
+  if(!raw) raw = localStorage.getItem(BACKUP_KEY);
+  if(!raw){ isLoading = false; window._bootGameDone = true; return; }
+
+  var data = null;
+  try {
+    data = JSON.parse(raw);
+  } catch(e){
+    console.warn('SAVE_KEY bozuk, yedekten okunuyor...');
+    var bRaw = localStorage.getItem(BACKUP_KEY);
+    if(bRaw){
+      try { data = JSON.parse(bRaw); } catch(e2){}
     }
-    if(!localStorage.getItem('gdn_rm_fences_v2')){
-      savedDecos=savedDecos.filter(function(d){
-        return d && d.type !== 'fence';
-      });
-      localStorage.setItem('gdn_rm_fences_v2','1');
+    if(!data){ isLoading = false; window._bootGameDone = true; return; }
+  }
+
+  var elapsed = Math.max(0, (Date.now() - (data.lastUpdate || Date.now())) / 1000);
+
+  // Restore plants
+  (data.plants || []).forEach(function(p){ mkFlower(p.x, p.z, p); });
+
+  // Restore bad bugs
+  var sB = data.badBugs || [];
+  if(!(typeof isCozy === 'function' && isCozy())){
+    sB.forEach(function(b){ if(b.ti < flowers.length) mkBadBug(b.ti); });
+  }
+  if(elapsed > 0) advancePlants(elapsed);
+  if(!(typeof isCozy === 'function' && isCozy()) && typeof BUG_EVERY !== 'undefined' && elapsed >= BUG_EVERY && flowers.length){
+    mkBadBug(Math.floor(Math.random() * flowers.length));
+  }
+
+  // Restore butterflies
+  var bc = data.bugCount || 0;
+  for(var i = 0; i < bc; i++) window.addBug();
+
+  // Restore decos
+  var savedDecos = data.decos || [];
+
+  function _applyXform(d, target){
+    if(!target || !target.group) return;
+    if(d.y != null && !isNaN(d.y)) target.group.position.y = d.y;
+    if(d.ry != null) target.group.rotation.y = d.ry;
+    if(d.sc && d.sc !== 1) target.group.scale.setScalar(d.sc);
+    target.world = d.world || 'both';
+  }
+
+  savedDecos.forEach(function(d){
+    if(!d || !d.type) return;
+    var x = d.x || 0, z = d.z || 0, a = d.ry || 0;
+    var beforeCount = decos.length;
+
+    if(d.type==='lantern')mkLantern(x,z);
+    else if(d.type==='bench')mkBench(x,z,a);
+    else if(d.type==='stone')mkStone(x,z);
+    else if(d.type==='mushroom')mkMushroom(x,z);
+    else if(d.type==='pot')mkPot(x,z);
+    else if(d.type==='fence')mkFence(x,z,a);
+    else if(d.type==='tree')mkTree(x,z);
+    else if(d.type==='bush')mkBush(x,z);
+    else if(d.type==='pond')mkPond(x,z);
+    else if(d.type==='wall')mkWall(x,z,a);
+    else if(d.type==='arch')mkArch(x,z,a);
+    else if(d.type==='pergola')mkPergola(x,z,a);
+    else if(d.type==='bridge')mkBridge(x,z,a);
+    else if(d.type==='well')mkWell(x,z);
+    else if(d.type==='table')mkTable(x,z,a);
+    else if(d.type==='windmill')mkWindmill(x,z);
+    else if(d.type==='scarecrow')mkScarecrow(x,z);
+    else if(d.type==='flower_wild')mkWildFlower(x,z);
+    else if(d.type==='house')mkHouse(x,z,a);
+    else if(d.type==='train_station' && typeof mkTrainStation==='function')mkTrainStation(x,z,a);
+    else if(d.type==='mini_train' && typeof mkMiniTrain==='function')mkMiniTrain(x,z,a);
+    else if(d.type==='pier_lantern' && typeof mkPierLantern==='function')mkPierLantern(x,z);
+    else if(d.type==='golden_loco' && typeof mkGoldenLocomotive==='function')mkGoldenLocomotive(x,z,a);
+    else if(d.type==='farmer_house' && typeof window.mkFarmerHouse==='function'){
+      window.mkFarmerHouse(x, z, d.level||1);
+      var fh = decos[decos.length-1];
+      if(fh && d.world) fh.world = d.world;
     }
-    function _applyXform(d){
-      var last=decos[decos.length-1];if(!last)return;
-      if(d.y!=null&&!isNaN(d.y))last.group.position.y=d.y;
-      if(d.ry!=null)last.group.rotation.y=d.ry;
-      if(d.sc&&d.sc!==1)last.group.scale.setScalar(d.sc);
-      // Restore mode ownership (diorama vs classic).
-      // Untagged + far from classic garden → likely a diorama/biome placement (pre-fix saves).
-      if(d.world) last.world = d.world;
-      else if(Math.hypot(d.x||0, d.z||0) > 18) last.world = 'cozy';
-      else last.world = 'both';
+    else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[d.type] && typeof mkPackProp==='function'){
+      mkPackProp(d.type, x, z, a);
     }
-    savedDecos.forEach(function(d){
-      var x=d.x,z=d.z,a=d.ry||0;
-      if(d.type==='lantern')mkLantern(x,z);
-      else if(d.type==='bench')mkBench(x,z,a);
-      else if(d.type==='stone')mkStone(x,z);
-      else if(d.type==='mushroom')mkMushroom(x,z);
-      else if(d.type==='pot')mkPot(x,z);
-      else if(d.type==='fence')mkFence(x,z,a);
-      else if(d.type==='tree')mkTree(x,z);
-      else if(d.type==='bush')mkBush(x,z);
-      else if(d.type==='pond')mkPond(x,z);
-      else if(d.type==='wall')mkWall(x,z,a);
-      else if(d.type==='arch')mkArch(x,z,a);
-      else if(d.type==='pergola')mkPergola(x,z,a);
-      else if(d.type==='bridge')mkBridge(x,z,a);
-      else if(d.type==='well')mkWell(x,z);
-      else if(d.type==='table')mkTable(x,z,a);
-      else if(d.type==='windmill')mkWindmill(x,z);
-      else if(d.type==='scarecrow')mkScarecrow(x,z);
-      else if(d.type==='flower_wild')mkWildFlower(x,z);
-      else if(d.type==='house')mkHouse(x,z,a);
-      else if(d.type==='train_station' && typeof mkTrainStation==='function')mkTrainStation(x,z,a);
-      else if(d.type==='mini_train' && typeof mkMiniTrain==='function')mkMiniTrain(x,z,a);
-      else if(d.type==='pier_lantern' && typeof mkPierLantern==='function')mkPierLantern(x,z);
-      else if(d.type==='golden_loco' && typeof mkGoldenLocomotive==='function')mkGoldenLocomotive(x,z,a);
-      else if(d.type==='farmer_house' && typeof window.mkFarmerHouse==='function'){
-        window.mkFarmerHouse(x, z, d.level||1);
-        var fh=decos[decos.length-1];
-        if(fh && d.world) fh.world=d.world;
-      }
-      else if(typeof PACK_PROPS!=='undefined' && PACK_PROPS[d.type] && typeof mkPackProp==='function'){
-        if(!mkPackProp(d.type, x, z, a)) return;
-      }
-      else if(d.type==='golden_pot')mkGoldenPot(x,z);
-      else if(d.type==='crystal_pond')mkCrystalPond(x,z);
-      else if(d.type==='magic_lamp')mkMagicLamp(x,z);
-      else if(d.type==='rainbow_arch')mkRainbowArch(x,z,a);
-      else if(d.type==='fountain')mkFountain(x,z);
-      else if(d.type==='treehouse')mkTreehouse(x,z);
-      else if(d.type==='angel_wing'||d.type==='angel_winggg')mkAngelWing(x,z);
-      else if(d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar'){
-        // Special items - find original item and re-place
-        var sItem=null;
+    else if(d.type==='golden_pot')mkGoldenPot(x,z);
+    else if(d.type==='crystal_pond')mkCrystalPond(x,z);
+    else if(d.type==='magic_lamp')mkMagicLamp(x,z);
+    else if(d.type==='rainbow_arch')mkRainbowArch(x,z,a);
+    else if(d.type==='fountain')mkFountain(x,z);
+    else if(d.type==='treehouse')mkTreehouse(x,z);
+    else if(d.type==='angel_wing'||d.type==='angel_winggg')mkAngelWing(x,z);
+    else if(d.type==='dragon_egg'||d.type==='moonflower'||d.type==='golden_tree'||d.type==='firefly_jar'){
+      var sItem=null;
+      if(typeof SHOP_ITEMS!=='undefined'&&SHOP_ITEMS.special){
         Object.values(SHOP_ITEMS.special).forEach(function(i){if(i.id===d.type)sItem=i;});
-        if(!sItem)Object.values(SHOP_ITEMS).forEach(function(arr){arr.forEach(function(i){if(i.id===d.type)sItem=i;});});
-        if(sItem)placeSpecial(sItem,x,z);
       }
-      _applyXform(d);
-    });
-    if(typeof window.syncDecoWorldVisibility==='function') window.syncDecoWorldVisibility();
-    if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
-    // Restore weather
-    if(data.weather&&data.weather!=='clear')window.setWeather(data.weather);
-    // Re-render shop with current coins
-    renderShop();
-    // Restore harvest plants
-    var sH=data.harvest||[];
-    sH.forEach(function(h){
-      mkHarvestPlant(h.x,h.z,h.type,h.stage||0);
-      if(harvestItems.length>0) harvestItems[harvestItems.length-1].growTimer=h.growTimer||0;
-    });
-    if(elapsed>0) advanceHarvest(elapsed);
-    // Restore pets & farm animals
-    var sP=data.petCount||[];
-    sP.forEach(function(p){
-      if(typeof window.restoreSavedPet==='function') window.restoreSavedPet(p);
-      else if(p.type==='cat')mkCat(p.x,p.z);
-      else mkDog(p.x,p.z);
-    });
-    isLoading=false;
-    if(elapsed >= 90 && typeof window.showWelcomeSummary === 'function'){
-      setTimeout(function(){ window.showWelcomeSummary(elapsed); }, 800);
+      if(sItem && typeof placeSpecial==='function') placeSpecial(sItem,x,z);
     }
-    save(true);
+
+    // GÜVENLİK AĞI: Eğer yukarıdaki hiçbir şart objeyi ekleyemediyse bile modeli asla silme!
+    if(decos.length === beforeCount){
+      if(typeof mkPackProp === 'function' && typeof PACK_PROPS !== 'undefined' && PACK_PROPS[d.type]){
+        mkPackProp(d.type, x, z, a);
+      }
+      if(decos.length === beforeCount){
+        // Acil durum yer tutucusu (placeholder): Model kaybolmaz, hafızada ve sahnede kalır
+        var phG = new THREE.Group();
+        var phMat = new THREE.MeshStandardMaterial({color:0x8d6e53, roughness:0.85});
+        phMat.userData.keep = true;
+        phG.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), phMat));
+        phG.position.set(x, d.y || 0, z);
+        pushDeco(phG, d.type);
+      }
+    }
+
+    if(decos.length > beforeCount){
+      _applyXform(d, decos[decos.length - 1]);
+    }
+  });
+
+  if(typeof window.syncDecoWorldVisibility==='function') window.syncDecoWorldVisibility();
+  if(typeof window.bindFarmerHouseFromDecos==='function') window.bindFarmerHouseFromDecos();
+
+  // Restore weather
+  if(data.weather && data.weather !== 'clear' && typeof window.setWeather === 'function'){
+    window.setWeather(data.weather);
+  }
+  // Re-render shop
+  if(typeof renderShop === 'function') renderShop();
+
+  // Restore harvest
+  var sH = data.harvest || [];
+  sH.forEach(function(h){
+    if(typeof mkHarvestPlant === 'function'){
+      mkHarvestPlant(h.x, h.z, h.type, h.stage || 0);
+      if(harvestItems.length > 0) harvestItems[harvestItems.length - 1].growTimer = h.growTimer || 0;
+    }
+  });
+  if(elapsed > 0 && typeof advanceHarvest === 'function') advanceHarvest(elapsed);
+
+  // Restore pets
+  var sP = data.petCount || [];
+  sP.forEach(function(p){
+    if(typeof window.restoreSavedPet === 'function') window.restoreSavedPet(p);
+    else if(p.type === 'cat' && typeof mkCat === 'function') mkCat(p.x, p.z);
+    else if(typeof mkDog === 'function') mkDog(p.x, p.z);
+  });
+
+  isLoading = false;
+  window._bootGameDone = true;
+
+  if(elapsed >= 90 && typeof window.showWelcomeSummary === 'function'){
+    setTimeout(function(){ window.showWelcomeSummary(elapsed); }, 800);
+  }
+
+  save(true);
 }
