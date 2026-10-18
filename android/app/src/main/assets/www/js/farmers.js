@@ -893,10 +893,11 @@
         }
       }
 
+      var terrY = (typeof window.getVillageTerrainHeight === 'function') ? window.getVillageTerrainHeight(f.group.position.x, f.group.position.z) : 0;
       if(f.state === 'idle'){
         f.timer -= dt;
         if(f.animName !== 'Idle') playClip(f, 'Idle');
-        f.group.position.y = 0;
+        f.group.position.y = terrY;
         if(f.timer <= 0){
           if(!chooseHarvestJob(f)) f.timer = 1.4 + Math.random();
         }
@@ -907,19 +908,19 @@
         if(dist < 0.4){
           f.group.position.x = f.target.x;
           f.group.position.z = f.target.z;
-          f.group.position.y = 0;
+          f.group.position.y = (typeof window.getVillageTerrainHeight === 'function') ? window.getVillageTerrainHeight(f.target.x, f.target.z) : 0;
           doArrive(f);
         } else {
           var step = Math.min(dist, WALK * dt);
           f.group.position.x += dx / dist * step;
           f.group.position.z += dz / dist * step;
           f.group.rotation.y = Math.atan2(dx, dz);
-          f.group.position.y = 0;
+          f.group.position.y = (typeof window.getVillageTerrainHeight === 'function') ? window.getVillageTerrainHeight(f.group.position.x, f.group.position.z) : 0;
           if(f.animName !== 'Walk') playClip(f, 'Walk', {fade: 0.12});
         }
       } else if(f.state === 'work'){
         f.timer -= dt;
-        f.group.position.y = 0;
+        f.group.position.y = terrY;
         if(f.timer <= 0){
           var wasGreet = f.job && f.job.type === 'greet';
           f.job = null;

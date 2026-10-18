@@ -528,7 +528,7 @@
         }
         c.group.position.x = c.x;
         c.group.position.z = c.z;
-        c.group.position.y = 0;
+        c.group.position.y = (typeof window.getVillageTerrainHeight === 'function') ? window.getVillageTerrainHeight(c.x, c.z) : 0;
       } else if(c.state === 'inspect'){
         c.inspectTimer -= dt;
         if(c.inspectTimer <= 0){
