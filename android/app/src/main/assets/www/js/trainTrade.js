@@ -514,38 +514,37 @@
     var darkVoidMat = new THREE.MeshBasicMaterial({ color: 0x050505, side: THREE.DoubleSide });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 1) GENİŞ DEMİRYOLU HATTI (Balast, Raylar ve 130 Travers)
+    // 1) GENİŞ DEMİRYOLU HATTI (Balast, Raylar ve 175 Travers - Harita Boydan Boya)
     // ─────────────────────────────────────────────────────────────────────────
-    var ballast = new THREE.Mesh(new THREE.BoxGeometry(116, 0.09, 2.3), gravelMat);
+    var ballast = new THREE.Mesh(new THREE.BoxGeometry(165, 0.09, 2.3), gravelMat);
     ballast.position.set(0, 0.045, -21.0);
     scenicTracks.add(ballast);
 
-    for(var tx = -55; tx <= 55; tx += 0.85){
+    for(var tx = -75; tx <= 75; tx += 0.85){
       var tie = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.09, 1.6), woodDark);
       tie.position.set(tx, 0.075, -21.0);
       scenicTracks.add(tie);
     }
 
     [-21.45, -20.55].forEach(function(rz){
-      var rail = new THREE.Mesh(new THREE.BoxGeometry(116, 0.12, 0.08), steelMat);
+      var rail = new THREE.Mesh(new THREE.BoxGeometry(165, 0.12, 0.08), steelMat);
       rail.position.set(0, 0.16, rz);
       scenicTracks.add(rail);
     });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 2) DOĞU DAĞI VE DEMİRYOLU TÜNEL PORTALI (Trenin arkasında kaybolduğu dağ)
+    // 2) DOĞU DAĞI VE DEMİRYOLU TÜNEL PORTALI (Haritanın En Sağ Ucu: x = 72.0, z = -21.0)
     // ─────────────────────────────────────────────────────────────────────────
     var eastMountain = new THREE.Group();
-    eastMountain.position.set(0, 0, 0);
+    eastMountain.position.set(72.0, 0, -21.0);
 
     var mPeaks = [
-      { x: 32, z: -27, r: 7.5, h: 14, col: 0x484d52 },
-      { x: 42, z: -21, r: 9.2, h: 17, col: 0x585d62 },
-      { x: 35, z: -14, r: 6.8, h: 12, col: 0x3d4246 },
-      { x: 28, z: -25, r: 6.2, h: 11, col: 0x42464a },
-      { x: 48, z: -26, r: 9.8, h: 18, col: 0x52565b },
-      { x: 45, z: -13, r: 7.8, h: 13, col: 0x464a4f },
-      { x: 26, z: -15, r: 5.5, h: 9.5, col: 0x3e4245 }
+      { x: 6, z: -6, r: 8.5, h: 16, col: 0x484d52 },
+      { x: 14, z: 0, r: 10.5, h: 20, col: 0x585d62 },
+      { x: 8, z: 7, r: 7.8, h: 14, col: 0x3d4246 },
+      { x: 18, z: -5, r: 11.2, h: 22, col: 0x52565b },
+      { x: 16, z: 8, r: 9.0, h: 15, col: 0x464a4f },
+      { x: 4, z: 8, r: 6.5, h: 11.5, col: 0x3e4245 }
     ];
 
     mPeaks.forEach(function(mp){
@@ -565,8 +564,8 @@
     });
 
     var pineSpots = [
-      [27, -23, 1.2], [30, -28, 1.4], [34, -13, 1.1], [38, -15, 1.3],
-      [42, -28, 1.5], [46, -16, 1.4], [29, -13, 1.0], [33, -31, 1.3]
+      [3, -5, 1.2], [5, -8, 1.4], [6, 6, 1.1], [10, 5, 1.3],
+      [12, -7, 1.5], [14, 2, 1.4], [4, 7, 1.0], [8, -9, 1.3]
     ];
     pineSpots.forEach(function(ps){
       var pt = new THREE.Group();
@@ -583,9 +582,9 @@
       eastMountain.add(pt);
     });
 
-    // Doğu Taş Tünel Portalı (x = 25.6, z = -21.0)
+    // Doğu Taş Tünel Portalı (x = 0, z = 0 yerel, dünya: x = 72.0, z = -21.0)
     var eastPortal = new THREE.Group();
-    eastPortal.position.set(25.6, 0, -21.0);
+    eastPortal.position.set(0, 0, 0);
 
     var jambL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 5.0, 1.2), tunnelStone);
     jambL.position.set(0, 2.5, -2.1);
@@ -615,30 +614,52 @@
     tLight.position.set(-0.8, 3.8, 0);
     eastPortal.add(tLight);
 
-    // Tünel İçi Derin Karanlık Hacmi (Tren bu siyah tünele girip dağın ardında kaybolur)
-    var tunnelVoid = new THREE.Mesh(new THREE.BoxGeometry(28, 4.2, 3.2), darkVoidMat);
-    tunnelVoid.position.set(14.0, 2.1, 0);
+    // Tünel İçi Derin Karanlık Hacmi (Tren bu tünele girip dağın ardında kaybolur)
+    var tunnelVoid = new THREE.Mesh(new THREE.BoxGeometry(32, 4.2, 3.2), darkVoidMat);
+    tunnelVoid.position.set(16.0, 2.1, 0);
     eastPortal.add(tunnelVoid);
 
     eastMountain.add(eastPortal);
     scenicTracks.add(eastMountain);
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 3) BATI DAĞ GEÇİDİ VE GİRİŞ TÜNELİ (x: -36.0 .. -54.0)
+    // 3) BATI DAĞ GEÇİDİ VE GİRİŞ TÜNELİ (Haritanın En Sol Ucu: x = -72.0, z = -21.0)
     // ─────────────────────────────────────────────────────────────────────────
     var westMountain = new THREE.Group();
-    westMountain.position.set(-36.0, 0, -21.0);
+    westMountain.position.set(-72.0, 0, -21.0);
 
     var wPeaks = [
-      { x: -5, z: -5, r: 6.5, h: 12, col: 0x464b50 },
-      { x: -10, z: 4, r: 7.2, h: 13, col: 0x505459 },
-      { x: -14, z: -4, r: 8.5, h: 15, col: 0x43474b }
+      { x: -6, z: -6, r: 8.5, h: 16, col: 0x464b50 },
+      { x: -14, z: 0, r: 10.5, h: 20, col: 0x505459 },
+      { x: -8, z: 7, r: 7.8, h: 14, col: 0x43474b },
+      { x: -18, z: -5, r: 11.2, h: 22, col: 0x4d5156 },
+      { x: -16, z: 8, r: 9.0, h: 15, col: 0x464a4f },
+      { x: -4, z: 8, r: 6.5, h: 11.5, col: 0x3e4245 }
     ];
     wPeaks.forEach(function(wp){
       var wpm = new THREE.MeshStandardMaterial({ color: wp.col, roughness: 0.94 });
       var wPeak = new THREE.Mesh(new THREE.ConeGeometry(wp.r, wp.h, 7), wpm);
       wPeak.position.set(wp.x, wp.h * 0.48, wp.z);
       westMountain.add(wPeak);
+    });
+
+    var wPineSpots = [
+      [-3, -5, 1.2], [-5, -8, 1.4], [-6, 6, 1.1], [-10, 5, 1.3],
+      [-12, -7, 1.5], [-14, 2, 1.4], [-4, 7, 1.0], [-8, -9, 1.3]
+    ];
+    wPineSpots.forEach(function(ps){
+      var wpt = new THREE.Group();
+      wpt.position.set(ps[0], 0, ps[1]);
+      var tr2 = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.4, 5), pineTrunkMat);
+      tr2.position.y = 0.7;
+      wpt.add(tr2);
+      for(var li2 = 0; li2 < 3; li2++){
+        var lc2 = new THREE.Mesh(new THREE.ConeGeometry(1.2 - li2 * 0.28, 1.6, 6), pineLeafMat);
+        lc2.position.y = 1.4 + li2 * 0.9;
+        wpt.add(lc2);
+      }
+      wpt.scale.setScalar(ps[2]);
+      westMountain.add(wpt);
     });
 
     var wJambL = new THREE.Mesh(new THREE.BoxGeometry(1.4, 5.0, 1.2), tunnelStone);
@@ -653,8 +674,16 @@
     wLintel.position.set(0, 4.6, 0);
     westMountain.add(wLintel);
 
-    var wVoid = new THREE.Mesh(new THREE.BoxGeometry(22, 4.2, 3.2), darkVoidMat);
-    wVoid.position.set(-11.0, 2.1, 0);
+    var wKeystone = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.85, 0.95), new THREE.MeshStandardMaterial({ color: 0x827d75, roughness: 0.85 }));
+    wKeystone.position.set(0, 4.7, 0);
+    westMountain.add(wKeystone);
+
+    var wLamp = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.3, 0.22), new THREE.MeshStandardMaterial({ color: 0xffea78, emissive: 0xf59e0b, emissiveIntensity: 0.95 }));
+    wLamp.position.set(0.8, 3.8, 0);
+    westMountain.add(wLamp);
+
+    var wVoid = new THREE.Mesh(new THREE.BoxGeometry(32, 4.2, 3.2), darkVoidMat);
+    wVoid.position.set(-16.0, 2.1, 0);
     westMountain.add(wVoid);
 
     scenicTracks.add(westMountain);
@@ -662,7 +691,7 @@
     // ─────────────────────────────────────────────────────────────────────────
     // 4) TELGRAF DİREKLERİ VE HATLARI
     // ─────────────────────────────────────────────────────────────────────────
-    var poleXCoords = [-36, -24, -12, 12, 24];
+    var poleXCoords = [-54, -36, -18, 0, 18, 36, 54];
     var poleMat = new THREE.MeshStandardMaterial({ color: 0x5a3d24, roughness: 0.9 });
     var insulatorMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.4 });
     var wireMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
@@ -890,8 +919,8 @@
         sndTrainWhistle();
         if(typeof showToast === 'function') showToast('🟢 Çiftlik Treni yanaştı! Toptan ihracat siparişleri hazır.');
       }
-      // Batı dağ tünelinden (x = -48) istasyona (x = 0) doğru yanaşır
-      var startX = stationTarget.x - 48;
+      // Batı dağ tünelinden (x = -72) istasyona (x = 0) doğru yanaşır
+      var startX = stationTarget.x - 72;
       var curX = startX + (stationTarget.x - startX) * Math.sin(trainMoveProgress * Math.PI * 0.5);
       trainGroup.position.set(curX, stationTarget.y, stationTarget.z);
       trainGroup.rotation.y = stationTarget.rotY;
@@ -903,7 +932,7 @@
       if(_chugPuffAcc >= 0.22){
         _chugPuffAcc = 0;
         sndTrainChug();
-        if(trainSmokeEmitter && curX > -34){
+        if(trainSmokeEmitter && curX > (stationTarget.x - 68)){
           var ep = new THREE.Vector3();
           trainSmokeEmitter.getWorldPosition(ep);
           spawnSmokePuff(ep, true);
@@ -928,9 +957,10 @@
     }
     else if(trainState === 'departing'){
       trainGroup.visible = true;
-      trainMoveProgress += dt * 0.24;
-      // İstasyondan (x = 0) Doğu Dağı Tüneline (x = 25.6) ve dağın arkasına doğru hareket
-      var departX = stationTarget.x + trainMoveProgress * 46;
+      trainMoveProgress += dt * 0.16; // Harita boydan boya uzun olduğu için akıcı hız
+      // İstasyondan (x = 0) Doğu Dağı Tüneline (x = 72) ve dağın arkasına doğru hareket
+      var departDist = 78.0;
+      var departX = stationTarget.x + trainMoveProgress * departDist;
       trainGroup.position.set(departX, stationTarget.y, stationTarget.z);
 
       var rollSpd = dt * 18;
@@ -941,15 +971,15 @@
         _chugPuffAcc = 0;
         sndTrainChug();
         // Tünel içine girdikten sonra duman tünel dışına taşmasın
-        if(trainSmokeEmitter && departX < 26.0){
+        if(trainSmokeEmitter && departX < (stationTarget.x + 71.5)){
           var ep3 = new THREE.Vector3();
           trainSmokeEmitter.getWorldPosition(ep3);
           spawnSmokePuff(ep3, true);
         }
       }
 
-      // Trenin tamamı (tüm 3 vagonuyla) dağın içine girip tünelde kaybolana kadar haritada gözükür!
-      if(trainMoveProgress >= 1.15){
+      // Trenin tamamı (tüm vagonlarıyla) haritanın ucundaki dağın içine girip kaybolana kadar gözükür!
+      if(departX >= (stationTarget.x + 76.5)){
         trainState = 'away';
         trainTimer = 480; // 8 dakika sonraki sefere kadar yolda
         activeContracts = makeNewContracts();

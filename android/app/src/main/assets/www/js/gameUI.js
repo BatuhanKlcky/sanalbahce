@@ -336,6 +336,35 @@
       }
     }
 
+    // 1.7) Doğal Kıyı Göleti & Ahşap Balıkçı İskelesi Kontrolü
+    if(window._shorePond && window._shorePond.group && window._shorePond.group.visible !== false){
+      var pondMeshes = [];
+      window._shorePond.group.traverse(function(ch){ if(ch.isMesh) pondMeshes.push(ch); });
+      var pnHits = _ray.intersectObjects(pondMeshes, true);
+      if(pnHits.length > 0){
+        inspectObject({
+          icon: '🎣',
+          title: 'DOĞAL KIYI GÖLETİ',
+          sub: '🐟 Berrak Su & Ahşap Balıkçı İskelesi',
+          pos: window._shorePond.group.position,
+          heightOffset: 1.5,
+          ringScale: 2.5,
+          actions: [
+            {
+              label: 'Olta At (Balık Tut)',
+              icon: '🎣',
+              primary: true,
+              onClick: function(){
+                closeInspector();
+                if(typeof window.startFishingGame === 'function') window.startFishingGame();
+              }
+            }
+          ]
+        });
+        return;
+      }
+    }
+
     // 1.75) Evcil Dostlar & Çiftlik Hayvanları Kontrolü
     if(typeof pets !== 'undefined' && pets.length){
       var pMeshes = [];

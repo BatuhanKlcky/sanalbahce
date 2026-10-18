@@ -378,135 +378,146 @@ function buildNaturalShorePond(x, z){
   var g = new THREE.Group();
   var rnd = gardenRand(x+7, z+11);
 
+  // 0) Doğal Yükseltilmiş Kıyı Seddi / Çim & Toprak Tepeciği (Berm / Rim)
+  // Gölün etrafında zeminden yükselen doğal bir çanak oluşturur (çime asla batmaz!)
+  var bermGeo = new THREE.TorusGeometry(4.3, 0.48, 8, 36);
+  var bermMat = kept(0x447532, 0.95);
+  var berm = new THREE.Mesh(bermGeo, bermMat);
+  berm.rotation.x = Math.PI / 2;
+  berm.position.y = 0.11;
+  berm.scale.set(1.3, 0.95, 0.7);
+  g.add(berm);
+
   // 1) Kum / Çakıl Taban
-  var bedGeo = new THREE.CircleGeometry(3.6, 28);
-  var bedMat = kept(0x28382c, 0.95);
+  var bedGeo = new THREE.CircleGeometry(4.5, 32);
+  var bedMat = kept(0x354432, 0.95);
   var bed = new THREE.Mesh(bedGeo, bedMat);
   bed.rotation.x = -Math.PI / 2;
-  bed.position.y = 0.015;
+  bed.position.y = 0.08;
   bed.scale.set(1.3, 0.95, 1);
   g.add(bed);
 
-  // 2) Su Yüzeyi (Animasyonlu / Berrak Su Materyali)
-  var waterGeo = new THREE.CircleGeometry(3.3, 32);
-  var waterMat = window._waterMat || new THREE.MeshStandardMaterial({
-    color: 0x1f7ca8,
-    roughness: 0.12,
-    metalness: 0.35,
+  // 2) Su Yüzeyi (Yükseltilmiş, Çarpıcı Berrak Turkuaz Su)
+  var waterGeo = new THREE.CircleGeometry(4.15, 36);
+  var waterMat = new THREE.MeshStandardMaterial({
+    color: 0x168bc7,
+    roughness: 0.08,
+    metalness: 0.40,
     transparent: true,
-    opacity: 0.88
+    opacity: 0.88,
+    side: THREE.DoubleSide
   });
   var w = new THREE.Mesh(waterGeo, waterMat);
   w.rotation.x = -Math.PI / 2;
-  w.position.y = 0.038;
+  w.position.y = 0.17; // Zeminin 17 cm üzerinde, her modda pırıl pırıl parlar!
   w.scale.set(1.3, 0.95, 1);
   g.add(w);
 
   // 3) Kıyı Kayaları ve Cilalı Dere Taşları
   var rockCols = [0x545b63, 0x6e757c, 0x41474d, 0x7c848b];
-  for(var i = 0; i < 24; i++){
-    var a = (i / 24) * Math.PI * 2 + (rnd() - 0.5) * 0.15;
-    var rDistX = 3.35 + (rnd() - 0.5) * 0.3;
-    var rDistZ = 2.45 + (rnd() - 0.5) * 0.3;
-    var rSize = 0.22 + rnd() * 0.16;
+  for(var i = 0; i < 28; i++){
+    var a = (i / 28) * Math.PI * 2 + (rnd() - 0.5) * 0.15;
+    var rDistX = 4.15 + (rnd() - 0.5) * 0.35;
+    var rDistZ = 3.05 + (rnd() - 0.5) * 0.35;
+    var rSize = 0.28 + rnd() * 0.22;
     var rockMat = kept(rockCols[i % rockCols.length], 0.92);
     var rock = new THREE.Mesh(new THREE.DodecahedronGeometry(rSize, 0), rockMat);
-    rock.scale.set(1.1 + rnd() * 0.3, 0.55 + rnd() * 0.2, 0.9 + rnd() * 0.3);
-    rock.position.set(Math.cos(a) * rDistX, 0.06, Math.sin(a) * rDistZ);
+    rock.scale.set(1.1 + rnd() * 0.3, 0.65 + rnd() * 0.3, 0.9 + rnd() * 0.3);
+    rock.position.set(Math.cos(a) * rDistX, 0.19, Math.sin(a) * rDistZ);
     rock.rotation.set(rnd() * 0.5, rnd() * Math.PI * 2, rnd() * 0.5);
     g.add(rock);
   }
 
   // 4) Nilüfer Yaprakları & Çiçekleri (Lotuses)
-  for(var lp = 0; lp < 5; lp++){
+  for(var lp = 0; lp < 7; lp++){
     var lpa = rnd() * Math.PI * 2;
-    var lpr = 0.8 + rnd() * 1.5;
-    var pad = new THREE.Mesh(new THREE.CircleGeometry(0.24 + rnd() * 0.08, 9), kept(0x236932, 0.82));
+    var lpr = 0.9 + rnd() * 2.2;
+    var pad = new THREE.Mesh(new THREE.CircleGeometry(0.32 + rnd() * 0.1, 9), kept(0x236932, 0.82));
     pad.rotation.x = -Math.PI / 2;
-    pad.position.set(Math.cos(lpa) * (lpr * 1.2), 0.046, Math.sin(lpa) * (lpr * 0.85));
+    pad.position.set(Math.cos(lpa) * (lpr * 1.2), 0.185, Math.sin(lpa) * (lpr * 0.88));
     g.add(pad);
 
     if(lp % 2 === 0){
-      var lotus = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), kept(lp === 0 ? 0xffb3c6 : 0xffffff, 0.45));
-      lotus.position.set(pad.position.x, 0.08, pad.position.z);
+      var lotus = new THREE.Mesh(new THREE.SphereGeometry(0.12, 7, 6), kept(lp === 0 ? 0xffb3c6 : 0xffffff, 0.45));
+      lotus.position.set(pad.position.x, 0.23, pad.position.z);
       lotus.scale.set(1.2, 0.7, 1.2);
       g.add(lotus);
     }
   }
 
   // 5) Sazlıklar (Reeds & Cattails)
-  for(var rd = 0; rd < 14; rd++){
-    var rda = 0.8 + (rd / 14) * 2.2;
-    var rdx = Math.cos(rda) * 3.1 + (rnd() - 0.5) * 0.3;
-    var rdz = Math.sin(rda) * 2.3 + (rnd() - 0.5) * 0.3;
-    var rdh = 0.75 + rnd() * 0.55;
-    var reedStem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.018, rdh, 5), kept(0x2f6432, 0.9));
-    reedStem.position.set(rdx, rdh / 2, rdz);
+  for(var rd = 0; rd < 18; rd++){
+    var rda = 0.7 + (rd / 18) * 2.4;
+    var rdx = Math.cos(rda) * 3.8 + (rnd() - 0.5) * 0.35;
+    var rdz = Math.sin(rda) * 2.8 + (rnd() - 0.5) * 0.35;
+    var rdh = 0.9 + rnd() * 0.65;
+    var reedStem = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, rdh, 5), kept(0x2f6432, 0.9));
+    reedStem.position.set(rdx, 0.17 + rdh / 2, rdz);
     reedStem.rotation.z = (rnd() - 0.5) * 0.2;
     g.add(reedStem);
 
     if(rd % 3 === 0){
-      var cat = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.18, 6), kept(0x422616, 0.95));
-      cat.position.set(rdx, rdh * 0.82, rdz);
+      var cat = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.22, 6), kept(0x422616, 0.95));
+      cat.position.set(rdx, 0.17 + rdh * 0.82, rdz);
       g.add(cat);
     }
   }
 
-  // 6) Ahşap Balıkçı İskelesi & Fener (Wooden Fishing Pier with Lamp & Rod)
+  // 6) Ahşap Balıkçı İskelesi & Fener
   var pierGroup = new THREE.Group();
-  pierGroup.position.set(-1.6, 0, 0.8);
-  pierGroup.rotation.y = 0.4;
+  pierGroup.position.set(-2.0, 0, 1.0);
+  pierGroup.rotation.y = 0.38;
 
   var rusticWood = kept(0x5a3d24, 0.88);
   var plankWood = kept(0x825b38, 0.82);
 
   // 4 Kazık (Stilts)
-  [[-0.6, -1.0], [0.6, -1.0], [-0.6, 0.9], [0.6, 0.9]].forEach(function(st){
-    var stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, 0.75, 6), rusticWood);
-    stilt.position.set(st[0], 0.22, st[1]);
+  [[-0.7, -1.2], [0.7, -1.2], [-0.7, 1.1], [0.7, 1.1]].forEach(function(st){
+    var stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.9, 6), rusticWood);
+    stilt.position.set(st[0], 0.32, st[1]);
     pierGroup.add(stilt);
   });
 
   // İskele Tahtaları (Deck Planks)
-  for(var pk = -1.1; pk <= 1.1; pk += 0.22){
-    var plank = new THREE.Mesh(new THREE.BoxGeometry(1.36, 0.055, 0.19), plankWood);
-    plank.position.set(0, 0.42, pk);
+  for(var pk = -1.3; pk <= 1.3; pk += 0.24){
+    var plank = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.065, 0.21), plankWood);
+    plank.position.set(0, 0.54, pk);
     pierGroup.add(plank);
   }
 
   // Bağlama Babası & İskele Feneri
-  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 1.4, 6), rusticWood);
-  post.position.set(0.55, 0.7, 0.95);
+  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 1.5, 6), rusticWood);
+  post.position.set(0.65, 0.85, 1.15);
   pierGroup.add(post);
 
-  var lanternMesh = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.24, 0.18), new THREE.MeshStandardMaterial({
+  var lanternMesh = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.28, 0.22), new THREE.MeshStandardMaterial({
     color: 0xffe57f,
     emissive: 0xf59e0b,
-    emissiveIntensity: 0.92
+    emissiveIntensity: 0.95
   }));
-  lanternMesh.position.set(0.55, 1.45, 0.95);
+  lanternMesh.position.set(0.65, 1.65, 1.15);
   pierGroup.add(lanternMesh);
 
-  var lanternLight = new THREE.PointLight(0xffdf78, 1.8, 6.5);
-  lanternLight.position.set(0.55, 1.45, 0.95);
+  var lanternLight = new THREE.PointLight(0xffdf78, 2.2, 8.0);
+  lanternLight.position.set(0.65, 1.65, 1.15);
   pierGroup.add(lanternLight);
 
   // İskelede Duran Balık Oltası
   var rodMat = kept(0x3e2715, 0.85);
-  var rod = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.028, 2.1, 5), rodMat);
-  rod.position.set(0.2, 0.95, 0.85);
+  var rod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 2.4, 5), rodMat);
+  rod.position.set(0.25, 1.1, 1.05);
   rod.rotation.set(-0.35, 0.2, 0.45);
   pierGroup.add(rod);
 
   g.add(pierGroup);
 
   // Su Parıltı Işığı
-  var waterLight = new THREE.PointLight(0x38bdf8, 0.8, 5.5);
-  waterLight.position.set(0, 0.35, 0);
+  var waterLight = new THREE.PointLight(0x38bdf8, 1.2, 7.0);
+  waterLight.position.set(0, 0.5, 0);
   g.add(waterLight);
 
   g.position.set(x, 0, z);
-  return { group: g, light: lanternLight, pierPos: new THREE.Vector3(x - 1.6, 0.42, z + 0.8) };
+  return { group: g, light: lanternLight, pierPos: new THREE.Vector3(x - 2.0, 0.54, z + 1.0) };
 }
 window.buildNaturalShorePond = buildNaturalShorePond;
 function buildWall(x, z, a){
@@ -1487,11 +1498,13 @@ function dressGarden(){
   window._blooms = [];
   window._cozyDress = [];
   // Çitler tamamen kaldırıldı — bahçe sınırları açık ve ferah
-  // 🌊 Doğal Kıyı Göleti & Ahşap Balıkçı İskelesi
-  var shorePond = buildNaturalShorePond(10.8, -6.5);
+  // 🌊 Doğal Kıyı Göleti & Ahşap Balıkçı İskelesi (Kalıcı ve Her Modda Görünür)
+  if(window._shorePond && window._shorePond.group && window._shorePond.group.parent){
+    window._shorePond.group.parent.remove(window._shorePond.group);
+  }
+  var shorePond = buildNaturalShorePond(13.2, -8.2);
   scene.add(shorePond.group);
   window._shorePond = shorePond;
-  window._cozyDress.push(shorePond.group);
   soilBed(0, 6.2, 3.55);
   soilBed(-8.2, -1.3, 3.15);
   soilBed(8.2, -1.3, 3.15);

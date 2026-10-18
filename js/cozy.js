@@ -211,6 +211,7 @@ function applyCozyScenery(){
   // Prefer multi-biome archipelago; hide legacy single-island dress when biomes exist.
   var hasBiomes = !!(window._biomeRoot && window._biomes && window._biomes.length);
   if(window._cozyDress) window._cozyDress.forEach(function(o){ if(o) o.visible = !!cozyMode && !hasBiomes; });
+  if(window._shorePond && window._shorePond.group) window._shorePond.group.visible = true;
   if(window._cozyHills) window._cozyHills.forEach(function(h){ h.visible = !cozyMode; });
   if(window._islandRoot) window._islandRoot.visible = !!cozyMode && !hasBiomes;
   if(window._flatGnd) window._flatGnd.visible = !cozyMode;
