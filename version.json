@@ -1,14 +1,14 @@
 {
-  "version": "2.2.0",
-  "versionCode": 16,
-  "releaseDate": "2026-10-18",
-  "title": "Köy Pazarı, Mutfak & A-Kalite Güncellemesi",
+  "version": "2.3.0",
+  "versionCode": 17,
+  "releaseDate": "2026-10-19",
+  "title": "A+ Çiftlik Hayvanları, Şans Çarkı, Rüzgar Değirmeni & Gece Ateşböcekleri",
   "notes": [
-    "Köy Pazarı ve Köy Mutfağı dükkanı",
-    "Gelişmiş gerilim çubuklu balık tutma mini oyunu",
-    "A-Kalite Köy sakinleri, Muhtar, Aşçı ve Balıkçı animasyonları",
-    "Doğal dağ sırasıyla zenginleştirilmiş manzara",
-    "Performans ve batarya optimizasyonları"
+    "Sadık Çiftlik Köpeği Karabaş ve Tembel Kedi Pamuk (Toprak kazma, hazine bulma, sevme)",
+    "Günlük Şans Çarkı (Çarkıfelek) ile altın, elmas ve tohum ödülleri",
+    "Çalışan Rüzgar Değirmeni ve ince un öğütme mekaniği",
+    "Gece köy meydanı ateşi ve parlayan ateşböcekleri",
+    "Gerçek dünya saatiyle senkronize gece/gündüz döngüsü"
   ],
   "updateUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
   "downloadUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
