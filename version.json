@@ -7,10 +7,10 @@
     "Doğal Köylü ve Çiftçi Animasyonları (T-pose ve kayma hatası düzeltildi, yeni çalışma animasyonu)",
     "Hasat ve altın/ürün bildirimlerinin üst üste binmesi ayrıştırıldı",
     "NPC, hayvan isimlikleri ve diyalog balonları sabit ekran netliğine (fixed_size) kavuşturuldu",
-    "Düşük segment telefonlar için GPU ve ışıklandırma optimizasyonu ile yüksek akıcı FPS"
+    "Düşük segment telefonlar için GPU ve ışık optimizasyonu ile yüksek akıcı FPS"
   ],
-  "updateUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
-  "downloadUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
-  "apkUrl": "https://raw.githubusercontent.com/BatuhanKlcky/sanalbahce/main/sanal-bahce.apk",
+  "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
+  "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
+  "apkUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "isMandatory": false
 }

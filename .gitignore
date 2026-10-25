@@ -5,3 +5,9 @@ android/*.pem
 android/build/
 .gradle/
 build/
+
+*.apk
+*.aab
+*.apks
+android/
+
