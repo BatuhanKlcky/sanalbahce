@@ -1,14 +1,13 @@
 {
-  "version": "2.3.0",
-  "versionCode": 17,
-  "releaseDate": "2026-10-19",
-  "title": "A+ Çiftlik Hayvanları, Şans Çarkı, Rüzgar Değirmeni & Gece Ateşböcekleri",
+  "version": "3.5.0",
+  "versionCode": 35,
+  "releaseDate": "2026-10-25",
+  "title": "Doğal NPC Animasyonları, Okunabilir Başlıklar & Mobil FPS Optimizasyonu",
   "notes": [
-    "Sadık Çiftlik Köpeği Karabaş ve Tembel Kedi Pamuk (Toprak kazma, hazine bulma, sevme)",
-    "Günlük Şans Çarkı (Çarkıfelek) ile altın, elmas ve tohum ödülleri",
-    "Çalışan Rüzgar Değirmeni ve ince un öğütme mekaniği",
-    "Gece köy meydanı ateşi ve parlayan ateşböcekleri",
-    "Gerçek dünya saatiyle senkronize gece/gündüz döngüsü"
+    "Doğal Köylü ve Çiftçi Animasyonları (T-pose ve kayma hatası düzeltildi, yeni çalışma animasyonu)",
+    "Hasat ve altın/ürün bildirimlerinin üst üste binmesi ayrıştırıldı",
+    "NPC, hayvan isimlikleri ve diyalog balonları sabit ekran netliğine (fixed_size) kavuşturuldu",
+    "Düşük segment telefonlar için GPU ve ışıklandırma optimizasyonu ile yüksek akıcı FPS"
   ],
   "updateUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
   "downloadUrl": "https://github.com/BatuhanKlcky/sanalbahce/releases/latest",
