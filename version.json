@@ -1,13 +1,14 @@
 {
-  "version": "3.5.0",
-  "versionCode": 35,
+  "version": "3.5.5",
+  "versionCode": 40,
   "releaseDate": "2026-10-25",
-  "title": "Doğal NPC Animasyonları, Okunabilir Başlıklar & Mobil FPS Optimizasyonu",
+  "title": "Dinamik Ses & Müzik Atmosferi + İnteraktif NPC Görev ve Diyalog Sistemi",
   "notes": [
-    "Doğal Köylü ve Çiftçi Animasyonları (T-pose ve kayma hatası düzeltildi, yeni çalışma animasyonu)",
-    "Hasat ve altın/ürün bildirimlerinin üst üste binmesi ayrıştırıldı",
-    "NPC, hayvan isimlikleri ve diyalog balonları sabit ekran netliğine (fixed_size) kavuşturuldu",
-    "Düşük segment telefonlar için GPU ve ışık optimizasyonu ile yüksek akıcı FPS"
+    "A+++ Dinamik Müzik ve Ambiyans Sistemi: Gündüz akustik gitar/kalimba, gece lofi piyano melodileri; kuş cıvıltıları, gece cırcır böcekleri ve dinlendirici yağmur sesleri arasında kesintisiz 2.5 saniyelik yumuşak geçişler (crossfade).",
+    "İnteraktif NPC Diyalog & Görev Sistemi: Kasabadaki köylüler ve yardımcı çiftçilerle etkileşime geçerek özel diyaloglar açma, günlük çiftlik görevlerini üstlenme ve altın/XP/özel tohum ödüllerini anında toplama.",
+    "Zengin SFX Ses Efektleri: Çimende adım sesleri, tohum ekme, sulama, seviye atlama ve konuşma diyalog ses efektleri ile yaşayan dünya.",
+    "Kusursuz NPC Yürüyüş Fiziği: Tam sagittal eksen kilitli, sıfır sapmalı doğal ileri-geri adımlama ve 60 FPS mobil optimizasyon.",
+    "Ultra HD 1080p Grafikler: 2x MSAA kenar yumuşatma ve canlı aydınlatma."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
