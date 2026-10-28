@@ -1,14 +1,15 @@
 {
-  "version": "3.5.5",
-  "versionCode": 40,
-  "releaseDate": "2026-10-25",
-  "title": "Dinamik Ses & Müzik Atmosferi + İnteraktif NPC Görev ve Diyalog Sistemi",
+  "version": "3.6.6",
+  "versionCode": 51,
+  "releaseDate": "2026-10-28",
+  "title": "Otantik Türk Pazarı, Organik Gölet & Sandal, İnşa Menüsü ve Performans Güncellemesi",
   "notes": [
-    "A+++ Dinamik Müzik ve Ambiyans Sistemi: Gündüz akustik gitar/kalimba, gece lofi piyano melodileri; kuş cıvıltıları, gece cırcır böcekleri ve dinlendirici yağmur sesleri arasında kesintisiz 2.5 saniyelik yumuşak geçişler (crossfade).",
-    "İnteraktif NPC Diyalog & Görev Sistemi: Kasabadaki köylüler ve yardımcı çiftçilerle etkileşime geçerek özel diyaloglar açma, günlük çiftlik görevlerini üstlenme ve altın/XP/özel tohum ödüllerini anında toplama.",
-    "Zengin SFX Ses Efektleri: Çimende adım sesleri, tohum ekme, sulama, seviye atlama ve konuşma diyalog ses efektleri ile yaşayan dünya.",
-    "Kusursuz NPC Yürüyüş Fiziği: Tam sagittal eksen kilitli, sıfır sapmalı doğal ileri-geri adımlama ve 60 FPS mobil optimizasyon.",
-    "Ultra HD 1080p Grafikler: 2x MSAA kenar yumuşatma ve canlı aydınlatma."
+    "Otantik Türk Köy Pazarı: Doğal ahşap tezgahlar, taze meyve-sebze kasaları ve sağlam dikmelerle gerdirilmiş çadır gölgelikleri.",
+    "Organik Gölet ve Balıkçı İskelesi: Berrak turkuaz su derinliği, nilüferler, ahşap kalaslı iskele ve demirlenmiş dikişsiz klasik sandal.",
+    "İnşa Menüsü Dokunmatik İyileştirmesi: Liste kaydırılırken kazara eşya seçilmesini engelleyen hassas dokunma toleransı.",
+    "Cozy Modu Geliştirme Bildirimi: Rahatlatıcı ada modu hazırlıkları ve bilgilendirici arayüz entegrasyonu.",
+    "Arayüz ve Buton Güncellemeleri: Modern cam-morfik dock tasarımı ve geliştirilmiş dokunma geri bildirimleri.",
+    "Android Sürüm Kodu 51 (v3.6.6): Android 14/15 (API 34-36) tam uyumluluk ve kararlı 60+ FPS optimizasyonu."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",

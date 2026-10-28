@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+<!-- Supabase Analytics & Visitor Tracking -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.42.5/dist/umd/supabase.js"></script>
 <script>
   const supabaseUrl = 'https://lvoeziofefbczugymzft.supabase.co';
@@ -13,562 +14,1645 @@
     window.addEventListener('beforeunload',async()=>{
       await client.from('visitor_logs').insert([{page_url:page,ip_address:ip,user_agent:ua,screen_resolution:res,time_spent:Math.floor((Date.now()-visitStart)/1000)}]);
     });
-  });
+  }).catch(()=>{});
 </script>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sanal Bahçe — İndir</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sanal Bahçe 🌱 — 3D Huzurlu Çiftlik ve Köy Simülatörü | v3.6.6</title>
+<meta name="description" content="Sanal Bahçe v3.6.6 (Build 51) — Kendi masalsı 3D çiftliğini kur, otantik köy pazarında ticaret yap, gölet kenarında balık tut ve huzur dolu vadi hayatının tadını çıkar!">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#07170c">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&display=swap" rel="stylesheet">
+
 <style>
-:root{--gd:#0a1f0d;--gm:#1a3d20;--gb:#2d7a3a;--gg:#4caf65;--gl:#a8d8b0;--gold:#d4a843;--gol:#f0c96a;--cr:#f5f0e8;--tm:#e8f0ea;--mu:rgba(200,220,205,0.55);--glass:rgba(255,255,255,0.04);--gb2:rgba(255,255,255,0.08)}
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:"DM Sans",sans-serif;background:var(--gd);color:var(--tm);min-height:100vh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none}
-.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
-.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(45,122,58,0.18) 0%,transparent 70%);top:-200px;left:-100px;animation:drift1 18s ease-in-out infinite}
-.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(212,168,67,0.1) 0%,transparent 70%);bottom:100px;right:-100px;animation:drift2 22s ease-in-out infinite}
-.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(76,175,101,0.12) 0%,transparent 70%);top:50%;left:60%;animation:drift1 15s ease-in-out infinite reverse}
-@keyframes drift1{0%,100%{transform:translate(0,0)}33%{transform:translate(40px,-30px)}66%{transform:translate(-20px,40px)}}
-@keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,-20px)}}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(10,31,13,0.9) 0%,transparent 100%);backdrop-filter:blur(12px)}
-.nav-logo{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:var(--gg);letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
-.nav-logo span{color:var(--gold)}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-version{background:rgba(76,175,101,0.12);border:1px solid rgba(76,175,101,0.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--gg);letter-spacing:.05em}
-.nav-dl{background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .2s}
-.nav-dl:hover{transform:translateY(-2px)}
-.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.25);border-radius:30px;padding:8px 18px;font-size:12px;font-weight:600;color:var(--gol);letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px;animation:fadeUp .8s ease both}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:pulse 2s ease infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.hero-title{font-family:"Playfair Display",serif;font-size:clamp(52px,10vw,110px);font-weight:900;line-height:.95;letter-spacing:-3px;margin-bottom:24px;animation:fadeUp .8s .1s ease both}
-.hero-title .line1{display:block;color:var(--tm)}
-.hero-title .line2{display:block;color:var(--gg);-webkit-text-stroke:1px var(--gb)}
-.hero-desc{font-size:clamp(15px,2vw,18px);font-weight:300;color:var(--mu);max-width:520px;line-height:1.7;margin-bottom:48px;animation:fadeUp .8s .2s ease both}
-.dl-group{display:flex;flex-direction:column;align-items:center;gap:16px;animation:fadeUp .8s .3s ease both}
-.btn-download{position:relative;display:inline-flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;font-family:"DM Sans",sans-serif;font-size:16px;font-weight:600;padding:18px 40px;border-radius:60px;text-decoration:none;border:none;cursor:pointer;box-shadow:0 0 40px rgba(76,175,101,0.3),0 8px 32px rgba(0,0,0,0.4);transition:transform .2s,box-shadow .2s;overflow:hidden}
-.btn-download::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);border-radius:inherit}
-.btn-download:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(76,175,101,0.45),0 16px 40px rgba(0,0,0,0.5)}
-.btn-icon{font-size:24px}
-.btn-text{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
-.btn-text small{font-size:11px;font-weight:400;opacity:.7;letter-spacing:.05em}
-.dl-info{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:8px}
-.dl-dot{width:3px;height:3px;border-radius:50%;background:var(--mu)}
-.device-wrap{position:relative;z-index:1;display:flex;justify-content:center;margin:80px auto 0;animation:fadeUp .8s .4s ease both}
-.device{position:relative;width:260px;background:#0d0d0f;border-radius:40px;border:1.5px solid rgba(255,255,255,0.1);box-shadow:0 0 0 6px rgba(255,255,255,0.03),0 40px 80px rgba(0,0,0,0.6),0 0 60px rgba(76,175,101,0.12);overflow:hidden;padding:12px}
-.device-screen{background:linear-gradient(160deg,#0a2010 0%,#051008 40%,#0d1a0f 100%);border-radius:30px;height:480px;overflow:hidden;position:relative;display:flex;flex-direction:column}
-.device-notch{width:90px;height:24px;background:#0d0d0f;border-radius:0 0 16px 16px;margin:0 auto;flex-shrink:0}
-.screen-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative}
-.screen-sky{position:absolute;inset:0;background:linear-gradient(180deg,#0a0a20 0%,#0d1a0f 60%,#0a150a 100%)}
-.screen-stars{position:absolute;top:0;left:0;right:0;height:60%;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 60% 15%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 80% 40%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 40% 25%,rgba(255,255,255,0.7) 0%,transparent 100%),radial-gradient(2px 2px at 70% 20%,rgba(200,200,255,0.5) 0%,transparent 100%);animation:twinkle 3s ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.6}}
-.screen-ground{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(180deg,#0d2010 0%,#0a1a0a 100%);border-radius:50% 50% 0 0/20px 20px 0 0}
-.screen-flowers{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:flex-end}
-.s-flower{display:flex;flex-direction:column;align-items:center;animation:sway 3s ease-in-out infinite}
-.s-flower:nth-child(2){animation-delay:.5s}.s-flower:nth-child(3){animation-delay:1s}.s-flower:nth-child(4){animation-delay:1.5s}
-@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-.s-stem{width:2px;background:#2d7a3a;border-radius:1px}
-.s-head{font-size:14px;margin-bottom:1px}
-.screen-moon{position:absolute;top:18%;right:22%;width:22px;height:22px;background:radial-gradient(circle at 35% 35%,#dde8ff,#aabfcc);border-radius:50%;box-shadow:0 0 12px rgba(180,200,255,0.4)}
-.screen-butterfly{position:absolute;top:40%;left:25%;font-size:12px;animation:flutter 4s ease-in-out infinite}
-@keyframes flutter{0%,100%{transform:translate(0,0) rotate(-10deg)}25%{transform:translate(20px,-10px) rotate(10deg)}50%{transform:translate(40px,0) rotate(-5deg)}75%{transform:translate(20px,10px) rotate(5deg)}}
-.screen-harvest{position:absolute;bottom:42%;right:20%;font-size:18px;animation:bob 2s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.screen-pet{position:absolute;bottom:46%;left:18%;font-size:16px;animation:waddle 3s ease-in-out infinite}
-@keyframes waddle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
-.screen-ui{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(6,10,20,0.9);border-radius:16px;padding:8px 10px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
-.screen-clock{font-size:16px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:4px}
-.screen-btns{display:flex;gap:4px}
-.screen-btn{flex:1;height:22px;border-radius:8px}
-.sb1{background:linear-gradient(135deg,#003660,#005db8)}.sb2{background:linear-gradient(135deg,#0a2800,#2d7a00)}.sb3{background:linear-gradient(135deg,#2a0040,#9424b8)}.sb4{background:linear-gradient(135deg,#3a0000,#cc1100)}
-.new-tag{display:inline-block;background:linear-gradient(135deg,#ff6b35,#ff4500);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:800;color:#fff;letter-spacing:.05em;margin-left:6px;vertical-align:middle;text-transform:uppercase}
-.stats-row{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.stat-box{background:var(--glass);border:1px solid var(--gb2);border-radius:20px;padding:24px;text-align:center}
-.stat-num{font-family:"Playfair Display",serif;font-size:36px;font-weight:900;color:var(--gg);line-height:1;margin-bottom:6px}
-.stat-label{font-size:11px;font-weight:400;color:var(--mu);letter-spacing:.06em}
-.features{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:60px 24px 80px}
-.section-label{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gg);margin-bottom:16px}
-.section-title{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,52px);font-weight:700;line-height:1.1;margin-bottom:50px;color:var(--tm)}
-.section-title em{color:var(--gg);font-style:normal}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.feat-card{background:var(--glass);border:1px solid var(--gb2);border-radius:24px;padding:28px 24px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s}
-.feat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(76,175,101,0.4),transparent)}
-.feat-card:hover{transform:translateY(-4px);border-color:rgba(76,175,101,0.2)}
-.feat-card.feat-new{border-color:rgba(76,175,101,0.25);background:rgba(76,175,101,0.04)}
-.feat-icon{font-size:32px;margin-bottom:14px;display:block;filter:drop-shadow(0 4px 12px rgba(76,175,101,0.3))}
-.feat-name{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--tm)}
-.feat-desc{font-size:13px;font-weight:300;color:var(--mu);line-height:1.6}
-.feat-tag{display:inline-block;margin-top:10px;background:rgba(76,175,101,0.1);border:1px solid rgba(76,175,101,0.2);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--gg);letter-spacing:.05em;text-transform:uppercase}
-.feat-tag.gold{background:rgba(212,168,67,0.1);border-color:rgba(212,168,67,0.25);color:var(--gol)}
-.shop-preview{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 24px 80px}
-.shop-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
-.shop-card{background:var(--glass);border:1px solid var(--gb2);border-radius:18px;padding:18px;text-align:center;transition:transform .2s}
-.shop-card:hover{transform:translateY(-3px)}
-.shop-card-emoji{font-size:32px;margin-bottom:8px}
-.shop-card-name{font-size:13px;font-weight:600;color:var(--tm);margin-bottom:4px}
-.shop-card-price{font-size:12px;color:var(--gol);font-weight:700}
-.shop-card.rare{border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.04)}
-.versions{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 24px 80px}
-.version-list{display:flex;flex-direction:column;gap:0}
-.version-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid var(--gb2);position:relative}
-.version-item:last-child{border-bottom:none}
-.v-num{font-family:"Playfair Display",serif;font-size:13px;font-weight:700;color:var(--gg);white-space:nowrap;padding-top:3px;min-width:60px}
-.v-latest .v-num{color:var(--gold)}
-.v-content{flex:1}
-.v-title{font-size:15px;font-weight:600;margin-bottom:8px;color:var(--tm);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.v-badge{font-size:10px;font-weight:700;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);color:var(--gol);padding:2px 8px;border-radius:10px;letter-spacing:.05em;text-transform:uppercase}
-.v-changes{list-style:none;display:flex;flex-direction:column;gap:4px}
-.v-changes li{font-size:13px;font-weight:300;color:var(--mu);padding-left:14px;position:relative}
-.v-changes li::before{content:"→";position:absolute;left:0;color:var(--gb);font-size:11px}
-.v-date{font-size:11px;color:var(--mu);margin-top:8px;letter-spacing:.04em}
-.install{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 24px 80px}
-.steps{display:flex;flex-direction:column;gap:16px;margin-top:24px}
-.step{display:flex;gap:16px;align-items:flex-start;padding:20px;background:var(--glass);border:1px solid var(--gb2);border-radius:18px}
-.step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gb),var(--gg));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
-.step-text{flex:1}
-.step-title{font-size:14px;font-weight:600;color:var(--tm);margin-bottom:4px}
-.step-desc{font-size:12px;color:var(--mu);line-height:1.5}
-.cta{position:relative;z-index:1;text-align:center;padding:0 24px 120px}
-.cta-title{font-family:"Playfair Display",serif;font-size:clamp(28px,5vw,48px);font-weight:700;margin-bottom:24px}
-.cta-title span{color:var(--gg)}
-footer{position:relative;z-index:1;border-top:1px solid var(--gb2);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.footer-logo{font-family:"Playfair Display",serif;font-size:16px;color:var(--gg);font-weight:700}
-.footer-links{display:flex;gap:20px}
-.footer-links a{font-size:12px;color:var(--mu);text-decoration:none;transition:color .2s}
-.footer-links a:hover{color:var(--gg)}
-.footer-copy{font-size:12px;color:var(--mu)}
-/* YORUMLAR */
-.reviews{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 24px 80px}
-.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:40px;min-height:60px}
-.review-card{background:var(--glass);border:1px solid var(--gb2);border-radius:20px;padding:24px;transition:transform .2s;position:relative}
-.review-card:hover{transform:translateY(-3px)}
-.review-stars{font-size:14px;margin-bottom:10px}
-.review-text{font-size:13px;font-weight:300;color:var(--mu);line-height:1.7;margin-bottom:16px;font-style:italic}
-.review-author{display:flex;align-items:center;gap:10px}
-.review-avatar{width:36px;height:36px;border-radius:50%;background:rgba(76,175,101,0.15);border:1px solid rgba(76,175,101,0.2);display:flex;align-items:center;justify-content:center;font-size:18px}
-.review-name{font-size:13px;font-weight:600;color:var(--tm)}
-.review-date{font-size:11px;color:var(--mu)}
-.review-form-wrap{background:var(--glass);border:1px solid var(--gb2);border-radius:24px;padding:32px;max-width:600px;margin:0 auto}
-.form-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:var(--tm);margin-bottom:20px}
-.star-selector{display:flex;gap:8px;margin-bottom:16px}
-.star-pick{font-size:28px;cursor:pointer;transition:transform .15s;opacity:.4;filter:grayscale(1);user-select:none}
-.star-pick.active{opacity:1;filter:none;transform:scale(1.2)}
-.form-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px}
-.form-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;color:var(--tm);font-family:"DM Sans",sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
-.form-input:focus{border-color:rgba(76,175,101,.4)}
-.form-input::placeholder{color:var(--mu)}
-select.form-input{width:auto;cursor:pointer;padding:12px 10px;background:#0d1f0f}
-.form-textarea{resize:vertical;min-height:100px;margin-bottom:14px;display:block}
-.form-submit{background:linear-gradient(135deg,var(--gb),var(--gg));color:#fff;border:none;border-radius:50px;padding:14px 32px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:"DM Sans",sans-serif;width:100%}
-.form-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,175,101,.3)}
-.form-submit:active{transform:scale(.97)}
-.form-msg{margin-top:12px;font-size:12px;font-weight:600;text-align:center;min-height:18px}
-.form-msg.ok{color:var(--gg)}.form-msg.err{color:#ff6b6b}
-.review-card.new-review{border-color:rgba(76,175,101,.3);background:rgba(76,175,101,.05)}
-.new-review::after{content:"Yeni";position:absolute;top:10px;right:10px;background:rgba(76,175,101,.2);color:var(--gg);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:768px){nav{padding:16px 20px}.stats-row{grid-template-columns:repeat(2,1fr)}.device{width:220px}.device-screen{height:400px}footer{flex-direction:column;text-align:center}}
-@media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}}
+:root {
+  --bg-dark: #07140c;
+  --bg-deep: #0a1f13;
+  --bg-card: rgba(18, 44, 28, 0.55);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-gold: rgba(234, 182, 73, 0.35);
+  --primary-green: #38b463;
+  --primary-light: #6ee794;
+  --primary-deep: #1e6936;
+  --accent-gold: #f2c14e;
+  --accent-amber: #e59837;
+  --text-white: #f5f9f6;
+  --text-muted: #a3c2af;
+  --text-dim: #6c917b;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --shadow-glow: 0 0 35px rgba(56, 180, 99, 0.22);
+  --shadow-card: 0 16px 45px rgba(0, 0, 0, 0.45);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.6;
+}
+
+/* Background Atmosphere */
+#particleCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.orb-1 {
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, #2d7a3a 0%, transparent 70%);
+  top: -200px;
+  left: -150px;
+}
+.orb-2 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, #d4a843 0%, transparent 70%);
+  bottom: 10%;
+  right: -150px;
+}
+.orb-3 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, #1e824c 0%, transparent 70%);
+  top: 45%;
+  left: 60%;
+}
+
+/* NAVBAR */
+nav.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 16px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(7, 20, 12, 0.82);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-glass);
+  transition: all 0.3s ease;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(56, 180, 99, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.brand-name span {
+  color: var(--primary-green);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-link:hover {
+  color: var(--primary-light);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(56, 180, 99, 0.12);
+  border: 1px solid rgba(56, 180, 99, 0.3);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-light);
+  letter-spacing: 0.5px;
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  box-shadow: 0 0 10px var(--primary-green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.btn-sound {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.btn-sound:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btn-primary-nav {
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary-green));
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(56, 180, 99, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(56, 180, 99, 0.5);
+}
+
+/* HERO SECTION */
+section.hero {
+  position: relative;
+  z-index: 1;
+  padding: 140px 24px 80px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 48px;
+  min-height: calc(100vh - 60px);
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(242, 193, 78, 0.1);
+  border: 1px solid var(--border-gold);
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 22px;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 5.2vw, 72px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -1.2px;
+  margin-bottom: 24px;
+}
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, #ffffff 30%, var(--primary-light) 80%, var(--accent-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+  font-size: clamp(16px, 1.3vw, 19px);
+  color: var(--text-muted);
+  max-width: 580px;
+  margin-bottom: 36px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.hero-cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.btn-hero-primary {
+  background: linear-gradient(135deg, #2a8745 0%, #3ec26c 50%, #4dda7e 100%);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 16px 28px;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 30px rgba(56, 180, 99, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.btn-hero-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 40px rgba(56, 180, 99, 0.55);
+}
+
+.btn-hero-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-white);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 16px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s;
+}
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-glass);
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+.stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+}
+.stat-lbl {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* HERO SHOWCASE CARD (INTERACTIVE) */
+.hero-visual {
+  position: relative;
+}
+.showcase-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card), 0 0 60px rgba(56, 180, 99, 0.15);
+  backdrop-filter: blur(25px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.showcase-window:hover {
+  transform: translateY(-6px);
+}
+
+.showcase-header {
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-glass);
+}
+.window-dots {
+  display: flex;
+  gap: 6px;
+}
+.window-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+.window-dot:nth-child(1) { background: #ff5f56; }
+.window-dot:nth-child(2) { background: #ffbd2e; }
+.window-dot:nth-child(3) { background: #27c93f; }
+
+.showcase-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+}
+
+.showcase-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #000;
+  overflow: hidden;
+}
+.showcase-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.showcase-window:hover .showcase-img {
+  transform: scale(1.04);
+}
+
+.showcase-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  background: linear-gradient(to top, rgba(7, 20, 12, 0.95) 0%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.caption-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.caption-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.showcase-thumbs {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow-x: auto;
+}
+.thumb-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 64px;
+  height: 42px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.thumb-btn.active, .thumb-btn:hover {
+  opacity: 1;
+  border-color: var(--primary-green);
+  transform: scale(1.05);
+}
+.thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* SECTION COMMON */
+section.section {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 100px 24px;
+}
+
+.section-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 60px;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--primary-green);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 3.6vw, 48px);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+.section-desc {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* FEATURES GRID (NEW V3.6.6 HIGHLIGHTS) */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 32px 28px;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(56, 180, 99, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 180, 99, 0.15);
+}
+
+.feature-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(56, 180, 99, 0.12);
+  border: 1px solid rgba(56, 180, 99, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 22px;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+.feature-text {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.feature-tag-pill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+}
+
+/* INTERACTIVE GALLERY & LIGHTBOX */
+.gallery-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.filter-btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn.active, .filter-btn:hover {
+  background: var(--primary-green);
+  color: #fff;
+  border-color: var(--primary-green);
+  box-shadow: 0 4px 15px rgba(56, 180, 99, 0.35);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.gallery-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  cursor: pointer;
+  background: #000;
+  border: 1px solid var(--border-glass);
+}
+.gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.gallery-card:hover img {
+  transform: scale(1.06);
+}
+.gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 20, 12, 0.9) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+}
+.gallery-card:hover .gallery-overlay {
+  opacity: 1;
+}
+.gallery-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.gallery-card-sub {
+  font-size: 12px;
+  color: var(--primary-light);
+}
+
+/* LIGHTBOX MODAL */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  backdrop-filter: blur(15px);
+}
+.lightbox.active {
+  display: flex;
+}
+.lightbox-content {
+  position: relative;
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lightbox-img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border-glass);
+}
+.lightbox-caption {
+  margin-top: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+}
+.lightbox-close {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+/* CHANGELOG TIMELINE */
+.timeline-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.version-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(20px);
+}
+.version-card.current {
+  border-color: rgba(56, 180, 99, 0.5);
+  box-shadow: 0 10px 40px rgba(56, 180, 99, 0.12);
+}
+.version-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.v-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.v-badge {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+.v-status-tag {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--primary-green);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.v-date {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.v-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14.5px;
+  color: var(--text-muted);
+}
+.v-bullet {
+  color: var(--primary-green);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+/* 77X TECHNOLOGIES DEVELOPER SPOTLIGHT */
+.dev-spotlight {
+  background: linear-gradient(135deg, rgba(18, 44, 28, 0.7) 0%, rgba(10, 31, 19, 0.9) 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 36px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(25px);
+  margin-top: 40px;
+}
+.dev-logo-mark {
+  width: 130px;
+  height: 130px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #183321 0%, #0d2114 100%);
+  border: 1px solid var(--border-gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.dev-logo-mark .big-77 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--accent-gold);
+  line-height: 1;
+}
+.dev-logo-mark .sub-x {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--primary-light);
+  text-transform: uppercase;
+}
+
+.dev-info h3 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.dev-info p {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 650px;
+}
+.dev-badge-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.dev-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+}
+
+.dev-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.btn-dev {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-dev:hover {
+  background: var(--accent-gold);
+  color: #000;
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+}
+
+/* DOWNLOAD BOX */
+.download-box {
+  background: radial-gradient(circle at 50% 0%, rgba(56, 180, 99, 0.2) 0%, rgba(7, 20, 12, 0.8) 75%);
+  border: 1px solid rgba(56, 180, 99, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 60px 36px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
+}
+.dl-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 3.8vw, 44px);
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.dl-subtitle {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 36px;
+}
+.dl-btns-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.dl-btn-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.25s;
+  min-width: 230px;
+  text-align: left;
+}
+.dl-btn-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.dl-btn-card.highlight {
+  background: linear-gradient(135deg, #2a8745, #3ec26c);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 30px rgba(56, 180, 99, 0.4);
+}
+.dl-btn-card.highlight:hover {
+  box-shadow: 0 12px 40px rgba(56, 180, 99, 0.6);
+}
+.dl-card-icon {
+  font-size: 32px;
+}
+.dl-card-text small {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.dl-card-text strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dl-specs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.dl-spec-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* FOOTER */
+footer.footer {
+  border-top: 1px solid var(--border-glass);
+  padding: 48px 24px 36px;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: var(--primary-light);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  section.hero {
+    grid-template-columns: 1fr;
+    padding-top: 110px;
+    gap: 40px;
+  }
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dev-spotlight {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+  }
+  .dev-info p {
+    margin: 0 auto;
+  }
+  .dev-badge-row {
+    justify-content: center;
+  }
+  .nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  nav.navbar {
+    padding: 14px 20px;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  footer.footer {
+    flex-direction: column;
+    text-align: center;
+  }
+}
 </style>
 </head>
 <body>
-<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
 
-<nav>
-  <div class="nav-logo">&#127807; Sanal <span>Bah&#231;e</span></div>
-  <div class="nav-right">
-    <div class="nav-version">v3.5.5</div>
-    <a href="https://batuhanklcky.github.io/sanalbahce/" class="nav-dl">&#127760; Oyna</a>
+<!-- Ambient background canvas -->
+<canvas id="particleCanvas"></canvas>
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+<div class="ambient-orb orb-3"></div>
+
+<!-- TOP NAVBAR -->
+<nav class="navbar">
+  <a href="anasayfa.html" class="brand-wrapper">
+    <img src="img/app-icon.png" alt="Sanal Bahçe İkon" class="brand-icon">
+    <span class="brand-name">Sanal <span>Bahçe</span></span>
+  </a>
+
+  <div class="nav-links">
+    <a class="nav-link" href="#ozellikler">Özellikler</a>
+    <a class="nav-link" href="#galeri">Görseller</a>
+    <a class="nav-link" href="#surum-notlari">Sürüm Notları</a>
+    <a class="nav-link" href="#77x-tech">77x Technologies</a>
+  </div>
+
+  <div class="nav-actions">
+    <div class="version-badge">
+      <span class="status-dot"></span>
+      v3.6.6 (Build 51)
+    </div>
+    <button class="btn-sound" id="soundToggle" title="Ortam Sesi Aç/Kapat">🎵</button>
+    <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" target="_blank" class="btn-primary-nav">
+      <span>Play Store</span>
+    </a>
   </div>
 </nav>
 
+<!-- HERO SECTION -->
 <section class="hero">
-  <div class="hero-badge"><span class="badge-dot"></span> Google Play yay&#305;n&#305; haz&#305;r &#183; G&#252;ncel S&#252;r&#252;m v3.5.5</div>
-  <h1 class="hero-title"><span class="line1">Kendi Bah&#231;eni</span><span class="line2">Yarat.</span></h1>
-  <p class="hero-desc">3D sanal bah&#231;eni in&#351;a et, &#252;r&#252;n hasat et, evcil hayvanlar&#305;nla vakit ge&#231;. Gece/g&#252;nd&#252;z d&#246;ng&#252;s&#252;, ma&#287;aza sistemi, melek kanad&#305; ve &#231;ok daha fazlas&#305;.</p>
-  <div class="dl-group">
-    <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" class="btn-download" target="_blank" rel="noopener">
-      <span class="btn-icon">&#9654;&#65039;</span>
-      <span class="btn-text"><small>Google Play Store &middot; Resmi S&#252;r&#252;m</small>Google Play'den &#304;ndir</span>
-    </a>
-    <div class="dl-info"><span>&#11088; Google Play G&#252;venli &#304;ndirme</span><span class="dl-dot"></span><span>&#128241; Android 7+</span><span class="dl-dot"></span><span>&#127358; &#220;cretsiz</span></div>
+  <div class="hero-content">
+    <div class="hero-pill">
+      <span>✨</span> GOOGLE PLAY GÜNCELLEMESİ YAYINDA · v3.6.6 (BUILD 51)
+    </div>
+    <h1 class="hero-title">
+      Huzurlu 3D Çiftlik & <br>
+      <span class="gradient-text">Köy Yaşamını İnşa Et.</span>
+    </h1>
+    <p class="hero-desc">
+      Şehrin gürültüsünden ve karmaşasından uzaklaş. Kuş sesleri ve berrak gölet tınıları eşliğinde kendi masalsı vadini kur. Ekin yetiştir, otantik köy pazarında ticaret yap, hayvanlarla bağ kur ve rahatla.
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" target="_blank" class="btn-hero-primary" id="btnPlayStore">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3.609 1.814L13.792 12 3.61 22.186a2.03 2.03 0 0 1-.61-1.463V3.277c0-.573.228-1.09.61-1.463zm11.238 11.24l2.457 2.457-11.45 6.467 8.993-8.924zm0-2.108L5.854 2.022l11.45 6.467-2.457 2.457zm1.488 1.488l3.414 1.927c.928.524.928 1.381 0 1.905l-3.414 1.927-2.185-2.185 2.185-2.185z"/>
+        </svg>
+        <span>Google Play'den İndir</span>
+      </a>
+
+      <a href="index.html" class="btn-hero-secondary" id="btnPlayWeb">
+        <span>🎮 Web Sürümünü Oyna</span>
+      </a>
+
+      <a href="#indir" class="btn-hero-secondary">
+        <span>📱 Doğrudan APK İndir</span>
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-val">60+ FPS</span>
+        <span class="stat-lbl">Ultra Akıcı 3D</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">0 Reklam</span>
+        <span class="stat-lbl">Sıfır Stres</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">Çevrimdışı</span>
+        <span class="stat-lbl">İnternetsiz Oyun</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">v3.6.6</span>
+        <span class="stat-lbl">Son Sürüm (51)</span>
+      </div>
+    </div>
   </div>
-  <div class="device-wrap">
-    <div class="device">
-      <div class="device-screen">
-        <div class="device-notch"></div>
-        <div class="screen-content">
-          <div class="screen-sky"></div><div class="screen-stars"></div><div class="screen-moon"></div><div class="screen-ground"></div>
-          <div class="screen-butterfly">&#129411;</div><div class="screen-harvest">&#127813;</div><div class="screen-pet">&#128049;</div>
-          <div class="screen-flowers">
-            <div class="s-flower"><div class="s-head">&#127800;</div><div class="s-stem" style="height:28px"></div></div>
-            <div class="s-flower"><div class="s-head">&#127802;</div><div class="s-stem" style="height:38px"></div></div>
-            <div class="s-flower"><div class="s-head">&#127804;</div><div class="s-stem" style="height:22px"></div></div>
-            <div class="s-flower"><div class="s-head">&#128144;</div><div class="s-stem" style="height:32px"></div></div>
-          </div>
-          <div class="screen-ui">
-            <div class="screen-clock" id="sc">00:00</div>
-            <div class="screen-btns"><div class="screen-btn sb1"></div><div class="screen-btn sb2"></div><div class="screen-btn sb3"></div><div class="screen-btn sb4"></div></div>
+
+  <!-- INTERACTIVE SHOWCASE CARD -->
+  <div class="hero-visual">
+    <div class="showcase-window">
+      <div class="showcase-header">
+        <div class="window-dots">
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
+        </div>
+        <span class="showcase-tag" id="showcaseBadge">Otantik Türk Köy Pazarı</span>
+      </div>
+      <div class="showcase-img-wrap">
+        <img src="img/bazaar.png" alt="Oyun İçi Görünüm" class="showcase-img" id="showcaseMainImg">
+        <div class="showcase-caption">
+          <div>
+            <div class="caption-title" id="showcaseTitle">Otantik Türk Köy Pazarı</div>
+            <div class="caption-sub" id="showcaseSub">Açık ahşap tezgahlar, taze meyve-sebze kasaları ve gölgelik çadırlar.</div>
           </div>
         </div>
       </div>
+      <div class="showcase-thumbs">
+        <button class="thumb-btn active" data-img="img/bazaar.png" data-title="Otantik Türk Köy Pazarı" data-sub="Açık ahşap tezgahlar, taze meyve-sebze kasaları ve gölgelik çadırlar." data-badge="Köy Pazarı">
+          <img src="img/bazaar.png" alt="Pazar">
+        </button>
+        <button class="thumb-btn" data-img="img/lake-boat.png" data-title="Kristal Gölet & Ahşap Sandal" data-sub="Berrak turkuaz su, sahil taşları, nilüferler ve demirli el yapımı sandal." data-badge="Gölet & Balıkçılık">
+          <img src="img/lake-boat.png" alt="Gölet">
+        </button>
+        <button class="thumb-btn" data-img="img/cicekler.png" data-title="Organik Çiçek Bahçesi" data-sub="Kadife güller, Osmanlı laleleri ve dev ayçiçekleri." data-badge="Botanik Bahçe">
+          <img src="img/cicekler.png" alt="Çiçekler">
+        </button>
+        <button class="thumb-btn" data-img="img/ciftlik-degirmen.png" data-title="Huzurlu Çiftlik & Rüzgar Değirmeni" data-sub="Pastoral vadi atmosferi ve dönen nostaljik değirmen kanatları." data-badge="Çiftlik Alanı">
+          <img src="img/ciftlik-degirmen.png" alt="Değirmen">
+        </button>
+        <button class="thumb-btn" data-img="img/tren-ticaret.png" data-title="Tarihi Buharlı Tren & Ticaret" data-sub="Hasat ürünlerini vagonlara yükle ve kasabayla ticaret yap." data-badge="Tren & Ticaret">
+          <img src="img/tren-ticaret.png" alt="Tren">
+        </button>
+        <button class="thumb-btn" data-img="img/gece-ates.png" data-title="Gece Kamp Ateşi & Yıldızlar" data-sub="Dinamik gece döngüsü, cırcır böcekleri ve sıcacık kamp ateşi." data-badge="Gece Atmosferi">
+          <img src="img/gece-ates.png" alt="Gece">
+        </button>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="stats-row">
-  <div class="stat-box"><div class="stat-num">20+</div><div class="stat-label">&#304;N&#350;A OBJESI</div></div>
-  <div class="stat-box"><div class="stat-num">16</div><div class="stat-label">MA&#286;AZA &#220;R&#220;N&#220;</div></div>
-  <div class="stat-box"><div class="stat-num">10</div><div class="stat-label">SEV&#304;YE</div></div>
-  <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">CANLI D&#220;NYA</div></div>
+<!-- FEATURES SECTION (YENİLİKLER VE DETAYLAR) -->
+<section class="section" id="ozellikler">
+  <div class="section-head">
+    <span class="section-tag">YENİ NESİL ÖZELLİKLER</span>
+    <h2 class="section-title">v3.6.6 İle Gelen Zenginlikler</h2>
+    <p class="section-desc">Geliştirici ekibimiz ve oyuncu topluluğumuzun geri bildirimleriyle şekillenen, detaylara gösterilen özenle hazırlanmış en güncel çiftlik deneyimi.</p>
+  </div>
+
+  <div class="features-grid">
+    <!-- Feature 1 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">🏪</div>
+      <h3 class="feature-title">Otantik Türk Köy Pazarı</h3>
+      <p class="feature-text">Masa örtüleri kaldırılarak açık ahşap çıtalı tezgahlarda taze hasat domates, biber, patlıcan, elma ve portakal kasaları sergileniyor. Çadırlar sağlam ahşap direklerle zemine sabitlendi.</p>
+      <span class="feature-tag-pill">v3.6.6 Yeniliği</span>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">🌊</div>
+      <h3 class="feature-title">Organik Gölet & Klasik Sandal</h3>
+      <p class="feature-text">Derinlik gradyanlı turkuaz su dokusu, sahil çakılları, nilüferler ve suya inen ahşap iskele. İskele babasına palamarla bağlı, dikişsiz ahşap gövdeli nostaljik sandal.</p>
+      <span class="feature-tag-pill">Geliştirilmiş Su Fiziği</span>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">🛠️</div>
+      <h3 class="feature-title">Hassas Dokunmatik İnşa</h3>
+      <p class="feature-text">İnşa menüsünü aşağı/yukarı kaydırırken yanlışlıkla eşyaların seçilip haritaya yerleşmesini önleyen akıllı kaydırma toleransı (drag gesture threshold) eklendi.</p>
+      <span class="feature-tag-pill">Kullanıcı Deneyimi</span>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">🐔</div>
+      <h3 class="feature-title">Sevimli Hayvanlar & Sivas Kangalı</h3>
+      <p class="feature-text">Geniş kümeslerde tavukları besle, taptaze organik yumurtaları topla. Koyunlar, inekler ve bahçeni şefkatle koruyan sadık dostumuz Kangal köpeği seni bekliyor.</p>
+      <span class="feature-tag-pill">Canlı Ekosistem</span>
+    </div>
+
+    <!-- Feature 5 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">🚂</div>
+      <h3 class="feature-title">Buharlı Tren ile Kasaba Ticareti</h3>
+      <p class="feature-text">Vadiye her sabah çalan düdüğüyle giriş yapan tarihi buharlı trenin vagonlarını doldur. Kasaba siparişlerini tamamlayarak bol miktarda altın ve seviye puanı kazan.</p>
+      <span class="feature-tag-pill">Ekonomi & Ticaret</span>
+    </div>
+
+    <!-- Feature 6 -->
+    <div class="feature-card">
+      <div class="feature-icon-box">☁️</div>
+      <h3 class="feature-title">Cozy Modu (Çok Yakında!)</h3>
+      <p class="feature-text">Daha zengin biyomlar ve diorama adaları eklenmek üzere dinlenmeye alındı. Butona tıkladığında hazırlık durumunu görebilir, yakında çıkacak dev ada güncellemesine tanık olabilirsin.</p>
+      <span class="feature-tag-pill">Geliştirme Aşamasında</span>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE GALLERY -->
+<section class="section" id="galeri">
+  <div class="section-head">
+    <span class="section-tag">OYUN İÇİ FOTOĞRAF GALERİSİ</span>
+    <h2 class="section-title">Vadiden Canlı Kareler</h2>
+    <p class="section-desc">Tüm ekran görüntüleri doğrudan v3.6.6 oyun motorundan 1080p Ultra HD çözünürlükte kaydedilmiştir.</p>
+  </div>
+
+  <div class="gallery-filters">
+    <button class="filter-btn active" data-filter="all">Tümü</button>
+    <button class="filter-btn" data-filter="koy">Köy & Pazar</button>
+    <button class="filter-btn" data-filter="doga">Doğa & Gölet</button>
+    <button class="filter-btn" data-filter="ciftlik">Çiftlik & Hayvanlar</button>
+  </div>
+
+  <div class="gallery-grid">
+    <div class="gallery-card" data-cat="koy" data-full="img/bazaar.png" data-title="Otantik Türk Köy Pazarı" data-desc="Taze ürün kasaları ve gerdirilmiş tente gölgelikleri.">
+      <img src="img/bazaar.png" alt="Köy Pazarı">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Otantik Türk Köy Pazarı</div>
+        <div class="gallery-card-sub">Köy Meydanı & Ticaret</div>
+      </div>
+    </div>
+
+    <div class="gallery-card" data-cat="doga" data-full="img/lake-boat.png" data-title="Organik Gölet ve İskele" data-desc="Canlı turkuaz su derinliği ve bağlı nostaljik sandal.">
+      <img src="img/lake-boat.png" alt="Gölet ve İskele">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Organik Gölet ve İskele</div>
+        <div class="gallery-card-sub">Balıkçılık & Dinlenme Alanı</div>
+      </div>
+    </div>
+
+    <div class="gallery-card" data-cat="ciftlik" data-full="img/cicekler.png" data-title="Botanik Çiçek Bahçesi" data-desc="Kadife güller ve renkli Osmanlı laleleri.">
+      <img src="img/cicekler.png" alt="Çiçek Bahçesi">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Botanik Çiçek Bahçesi</div>
+        <div class="gallery-card-sub">Tohum & Çiçekçilik</div>
+      </div>
+    </div>
+
+    <div class="gallery-card" data-cat="ciftlik" data-full="img/ciftlik-degirmen.png" data-title="Rüzgar Değirmeni ve Tarla" data-desc="Pastoral çiftlik hayatı ve dönen kanatlar.">
+      <img src="img/ciftlik-degirmen.png" alt="Değirmen">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Rüzgar Değirmeni ve Tarla</div>
+        <div class="gallery-card-sub">Tahıl & Un Üretimi</div>
+      </div>
+    </div>
+
+    <div class="gallery-card" data-cat="ciftlik" data-full="img/kumes-hayvanlar.png" data-title="Tavuk Kümesi ve Çiftlik Hayvanları" data-desc="Neşeli tavuklar, koyunlar ve sevimli Kangal.">
+      <img src="img/kumes-hayvanlar.png" alt="Kümes">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Tavuk Kümesi & Hayvanlar</div>
+        <div class="gallery-card-sub">Hayvancılık & Yumurta</div>
+      </div>
+    </div>
+
+    <div class="gallery-card" data-cat="koy" data-full="img/tren-ticaret.png" data-title="Tarihi Buharlı Tren" data-desc="Hasat ürünlerini vagonlara yükleme ve altın kazanma.">
+      <img src="img/tren-ticaret.png" alt="Tren">
+      <div class="gallery-overlay">
+        <div class="gallery-card-title">Tarihi Buharlı Tren</div>
+        <div class="gallery-card-sub">Kasaba Sevkiyatı</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX MODAL -->
+<div class="lightbox" id="lightboxModal">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <img src="" alt="Büyük Görsel" class="lightbox-img" id="lightboxImg">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
 </div>
 
-<section class="features">
-  <div class="section-label">&#214;zellikler</div>
-  <h2 class="section-title">Ger&#231;ek bir bah&#231;e<br><em>deneyimi</em></h2>
-  <div class="feat-grid">
-    <div class="feat-card feat-new"><span class="feat-icon">&#127978;</span><div class="feat-name">Ma&#287;aza Sistemi <span class="new-tag">Yeni</span></div><div class="feat-desc">Coin kazan, &#246;zel tohumlar ve nadir e&#351;yalar sat&#305;n al. Ejder yumurtas&#305;, alt&#305;n a&#287;a&#231; ve daha fazlas&#305;.</div><span class="feat-tag gold">16 &#220;r&#252;n</span></div>    <div class="feat-card feat-new"><span class="feat-icon">&#127813;</span><div class="feat-name">Hasat Sistemi <span class="new-tag">Yeni</span></div><div class="feat-desc">Domates, &#231;ilek ve kabak yeti&#351;tir. Ger&#231;ek zamanl&#305; b&#252;y&#252;me, hasat et ve coin kazan.</div><span class="feat-tag">Ger&#231;ek Zamanl&#305;</span></div>
-    <div class="feat-card feat-new"><span class="feat-icon">&#128049;</span><div class="feat-name">Evcil Hayvanlar <span class="new-tag">Yeni</span></div><div class="feat-desc">Kedi ve k&#246;pe&#287;in bah&#231;ende &#246;zg&#252;rce dola&#351;&#305;r. K&#246;pek kuyruk sallar, kedi kuyru&#287;unu k&#305;pırdatır.</div><span class="feat-tag">2 Hayvan</span></div>
-    <div class="feat-card feat-new"><span class="feat-icon">&#128276;</span><div class="feat-name">Bildirimler <span class="new-tag">Yeni</span></div><div class="feat-desc">Sulama zaman&#305;, hasat haz&#305;r, zarl&#305; b&#246;cek ve g&#252;nl&#252;k g&#246;rev hat&#305;rlat&#305;c&#305;s&#305;.</div><span class="feat-tag">Ak&#305;ll&#305;</span></div>
-    <div class="feat-card feat-new"><span class="feat-icon">&#128202;</span><div class="feat-name">&#304;statistikler <span class="new-tag">Yeni</span></div><div class="feat-desc">G&#252;nl&#252;k streak, toplam sulama, hasat say&#305;lar&#305;, oynama s&#252;resi ve coin takibi.</div><span class="feat-tag">Detayl&#305;</span></div>
-    <div class="feat-card"><span class="feat-icon">&#127769;</span><div class="feat-name">Gece/G&#252;nd&#252;z D&#246;ng&#252;s&#252;</div><div class="feat-desc">Ger&#231;ek saatinle senkronize g&#246;ky&#252;z&#252;. &#350;afak, g&#252;nd&#252;z, ak&#351;am ve gece atmosferleri.</div><span class="feat-tag">Ger&#231;ek Saat</span></div>
-    <div class="feat-card"><span class="feat-icon">&#127969;</span><div class="feat-name">S&#252;r&#252;kle-B&#305;rak &#304;n&#351;a</div><div class="feat-desc">20+ obje. A&#287;a&#231;, g&#246;let, ev, &#231;e&#351;me, &#231;ardak, a&#287;a&#231; evi ve daha fazlas&#305;n&#305; istedi&#287;in yere koy.</div><span class="feat-tag">20+ Obje</span></div>
-    <div class="feat-card"><span class="feat-icon">&#127783;&#65039;</span><div class="feat-name">Hava Efektleri</div><div class="feat-desc">Gece ya&#287;muru bitkilerini sular. Kar ya&#287;d&#305;r, sonbahar yapraklar&#305; d&#246;ks&#252;n.</div><span class="feat-tag">Dinamik</span></div>
-    <div class="feat-card"><span class="feat-icon">&#128203;</span><div class="feat-name">G&#252;nl&#252;k G&#246;revler</div><div class="feat-desc">Her g&#252;n yeni g&#246;revler, XP kazan ve 10 seviyeye kadar ilerle.</div><span class="feat-tag">10 Seviye</span></div>
-    <div class="feat-card"><span class="feat-icon">&#128190;</span><div class="feat-name">Otomatik Kay&#305;t</div><div class="feat-desc">Bah&#231;en, dekorlar&#305;n ve hayvanlar&#305;n g&#252;venle kaydedilir. G&#252;ncelleme sonras&#305; kay&#305;p yok.</div><span class="feat-tag">Kal&#305;c&#305;</span></div>
-    <div class="feat-card"><span class="feat-icon">&#128228;</span><div class="feat-name">Payla&#351;&#305;m</div><div class="feat-desc">Bah&#231;e durumunu arkada&#351;lar&#305;nla payla&#351;. Seviye, coin ve streak bilgilerin.</div><span class="feat-tag">Sosyal</span></div>
+<!-- CHANGELOG & SÜRÜM GEÇMİŞİ -->
+<section class="section" id="surum-notlari">
+  <div class="section-head">
+    <span class="section-tag">ŞEFFAF GELİŞTİRME GÜNLÜĞÜ</span>
+    <h2 class="section-title">Sürüm Geçmişi & Notlar</h2>
+    <p class="section-desc">Her güncellemede oyunumuzu daha huzurlu, optimize ve kusursuz hale getiriyoruz.</p>
+  </div>
+
+  <div class="timeline-wrap">
+    <!-- Current Version -->
+    <div class="version-card current">
+      <div class="version-card-head">
+        <div class="v-left">
+          <span class="v-badge">v3.6.6</span>
+          <span class="v-status-tag">GÜNCEL (BUILD 51)</span>
+        </div>
+        <span class="v-date">28 Ekim 2026</span>
+      </div>
+      <ul class="v-list">
+        <li class="v-item">
+          <span class="v-bullet">✦</span>
+          <span><strong>Otantik Türk Köy Pazarı:</strong> Açık ahşap çıtalar üzerinde meyve-sebze kasaları sergilendi, çadır gölgelikleri sağlamlaştırıldı.</span>
+        </li>
+        <li class="v-item">
+          <span class="v-bullet">✦</span>
+          <span><strong>Organik Gölet & Sandal:</strong> Canlı turkuaz su dokusu, sahil sazlıkları, ahşap balıkçı iskelesi ve dikişsiz ahşap sandal eklendi.</span>
+        </li>
+        <li class="v-item">
+          <span class="v-bullet">✦</span>
+          <span><strong>İnşa Menüsü Kaydırma Düzeltmesi:</strong> Dokunmatik kaydırma toleransı ile yanlışlıkla eşya seçilmesi engellendi.</span>
+        </li>
+        <li class="v-item">
+          <span class="v-bullet">✦</span>
+          <span><strong>Android Sürüm Kodu 51:</strong> Google Play Store güncel sürüm koduyla tam uyumlu paketleme ve 60+ FPS kararlılık.</span>
+        </li>
+        <li class="v-item">
+          <span class="v-bullet">✦</span>
+          <span><strong>Cozy Modu Önizleme:</strong> Cozy modu geliştirme aşamasına alındı, butona basıldığında bilgilendirme eklendi.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Previous Version -->
+    <div class="version-card">
+      <div class="version-card-head">
+        <div class="v-left">
+          <span class="v-badge">v3.5.5</span>
+        </div>
+        <span class="v-date">25 Ekim 2026</span>
+      </div>
+      <ul class="v-list">
+        <li class="v-item">
+          <span class="v-bullet">•</span>
+          <span>Dinamik Müzik & Ses Ambiyansı: Gündüz akustik gitar, gece lofi piyano tınıları ve su sesleri.</span>
+        </li>
+        <li class="v-item">
+          <span class="v-bullet">•</span>
+          <span>İnteraktif NPC Diyalog ve Görev Sistemi ile kasaba halkıyla iletişim.</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </section>
 
-<section class="shop-preview">
-  <div class="section-label">Ma&#287;aza</div>
-  <h2 class="section-title">Nadir <em>e&#351;yalar</em></h2>
-  <div class="shop-cards">
-    <div class="shop-card rare"><div class="shop-card-emoji">&#129554;</div><div class="shop-card-name">Ejder Yumurtas&#305;</div><div class="shop-card-price">&#128176; 300 coin</div></div>
-    <div class="shop-card rare"><div class="shop-card-emoji">&#127795;</div><div class="shop-card-name">Alt&#305;n A&#287;a&#231;</div><div class="shop-card-price">&#128176; 350 coin</div></div>
-    <div class="shop-card"><div class="shop-card-emoji">&#9970;</div><div class="shop-card-name">&#199;e&#351;me</div><div class="shop-card-price">&#128176; 200 coin</div></div>
-    <div class="shop-card"><div class="shop-card-emoji">&#127818;</div><div class="shop-card-name">A&#287;a&#231; Evi</div><div class="shop-card-price">&#128176; 250 coin</div></div>
-    <div class="shop-card"><div class="shop-card-emoji">&#127801;</div><div class="shop-card-name">G&#252;l Tohumu</div><div class="shop-card-price">&#128176; 30 coin</div></div>
+<!-- 77X TECHNOLOGIES DEVELOPER SPOTLIGHT -->
+<section class="section" id="77x-tech" style="padding-top: 20px;">
+  <div class="dev-spotlight">
+    <div class="dev-logo-mark">
+      <span class="big-77">77x</span>
+      <span class="sub-x">TECHNOLOGY</span>
+    </div>
+    <div class="dev-info">
+      <h3>77x Technologies</h3>
+      <p>
+        Yenilikçi dijital simülasyonlar, oyun mimarileri ve yüksek performanslı yazılım motorları üreten bağımsız teknoloji stüdyosu. Sanal Bahçe, stüdyomuzun huzur ve detay odaklı amiral gemisi projesidir.
+      </p>
+      <div class="dev-badge-row">
+        <span class="dev-badge">Geliştirici: Batuhan Kılıçkaya</span>
+        <span class="dev-badge">Godot Engine 4.x</span>
+        <span class="dev-badge">Three.js / WebGL</span>
+        <span class="dev-badge">Android Native</span>
+      </div>
+    </div>
+    <div class="dev-actions">
+      <a href="https://github.com/BatuhanKlcky" target="_blank" class="btn-dev">
+        <span>GitHub Profili</span>
+      </a>
+      <a href="https://github.com/BatuhanKlcky/sanalbahce" target="_blank" class="btn-dev">
+        <span>Kaynak Kodu (Repo)</span>
+      </a>
+    </div>
   </div>
 </section>
 
-<section class="install">
-  <div class="section-label">Google Play</div>
-  <h2 class="section-title">Google Play'den <em>Hemen Yükle</em></h2>
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-text"><div class="step-title">Mağazayı Aç</div><div class="step-desc">"Google Play'den İndir" butonuna basarak doğrudan resmi mağaza sayfasına ulaş.</div></div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-text"><div class="step-title">Yükle'ye Dokun</div><div class="step-desc">Güvenli ve otomatik olarak en güncel sürümü telefonuna kur.</div></div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-text"><div class="step-title">Bahçene Başla</div><div class="step-desc">Oyunu aç, ekinlerini ek, köylüler ve hayvanlarınla keyifli vakit geçir!</div></div></div>
-  </div>
-</section>
+<!-- DOWNLOAD CENTER -->
+<section class="section" id="indir" style="padding-top: 40px;">
+  <div class="download-box">
+    <h2 class="dl-title">Hemen İndir ve Bahçene Başla</h2>
+    <p class="dl-subtitle">
+      Sanal Bahçe v3.6.6'yı ister Google Play Store üzerinden indir, ister doğrudan APK olarak kur, istersen de tarayıcından anında oyna.
+    </p>
 
-<section class="versions">
-  <div class="section-label">S&#252;r&#252;m Ge&#231;mi&#351;i</div>
-  <h2 class="section-title" style="margin-bottom:32px">G&#252;ncellemeler</h2>
-    <div class="version-list">
-    <div class="version-item v-latest">
-      <div class="v-num">v3.5.5</div>
-      <div class="v-content">
-        <div class="v-title">Dinamik Müzik &amp; Ses Atmosferi + İnteraktif NPC Görev Sistemi <span class="v-badge">Şimdi Yayında</span></div>
-        <ul class="v-changes">
-          <li>A+++ Dinamik Müzik &amp; Ambiyans: Gündüz akustik gitar/kalimba melodileri, gece lofi piyano; kuş sesleri, cırcır böcekleri ve yağmur ambiyansları arasında yumuşak 2.5s crossfade geçişleri.</li>
-          <li>İnteraktif NPC Diyalog &amp; Görev Sistemi: Köylüler ve yardımcı çiftçilerle konuşma, özel karakter kartları, günlük görevler ve anında altın/XP/tohum ödül toplama.</li>
-          <li>Zengin Ses Efektleri: Çimen adım sesleri, tohum ekme, sulama, seviye atlama ve diyalog ses efektleri.</li>
-          <li>Kusursuz İleri-Geri NPC Yürüyüş Fiziği: Tam sagittal eksen kilitli, sıfır sapmalı doğal adımlama.</li>
-          <li>1080p Ultra HD Netlik &amp; Donanımsal 2x MSAA kenar yumuşatma.</li>
-        </ul>
-        <div class="v-date">25 Ekim 2026</div>
-      </div>
+    <div class="dl-btns-row">
+      <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" target="_blank" class="dl-btn-card highlight">
+        <div class="dl-card-icon">▶</div>
+        <div class="dl-card-text">
+          <small>Google Play Store</small>
+          <strong>Resmi Yayın İndir</strong>
+        </div>
+      </a>
+
+      <a href="https://github.com/BatuhanKlcky/sanalbahce/releases" target="_blank" class="dl-btn-card">
+        <div class="dl-card-icon">📦</div>
+        <div class="dl-card-text">
+          <small>Android APK (v3.6.6)</small>
+          <strong>Doğrudan APK İndir</strong>
+        </div>
+      </a>
+
+      <a href="index.html" class="dl-btn-card">
+        <div class="dl-card-icon">🌐</div>
+        <div class="dl-card-text">
+          <small>Web Tarayıcısı</small>
+          <strong>Hemen Çevrimiçi Oyna</strong>
+        </div>
+      </a>
     </div>
-    <div class="version-item">
-      <div class="v-num">v3.5.4</div>
-      <div class="v-content">
-        <div class="v-title">Kusursuz İleri-Geri NPC Yürüyüş Fiziği &amp; 1080p Ultra HD</div>
-        <ul class="v-changes">
-          <li>Kusursuz İleri-Geri NPC Yürüyüş Fiziği: Yürürken bacakların sağa-sola açılma ve sallanma sorunu tamamen giderildi; diz bükülmesi ve üst bacak adımları sagittal düzleme kilitlenerek 0.000 mm yan sapmasız gerçekçi yürüyüş sağlandı.</li>
-          <li>Kadın &amp; Erkek Karakter İskelet Ayrımı: Kadın ve erkek modellerin farklı kemik rotasyon eksenleri ayrıştırılarak her iki karakter için kusursuz ileri adım ve geriye diz bükülme dinamiği entegre edildi.</li>
-          <li>1080p Ultra HD Netlik &amp; Donanımsal 2x MSAA: %100 yerel mobil render ölçeği, 4x anizotropik doku filtreleme ve donanımsal kenar yumuşatma ile kristal netlik.</li>
-          <li>A+++ Sinematik Animasyonlu Loading: Süzülen sakura yaprakları, parıldayan altın ateş böcekleri, dönen güneş hareleri ve zıplayan maskotlu dinamik açılış.</li>
-          <li>Gelişmiş Mobil Pil &amp; 60 FPS Optimizasyonu: Mobil cihazlarda aşırı ısınmayı önleyen sabit 60 FPS kilidi ve optimize kamera mesafesi.</li>
-        </ul>
-        <div class="v-date">25 Ekim 2026</div>
+
+    <div class="dl-specs">
+      <div class="dl-spec-item">
+        <span>✓</span> Android 7.0 ve üzeri
       </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.5.0</div>
-      <div class="v-content">
-        <div class="v-title">Doğal NPC Animasyonları &amp; Mobil FPS Optimizasyonu</div>
-        <ul class="v-changes">
-          <li>Köylü ve çiftçi kollarının havada kalması (T-pose) ve kayma hatası baştan düzeltildi.</li>
-          <li>Yeni ekin sulama, tohumlama ve hasat işleme animasyonları (Farmer|Work).</li>
-          <li>Hasat edildi ve kazanılan altın/ürün metinlerinin üst üste binmesi ayrıştırıldı.</li>
-          <li>Sabit ekran boyutunda (fixed_size) jilet gibi net NPC &amp; hayvan isimlikleri ve diyalog balonları.</li>
-          <li>Düşük segment telefonlar için GPU ve ışık optimizasyonu ile akıcı 60 FPS deneyimi.</li>
-        </ul>
-        <div class="v-date">25 Ekim 2026</div>
+      <div class="dl-spec-item">
+        <span>✓</span> 108 MB Paket Boyutu
       </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.4.0</div>
-      <div class="v-content">
-        <div class="v-title">Mobil Yapı Taşıma &amp; Touch-Scroll Cilalaması</div>
-        <ul class="v-changes">
-          <li>Ergonomik dokunmatik yapı taşıma, döndürme ve onaylama sistemi.</li>
-          <li>Mobil arayüzlerde dokunmatik liste kaydırma (touch-scroll) düzeltmeleri.</li>
-          <li>Alt dock butonlarında tematik renk paletleri ve yüksek kontrast.</li>
-        </ul>
-        <div class="v-date">24 Ekim 2026</div>
+      <div class="dl-spec-item">
+        <span>✓</span> %100 Çevrimdışı (İnternetsiz)
       </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.3.0</div>
-      <div class="v-content">
-        <div class="v-title">Köy Pazarı, Çiftçi Evleri &amp; Tavuk Kümesi</div>
-        <ul class="v-changes">
-          <li>Köy meydanı pazar tezgahları ve interaktif köylü alışveriş mekaniği.</li>
-          <li>Çiftçi kulübeleri, ahır sistemi ve sevimli sarı civcivler.</li>
-        </ul>
-        <div class="v-date">24 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.2.0</div>
-      <div class="v-content">
-        <div class="v-title">Balıkçılık, Tren İhracatı &amp; Köy Mutfağı</div>
-        <ul class="v-changes">
-          <li>Göl kenarında balık tutma mini oyunu ve nadir balık türleri.</li>
-          <li>Buharlı tren ihracat istasyonu ve ticaret bonusları.</li>
-          <li>Fırıncılık tarifleri ve ekmek/pasta pişirme.</li>
-        </ul>
-        <div class="v-date">24 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.1.0</div>
-      <div class="v-content">
-        <div class="v-title">Godot 4 3D Geçişi &amp; Alpine Dağ Silüetleri</div>
-        <ul class="v-changes">
-          <li>Tam Godot 4 3D motoru dönüşümü ve optimize gl_compatibility render.</li>
-          <li>Kuzey ufku alpine karlı dağ zincirleri ve tren tünelleri.</li>
-          <li>Gece meydan ateşi ve parıldayan ateş böcekleri.</li>
-        </ul>
-        <div class="v-date">24 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v3.0.0</div>
-      <div class="v-content">
-        <div class="v-title">Çoklu Biyom Adaları &amp; Şans Çarkı</div>
-        <ul class="v-changes">
-          <li>5 Farklı biyom: Çayır, Orman, Çiftlik, Göl ve Köy.</li>
-          <li>Dönen rüzgar değirmeni ve un öğütme mekaniği.</li>
-          <li>Günlük hediyeli Şans Çarkı (Çarkıfelek).</li>
-        </ul>
-        <div class="v-date">20 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v2.3.0</div>
-      <div class="v-content">
-        <div class="v-title">Çiftlik Hayvanları &amp; Sadık Dostlar</div>
-        <ul class="v-changes">
-          <li>Alaca İnek, Alpaca ve At modelleri; besleme ve süt sağma.</li>
-          <li>Çiftlik köpeği Karabaş (hazine bulma) ve kedi Pamuk.</li>
-        </ul>
-        <div class="v-date">19 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v2.1.8</div>
-      <div class="v-content">
-        <div class="v-title">Cozy Diorama &amp; Kusursuz Çiçekler</div>
-        <ul class="v-changes">
-          <li>Diorama adaları, premium zemin ve güçlü fenerler.</li>
-          <li>Gül, lale, lotus ve papatya procedural bitkileri.</li>
-        </ul>
-        <div class="v-date">18 Ekim 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v1.5.0</div>
-      <div class="v-content">
-        <div class="v-title">Mağaza &amp; Nadir Eşyalar</div>
-        <ul class="v-changes">
-          <li>Mağaza sistemi, bildirimler, FPS ve kayıt düzeltmeleri.</li>
-        </ul>
-        <div class="v-date">Mayıs 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v1.4.0</div>
-      <div class="v-content">
-        <div class="v-title">Hasat &amp; Evcil Hayvan</div>
-        <ul class="v-changes"><li>Hasat sistemi, evcil hayvan, istatistikler, coin.</li></ul>
-        <div class="v-date">Mayıs 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v1.3.0</div>
-      <div class="v-content">
-        <div class="v-title">İnşa &amp; Silme</div>
-        <ul class="v-changes"><li>Sürükle-bırak yerleştirme, dekor silme, ev modeli.</li></ul>
-        <div class="v-date">Nisan 2026</div>
-      </div>
-    </div>
-    <div class="version-item">
-      <div class="v-num">v1.0.0</div>
-      <div class="v-content">
-        <div class="v-title">İlk Sürüm</div>
-        <ul class="v-changes"><li>3D bahçe, gece/gündüz, çiçekler, kelebekler.</li></ul>
-        <div class="v-date">Nisan 2026</div>
+      <div class="dl-spec-item">
+        <span>✓</span> Sıfır Reklam
       </div>
     </div>
   </div>
 </section>
 
-<section class="reviews" id="yorumlar">
-  <div class="section-label">Kullan&#305;c&#305; Deneyimleri</div>
-  <h2 class="section-title">Bah&#231;eseverler <em>ne diyor?</em></h2>
-  <div class="review-grid" id="reviewGrid"></div>
-  <div class="review-form-wrap">
-    <h3 class="form-title">Sen de yorum yap</h3>
-    <div class="star-selector" id="starSelector">
-      <span class="star-pick" data-v="1">&#11088;</span>
-      <span class="star-pick" data-v="2">&#11088;</span>
-      <span class="star-pick" data-v="3">&#11088;</span>
-      <span class="star-pick" data-v="4">&#11088;</span>
-      <span class="star-pick" data-v="5">&#11088;</span>
-    </div>
-    <div class="form-row">
-      <input class="form-input" id="reviewName" type="text" placeholder="&#304;smin (&#246;rn. Ahmet K.)" maxlength="30">
-      <select class="form-input" id="reviewEmoji">
-        <option>&#127800;</option><option>&#127807;</option><option>&#129411;</option>
-        <option>&#127802;</option><option>&#128049;</option><option>&#128054;</option>
-        <option>&#127813;</option><option>&#11088;</option>
-      </select>
-    </div>
-    <textarea class="form-input form-textarea" id="reviewText" placeholder="Deneyimini payla&#351;... (en az 20 karakter)" maxlength="280"></textarea>
-    <button class="form-submit" onclick="submitReview()">Yorumu G&#246;nder &#127807;</button>
-    <div id="formMsg" class="form-msg"></div>
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">
+    <strong>Sanal Bahçe</strong> — Bir <strong>77x Technologies</strong> Yapımıdır. © 2026 Tüm Hakları Saklıdır.
   </div>
-</section>
-
-<section class="cta">
-  <h2 class="cta-title">Bah&#231;ene <span>&#351;imdi</span> ba&#351;la.</h2>
-  <div class="dl-group">
-    <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" class="btn-download" target="_blank" rel="noopener">
-      <span class="btn-icon">&#9654;&#65039;</span>
-      <span class="btn-text"><small>Google Play Store &middot; Resmi S&#252;r&#252;m</small>Hemen Y&#252;kle</span>
-    </a>
-    <div class="dl-info"><span>&#11088; Google Play g&#252;vencesiyle hemen oyna</span></div>
-  </div>
-</section>
-
-<footer>
-  <div class="footer-logo">&#127807; Sanal Bah&#231;e</div>
   <div class="footer-links">
-    <a href="https://batuhanklcky.github.io/sanalbahce/">&#127760; Oyna</a>
-    <a href="./gizlilik.html">Gizlilik</a>
-    <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" target="_blank" rel="noopener">Google Play</a>
+    <a href="gizlilik.html" class="footer-link">Gizlilik Politikası</a>
+    <a href="CONTRIBUTING.md" class="footer-link">Katkıda Bulun</a>
+    <a href="https://github.com/BatuhanKlcky/sanalbahce" target="_blank" class="footer-link">GitHub</a>
+    <a href="https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce" target="_blank" class="footer-link">Google Play</a>
   </div>
-  <div class="footer-copy">v3.5.5 &middot; 2026 &middot; Google Play Yay&#305;n&#305;</div>
 </footer>
 
+<!-- SCRIPT: Particles, Showcase, Lightbox, Sound -->
 <script>
-var SB_URL='https://lvoeziofefbczugymzft.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2b2V6aW9mZWZiY3p1Z3ltemZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU1ODY1MjcsImV4cCI6MjA2MTE2MjUyN30.u9HyvUCxkchSmtwDzwAm2iy6yQiA7rScCQjKXCpq7XI';
-var selStars=0;
+// --- 1. AMBIENT PARTICLE ENGINE (POLLEN & FIREFLIES) ---
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
 
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function addCard(r,prepend){
-  var grid=document.getElementById('reviewGrid');
-  if(!grid)return;
-  var st='';for(var i=0;i<r.stars;i++)st+='&#11088;';
-  var dt=r.created_at?new Date(r.created_at).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}):(r.date||'');
-  var card=document.createElement('div');
-  card.className='review-card'+(prepend?' new-review':'');
-  card.innerHTML='<div class="review-stars">'+st+'</div>'
-    +'<div class="review-text">"'+escHtml(r.text)+'"</div>'
-    +'<div class="review-author"><div class="review-avatar">'+(r.emoji||'&#127807;')+'</div>'
-    +'<div><div class="review-name">'+escHtml(r.name)+'</div>'
-    +'<div class="review-date">'+dt+'</div></div></div>';
-  if(prepend)grid.insertBefore(card,grid.firstChild);
-  else grid.appendChild(card);
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-function loadReviews(){
-  var grid=document.getElementById('reviewGrid');
-  if(!grid)return;
-  grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px;color:rgba(200,220,205,0.5);font-size:13px">&#127807; Yorumlar y&#252;kleniyor...</div>';
-  fetch(SB_URL+'/rest/v1/reviews?select=*&order=created_at.desc&limit=30',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Accept':'application/json'}
-  }).then(function(r){return r.json();}).then(function(data){
-    grid.innerHTML='';
-    if(Array.isArray(data)&&data.length>0){
-      data.forEach(function(r){addCard(r,false);});
-    } else {
-      grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px;color:rgba(200,220,205,0.4);font-size:13px">Hen&#252;z yorum yok. &#304;lk yorumu sen yaz! &#127807;</div>';
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2.2 + 0.8;
+    this.speedX = (Math.random() - 0.5) * 0.45;
+    this.speedY = Math.random() * -0.6 - 0.2;
+    this.opacity = Math.random() * 0.5 + 0.2;
+    this.glow = Math.random() > 0.6;
+    this.pulse = Math.random() * Math.PI;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.pulse += 0.03;
+    if (this.y < -10 || this.x < -10 || this.x > canvas.width + 10) {
+      this.reset();
+      this.y = canvas.height + 10;
     }
-  }).catch(function(){
-    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:24px;color:#ff6b6b;font-size:13px">&#9888;&#65039; Yorumlar y&#252;klenemedi.</div>';
-  });
-}
-
-function submitReview(){
-  var nm=document.getElementById('reviewName'),
-      tx=document.getElementById('reviewText'),
-      em=document.getElementById('reviewEmoji'),
-      msg=document.getElementById('formMsg');
-  if(!nm||!tx||!msg)return;
-  var name=nm.value.trim(),text=tx.value.trim(),emoji=em?em.value:'&#127807;';
-  if(!name){msg.textContent='&#9888;&#65039; &#304;smini yaz!';msg.className='form-msg err';return;}
-  if(!selStars){msg.textContent='&#9888;&#65039; Y&#305;ld&#305;z se&#231;!';msg.className='form-msg err';return;}
-  if(text.length<20){msg.textContent='&#9888;&#65039; En az 20 karakter yaz!';msg.className='form-msg err';return;}
-  msg.textContent='&#9203; G&#246;nderiliyor...';msg.className='form-msg ok';
-  fetch(SB_URL+'/rest/v1/reviews',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-    body:JSON.stringify({name:name,text:text,emoji:emoji,stars:selStars})
-  }).then(function(r){
-    if(r.ok||r.status===201){
-      addCard({name:name,text:text,emoji:emoji,stars:selStars,date:new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})},true);
-      nm.value='';tx.value='';selStars=0;
-      document.querySelectorAll('.star-pick').forEach(function(s){s.classList.remove('active');s.style.opacity='.4';s.style.filter='grayscale(1)';});
-      msg.textContent='&#9989; Yorum eklendi, te&#351;ekk&#252;rler! &#127807;';msg.className='form-msg ok';
-      setTimeout(function(){msg.textContent='';},3000);
-      var g=document.getElementById('reviewGrid');if(g)g.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  draw() {
+    const curOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    if (this.glow) {
+      ctx.fillStyle = `rgba(242, 193, 78, ${curOpacity})`;
+      ctx.shadowColor = 'rgba(242, 193, 78, 0.8)';
+      ctx.shadowBlur = 8;
     } else {
-      r.text().then(function(t){console.error('Review error:',r.status,t);msg.textContent='&#10060; G&#246;nderilemedi ('+r.status+')';msg.className='form-msg err';});
+      ctx.fillStyle = `rgba(110, 231, 148, ${curOpacity})`;
+      ctx.shadowBlur = 0;
     }
-  }).catch(function(e){console.error(e);msg.textContent='&#10060; Ba&#287;lant&#305; hatas&#305;!';msg.className='form-msg err';});
+    ctx.fill();
+  }
 }
 
-window.addEventListener('DOMContentLoaded',function(){
-  var stars=document.querySelectorAll('.star-pick');
-  stars.forEach(function(el){
-    el.addEventListener('click',function(){
-      selStars=parseInt(this.dataset.v);
-      stars.forEach(function(s,i){s.classList.toggle('active',i<selStars);});
-    });
-    el.addEventListener('mouseover',function(){
-      var v=parseInt(this.dataset.v);
-      stars.forEach(function(s,i){s.style.opacity=i<v?'1':'.4';s.style.filter=i<v?'none':'grayscale(1)';});
-    });
+for (let i = 0; i < 45; i++) {
+  particles.push(new Particle());
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.update();
+    p.draw();
   });
-  var sel=document.getElementById('starSelector');
-  if(sel)sel.addEventListener('mouseleave',function(){
-    stars.forEach(function(s,i){s.style.opacity=i<selStars?'1':'.4';s.style.filter=i<selStars?'none':'grayscale(1)';});
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// --- 2. HERO SHOWCASE INTERACTIVE TABS & AUTOPLAY ---
+const mainImg = document.getElementById('showcaseMainImg');
+const titleElem = document.getElementById('showcaseTitle');
+const subElem = document.getElementById('showcaseSub');
+const badgeElem = document.getElementById('showcaseBadge');
+const thumbBtns = document.querySelectorAll('.thumb-btn');
+let currentShowcaseIdx = 0;
+let showcaseInterval = null;
+
+function setShowcase(idx) {
+  thumbBtns.forEach(b => b.classList.remove('active'));
+  const btn = thumbBtns[idx];
+  btn.classList.add('active');
+  
+  mainImg.style.opacity = '0.4';
+  setTimeout(() => {
+    mainImg.src = btn.dataset.img;
+    titleElem.textContent = btn.dataset.title;
+    subElem.textContent = btn.dataset.sub;
+    badgeElem.textContent = btn.dataset.badge;
+    mainImg.style.opacity = '1';
+  }, 180);
+}
+
+thumbBtns.forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    currentShowcaseIdx = idx;
+    setShowcase(idx);
+    resetShowcaseTimer();
   });
-  loadReviews();
-  setInterval(loadReviews,30000);
 });
 
-function updateClock(){var n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),el=document.getElementById('sc');if(el)el.textContent=h+':'+m;}
-updateClock();setInterval(updateClock,10000);
-var obs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.style.opacity='1';x.target.style.transform='translateY(0)';}});},{threshold:.1});
-document.querySelectorAll('.feat-card,.stat-box,.version-item,.shop-card,.step').forEach(function(el){el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease,transform 0.6s ease';obs.observe(el);});
+function nextShowcase() {
+  currentShowcaseIdx = (currentShowcaseIdx + 1) % thumbBtns.length;
+  setShowcase(currentShowcaseIdx);
+}
+function resetShowcaseTimer() {
+  clearInterval(showcaseInterval);
+  showcaseInterval = setInterval(nextShowcase, 5000);
+}
+resetShowcaseTimer();
+
+// Pause on hover
+const showcaseWin = document.querySelector('.showcase-window');
+showcaseWin.addEventListener('mouseenter', () => clearInterval(showcaseInterval));
+showcaseWin.addEventListener('mouseleave', resetShowcaseTimer);
+
+// --- 3. GALLERY FILTERS & LIGHTBOX MODAL ---
+const filterBtns = document.querySelectorAll('.filter-btn');
+const galleryCards = document.querySelectorAll('.gallery-card');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+
+    galleryCards.forEach(card => {
+      if (filter === 'all' || card.dataset.cat === filter) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+});
+
+const lightbox = document.getElementById('lightboxModal');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxClose = document.getElementById('lightboxClose');
+
+galleryCards.forEach(card => {
+  card.addEventListener('click', () => {
+    lightboxImg.src = card.dataset.full;
+    lightboxCaption.innerHTML = `<strong>${card.dataset.title}</strong> — ${card.dataset.desc}`;
+    lightbox.classList.add('active');
+  });
+});
+
+lightboxClose.addEventListener('click', () => lightbox.classList.remove('active'));
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) lightbox.classList.remove('active');
+});
+
+// --- 4. MICRO-INTERACTION AUDIO (SYNTHESIZED WEB AUDIO API) ---
+let audioCtx = null;
+let soundEnabled = false;
+const soundToggle = document.getElementById('soundToggle');
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playGardenChime(freq = 587.33) {
+  if (!soundEnabled || !audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + 0.12);
+    
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.35);
+  } catch(e) {}
+}
+
+soundToggle.addEventListener('click', () => {
+  initAudio();
+  soundEnabled = !soundEnabled;
+  soundToggle.textContent = soundEnabled ? '🔔' : '🎵';
+  if (soundEnabled) {
+    playGardenChime(784); // G5 note
+  }
+});
+
+document.querySelectorAll('button, a.btn-hero-primary, a.btn-hero-secondary, .thumb-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    if (soundEnabled) playGardenChime(523.25);
+  });
+});
 </script>
+
 </body>
 </html>
