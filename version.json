@@ -1,15 +1,15 @@
 {
-  "version": "3.6.6",
-  "versionCode": 51,
-  "releaseDate": "2026-10-28",
-  "title": "Otantik Türk Pazarı, Organik Gölet & Sandal, İnşa Menüsü ve Performans Güncellemesi",
+  "version": "3.6.7",
+  "versionCode": 52,
+  "releaseDate": "2026-11-01",
+  "title": "Çiftçi Komuta Sistemi, Toprak Nemi & Gerçekçi Köy Mimarisi Güncellemesi",
   "notes": [
-    "Otantik Türk Köy Pazarı: Doğal ahşap tezgahlar, taze meyve-sebze kasaları ve sağlam dikmelerle gerdirilmiş çadır gölgelikleri.",
-    "Organik Gölet ve Balıkçı İskelesi: Berrak turkuaz su derinliği, nilüferler, ahşap kalaslı iskele ve demirlenmiş dikişsiz klasik sandal.",
-    "İnşa Menüsü Dokunmatik İyileştirmesi: Liste kaydırılırken kazara eşya seçilmesini engelleyen hassas dokunma toleransı.",
-    "Cozy Modu Geliştirme Bildirimi: Rahatlatıcı ada modu hazırlıkları ve bilgilendirici arayüz entegrasyonu.",
-    "Arayüz ve Buton Güncellemeleri: Modern cam-morfik dock tasarımı ve geliştirilmiş dokunma geri bildirimleri.",
-    "Android Sürüm Kodu 51 (v3.6.6): Android 14/15 (API 34-36) tam uyumluluk ve kararlı 60+ FPS optimizasyonu."
+    "Akıllı Çiftçi Komuta Sistemi: Çiftçiler (Mehmet & Ayşe) artık rastgele hareket etmez; tamamen sizin ekim, sulama ve hasat emirlerinizle ayrı ayrı tarlalara giderek çalışır.",
+    "Toprak Nemi & Sulama Mekaniği: Ekinler zamanla su bekler; sulanan ekinler 2 kat hızla büyür ve parıldar. Yağmurlu günlerde doğa tüm tarlalarınızı otomatik sular.",
+    "Dengeli ve Ödüllendirici Tarım Süreleri: Gerçekçi çiftlik simülasyonu temposu (2-35 dk arası) ve yükseltilmiş altın/XP hasat ödülleri.",
+    "Gerçekçi Mimari Ölçekler: İnşa modundaki köy hanı, ahşap konaklar, değirmen, demirci, ahırlar ve çitler gerçek boyutlarına (1.45 - 1.80x) yükseltildi.",
+    "Dinamik İnşa Halkası: Yapı taban alanına göre otomatik genişleyen zemin yerleştirme önizleme çemberi.",
+    "Android Sürüm Kodu 52 (v3.6.7): Kararlı 60 FPS optimizasyonu ve Google Play Store için AAB paketi."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
