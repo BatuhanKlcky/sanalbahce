@@ -1,15 +1,15 @@
 {
-  "version": "3.6.7",
-  "versionCode": 52,
+  "version": "3.6.8",
+  "versionCode": 53,
   "releaseDate": "2026-11-01",
-  "title": "Çiftçi Komuta Sistemi, Toprak Nemi & Gerçekçi Köy Mimarisi Güncellemesi",
+  "title": "Hızlı Dokunmatik Ekim, Meyve Hasadı, Köy Pazarı ve İstasyon Güncellemesi",
   "notes": [
-    "Akıllı Çiftçi Komuta Sistemi: Çiftçiler (Mehmet & Ayşe) artık rastgele hareket etmez; tamamen sizin ekim, sulama ve hasat emirlerinizle ayrı ayrı tarlalara giderek çalışır.",
-    "Toprak Nemi & Sulama Mekaniği: Ekinler zamanla su bekler; sulanan ekinler 2 kat hızla büyür ve parıldar. Yağmurlu günlerde doğa tüm tarlalarınızı otomatik sular.",
-    "Dengeli ve Ödüllendirici Tarım Süreleri: Gerçekçi çiftlik simülasyonu temposu (2-35 dk arası) ve yükseltilmiş altın/XP hasat ödülleri.",
-    "Gerçekçi Mimari Ölçekler: İnşa modundaki köy hanı, ahşap konaklar, değirmen, demirci, ahırlar ve çitler gerçek boyutlarına (1.45 - 1.80x) yükseltildi.",
-    "Dinamik İnşa Halkası: Yapı taban alanına göre otomatik genişleyen zemin yerleştirme önizleme çemberi.",
-    "Android Sürüm Kodu 52 (v3.6.7): Kararlı 60 FPS optimizasyonu ve Google Play Store için AAB paketi."
+    "Anında Dokunmatik Ekim ve Hasat: Tohum seçip tarlaya dokunduğunuzda ekin gecikmesiz hemen yerleşir; olgunlaşan veya susamış ekinlere dokunulduğunda anında hasat edilir ve sulanır.",
+    "Genişletilmiş Meyve Ağacı Hasadı: Ağaç silkeleme ve meyve toplama etkileşim mesafesi 4.8 metreye genişletildi, ağaç dallarına, sepetine veya gövdesine dokunulduğunda anında meyve toplanır.",
+    "Köy Pazarı & Toplu Satış: Köy tezgâhında artık hem 1x Sat hem de 'Tümünü Sat' butonları aktif. Çantadaki tüm ekinler, meyveler, bal ve lezzetler tek tıkla altın kazandırır.",
+    "Ticaret Treni ve İstasyon İskele Algılayıcı: Ray hattı ve istasyon peronunun tamamına dokunmatik algılama eklendi, tren geldiğinde doğrudan ticaret menüsü açılır.",
+    "İnşa Modu Minyatür Model Düzeltmeleri: Fıçı, sandık, saman balyası, çuval, kargo paketi, kazan, kamp ateşi, çan ve sokak feneri modelleri gerçek boyutlarına (1.60 - 1.85x) büyütüldü.",
+    "Eğitim Bildirimi Konum İyileştirmesi: Bildirim toast kutucuğu eğitim adımlarının altına dinamik olarak yerleştirildi, yazılar asla üst üste binmez."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",

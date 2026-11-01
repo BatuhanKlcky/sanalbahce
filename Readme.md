@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.6.7%20(Build%2052)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.6.8%20(Build%2053)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -45,18 +45,26 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 
 ## 🎮 Öne Çıkan Özellikler
 
-### 🧑‍🌾 1. Akıllı Çiftçi Komuta & İş Bölümü (v3.6.7)
+### ⚡ 1. Hızlı Dokunmatik Ekim, Hasat & Pazar (v3.6.8)
+* **Gecikmesiz Anında Dokunmatik Ekim:** Tohum seçip tarlaya dokunduğunuzda ekin hemen yerleşir; olgunlaşan ekinlere veya susamış mahsullere dokunulduğunda anında hasat edilir ve sulanır.
+* **Genişletilmiş Meyve Ağacı Hasadı:** Ağaç silkeleme ve meyve toplama etkileşim mesafesi 4.8 metreye genişletildi, ağaç dallarına, sepetine veya gövdesine dokunulduğunda sepet anında dolar.
+* **Köy Pazarı & Toplu Satış:** Köy tezgâhında artık hem 1x Sat hem de 'Tümünü Sat' butonları aktif. Çantadaki tüm ekinler, meyveler, bal ve lezzetler tek tıkla altın kazandırır.
+* **Ticaret Treni ve İstasyon İskele Algılayıcı:** Ray hattı ve istasyon peronunun tamamına dokunmatik algılama eklendi, tren geldiğinde doğrudan ticaret menüsü açılır.
+* **İnşa Modu Minyatür Model Düzeltmeleri:** Fıçı, sandık, saman balyası, çuval, kargo paketi, kazan, kamp ateşi, çan ve sokak feneri modelleri gerçek boyutlarına (1.60 - 1.85x) büyütüldü.
+* **Dinamik Eğitim Bildirimleri:** Bildirim toast kutucuğu eğitim adımlarının altına yerleştirilerek ekran metinlerinin çakışması engellendi.
+
+### 🧑‍🌾 2. Akıllı Çiftçi Komuta & İş Bölümü
 * **Oyuncu Emirli Hareket:** Çiftçi yardımcıları (Mehmet & Ayşe) artık rastgele hareket etmez; tamamen sizin verdiğiniz emirler doğrultusunda ayrı ayrı tarlalara koşar.
 * **Canlı Baş Üstü Durum Levhaları:** Çiftçilerin ne yaptığı başlarının üzerindeki 3D panolardan anlık olarak okunur (`Tohum Ekiyor 🌱`, `Sulamaya Gidiyor 💧`, `Hasada Gidiyor 🌾`, `Emir Bekliyor 🧑‍🌾`).
 * **Otomatik Görev Sırası (Queue):** Peş peşe verilen işler sıraya alınır; işi biten çiftçi kulübeye dönmeden doğrudan sıradaki tarlaya yönelir.
 
-### 💧 2. Toprak Nemi Mekaniği & Dengeli Tarım Süreleri (v3.6.7)
+### 💧 2. Toprak Nemi Mekaniği & Dengeli Tarım Süreleri (v3.6.8)
 * **Toprak Kuruma Zamanlayıcısı:** Ekinlerin toprağı zamanla kurur ve üzerinde mavi `💧 Su Bekliyor` rozeti belirir.
 * **Sulama ile 2x Hızlı Büyüme:** Sulanan ekinler parıldayan su damlacıkları eşliğinde 2 kat daha hızlı büyür.
 * **Bereketli Yağmur:** Yağmurlu günlerde doğa tarlalarınızdaki tüm ekinleri otomatik olarak can suyuyla sular.
 * **Gerçekçi Süre Dengesi:** Ekinler 2 dk ile 35 dk arasında kademeli sürelerle büyür ve yüksek altın/XP kazandırır.
 
-### 🏛️ 3. Büyük Mimari Ölçek Revizyonu (v3.6.7)
+### 🏛️ 3. Büyük Mimari Ölçek Revizyonu (v3.6.8)
 * **İnsan Oranlarına Uyumlu Binalar:** İnşa modundaki köy hanı, ahşap konaklar, değirmen, demirci ve ahırlar gerçekçi mimari oranlara (`1.45 - 1.80x`) yükseltildi.
 * **Gerçekçi Bahçe Çitleri:** Çitler ve taş bahçe duvarları bel hizasına (`1.20x`) çıkarıldı.
 * **Dinamik İnşa Halkası:** Yerleştirilen yapının taban alanına göre otomatik genişleyen zemin yerleşim çemberi.
