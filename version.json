@@ -1,13 +1,14 @@
 {
-  "version": "3.7.0",
-  "versionCode": 55,
+  "version": "3.7.1",
+  "versionCode": 56,
   "releaseDate": "2026-11-01",
-  "title": "PBR Toprak, Kaya Dokuları ve Doğal Işık Kırılmaları Güncellemesi",
+  "title": "Organik Renk Tonu Varyasyonları ve Doğal Çevre Yumuşak Geçişleri Güncellemesi",
   "notes": [
-    "PBR Fiziksel Materyal Sistemi: Düz plastik boya görünümü yerine toprak, tarla, kaya ve taşlara yüksek çözünürlüklü Normal Map (pürüz/çatlak kabartması) ve Roughness (mikro matlık/parlaklık varyasyonu) haritaları eklendi.",
-    "Taş Kenarlarında Işık Sekmesi (Fresnel Rim Lighting): Güneş ve gökyüzü ışığının taşların, kayaların ve arnavut kaldırımı taşlarının keskin kenarlarından ve kıvrımlarından hafifçe sekmesi sağlandı.",
-    "Doğal Tarla & Toprak Dokusu: Çiftlik parsellerinde granüllü toprak kırıntıları, derin gözenekler ve nem varyasyonu içeren PBR zemin sistemi devreye alındı.",
-    "Köy Yolları & Taş Patikalar: Arnavut kaldırımı köy yollarında taş kabartmaları, derz aralıkları ve yürüyüş aşınması pürüzlülük dengesi PBR standartlarına yükseltildi."
+    "Rastgele Ton (Hue/Brightness) Varyasyonları: Aynı çimen ve taş modelinin kopyalanmış gibi durmasını önlemek için, her bir taş ve çimen objesine dünya koordinatı hash fonksiyonu üzerinden shader seviyesinde hafif organik Hue (ton), Doygunluk ve Parlaklık değişimleri eklendi.",
+    "Doğal Çevre Uyumu (Soft Blending): Gölet kenarları, köy pazarı ve tarlalar arasındaki keskin geometrik poligon geçişleri organik gürültü maskelemesiyle yumuşatılarak toprağın bitkilerle doğal biçimde kaynaşması sağlandı.",
+    "Gölet Kıyı Kum & Alüvyon Geçişi: Çimenlik arazi gölet kıyısına yaklaştıkça nehir kumu ve nemli alüvyon zeminine yumuşak bir dither/feather gradyanı ile geçiş yapar.",
+    "Pazar & Köy Meydanı Ayak İzi Toprağı: Köy meydanı, çeşme ve pazar tezgâhı etrafında ayakla çiğnenmiş köy toprağı dokusu ve yabani yonca desenleri doğallıkla zemine işlendi.",
+    "Tarla & Bahçe Ekim Alanı Zemin Kaynaşması: Çiftlik tarla yataklarının kenarlarında çapa izleri, dökülen organik gübreli toprak ve taze çimen saçakları organik sınırlarla birleştirildi."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",

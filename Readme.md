@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.7.0%20(Build%2055)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.7.1%20(Build%2056)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -45,7 +45,12 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 
 ## 🎮 Öne Çıkan Özellikler
 
-### 🪨 1. PBR Doğal Toprak & Taş Dokuları, Çatlaklar ve Işık Kırılmaları (v3.7.0)
+### 🌿 1. Rastgele Ton Varyasyonları & Doğal Çevre Uyumu (v3.7.1)
+* **Shader Seviyesinde Organik Renk Varyasyonları:** Çimen ve taş modellerine dünya koordinatı bazlı deterministik hash üzerinden Hue (ton), Doygunluk ve Parlaklık değişimleri atanarak hiçbir modelin yapay bir kopya gibi durmaması sağlandı.
+* **Doğal Çevre Uyumu & Yumuşak Zemin Geçişleri:** Gölet kıyıları, köy pazarı ve tarlalar arasındaki keskin poligon hatları organik gürültü maskelemesiyle eritilerek toprağın bitkiler ve kumla kusursuz bir şekilde kaynaşması sağlandı.
+* **Kıyı & Meydan Dokusu:** Gölet çevresinde kumsal ve nehir silti saçakları, köy meydanında çiğnenmiş toprak ayak izleri çim zemine doğal olarak yedirildi.
+
+### 🪨 2. PBR Doğal Toprak & Taş Dokuları, Çatlaklar ve Işık Kırılmaları (v3.7.0)
 * **Gerçekçi PBR Fiziksel Materyaller:** Düz plastik renk boyası görünümü tamamen kaldırılarak toprak, tarlalar, kayalar ve taşlara yüksek çözünürlüklü Normal Map (çatlak/pürüz kabartması) ve Roughness (matlık/parlaklık varyasyonu) haritaları entegre edildi.
 * **Taş Kenarlarında Işık Sekmesi (Fresnel Rim Lighting):** Güneş ve gökyüzü ışığının taşların, kayaların, arnavut kaldırımı yolların ve bordürlerin keskin kenarlarından ve kıvrımlarından hafifçe sekmesi sağlanarak derinlik ve gerçekçilik katbekat artırıldı.
 * **Organik Tarla & Toprak Dokusu:** Çiftlik tarlaları artık nemli gözenekler, kırıntı kabartmaları ve doğal Ambient Occlusion derinliğiyle zenginleşti.
