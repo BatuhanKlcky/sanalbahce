@@ -1,14 +1,15 @@
 {
-  "version": "3.7.1",
-  "versionCode": 56,
+  "version": "3.7.2",
+  "versionCode": 57,
   "releaseDate": "2026-11-01",
-  "title": "Organik Renk Tonu Varyasyonları ve Doğal Çevre Yumuşak Geçişleri Güncellemesi",
+  "title": "Gerçekçi 3D Gölet Balıkçılığı & Çiftlik Evi İçi Dekorasyonu",
   "notes": [
-    "Rastgele Ton (Hue/Brightness) Varyasyonları: Aynı çimen ve taş modelinin kopyalanmış gibi durmasını önlemek için, her bir taş ve çimen objesine dünya koordinatı hash fonksiyonu üzerinden shader seviyesinde hafif organik Hue (ton), Doygunluk ve Parlaklık değişimleri eklendi.",
-    "Doğal Çevre Uyumu (Soft Blending): Gölet kenarları, köy pazarı ve tarlalar arasındaki keskin geometrik poligon geçişleri organik gürültü maskelemesiyle yumuşatılarak toprağın bitkilerle doğal biçimde kaynaşması sağlandı.",
-    "Gölet Kıyı Kum & Alüvyon Geçişi: Çimenlik arazi gölet kıyısına yaklaştıkça nehir kumu ve nemli alüvyon zeminine yumuşak bir dither/feather gradyanı ile geçiş yapar.",
-    "Pazar & Köy Meydanı Ayak İzi Toprağı: Köy meydanı, çeşme ve pazar tezgâhı etrafında ayakla çiğnenmiş köy toprağı dokusu ve yabani yonca desenleri doğallıkla zemine işlendi.",
-    "Tarla & Bahçe Ekim Alanı Zemin Kaynaşması: Çiftlik tarla yataklarının kenarlarında çapa izleri, dökülen organik gübreli toprak ve taze çimen saçakları organik sınırlarla birleştirildi."
+    "Gerçekçi 3D Gölet Balıkçılığı Deneyimi: Düz buton basma mekaniği yerine parmak jestiyle geriye çekip göle fırlatma (gesture casting), esneyen dinamik olta, suda yüzen fiziksel şamandıra ve eşmerkezli su dalgaları.",
+    "Su Altı Balık Silüeti & Tasmala Hissi: Şamandıra etrafında yüzen gölge balık silüeti, ani batma anında yukarı kaydırarak tasmala refleksi ve su sıçrama efektleri.",
+    "Etkileşimli Pirinç Balıkçı Makarayı Çevirme: Ekranda parmağı dairesel çevirerek sarılan nostaljik makara, gerçekçi tıkırtı (ratchet click) sesleri ve balık çırpınışına karşı misina gerilim mücadelesi.",
+    "Havaya Sıçrayan 3D Balık & Trofe Kaydı: Yakalanan balığın boy (cm), ağırlık (kg) ve nadirlik özellikleri otomatik olarak çiftlik evi trofe duvarına kaydedilir.",
+    "Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu: Çiftlik evinin kapısından içeri girilebilen, taş şömineli, çıtırdayan odunlu ve taze demlenen çiftlik çaylı sıcak 3D oda.",
+    "Oda Zemin Halısı Özelleştirme: Anadolu Dokuma Kilimi, Bohem Peluş Yün Halı ve Doğal Ayı Postu arasında anında geçiş ve kişiselleştirme."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",

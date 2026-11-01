@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.7.1%20(Build%2056)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.7.2%20(Build%2057)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -45,7 +45,25 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 
 ## 🎮 Öne Çıkan Özellikler
 
-### 🌿 1. Rastgele Ton Varyasyonları & Doğal Çevre Uyumu (v3.7.1)
+### 🎣 1. Gerçekçi 3D Gölet Balıkçılığı & Çekme Mekaniği (v3.7.2)
+* **Dokunsal Jestle Atış (Gesture Casting):** Düz buton basma mekaniği kaldırıldı; ekranda parmağınızı geriye çekerek kamış gerilimini ayarlayın, bırakarak şamandırayı göle fırlatın!
+* **Dinamik Bükülen 3D Olta Kamışı:** Bambu/karbon olta kamışı atış yaparken geriye, balık çırpınırken öne ve aşağıya fiziksel eğrilikle bükülür.
+* **Fiziksel Yüzen Şamandıra & Su Halkaları:** Klasik kırmızı-beyaz mantar şamandıra göl suyunda sinüs dalgalarıyla salınır ve etrafına genişleyen eşmerkezli su halkaları (ripples) yayar.
+* **Su Altı Balık Silüeti & Tasmala Hissi:** Şamandıranın etrafında yüzen gölge balık silüeti yemi yoklar; aniden batınca yukarı kaydırarak veya dokunarak tasmala refleksi verilir.
+* **Etkileşimli Pirinç Balıkçı Makarayı Çevirme (Interactive Brass Reel):** Ekranda parmağınızı dairesel çevirerek sardığınız nostaljik pirinç makara, her turda mekanik tıkırtı (ratchet click) sesleri ve mikro-titreşimler üretir.
+* **Misina Gerilim Mücadelesi:** Balığın ani çırpınışlarına karşı gerilim ibresini yeşil alanda tutarak misinayı koparmadan kıyıya çekin.
+* **Havaya Sıçrayan 3D Balık:** Kıyıya varıldığında su damlacıkları saçarak havaya sıçrayan balık kutlama kartında boy (cm) ve ağırlık (kg) değerleriyle sergilenir.
+
+### 🏡 2. Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu (v3.7.2)
+* **3D Çiftlik Evi İçi:** Çiftlik evinin kapısına dokunulduğunda doğrudan sıcacık 3D oda perspektifine girilir.
+* **Çıtırdayan Taş Şömine:** İçinde meşe odunları yanan, yukarıya kıvılcımlar saçan ve odanın içini aydınlatan titrek ışıklı şömine. Şömineye odun atarak +20 Enerji kazanın.
+* **Kuzine & Taze Çiftlik Çayı:** Kuzinenin üzerinde fokurdayan bakır çaydanlıktan taze demlenen çiftlik çayını yudumlayarak +15 Enerji ve +25 XP kazanın.
+* **Nostaljik Pikap (Gramofon):** Dönen siyah plağı ve pirinç borusuyla akustik köy ezgilerini dinleyin.
+* **Sallanan Sandalye:** Sürekli ahenkle salınan ahşap koltukta dinlenin.
+* **Balıkçı Trofe Duvarı:** Göletten yakaladığınız en büyük Alabalık, Sazan ve Altın Sazan rekorları şömine üstündeki ahşap plakalarda gururla sergilenir.
+* **Oda Halısı Özelleştirme:** Anadolu Dokuma Kilimi, Bohem Peluş Yün Halı ve Doğal Ayı Postu arasında anında geçiş yapın; tercihiniz oyuna kaydedilir.
+
+### 🌿 3. Rastgele Ton Varyasyonları & Doğal Çevre Uyumu (v3.7.1)
 * **Shader Seviyesinde Organik Renk Varyasyonları:** Çimen ve taş modellerine dünya koordinatı bazlı deterministik hash üzerinden Hue (ton), Doygunluk ve Parlaklık değişimleri atanarak hiçbir modelin yapay bir kopya gibi durmaması sağlandı.
 * **Doğal Çevre Uyumu & Yumuşak Zemin Geçişleri:** Gölet kıyıları, köy pazarı ve tarlalar arasındaki keskin poligon hatları organik gürültü maskelemesiyle eritilerek toprağın bitkiler ve kumla kusursuz bir şekilde kaynaşması sağlandı.
 * **Kıyı & Meydan Dokusu:** Gölet çevresinde kumsal ve nehir silti saçakları, köy meydanında çiğnenmiş toprak ayak izleri çim zemine doğal olarak yedirildi.
