@@ -1,15 +1,13 @@
 {
-  "version": "3.6.8",
-  "versionCode": 53,
+  "version": "3.6.9",
+  "versionCode": 54,
   "releaseDate": "2026-11-01",
-  "title": "Hızlı Dokunmatik Ekim, Meyve Hasadı, Köy Pazarı ve İstasyon Güncellemesi",
+  "title": "Taş Fırın & Mutfak Pişirme Ustalığı ve Köy Ziyareti Güncellemesi",
   "notes": [
-    "Anında Dokunmatik Ekim ve Hasat: Tohum seçip tarlaya dokunduğunuzda ekin gecikmesiz hemen yerleşir; olgunlaşan veya susamış ekinlere dokunulduğunda anında hasat edilir ve sulanır.",
-    "Genişletilmiş Meyve Ağacı Hasadı: Ağaç silkeleme ve meyve toplama etkileşim mesafesi 4.8 metreye genişletildi, ağaç dallarına, sepetine veya gövdesine dokunulduğunda anında meyve toplanır.",
-    "Köy Pazarı & Toplu Satış: Köy tezgâhında artık hem 1x Sat hem de 'Tümünü Sat' butonları aktif. Çantadaki tüm ekinler, meyveler, bal ve lezzetler tek tıkla altın kazandırır.",
-    "Ticaret Treni ve İstasyon İskele Algılayıcı: Ray hattı ve istasyon peronunun tamamına dokunmatik algılama eklendi, tren geldiğinde doğrudan ticaret menüsü açılır.",
-    "İnşa Modu Minyatür Model Düzeltmeleri: Fıçı, sandık, saman balyası, çuval, kargo paketi, kazan, kamp ateşi, çan ve sokak feneri modelleri gerçek boyutlarına (1.60 - 1.85x) büyütüldü.",
-    "Eğitim Bildirimi Konum İyileştirmesi: Bildirim toast kutucuğu eğitim adımlarının altına dinamik olarak yerleştirildi, yazılar asla üst üste binmez."
+    "Taş Fırın & Mutfak Pişirme Mini Oyunu: Hamur yoğurma ritmi ve taş fırın altın kıvam ibresi ile leziz yemekler pişirme deneyimi eklendi. Kusursuz pişen yemekler 2 kat verim ve ek XP/altın kazandırır.",
+    "Köy Gezisi & Bahçe Ziyareti (Social Hub): Komşu köylülerin ve örnek çiftliklerin (Muhtar Rıza, Çiçekçi Elif, Usta Değirmenci, Zen Bahçesi) arazilerini gezme ve posta kutularına bereket hediyesi bırakma sistemi eklendi.",
+    "Bahçe Kodu Paylaşımı & İçe Aktarma: Kendi bahçe tasarımınızı tek tıkla şifreli kod olarak kopyalayabilir veya arkadaşınızın bahçe kodunu yapıştırarak dünyasını birebir ziyaret edebilirsiniz.",
+    "Geri Dönüş & Veri Güvenliği: Misafirlik tamamlandığında tek dokunuşla kendi çiftliğinize dönebilir, çiftliğiniz ve ekinleriniz eksiksiz korunur."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",

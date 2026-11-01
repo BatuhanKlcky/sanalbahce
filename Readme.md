@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.6.8%20(Build%2053)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.6.9%20(Build%2054)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -45,7 +45,19 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 
 ## 🎮 Öne Çıkan Özellikler
 
-### ⚡ 1. Hızlı Dokunmatik Ekim, Hasat & Pazar (v3.6.8)
+### 🥖 1. Taş Fırın & Mutfak Pişirme Ustalığı Mini Oyunu (v3.6.9)
+* **İnteraktif Hamur Yoğurma & Çırpma:** Köy mutfağında tarifleri hazırlarken dokunmatik ritmik yoğurma sistemi devreye girer; hamur hazır olunca taş fırına sürülür.
+* **Taş Fırın Altın Kıvam İbresi:** Salınan sıcaklık ibresini 'Altın Kıvam' bölgesinde yakalayıp fırından çekerek kusursuz çıtırlıkta yemekler pişirin.
+* **Şef Yıldızları & 2x Ödül:** ⭐⭐⭐ Kusursuz Şef derecesi alan yemekler 2 kat ürün adedi, ekstra XP ve altın bonusu kazandırır.
+* **Hızlı Pişir Kolaylığı:** Vakti olmayan oyuncular için tek tıkla doğrudan pişirme ("⚡ Hızlı Pişir") seçeneği korunmuştur.
+
+### 🏡 2. Köy Gezisi & Bahçe Ziyareti (Social Hub)
+* **Örnek Köy Çiftlikleri:** Muhtar Rıza, Çiçekçi Elif, Usta Değirmenci ve Huzur Vadisi gibi zengin yerleşimli çiftlikleri 3D olarak gezin ve ilham alın.
+* **Posta Kutusu Bereket Hediyesi:** Ziyaret edilen çiftliğin posta kutusuna tek dokunuşla bereket hediyesi bırakarak hem dostluk kurun hem de +50 🟡 altın ve XP kazanın.
+* **Bahçe Kodu Paylaşımı & İçe Aktarma:** Kendi çiftlik yerleşiminizi tek tıkla şifreli metin kodu olarak kopyalayabilir, arkadaşlarınızla paylaşabilir veya onların kodunu yapıştırarak bahçelerini ziyaret edebilirsiniz.
+* **Kaygısız Geri Dönüş:** Geziyi tamamlayıp kendi bahçenize döndüğünüzde mevcut tüm binalarınız, hayvanlarınız ve tarlalarınız eksiksiz korunur.
+
+### ⚡ 3. Hızlı Dokunmatik Ekim, Hasat & Pazar (v3.6.8)
 * **Gecikmesiz Anında Dokunmatik Ekim:** Tohum seçip tarlaya dokunduğunuzda ekin hemen yerleşir; olgunlaşan ekinlere veya susamış mahsullere dokunulduğunda anında hasat edilir ve sulanır.
 * **Genişletilmiş Meyve Ağacı Hasadı:** Ağaç silkeleme ve meyve toplama etkileşim mesafesi 4.8 metreye genişletildi, ağaç dallarına, sepetine veya gövdesine dokunulduğunda sepet anında dolar.
 * **Köy Pazarı & Toplu Satış:** Köy tezgâhında artık hem 1x Sat hem de 'Tümünü Sat' butonları aktif. Çantadaki tüm ekinler, meyveler, bal ve lezzetler tek tıkla altın kazandırır.
