@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v3.7.2%20(Build%2057)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v4.0.0%20(Build%2057)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -45,7 +45,7 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 
 ## 🎮 Öne Çıkan Özellikler
 
-### 🎣 1. Gerçekçi 3D Gölet Balıkçılığı & Çekme Mekaniği (v3.7.2)
+### 🎣 1. Gerçekçi 3D Gölet Balıkçılığı & Çekme Mekaniği (v4.0.0)
 * **Dokunsal Jestle Atış (Gesture Casting):** Düz buton basma mekaniği kaldırıldı; ekranda parmağınızı geriye çekerek kamış gerilimini ayarlayın, bırakarak şamandırayı göle fırlatın!
 * **Dinamik Bükülen 3D Olta Kamışı:** Bambu/karbon olta kamışı atış yaparken geriye, balık çırpınırken öne ve aşağıya fiziksel eğrilikle bükülür.
 * **Fiziksel Yüzen Şamandıra & Su Halkaları:** Klasik kırmızı-beyaz mantar şamandıra göl suyunda sinüs dalgalarıyla salınır ve etrafına genişleyen eşmerkezli su halkaları (ripples) yayar.
@@ -54,7 +54,7 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
 * **Misina Gerilim Mücadelesi:** Balığın ani çırpınışlarına karşı gerilim ibresini yeşil alanda tutarak misinayı koparmadan kıyıya çekin.
 * **Havaya Sıçrayan 3D Balık:** Kıyıya varıldığında su damlacıkları saçarak havaya sıçrayan balık kutlama kartında boy (cm) ve ağırlık (kg) değerleriyle sergilenir.
 
-### 🏡 2. Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu (v3.7.2)
+### 🏡 2. Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu (v4.0.0)
 * **3D Çiftlik Evi İçi:** Çiftlik evinin kapısına dokunulduğunda doğrudan sıcacık 3D oda perspektifine girilir.
 * **Çıtırdayan Taş Şömine:** İçinde meşe odunları yanan, yukarıya kıvılcımlar saçan ve odanın içini aydınlatan titrek ışıklı şömine. Şömineye odun atarak +20 Enerji kazanın.
 * **Kuzine & Taze Çiftlik Çayı:** Kuzinenin üzerinde fokurdayan bakır çaydanlıktan taze demlenen çiftlik çayını yudumlayarak +15 Enerji ve +25 XP kazanın.

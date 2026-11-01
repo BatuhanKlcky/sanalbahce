@@ -1,9 +1,10 @@
 {
-  "version": "3.7.2",
+  "version": "4.0.0",
   "versionCode": 57,
   "releaseDate": "2026-11-01",
-  "title": "Gerçekçi 3D Gölet Balıkçılığı & Çiftlik Evi İçi Dekorasyonu",
+  "title": "Sanal Bahçe v4.0.0 Büyük Dönüm Noktası - Gerçekçi 3D Gölet Balıkçılığı & Çiftlik Evi İçi",
   "notes": [
+    "Sanal Bahçe v4.0.0 Büyük Sürüm: Oyun motoru, render boru hattı, fiziksel balıkçılık simülasyonu ve oda içi yaşam alanlarıyla devrim niteliğinde bir dönüm noktası.",
     "Gerçekçi 3D Gölet Balıkçılığı Deneyimi: Düz buton basma mekaniği yerine parmak jestiyle geriye çekip göle fırlatma (gesture casting), esneyen dinamik olta, suda yüzen fiziksel şamandıra ve eşmerkezli su dalgaları.",
     "Su Altı Balık Silüeti & Tasmala Hissi: Şamandıra etrafında yüzen gölge balık silüeti, ani batma anında yukarı kaydırarak tasmala refleksi ve su sıçrama efektleri.",
     "Etkileşimli Pirinç Balıkçı Makarayı Çevirme: Ekranda parmağı dairesel çevirerek sarılan nostaljik makara, gerçekçi tıkırtı (ratchet click) sesleri ve balık çırpınışına karşı misina gerilim mücadelesi.",
