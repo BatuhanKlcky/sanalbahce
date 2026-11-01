@@ -1,13 +1,13 @@
 {
-  "version": "3.6.9",
-  "versionCode": 54,
+  "version": "3.7.0",
+  "versionCode": 55,
   "releaseDate": "2026-11-01",
-  "title": "Taş Fırın & Mutfak Pişirme Ustalığı ve Köy Ziyareti Güncellemesi",
+  "title": "PBR Toprak, Kaya Dokuları ve Doğal Işık Kırılmaları Güncellemesi",
   "notes": [
-    "Taş Fırın & Mutfak Pişirme Mini Oyunu: Hamur yoğurma ritmi ve taş fırın altın kıvam ibresi ile leziz yemekler pişirme deneyimi eklendi. Kusursuz pişen yemekler 2 kat verim ve ek XP/altın kazandırır.",
-    "Köy Gezisi & Bahçe Ziyareti (Social Hub): Komşu köylülerin ve örnek çiftliklerin (Muhtar Rıza, Çiçekçi Elif, Usta Değirmenci, Zen Bahçesi) arazilerini gezme ve posta kutularına bereket hediyesi bırakma sistemi eklendi.",
-    "Bahçe Kodu Paylaşımı & İçe Aktarma: Kendi bahçe tasarımınızı tek tıkla şifreli kod olarak kopyalayabilir veya arkadaşınızın bahçe kodunu yapıştırarak dünyasını birebir ziyaret edebilirsiniz.",
-    "Geri Dönüş & Veri Güvenliği: Misafirlik tamamlandığında tek dokunuşla kendi çiftliğinize dönebilir, çiftliğiniz ve ekinleriniz eksiksiz korunur."
+    "PBR Fiziksel Materyal Sistemi: Düz plastik boya görünümü yerine toprak, tarla, kaya ve taşlara yüksek çözünürlüklü Normal Map (pürüz/çatlak kabartması) ve Roughness (mikro matlık/parlaklık varyasyonu) haritaları eklendi.",
+    "Taş Kenarlarında Işık Sekmesi (Fresnel Rim Lighting): Güneş ve gökyüzü ışığının taşların, kayaların ve arnavut kaldırımı taşlarının keskin kenarlarından ve kıvrımlarından hafifçe sekmesi sağlandı.",
+    "Doğal Tarla & Toprak Dokusu: Çiftlik parsellerinde granüllü toprak kırıntıları, derin gözenekler ve nem varyasyonu içeren PBR zemin sistemi devreye alındı.",
+    "Köy Yolları & Taş Patikalar: Arnavut kaldırımı köy yollarında taş kabartmaları, derz aralıkları ve yürüyüş aşınması pürüzlülük dengesi PBR standartlarına yükseltildi."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
