@@ -1,16 +1,15 @@
 {
-  "version": "4.0.0",
-  "versionCode": 57,
+  "version": "1.0.0",
+  "versionCode": 58,
   "releaseDate": "2026-11-01",
-  "title": "Sanal Bahçe v4.0.0 Büyük Dönüm Noktası - Gerçekçi 3D Gölet Balıkçılığı & Çiftlik Evi İçi",
+  "title": "Sanal Bahçe v1.0.0 - Resmi Google Play Prodüksiyon Yayını",
   "notes": [
-    "Sanal Bahçe v4.0.0 Büyük Sürüm: Oyun motoru, render boru hattı, fiziksel balıkçılık simülasyonu ve oda içi yaşam alanlarıyla devrim niteliğinde bir dönüm noktası.",
+    "Sanal Bahçe v1.0.0 Resmi Google Play Yayını: Kapalı test süreci başarıyla tamamlandı ve oyun artık herkese açık prodüksiyon sürümünde!",
+    "3D Doğal Çiftlik & Köy Hayatı Simülasyonu: Tarla ekimi, sulama, hayvan bakımı (inek, tavuk, at, koyun), taş fırında ekmek/lezzet pişirme ve köy pazarı ticareti.",
     "Gerçekçi 3D Gölet Balıkçılığı Deneyimi: Düz buton basma mekaniği yerine parmak jestiyle geriye çekip göle fırlatma (gesture casting), esneyen dinamik olta, suda yüzen fiziksel şamandıra ve eşmerkezli su dalgaları.",
-    "Su Altı Balık Silüeti & Tasmala Hissi: Şamandıra etrafında yüzen gölge balık silüeti, ani batma anında yukarı kaydırarak tasmala refleksi ve su sıçrama efektleri.",
-    "Etkileşimli Pirinç Balıkçı Makarayı Çevirme: Ekranda parmağı dairesel çevirerek sarılan nostaljik makara, gerçekçi tıkırtı (ratchet click) sesleri ve balık çırpınışına karşı misina gerilim mücadelesi.",
-    "Havaya Sıçrayan 3D Balık & Trofe Kaydı: Yakalanan balığın boy (cm), ağırlık (kg) ve nadirlik özellikleri otomatik olarak çiftlik evi trofe duvarına kaydedilir.",
-    "Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu: Çiftlik evinin kapısından içeri girilebilen, taş şömineli, çıtırdayan odunlu ve taze demlenen çiftlik çaylı sıcak 3D oda.",
-    "Oda Zemin Halısı Özelleştirme: Anadolu Dokuma Kilimi, Bohem Peluş Yün Halı ve Doğal Ayı Postu arasında anında geçiş ve kişiselleştirme."
+    "Etkileşimli Pirinç Balıkçı Makarayı Çevirme: Ekranda parmağı dairesel çevirerek sarılan nostaljik makara, mekanik tıkırtı (ratchet click) sesleri ve balık çırpınışına karşı misina gerilim mücadelesi.",
+    "Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu: Çiftlik evinin kapısından içeri girilebilen, taş şömineli, çıtırdayan odunlu, taze demlenen çiftlik çaylı ve trofe duvarlı sıcak 3D oda.",
+    "Gelişmiş PBR Materyal ve Işık Kırılmaları: Toprak ve kayalarda çatlak derinlikleri, çimenlerde doğal klorofil ton varyasyonları ve kenar ışık sekmesi."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
