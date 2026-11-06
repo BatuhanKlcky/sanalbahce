@@ -6,7 +6,7 @@
 
   ### 3D Huzurlu Çiftlik, Otantik Köy Hayatı ve Doğa Simülasyonu
 
-  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v1.0.0%20(Build%2058)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
+  [![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v1.6.0%20(Build%2061)-34d399?style=for-the-badge&logo=android)](https://batuhanklcky.github.io/sanalbahce/anasayfa.html)
   [![Oyun Motoru](https://img.shields.io/badge/Motor-Godot%20Engine%204.x-478cbf?style=for-the-badge&logo=godotengine&logoColor=white)](https://godotengine.org)
   [![Platform](https://img.shields.io/badge/Platform-Android%20Native-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://play.google.com)
   [![Stüdyo](https://img.shields.io/badge/St%C3%BCdyo-77x%20Technologies-f59e0b?style=for-the-badge)](https://batuhanklcky.github.io/77xTechnology/)
@@ -158,32 +158,32 @@ Reklam baskısından ve yapay süre kısıtlamalarından uzak; tohumdan hasada, 
   <table>
     <tr>
       <td width="50%">
-        <img src="img/bazaar.png" alt="Otantik Köy Pazarı" style="border-radius: 12px;" />
-        <p align="center"><b>🏪 Canlı Köy Pazarı & Çarşısı</b></p>
+        <img src="img/01_magaza_ciftlik_hayati.png" alt="Gerçek 3B Çiftlik Deneyimi" style="border-radius: 12px;" />
+        <p align="center"><b>🌱 Seviye 1–100 Çiftlik Hayatı</b></p>
       </td>
       <td width="50%">
-        <img src="img/lake-boat.png" alt="Doğal Gölet ve Kayık" style="border-radius: 12px;" />
-        <p align="center"><b>🎣 Organik Gölet & Balıkçı İskelesi</b></p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%">
-        <img src="img/dock-ui.png" alt="Modern Arayüz" style="border-radius: 12px;" />
-        <p align="center"><b>💎 Kristal Netliğinde Responsive Arayüz</b></p>
-      </td>
-      <td width="50%">
-        <img src="img/kumes-hayvanlar.png" alt="Kümes ve Hayvanlar" style="border-radius: 12px;" />
-        <p align="center"><b>🐔 Canlı Kümes & Çiftlik Hayvanları</b></p>
+        <img src="img/02_magaza_sevimli_hayvanlar.png" alt="Sevimli Çiftlik Hayvanları" style="border-radius: 12px;" />
+        <p align="center"><b>🐄 Sevimli Hayvanlar & 3B Dostlar</b></p>
       </td>
     </tr>
     <tr>
       <td width="50%">
-        <img src="img/ciftlik-degirmen.png" alt="Köy Değirmeni" style="border-radius: 12px;" />
-        <p align="center"><b>🌾 Çalışan Yel Değirmeni & Tarlalar</b></p>
+        <img src="img/03_magaza_degirmen_ve_firin.png" alt="6 Üretim Atölyesi ve Fırın" style="border-radius: 12px;" />
+        <p align="center"><b>🏭 6 Üretim Atölyesi & 30 Tarif</b></p>
       </td>
       <td width="50%">
-        <img src="img/gece-ates.png" alt="Gece Kamp Ateşi" style="border-radius: 12px;" />
-        <p align="center"><b>🔥 Meydan Kamp Ateşi & Gece Işıkları</b></p>
+        <img src="img/04_magaza_golet_ve_balikcilik.png" alt="Gölet ve Balıkçılık" style="border-radius: 12px;" />
+        <p align="center"><b>🎣 3B Gölet & Etkileşimli Balıkçılık</b></p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%">
+        <img src="img/05_magaza_koy_pazari.png" alt="Otantik Köy Pazarı" style="border-radius: 12px;" />
+        <p align="center"><b>🏪 3B Köy Pazarı & Gazete</b></p>
+      </td>
+      <td width="50%">
+        <img src="img/06_magaza_bahce_ve_ciftlik_evi.png" alt="Çiftlik Evi ve Bahçe Tasarımı" style="border-radius: 12px;" />
+        <p align="center"><b>🏡 Çiftlik Evi & Komşu Ziyareti</b></p>
       </td>
     </tr>
   </table>

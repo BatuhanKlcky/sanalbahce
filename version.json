@@ -1,15 +1,14 @@
 {
-  "version": "1.0.0",
-  "versionCode": 58,
-  "releaseDate": "2026-11-01",
-  "title": "Sanal Bahçe v1.0.0 - Resmi Google Play Prodüksiyon Yayını",
+  "version": "1.6.0",
+  "versionCode": 61,
+  "releaseDate": "2026-11-06",
+  "title": "Sanal Bahçe v1.6.0 - Seviye 100 & Büyük Köy Güncellemesi!",
   "notes": [
-    "Sanal Bahçe v1.0.0 Resmi Google Play Yayını: Kapalı test süreci başarıyla tamamlandı ve oyun artık herkese açık prodüksiyon sürümünde!",
-    "3D Doğal Çiftlik & Köy Hayatı Simülasyonu: Tarla ekimi, sulama, hayvan bakımı (inek, tavuk, at, koyun), taş fırında ekmek/lezzet pişirme ve köy pazarı ticareti.",
-    "Gerçekçi 3D Gölet Balıkçılığı Deneyimi: Düz buton basma mekaniği yerine parmak jestiyle geriye çekip göle fırlatma (gesture casting), esneyen dinamik olta, suda yüzen fiziksel şamandıra ve eşmerkezli su dalgaları.",
-    "Etkileşimli Pirinç Balıkçı Makarayı Çevirme: Ekranda parmağı dairesel çevirerek sarılan nostaljik makara, mekanik tıkırtı (ratchet click) sesleri ve balık çırpınışına karşı misina gerilim mücadelesi.",
-    "Huzurlu Çiftlik Evi İçi & Oda Dekorasyonu: Çiftlik evinin kapısından içeri girilebilen, taş şömineli, çıtırdayan odunlu, taze demlenen çiftlik çaylı ve trofe duvarlı sıcak 3D oda.",
-    "Gelişmiş PBR Materyal ve Işık Kırılmaları: Toprak ve kayalarda çatlak derinlikleri, çimenlerde doğal klorofil ton varyasyonları ve kenar ışık sekmesi."
+    "Seviye 1–100 Yolculuğu & Üst Seviye XP Barı: 4 boş tarla parseliyle sıfırdan başlayıp Seviye 100'e uzanan dengeli XP sistemi ve kademeli kilit açılımları!",
+    "6 Üretim Atölyesi & 30 Tarif: Yel Değirmeni, Taş Fırın, Mandıra, Meyve Presi, Köy Ocağı ve İzabe Fırınında kuyruklu üretim zinciri.",
+    "Silo/Ambar Kapasitesi & 6 Arazi Genişletmesi: Çivi, Vida, Kalas, Koli Bandı ve Tapu Senedi toplayarak deponuzu ve arazinizi büyütün.",
+    "3B Köy Pazarı (Sv.5), Köy Gazetesi (Sv.18), Köy Madeni (Sv.30), Kooperatif Derbisi (Sv.40), Tren İstasyonu (Sv.50) ve 3B Teslimat Kamyonu!",
+    "3B Komşu Çiftlik Ziyareti & Tek Kodla Cihazlar Arası Otomatik Bulut Kayıt Aktarımı!"
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
