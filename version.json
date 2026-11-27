@@ -1,14 +1,14 @@
 {
-  "version": "1.6.0",
-  "versionCode": 61,
-  "releaseDate": "2026-11-06",
-  "title": "Sanal Bahçe v1.6.0 - Seviye 100 & Büyük Köy Güncellemesi!",
+  "version": "2.1.0",
+  "versionCode": 84,
+  "releaseDate": "2026-11-27",
+  "title": "Sanal Bahçe v2.1.0 — Yeni 3B Çiftçi Mehmet, Gerçek Sulama & 60 FPS Optimizasyon!",
   "notes": [
-    "Seviye 1–100 Yolculuğu & Üst Seviye XP Barı: 4 boş tarla parseliyle sıfırdan başlayıp Seviye 100'e uzanan dengeli XP sistemi ve kademeli kilit açılımları!",
-    "6 Üretim Atölyesi & 30 Tarif: Yel Değirmeni, Taş Fırın, Mandıra, Meyve Presi, Köy Ocağı ve İzabe Fırınında kuyruklu üretim zinciri.",
-    "Silo/Ambar Kapasitesi & 6 Arazi Genişletmesi: Çivi, Vida, Kalas, Koli Bandı ve Tapu Senedi toplayarak deponuzu ve arazinizi büyütün.",
-    "3B Köy Pazarı (Sv.5), Köy Gazetesi (Sv.18), Köy Madeni (Sv.30), Kooperatif Derbisi (Sv.40), Tren İstasyonu (Sv.50) ve 3B Teslimat Kamyonu!",
-    "3B Komşu Çiftlik Ziyareti & Tek Kodla Cihazlar Arası Otomatik Bulut Kayıt Aktarımı!"
+    "Yeni 3B Karakter: Çiftçi Mehmet özgün 3B modeli ve el sallama animasyonlarıyla çiftliğe katıldı! Usta Hasan ve Çiftçi Elif portreleri düzeltildi.",
+    "Gerçek Sulama & Uzatılmış Büyüme: Ekinler artık sulandıkça büyür, taze su +%25 hız bonusu verir, yağmur tarlayı otomatik sular ve büyüme süreleri dengelendi.",
+    "Göz Yormayan Ceviz-Altın Arayüz: Büyütülmüş mobil butonlar, tam ekran Pazar / Dükkân / İnşa / Görev pencereleri ve akıcı kaydırma.",
+    "%100 Özgün Rahatlatıcı Stüdyo Sesleri: Yeni gündüz/gece müzikleri, kuş cıvıltıları, cırcır böcekleri ve yumuşak efektler.",
+    "Dev Performans Artışı: Poligon yükü %95 azaltılarak mobil cihazlarda sabit 60 FPS akıcılık sağlandı."
   ],
   "updateUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
   "downloadUrl": "https://play.google.com/store/apps/details?id=com.batuhanklcky.sanalbahce",
